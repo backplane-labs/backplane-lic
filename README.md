@@ -73,3 +73,61 @@ File (`BACKPLANE_CONFIG_FILE`) < env `LIC_*` (the SDK block reads
 The account row is created at startup with generated keys (secret key,
 RSA-2048, ed25519, ECDSA P-256) that anchor token digests and response
 signatures.
+
+## Installation automation
+
+Lic declares the optional `lic.Deliver` hook. Without a binding, password
+reset retains Keygen's webhook-only behavior. With the shipped binding,
+lic calls `templates.Render`, then `courier.SendMail`; lic contains no SMTP
+credentials or message branding. `POST /passwords` still returns the same
+204, and `meta.deliver: false` suppresses mail without suppressing the webhook.
+
+Mount `deployments/wiring` into the **Backplane platform** container and set
+`BACKPLANE_WIRING_DIR` to its mount path, for example `/etc/backplane/wiring`.
+Mount `deployments/templates` into **backplane-templates** and set
+`TEMPLATES_FILES_DIR=/etc/lic-templates` to that mount path. Both services
+reconcile their files automatically; no console import or startup job is
+needed. Keep unrelated wiring and templates in those directories too, since
+removing a file removes its managed definition.
+
+Configure lic's public portal link and message language:
+
+```yaml
+automation:
+  portalBase: https://licenses.example.com/portal
+  locale: en
+```
+
+The environment overrides are `LIC_AUTOMATION_PORTAL_BASE` and
+`LIC_AUTOMATION_LOCALE`. `portalBase` must identify the public portal, not
+the API; the reset link appends `/reset` and carries `account_id`, `user_id`
+and `passwordResetToken`. The portal submits that claim with `newPassword`
+to the existing user `reset-password` action. Templates include English and
+Russian; the templates service handles language fallback.
+
+### Transactions and retries
+
+The business mutation, Keygen webhook records and automation outbox records
+commit together. The pg-outbox relay performs hook calls and event publication
+after commit. A failed delivery retries the same stored message and token,
+not the password-reset request. The message ID becomes `hook.Key`, so a lost
+reply retries the same Backplane execution; binding steps also retain their
+activity idempotency keys. Delivery remains at-least-once: the configured
+courier channel must honor its activity key to avoid duplicate external mail.
+An unbound hook, including a binding removed between `Bound` and `Call`,
+succeeds without mail. Other hook errors remain retryable.
+
+The relay uses the webhook retry budget (16 attempts), then retains a dead
+record for 30 days for operator investigation. Completed outbox payloads are
+cleared. Reset URLs contain credentials; restrict database access and don't
+log delivery payloads. Backplane password-reset events contain user identity
+only, never the reset token.
+
+Lic declares these stable Backplane event names: `lic.UserCreated`,
+`lic.PasswordResetRequested`, `lic.LicenseCreated`, `lic.LicenseExpiringSoon`,
+`lic.LicenseExpired`, `lic.LicenseRenewed`, `lic.LicenseSuspended`,
+`lic.LicenseRevoked`, `lic.LicenseValidationFailed` and `lic.UsageIncremented`.
+Event IDs survive relay retries; consumers must deduplicate by ID. Installations
+need NATS JetStream for events and Backplane's hook execution transport for
+mail. A missing transport leaves committed work pending; it never turns a
+committed password reset into an HTTP delivery error.

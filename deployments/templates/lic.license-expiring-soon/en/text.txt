@@ -1,0 +1,4 @@
+Hello {{.user_name}},
+
+Your {{.product_name}} license {{.license_key}} expires at {{.license_expiry}}.
+Contact your license provider to renew it.

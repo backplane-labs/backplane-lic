@@ -1,0 +1,6 @@
+Hello {{.user_name}},
+
+Reset your password using this link:
+{{.reset_url}}
+
+This link expires after 24 hours. If you didn't request a reset, ignore this message.

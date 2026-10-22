@@ -27,6 +27,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
+	appautomation "github.com/backplane-labs/backplane-lic/internal/app/automation"
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
@@ -41,6 +42,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	bpautomation "github.com/backplane-labs/backplane-lic/internal/infra/automation"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	whwebhook "github.com/backplane-labs/backplane-lic/internal/infra/webhook"
@@ -72,6 +74,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 
 	spec := accounts.Spec{ID: id, Name: cfg.Account.Name, Slug: cfg.Account.Slug}
 	late := &lateHandler{}
+	contracts := bpautomation.Declare(root)
 
 	var relayOutbox *outbox.Outbox
 
@@ -81,8 +84,11 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			return fmt.Errorf("bootstrap: %w", err)
 		}
 
-		relay, err := webhookOutbox(store.Get(), spec.ID, cfg.HTTP, root.Identity().Instance,
-			slog.New(xlog.NewSlogHandler(bootstrap.Log())))
+		webhookWorker := whwebhook.NewWorker(store.Get(), spec.ID, domain.NetResolver{},
+			allowPrivate(cfg.HTTP.WebhookAllowPrivate), time.Now)
+
+		relay, err := newOutbox(store.Get(), root.Identity().Instance,
+			slog.New(xlog.NewSlogHandler(bootstrap.Log())), bpautomation.NewWorker(contracts, webhookWorker))
 		if err != nil {
 			return err
 		}
@@ -94,7 +100,11 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			throttler = httpapi.NewValkeyThrottler(client.Client())
 		}
 
-		late.set(handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay))
+		decorate := func(publisher events.Publisher) events.Publisher {
+			return appautomation.NewPublisher(store.Get(), publisher, relay, contracts,
+				cfg.Automation.PortalBase, cfg.Automation.Locale, time.Now)
+		}
+		late.set(handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate))
 
 		return nil
 	})
@@ -168,15 +178,16 @@ func Handler(
 		return nil, err
 	}
 
-	return handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision, queue), nil
+	return handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision, queue,
+		func(publisher events.Publisher) events.Publisher { return publisher }), nil
 }
 
 func handler(
 	store *postgres.Store, throttler httpapi.Throttler, spec accounts.Spec, cfg HTTP, docsHost, revision string,
-	queue port.WebhookQueue,
+	queue port.WebhookQueue, decorate func(events.Publisher) events.Publisher,
 ) http.Handler {
 	clock := time.Now
-	publisher := events.Publisher(webhooks.NewPublisher(store, queue, spec.ID, rand.Reader, clock))
+	publisher := decorate(webhooks.NewPublisher(store, queue, spec.ID, rand.Reader, clock))
 	resolver := domain.Resolver(domain.NetResolver{})
 	allow := allowPrivate(cfg.WebhookAllowPrivate)
 
@@ -228,6 +239,10 @@ func webhookOutbox(store *postgres.Store, accountID uuid.UUID, cfg HTTP, instanc
 	delivery := whwebhook.NewWorker(store, accountID, domain.NetResolver{},
 		allowPrivate(cfg.WebhookAllowPrivate), time.Now)
 
+	return newOutbox(store, instance, log, delivery)
+}
+
+func newOutbox(store *postgres.Store, instance string, log *slog.Logger, delivery outbox.Publisher) (*outbox.Outbox, error) {
 	relay, err := outbox.New(store.Pool, store.DB.DB, delivery,
 		outbox.WithSchema(postgres.Schema), outbox.WithInstanceID(instance),
 		outbox.WithListenPool(store.Pool), outbox.WithLogger(log),

@@ -1,0 +1,18 @@
+bindings:
+  - hook: lic.Deliver
+    description: Render licensing messages and deliver them through the installation's mail channel.
+    steps:
+      rendered:
+        activity: templates.Render
+        input:
+          template: req.template
+          language: req.locale
+          data: req.data
+      mail:
+        activity: courier.SendMail
+        input:
+          to: [req.recipient]
+          subject: rendered.parts.subject
+          text: rendered.parts.text
+          html: rendered.parts.html
+    result: {}
