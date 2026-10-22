@@ -73,8 +73,16 @@ File (`BACKPLANE_CONFIG_FILE`) < env `LIC_*` (the SDK block reads
 | `account.slug` | `LIC_ACCOUNT_SLUG` | the account's slug (also its API address) |
 | `account.name` | `LIC_ACCOUNT_NAME` | display name |
 | `http.portal.enabled` | `LIC_HTTP_PORTAL_ENABLED` | serve the customer portal; defaults to `false` |
-| `http.portal.title` | `LIC_HTTP_PORTAL_TITLE` | vendor product name; defaults to `Licenses` |
 | `http.portal.basePath` | `LIC_HTTP_PORTAL_BASE_PATH` | mount path; defaults to `/portal`, cannot be `/` or under `/v1` |
+| `brand.name` | `LIC_BRAND_NAME` | vendor name in the portal and messages; defaults to `Licenses` |
+| `brand.tagline` | `LIC_BRAND_TAGLINE` | headline on the portal sign-in page |
+| `brand.logoUrl` | `LIC_BRAND_LOGO_URL` | https logo shown in the portal header and messages |
+| `brand.faviconUrl` | `LIC_BRAND_FAVICON_URL` | https favicon of the portal |
+| `brand.accentColor` | `LIC_BRAND_ACCENT_COLOR` | `#RRGGBB` accent for buttons, links and focus rings |
+| `brand.supportEmail` | `LIC_BRAND_SUPPORT_EMAIL` | support address in the portal footer and messages |
+| `brand.supportUrl` | `LIC_BRAND_SUPPORT_URL` | https support page |
+| `brand.termsUrl` | `LIC_BRAND_TERMS_URL` | https terms of service, linked from the portal footer |
+| `brand.privacyUrl` | `LIC_BRAND_PRIVACY_URL` | https privacy policy, linked from the portal footer |
 
 The account row is created at startup with generated keys (secret key,
 RSA-2048, ed25519, ECDSA P-256) that anchor token digests and response
@@ -88,9 +96,24 @@ Enable the portal on the same HTTP listener as the public API:
 http:
   portal:
     enabled: true
-    title: Acme Software
     basePath: /portal
+brand:
+  name: Acme Software
+  tagline: All your Acme licenses in one place.
+  logoUrl: https://acme.example/logo.svg
+  accentColor: "#3366ff"
+  supportEmail: support@acme.example
+  termsUrl: https://acme.example/terms
+  privacyUrl: https://acme.example/privacy
 ```
+
+Nothing in the portal or the shipped messages names a particular vendor:
+`brand` is the installation's identity. Startup fails on a non-https URL,
+a color other than `#RRGGBB` or a malformed support address. Logo and
+favicon hosts are added to the portal's Content-Security-Policy `img-src`;
+everything else stays `'self'`. Messages receive the same identity as
+`brand_name`, `brand_logo_url`, `brand_accent_color`, `support_email`,
+`support_url` and `portal_url`.
 
 Customers with role `user` sign in at `/portal`; operators use the separate
 Backplane console. The portal has no admin controls and calls only

@@ -40,6 +40,11 @@ import (
 
 const portalBase = "https://licenses.example.com/portal"
 
+// testBrand is the vendor identity the automation tests deliver with.
+var testBrand = domain.Brand{
+	Name: "Acme", SupportEmail: "help@acme.test", AccentColor: "#3366ff",
+}
+
 func automationFixture(t *testing.T) (*postgres.Store, domain.Account, domain.User) {
 	t.Helper()
 
@@ -150,7 +155,7 @@ func TestPasswordAutomation(t *testing.T) { //nolint:paralleltest // shared inte
 
 			queue := automationQueue(t, store)
 			decorate := func(publisher events.Publisher) events.Publisher {
-				return app.NewPublisher(store, publisher, queue, contracts, portalBase, "ru", time.Now)
+				return app.NewPublisher(store, publisher, queue, contracts, portalBase, "ru", testBrand, time.Now)
 			}
 			handler := handler(store, httpapi.NewMemoryThrottler(), accounts.Spec{ID: account.ID, Slug: account.Slug},
 				HTTP{}, "", "automation-test", queue, decorate)
@@ -203,6 +208,11 @@ func TestPasswordAutomation(t *testing.T) { //nolint:paralleltest // shared inte
 				t.Fatalf("delivery = %#v", delivered)
 			}
 
+			if delivered.Data.BrandName != testBrand.Name || delivered.Data.SupportEmail != testBrand.SupportEmail ||
+				delivered.Data.PortalURL != portalBase {
+				t.Fatalf("delivery brand = %#v", delivered.Data)
+			}
+
 			link, err := url.Parse(delivered.Data.ResetURL)
 			if err != nil {
 				t.Fatal(err)
@@ -241,7 +251,7 @@ func TestAutomationRollback(t *testing.T) { //nolint:paralleltest // shared inte
 	contracts := bp.Declare(harness.Root())
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
-		queue, contracts, portalBase, "en", time.Now)
+		queue, contracts, portalBase, "en", testBrand, time.Now)
 	rollback := errors.New("rollback")
 
 	err := store.Do(t.Context(), func(ctx context.Context) error {
@@ -394,7 +404,7 @@ func TestLicensingActivities(t *testing.T) { //nolint:paralleltest // shared int
 	contracts := bp.Declare(harness.Root())
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
-		queue, contracts, portalBase, "en", time.Now)
+		queue, contracts, portalBase, "en", testBrand, time.Now)
 	product, policy := licenseFixture(t, store, account.ID)
 	_ = product
 	application := app.NewActivities(store, licenseScenario(store, publisher, time.Now), account.ID, time.Now)
@@ -503,7 +513,7 @@ func TestExpiringLicenseAutomation(t *testing.T) { //nolint:paralleltest // shar
 	subscribe(t, store, account.ID, "license.expiring-soon")
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
-		queue, contracts, portalBase, "en", time.Now)
+		queue, contracts, portalBase, "en", testBrand, time.Now)
 	application := app.NewActivities(store, licenseScenario(store, publisher, time.Now), account.ID, time.Now)
 
 	created, err := application.CreateLicense(t.Context(), port.CreateLicenseIn{PolicyID: policy.ID, OwnerID: &user.ID}, "expiring")
@@ -555,7 +565,7 @@ func TestLicenseEventContracts(t *testing.T) { //nolint:paralleltest // shared i
 	contracts := bp.Declare(harness.Root())
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
-		queue, contracts, portalBase, "en", time.Now)
+		queue, contracts, portalBase, "en", testBrand, time.Now)
 
 	snapshot := domain.License{
 		ID: uuid.New(), AccountID: account.ID, ProductID: uuid.New(), PolicyID: uuid.New(),
@@ -626,7 +636,7 @@ func TestActivityReceiptFailureRollsBack(t *testing.T) { //nolint:paralleltest /
 	harness := backplanetest.New(t)
 	contracts := bp.Declare(harness.Root())
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
-		queue, contracts, portalBase, "en", time.Now)
+		queue, contracts, portalBase, "en", testBrand, time.Now)
 	application := app.NewActivities(failingReceiptStore{Store: store}, licenseScenario(store, publisher, time.Now),
 		account.ID, time.Now)
 
@@ -651,7 +661,7 @@ func TestConcurrentActivityAttempts(t *testing.T) { //nolint:paralleltest // sha
 	contracts := bp.Declare(harness.Root())
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
-		queue, contracts, portalBase, "en", time.Now)
+		queue, contracts, portalBase, "en", testBrand, time.Now)
 	application := app.NewActivities(store, licenseScenario(store, publisher, time.Now), account.ID, time.Now)
 
 	type attempt struct {

@@ -5,3 +5,9 @@ sample:
   product_name: Example App
   license_key: EXAMPLE-LICENSE-KEY
   license_expiry: '2026-11-01T12:00:00Z'
+  brand_name: Acme Software
+  brand_logo_url: https://acme.example/logo.png
+  brand_accent_color: '#3366ff'
+  support_email: support@acme.example
+  support_url: https://acme.example/support
+  portal_url: https://licenses.acme.example/portal

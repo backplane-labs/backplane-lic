@@ -5,6 +5,7 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/valkey"
 
+	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/portal"
 )
 
@@ -24,6 +25,10 @@ type Config struct {
 	HTTP HTTP `json:"http"`
 
 	Automation Automation `json:"automation"`
+
+	// Brand is the vendor identity customers see: the portal's header,
+	// accent color and footer links, and the brand_* data of every message.
+	Brand domain.Brand `json:"brand"`
 
 	// DocsHost overrides the docs origin of error links (the reference
 	// derives it from its configured host); empty derives it from the
@@ -46,7 +51,7 @@ type HTTP struct {
 	WebhookAllowPrivate []string `json:"webhookAllowPrivate" schemapb:"description=Private webhook CIDRs"` //nolint:tagliatelle,lll // camelCase
 }
 
-// Automation configures links and language, not mail transport or branding.
+// Automation configures links and language, not mail transport.
 type Automation struct {
 	PortalBase string `json:"portalBase" schemapb:"description=Public portal base URL"` //nolint:tagliatelle,lll // config is camelCase
 	Locale     string `json:"locale"     schemapb:"description=Default message language (en or ru)"`

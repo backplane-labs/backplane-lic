@@ -1,3 +1,8 @@
+<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;color:#1b2333">
+<p style="margin:0 0 24px">{{if .brand_logo_url}}<img src="{{.brand_logo_url}}" alt="{{.brand_name}}" height="32">{{else}}<strong style="font-size:18px">{{.brand_name}}</strong>{{end}}</p>
 <p>Hello {{.user_name}},</p>
-<p><a href="{{.reset_url}}">Reset your password</a></p>
+<p>We received a request to reset the password of your {{.brand_name}} account.</p>
+<p style="margin:24px 0"><a href="{{.reset_url}}" style="display:inline-block;padding:12px 20px;border-radius:6px;text-decoration:none;color:#ffffff;background:{{if .brand_accent_color}}{{.brand_accent_color}}{{else}}#2f5fd0{{end}}">Reset password</a></p>
 <p>This link expires after 24 hours. If you didn't request a reset, ignore this message.</p>
+<p style="margin-top:32px;font-size:13px;color:#5b6678">{{.brand_name}}{{if .support_email}} · Questions: <a href="mailto:{{.support_email}}">{{.support_email}}</a>{{end}}{{if .support_url}} · <a href="{{.support_url}}">Support</a>{{end}}</p>
+</div>

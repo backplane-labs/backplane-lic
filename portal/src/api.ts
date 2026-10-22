@@ -1,8 +1,12 @@
-export interface PortalConfig { title: string; basePath: string; account: string }
+export interface Brand {
+  name: string; tagline?: string; logoUrl?: string; faviconUrl?: string; accentColor?: string;
+  supportEmail?: string; supportUrl?: string; termsUrl?: string; privacyUrl?: string;
+}
+export interface PortalConfig { brand: Brand; basePath: string; account: string }
 declare global { interface Window { __PORTAL_CONFIG__?: PortalConfig } }
 
 export const config: PortalConfig = window.__PORTAL_CONFIG__ ?? {
-  title: 'Customer portal', basePath: '/portal', account: 'default',
+  brand: { name: 'Customer portal' }, basePath: '/portal', account: 'default',
 };
 
 export interface Attributes {

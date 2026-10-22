@@ -17,6 +17,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
 //go:embed all:dist
@@ -30,16 +32,15 @@ var (
 
 // Config controls the customer portal; disabled unless explicitly enabled.
 type Config struct {
-	Enabled bool   `json:"enabled,omitempty" schemapb:"description=Serve the customer portal"`
-	Title   string `json:"title,omitempty"   schemapb:"description=Vendor product name"`
+	Enabled bool `json:"enabled,omitempty" schemapb:"description=Serve the customer portal"`
 	// BasePath defaults to /portal; configuration uses camelCase.
 	BasePath string `json:"basePath,omitempty" schemapb:"description=Portal path"` //nolint:tagliatelle // camelCase config
 }
 
 type clientConfig struct {
-	Title    string `json:"title"`
-	BasePath string `json:"basePath"` //nolint:tagliatelle // frontend configuration uses camelCase
-	Account  string `json:"account"`
+	Brand    domain.Brand `json:"brand"`
+	BasePath string       `json:"basePath"` //nolint:tagliatelle // frontend configuration uses camelCase
+	Account  string       `json:"account"`
 }
 
 // Handler is an immutable portal mount with the public API as its fallback.
@@ -54,7 +55,7 @@ type Handler struct {
 // New embeds runtime configuration into the index. Like the templates console
 // bundle, a committed placeholder keeps a clean checkout buildable; make portal
 // replaces it with the actual Vite build before compiling a release.
-func New(cfg Config, account string, next http.Handler) (Handler, error) {
+func New(cfg Config, brand domain.Brand, account string, next http.Handler) (Handler, error) {
 	handler := Handler{next: next}
 	if !cfg.Enabled {
 		return handler, nil
@@ -73,10 +74,6 @@ func New(cfg Config, account string, next http.Handler) (Handler, error) {
 		return Handler{}, errBasePath
 	}
 
-	if cfg.Title == "" {
-		cfg.Title = "Licenses"
-	}
-
 	files, err := fs.Sub(assets, "dist")
 	if err != nil {
 		return Handler{}, fmt.Errorf("portal assets: %w", err)
@@ -91,23 +88,40 @@ func New(cfg Config, account string, next http.Handler) (Handler, error) {
 		return Handler{}, errIndex
 	}
 
-	config, err := json.Marshal(clientConfig{Title: cfg.Title, BasePath: basePath, Account: account})
+	config, err := json.Marshal(clientConfig{Brand: brand, BasePath: basePath, Account: account})
 	if err != nil {
 		return Handler{}, fmt.Errorf("portal config: %w", err)
 	}
 
 	script := "window.__PORTAL_CONFIG__=" + string(config) + ";"
-	digest := sha256.Sum256([]byte(script))
-	policy := "default-src 'self'; script-src 'self' 'sha256-" + base64.StdEncoding.EncodeToString(digest[:]) +
-		"'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; " +
-		"object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
-	injection := `<head><base href="` + html.EscapeString(basePath) + `/"><script>` + script + `</script>`
 	handler.basePath = basePath
-	handler.index = bytes.Replace(index, []byte("<head>"), []byte(injection), 1)
-	handler.csp = policy
+	handler.index = bytes.Replace(index, []byte("<head>"), []byte(head(basePath, brand, script)), 1)
+	handler.csp = policy(brand, script)
 	handler.files = files
 
 	return handler, nil
+}
+
+// policy allows the inline config by its digest and the brand's image
+// origins; everything else is same-origin.
+func policy(brand domain.Brand, script string) string {
+	digest := sha256.Sum256([]byte(script))
+	images := strings.Join(append([]string{"'self'", "data:"}, brand.Origins()...), " ")
+
+	return "default-src 'self'; script-src 'self' 'sha256-" + base64.StdEncoding.EncodeToString(digest[:]) +
+		"'; style-src 'self' 'unsafe-inline'; img-src " + images + "; connect-src 'self'; " +
+		"object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+}
+
+// head opens the index with the mount, the brand's title and favicon,
+// and the runtime config.
+func head(basePath string, brand domain.Brand, script string) string {
+	out := `<head><base href="` + html.EscapeString(basePath) + `/"><title>` + html.EscapeString(brand.Name) + `</title>`
+	if brand.FaviconURL != "" {
+		out += `<link rel="icon" href="` + html.EscapeString(brand.FaviconURL) + `">`
+	}
+
+	return out + `<script>` + script + `</script>`
 }
 
 func validBasePath(basePath string) bool {

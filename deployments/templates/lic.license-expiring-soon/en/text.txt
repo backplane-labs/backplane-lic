@@ -1,4 +1,10 @@
 Hello {{.user_name}},
 
 Your {{.product_name}} license {{.license_key}} expires at {{.license_expiry}}.
-Contact your license provider to renew it.
+Contact {{.brand_name}} to renew it.{{if .portal_url}}
+Your licenses: {{.portal_url}}{{end}}
+
+--
+{{.brand_name}}{{if .support_email}}
+Questions: {{.support_email}}{{end}}{{if .support_url}}
+Support: {{.support_url}}{{end}}

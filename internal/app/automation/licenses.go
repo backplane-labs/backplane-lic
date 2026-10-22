@@ -72,10 +72,10 @@ func (p Publisher) expiringSoon(ctx context.Context, license domain.License) err
 
 	return p.enqueue(ctx, DeliveryTopic, "Deliver", port.DeliverIn{
 		AccountID: license.AccountID, Template: "lic.license-expiring-soon", Recipient: user.Email, Locale: p.locale,
-		Data: port.DeliveryData{
+		Data: p.branded(port.DeliveryData{
 			UserID: user.ID, UserName: strings.TrimSpace(user.FirstName + " " + user.LastName),
 			UserEmail: user.Email, LicenseID: license.ID, LicenseKey: visibleLicenseKey(license), LicenseExpiry: expiry,
 			ProductName: product.Name,
-		},
+		}),
 	})
 }

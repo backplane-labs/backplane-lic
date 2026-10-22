@@ -17,9 +17,11 @@ export function Login() {
   const [otpRequired, setOTPRequired] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  // The reason a previous session ended is shown until the next attempt.
+  const [attempted, setAttempted] = useState(false);
   if (auth.user) return <Navigate to="/licenses" replace />;
   async function submit(event: FormEvent) {
-    event.preventDefault(); setError(null); setBusy(true);
+    event.preventDefault(); setError(null); setAttempted(true); setBusy(true);
     try {
       const response = await new API().request('/tokens', {
         method: 'POST', authorization: basic(email.trim(), password),
@@ -35,7 +37,7 @@ export function Login() {
     } finally { setBusy(false); }
   }
   return <div className="auth-form"><h1>{t('loginHeading')}</h1><p className="intro">{t('loginDetail')}</p>
-    <ErrorNotice error={error ?? auth.error} />
+    <ErrorNotice error={error ?? (attempted ? null : auth.error)} />
     <form onSubmit={submit}>
       <fieldset disabled={busy}>
         {!otpRequired ? <><Field label={t('email')} type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} autoFocus />

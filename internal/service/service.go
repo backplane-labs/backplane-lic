@@ -79,9 +79,9 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	contracts := bpautomation.Declare(root)
 	activities := bpautomation.NewActivityServer(root)
 
-	public, err := portal.New(cfg.HTTP.Portal, id.String(), late)
+	brand, public, err := customerFacing(cfg, id.String(), late)
 	if err != nil {
-		return nil, fmt.Errorf("http.portal: %w", err)
+		return nil, err
 	}
 
 	var relayOutbox *outbox.Outbox
@@ -107,7 +107,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 
 		decorate := func(publisher events.Publisher) events.Publisher {
 			return appautomation.NewPublisher(store.Get(), publisher, relay, contracts,
-				cfg.Automation.PortalBase, cfg.Automation.Locale, time.Now)
+				cfg.Automation.PortalBase, cfg.Automation.Locale, brand, time.Now)
 		}
 		publisher := decorate(webhooks.NewPublisher(store.Get(), relay, spec.ID, rand.Reader, time.Now))
 		activities.Set(appautomation.NewActivities(store.Get(), licenseScenario(store.Get(), publisher, time.Now),
@@ -133,13 +133,29 @@ func New(root backplane.Root[Config]) (*Service, error) {
 		jobsRunner := jobs.NewRunner(store.Get(), time.Now)
 		publisher := appautomation.NewPublisher(store.Get(),
 			webhooks.NewPublisher(store.Get(), relayOutbox, spec.ID, rand.Reader, time.Now),
-			relayOutbox, contracts, cfg.Automation.PortalBase, cfg.Automation.Locale, time.Now)
+			relayOutbox, contracts, cfg.Automation.PortalBase, cfg.Automation.Locale, brand, time.Now)
 		notifier := licenses.NewNotifier(store.Get().Licenses, publisher, spec.ID, time.Now, store.Get().Do)
 
 		return loop(ctx, time.Minute, notificationPass(jobsRunner, notifier))
 	})
 
 	return &Service{Store: store, Cache: cache, HTTP: public}, nil
+}
+
+// customerFacing validates the vendor identity and mounts the portal over
+// the public API.
+func customerFacing(cfg Config, account string, api http.Handler) (domain.Brand, portal.Handler, error) {
+	brand, err := domain.NewBrand(cfg.Brand)
+	if err != nil {
+		return domain.Brand{}, portal.Handler{}, err //nolint:wrapcheck // the error names its field
+	}
+
+	public, err := portal.New(cfg.HTTP.Portal, brand, account, api)
+	if err != nil {
+		return domain.Brand{}, portal.Handler{}, fmt.Errorf("http.portal: %w", err)
+	}
+
+	return brand, public, nil
 }
 
 // newThrottler counts password attempts in Valkey when it is configured,
@@ -219,7 +235,7 @@ func Handler(
 	api := handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision, queue,
 		func(publisher events.Publisher) events.Publisher { return publisher })
 
-	public, err := portal.New(cfg.Portal, spec.ID.String(), api)
+	public, err := portal.New(cfg.Portal, domain.Brand{Name: domain.DefaultBrandName}, spec.ID.String(), api)
 	if err != nil {
 		return nil, fmt.Errorf("http.portal: %w", err)
 	}

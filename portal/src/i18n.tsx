@@ -4,6 +4,7 @@ import { englishResources } from '@backplane-labs/backplane-ui';
 import { initReactI18next } from 'react-i18next';
 
 export const en = {
+  support: 'Support', terms: 'Terms', privacy: 'Privacy',
   portal: 'Customer portal', licenses: 'My licenses', tokens: 'API tokens', profile: 'Profile & security',
   signIn: 'Sign in', signOut: 'Sign out', email: 'Email', password: 'Password',
   welcome: 'Your software, in one place.', welcomeDetail: 'Access your licenses and manage your account securely.',
@@ -60,6 +61,7 @@ export const en = {
 } as const;
 export type TranslationKey = keyof typeof en;
 const ru: Record<TranslationKey, string> = {
+  support: 'Поддержка', terms: 'Условия', privacy: 'Конфиденциальность',
   portal: 'Личный кабинет', licenses: 'Мои лицензии', tokens: 'API-токены', profile: 'Профиль и безопасность',
   signIn: 'Войти', signOut: 'Выйти', email: 'Электронная почта', password: 'Пароль',
   welcome: 'Ваше ПО — в одном месте.', welcomeDetail: 'Управляйте лицензиями и безопасностью учётной записи.',

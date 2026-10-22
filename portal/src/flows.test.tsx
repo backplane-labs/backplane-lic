@@ -81,6 +81,21 @@ describe('customer authentication', () => {
     expect(readSession()).toBeNull();
     expect(fetchMock.mock.calls.some(call => endpoint(call[0]) === '/tokens/session-1' && call[1].method === 'DELETE')).toBe(true);
   });
+  it('drops the ended-session notice once the customer tries again', async () => {
+    signedIn();
+    fetchMock.mockImplementation(async (url: string) => {
+      if (endpoint(url) === '/profile') return failure('TOKEN_INVALID', 401);
+      if (endpoint(url) === '/tokens') return failure('PASSWORD_INVALID', 401);
+      throw new Error(`Unexpected ${url}`);
+    });
+    route('/login', <Login />);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/no longer valid/);
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'customer@example.test' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrong' } });
+    fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
+    await screen.findByText('Incorrect email or password');
+    expect(screen.queryByText(/no longer valid/)).toBeNull();
+  });
   it('requests an OTP when required and logs in using Basic plus meta.otp', async () => {
     let attempts = 0;
     fetchMock.mockImplementation(async (url: string) => {

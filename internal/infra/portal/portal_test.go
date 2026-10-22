@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/portal"
 )
 
@@ -14,7 +15,14 @@ func TestServing(t *testing.T) {
 
 	fallback := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusTeapot) })
 
-	handler, err := portal.New(portal.Config{Enabled: true, Title: "Vendor </script>", BasePath: "/customers"}, "account-id", fallback)
+	brand, err := domain.NewBrand(domain.Brand{
+		Name: "Vendor </script>", LogoURL: "https://cdn.vendor.test/logo.svg", FaviconURL: "https://cdn.vendor.test/icon.png",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	handler, err := portal.New(portal.Config{Enabled: true, BasePath: "/customers"}, brand, "account-id", fallback)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,6 +49,15 @@ func TestServing(t *testing.T) {
 
 			if strings.Contains(body, `Vendor </script>`) {
 				t.Fatal("config was not HTML escaped")
+			}
+
+			if !strings.Contains(body, `<title>Vendor &lt;/script&gt;</title>`) ||
+				!strings.Contains(body, `<link rel="icon" href="https://cdn.vendor.test/icon.png">`) {
+				t.Fatal("brand title or favicon missing: " + body)
+			}
+
+			if !strings.Contains(res.Header().Get("Content-Security-Policy"), "img-src 'self' data: https://cdn.vendor.test;") {
+				t.Fatal(res.Header())
 			}
 
 			if !strings.Contains(res.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
@@ -91,7 +108,7 @@ func TestConfig(t *testing.T) {
 
 	fallback := http.NotFoundHandler()
 
-	disabled, err := portal.New(portal.Config{}, "account", fallback)
+	disabled, err := portal.New(portal.Config{}, domain.Brand{Name: domain.DefaultBrandName}, "account", fallback)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +121,7 @@ func TestConfig(t *testing.T) {
 	}
 
 	for _, path := range []string{"/", "relative", "/v1", "/v1/portal", "/portal/../oops", "/portal?x=1", "/portal#fragment", "/portal%20x", "/portal\\x", "//host/path"} {
-		_, err := portal.New(portal.Config{Enabled: true, BasePath: path}, "account", fallback)
+		_, err := portal.New(portal.Config{Enabled: true, BasePath: path}, domain.Brand{Name: domain.DefaultBrandName}, "account", fallback)
 		if err == nil {
 			t.Fatalf("accepted base path %q", path)
 		}

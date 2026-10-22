@@ -32,12 +32,27 @@ function Preferences() {
 }
 function Brand({ linked = true }: { linked?: boolean }) {
   const { t } = useLocale();
-  const content = <><svg className="brand-mark" width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="8" stroke="currentColor" strokeWidth="1.5" /><path d="M10 10h10v4H10zm0 8h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg><span>{config.title || t('portal')}</span></>;
+  const { brand } = config;
+  const mark = brand.logoUrl
+    ? <img className="brand-logo" src={brand.logoUrl} alt="" />
+    : <svg className="brand-mark" width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="8" stroke="currentColor" strokeWidth="1.5" /><path d="M10 10h10v4H10zm0 8h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
+  const content = <>{mark}<span>{brand.name || t('portal')}</span></>;
   return linked ? <Link className="brand" to="/licenses">{content}</Link> : <div className="brand">{content}</div>;
+}
+function Footer() {
+  const { t } = useLocale();
+  const { brand } = config;
+  const links = [
+    brand.supportUrl && <a key="support" href={brand.supportUrl} target="_blank" rel="noopener noreferrer">{t('support')}</a>,
+    brand.supportEmail && <a key="email" href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>,
+    brand.termsUrl && <a key="terms" href={brand.termsUrl} target="_blank" rel="noopener noreferrer">{t('terms')}</a>,
+    brand.privacyUrl && <a key="privacy" href={brand.privacyUrl} target="_blank" rel="noopener noreferrer">{t('privacy')}</a>,
+  ].filter(Boolean);
+  return <footer className="portal-footer"><div className="footer-inner"><span>© {new Date().getFullYear()} {brand.name}</span>{links.length > 0 && <nav aria-label={t('support')}>{links}</nav>}</div></footer>;
 }
 function AuthLayout() {
   const { t } = useLocale();
-  return <div className="auth-page"><header className="auth-header"><Brand /><Preferences /></header><main className="auth-main"><aside className="auth-story"><div className="license-illustration" aria-hidden="true"><span /><span /><span /><i /></div><h2>{t('welcome')}</h2><p>{t('welcomeDetail')}</p></aside><Outlet /></main></div>;
+  return <div className="auth-page"><header className="auth-header"><Brand /><Preferences /></header><main className="auth-main"><aside className="auth-story"><div className="license-illustration" aria-hidden="true"><span /><span /><span /><i /></div><h2>{config.brand.tagline || t('welcome')}</h2><p>{t('welcomeDetail')}</p></aside><Outlet /></main><Footer /></div>;
 }
 function RequireAuth() {
   const { t } = useLocale();
@@ -60,6 +75,7 @@ function CustomerLayout() {
   return <div className="customer-page"><a className="skip-link" href="#main">{t('skipContent')}</a><header className="customer-header"><div className="header-inner"><Brand /><div className="header-account"><span className="user-email" title={user?.attributes.email}>{user?.attributes.email}</span><Preferences /><Button variant="outline" disabled={busy} onClick={async () => { setBusy(true); setError(null); try { await logout(); } catch (cause) { setError(cause); } finally { setBusy(false); } }}>{busy ? t('working') : t('signOut')}</Button></div></div></header>
     <nav className="main-nav" aria-label={t('portal')}><div className="nav-inner"><NavLink to="/licenses">{t('licenses')}</NavLink><NavLink to="/tokens">{t('tokens')}</NavLink><NavLink to="/profile">{t('profile')}</NavLink></div></nav>
     <main id="main" tabIndex={-1} className="page-content"><ErrorNotice error={error} /><Outlet /></main>
+    <Footer />
   </div>;
 }
 function NotFound() {
@@ -67,7 +83,7 @@ function NotFound() {
   return <><Empty title={t('notFound')} description={t('notFoundDetail')} /><Link className="text-link" to="/licenses">{t('backLicenses')}</Link></>;
 }
 function RouteTree() {
-  useEffect(() => { document.title = config.title; }, []);
+  useEffect(() => { document.title = config.brand.name; }, []);
   return <Routes>
     <Route element={<AuthLayout />}><Route path="/login" element={<Login />} /><Route path="/forgot" element={<ForgotPassword />} /><Route path="/reset" element={<ResetPassword />} /></Route>
     <Route element={<RequireAuth />}><Route element={<CustomerLayout />}><Route index element={<Navigate to="/licenses" replace />} /><Route path="/licenses" element={<Licenses />} /><Route path="/licenses/:id" element={<LicenseDetail />} /><Route path="/tokens" element={<Tokens />} /><Route path="/profile" element={<Profile />} /><Route path="*" element={<NotFound />} /></Route></Route>
