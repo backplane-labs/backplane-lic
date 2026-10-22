@@ -691,13 +691,7 @@ func validateValidationBody( //nolint:cyclop,gocritic,nonamedreturns // the type
 		nonce = &value
 	}
 
-	if legacyRaw, hasLegacy := meta["legacy_encrypted"]; hasLegacy && legacyRaw != nil {
-		legacy = legacyRaw == true //nolint:gosimple // the decoded value is any
-	}
-
-	if encRaw, hasEnc := meta["encrypted"]; hasEnc && encRaw != nil {
-		legacy = legacy || encRaw == true //nolint:gosimple // the decoded value is any
-	}
+	legacy = meta["legacy_encrypted"] == true || meta["encrypted"] == true
 
 	if keyRaw, hasKey := meta["key"]; hasKey {
 		value, err := str(keyRaw, "/meta/key")

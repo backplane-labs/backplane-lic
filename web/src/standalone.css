@@ -1,0 +1,7 @@
+/* Standalone frame only. Product pages use shared kit compositions. */
+body { margin: 0; background: var(--background); color: var(--foreground); font: 13px/20px var(--font-sans); -webkit-font-smoothing: antialiased; }
+#root > header { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; min-height: 48px; padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--chrome); }
+#root > header > button { margin-left: auto; }
+#root > main { max-width: 1200px; margin: 0 auto; padding: 24px; min-width: 0; }
+.module-brand { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-weight: 600; }
+@media (max-width: 640px) { #root > main { padding: 16px; } }

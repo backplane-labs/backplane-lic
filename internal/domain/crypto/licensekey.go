@@ -380,7 +380,7 @@ func formatTemplate(template string, in KeyInput) string {
 }
 
 // ErrKeyTooLarge: the RSA_2048_PKCS1_ENCRYPT seed exceeds the limit.
-var ErrKeyTooLarge = fmt.Errorf( //nolint:goerr113 // a domain sentinel
+var ErrKeyTooLarge = fmt.Errorf(
 	"crypto: license key: key exceeds maximum byte length (max size of %d bytes)", rsaMaxByteSize,
 )
 

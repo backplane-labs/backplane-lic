@@ -1,0 +1,16 @@
+{
+  "service": "lic",
+  "nav": [
+    { "path": "", "labelKey": "account" },
+    { "path": "products", "labelKey": "products" },
+    { "path": "policies", "labelKey": "policies" },
+    { "path": "licenses", "labelKey": "licenses" },
+    { "path": "users", "labelKey": "users" },
+    { "path": "groups", "labelKey": "groups" },
+    { "path": "entitlements", "labelKey": "entitlements" },
+    { "path": "tokens", "labelKey": "tokens" },
+    { "path": "webhook-endpoints", "labelKey": "webhook-endpoints" },
+    { "path": "webhook-events", "labelKey": "webhook-events" },
+    { "path": "keys", "labelKey": "keys" }
+  ]
+}
