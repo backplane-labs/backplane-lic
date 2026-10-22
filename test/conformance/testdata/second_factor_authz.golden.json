@@ -1,0 +1,388 @@
+{
+  "scenario": "second_factor_authz",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "ro-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "read-only",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create read-only user",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "sfz-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create plain user",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "expiry": null,
+            "kind": "read-only-token",
+            "name": null,
+            "token": "\u003ctoken:1\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/tokens/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "bearer": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+              }
+            }
+          },
+          "type": "tokens"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "mint read-only token",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "expiry": "\u003cts\u003e",
+            "kind": "user-token",
+            "name": null,
+            "token": "\u003ctoken:2\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/tokens/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "bearer": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+              }
+            }
+          },
+          "type": "tokens"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "mint plain token",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (read only lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "read-only cannot create a factor",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested user '\u003cuuid:1\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:7\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "plain user cannot create another's factor",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "enabled": false,
+            "secret": "\u003cb32:1\u003e",
+            "updated": "\u003cts\u003e",
+            "uri": "otpauth://totp/Keygen:sfz-\u003crun\u003e%40example.com?secret=\u003cb32:1\u003e\u0026image=https%3A%2F%2Fkeygen.sh%2Fimages%2Flogomark.png\u0026issuer=Keygen"
+          },
+          "id": "\u003cuuid:8\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors/\u003cuuid:8\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "user": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+              }
+            }
+          },
+          "type": "second-factors"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "own factor creation succeeds",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    }
+  ]
+}

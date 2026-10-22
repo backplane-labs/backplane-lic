@@ -1,0 +1,530 @@
+{
+  "scenario": "group_owners",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "maxLicenses": null,
+            "maxMachines": null,
+            "maxUsers": null,
+            "metadata": {},
+            "name": "own-\u003crun\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "owners": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/owners"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "groups"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "owner-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create owner user",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owners empty",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/owners/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e"
+                }
+              },
+              "user": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+                }
+              }
+            },
+            "type": "group-owners"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attach owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "USER_TAKEN",
+            "detail": "already exists",
+            "links": {
+              "about": "https://keygen.sh/docs/api/group-owners/#group-owners-object-relationships-user"
+            },
+            "source": {
+              "pointer": "/data/relationships/user"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attach duplicate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "USER_NOT_FOUND",
+            "detail": "must exist",
+            "links": {
+              "about": "https://keygen.sh/docs/api/group-owners/#group-owners-object-relationships-user"
+            },
+            "source": {
+              "pointer": "/data/relationships/user"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attach unknown user",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/owners/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e"
+                }
+              },
+              "user": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+                }
+              }
+            },
+            "type": "group-owners"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owners index",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/owners/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "groups"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e"
+              }
+            },
+            "user": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+              }
+            }
+          },
+          "type": "group-owners"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner show",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested group owner '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:8\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner show unknown",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "owner relationship for user '\u003cuuid:9\u003e' not found",
+            "source": {
+              "pointer": "/data/0"
+            },
+            "title": "Unprocessable entity"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "detach unknown owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "detach owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owners empty again",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

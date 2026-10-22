@@ -96,11 +96,23 @@ func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		return
 	case oas.GenerateTokenOperation:
-		p.serveAccountScoped(w, r, req, routePath, accountScoped, authn.ModePasswordOrToken)
+		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModePasswordOrToken)
+
+		return
+	case oas.RequestPasswordResetOperation:
+		// POST /passwords never authenticates (skip_verify_authorized).
+		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeNone)
+
+		return
+	case oas.CreateUserOperation, oas.ResetUserPasswordOperation:
+		// POST /users and the anonymous password reset authenticate
+		// softly: an absent credential leaves an anonymous principal
+		// for the policy to judge.
+		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeOptional)
 
 		return
 	default:
-		p.serveAccountScoped(w, r, req, routePath, accountScoped, authn.ModeToken)
+		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeRequired)
 
 		return
 	}
@@ -131,6 +143,35 @@ func (p *pipeline) servePlain(
 	}
 }
 
+// The authentication modes of the account-scoped routes: how the
+// pipeline treats the request's credential.
+type authMode int
+
+const (
+	// authModeRequired: authenticate_with_token! — a missing or invalid
+	// credential fails the request.
+	authModeRequired authMode = iota
+	// authModeOptional: authenticate_with_token (soft) — an ABSENT
+	// credential leaves an anonymous principal; an invalid one still
+	// fails.
+	authModeOptional
+	// authModeNone: the endpoint never authenticates (POST /passwords).
+	authModeNone
+	// authModePasswordOrToken: authenticate_with_password_or_token!
+	// (POST /tokens).
+	authModePasswordOrToken
+)
+
+// hasBody reports whether the method carries a request body at all.
+func hasBody(method string) bool {
+	switch method {
+	case http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete:
+		return true
+	default:
+		return false
+	}
+}
+
 // serveAccountScoped runs an account-scoped route: the whole pipeline.
 func (p *pipeline) serveAccountScoped(
 	w http.ResponseWriter,
@@ -138,7 +179,7 @@ func (p *pipeline) serveAccountScoped(
 	req *request,
 	routePath string,
 	accountScoped bool,
-	mode authn.Mode,
+	mode authMode,
 ) {
 	account, alg, ok := p.resolve(w, r, req, routePath)
 	if !ok {
@@ -147,7 +188,7 @@ func (p *pipeline) serveAccountScoped(
 
 	// The password throttle: 5 attempts per minute per account segment,
 	// IP and email, before anything else touches the body.
-	if accountScoped && p.throttled(r, routePath) {
+	if mode == authModePasswordOrToken && accountScoped && p.throttled(r, routePath) {
 		p.throttleError(w, p.clock())
 
 		return
@@ -157,7 +198,7 @@ func (p *pipeline) serveAccountScoped(
 
 	otp := ""
 
-	if r.Method == http.MethodPost || r.Method == http.MethodPatch || r.Method == http.MethodDelete {
+	if hasBody(r.Method) {
 		body, err := decodeBody(r)
 		if err != nil {
 			p.middlewareError(w, req.id, errJSONInvalid)
@@ -166,18 +207,33 @@ func (p *pipeline) serveAccountScoped(
 		}
 
 		req.body = body
-
-		if mode == authn.ModePasswordOrToken {
-			otp = bodyOTP(body)
-		}
+		otp = bodyOTP(body)
 	}
 
-	principal, result, err := p.authn.Authenticate(r.Context(), account, cred, mode, otp)
-	if err != nil {
-		req.challenge = challenge(cred)
-		p.fail(w, req, apperrFrom(err), alg)
+	var (
+		principal access.Principal
+		result    authn.Result
+		err       error
+	)
 
-		return
+	authnMode := authn.ModeToken
+	if mode == authModePasswordOrToken {
+		authnMode = authn.ModePasswordOrToken
+	}
+
+	switch {
+	case mode == authModeNone:
+		// No authentication at all.
+	case mode == authModeOptional && cred.Kind == authn.CredentialNone:
+		// Soft authentication without a credential: anonymous principal.
+	default:
+		principal, result, err = p.authn.Authenticate(r.Context(), account, cred, authnMode, otp)
+		if err != nil {
+			req.challenge = challenge(cred)
+			p.fail(w, req, apperrFrom(err), alg)
+
+			return
+		}
 	}
 
 	req.principal = principal
@@ -525,20 +581,28 @@ func bodyOTP(body map[string]any) string {
 	return otp
 }
 
-// rewriteBare maps the singleplayer bare paths (/v1/me, /v1/profile,
-// /v1/tokens) onto their account-scoped routes. A path outside /v1 has
-// no route at all.
+// rewriteBare maps the singleplayer bare paths (/v1/me, /v1/users/…)
+// onto their account-scoped routes. A path outside /v1 has no route at
+// all.
 func rewriteBare(path string, spec Spec) string {
 	switch path {
-	case "/v1/me", "/v1/profile", "/v1/tokens":
-		return "/v1/accounts/" + spec.ID.String() + path[len("/v1"):]
+	case "/v1/ping", "/v1/health", "/v1":
+		if path == "/v1" {
+			return ""
+		}
+
+		return path
 	}
 
-	if !strings.HasPrefix(path, "/v1/") && path != "/v1" {
+	if !strings.HasPrefix(path, "/v1/") {
 		return ""
 	}
 
-	return path
+	if strings.HasPrefix(path, "/v1/accounts/") {
+		return path
+	}
+
+	return "/v1/accounts/" + spec.ID.String() + path[len("/v1"):]
 }
 
 // acceptable answers whether the request's Accept header admits the

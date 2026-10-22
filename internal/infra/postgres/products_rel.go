@@ -169,7 +169,7 @@ func (r ProductsRepo) ListProductUsers(
 	for _, row := range rows { //nolint:gocritic // mirrors the reference's shape
 		out = append(out, userDomain(row.ID, row.AccountID, row.FirstName, row.LastName,
 			row.Email, row.PasswordDigest, ref(row.Role), row.Permissions, row.GroupID,
-			row.Metadata, row.BannedAt, row.CreatedAt, row.UpdatedAt))
+			row.Metadata, nil, nil, row.BannedAt, row.CreatedAt, row.UpdatedAt))
 	}
 
 	return out, nil
@@ -228,7 +228,7 @@ func productUser(row db.GetProductUserByIDRow, what string, err error) (domain.U
 
 	return userDomain(row.ID, row.AccountID, row.FirstName, row.LastName, row.Email,
 		row.PasswordDigest, ref(row.Role), row.Permissions, row.GroupID, row.Metadata,
-		row.BannedAt, row.CreatedAt, row.UpdatedAt), nil
+		nil, nil, row.BannedAt, row.CreatedAt, row.UpdatedAt), nil
 }
 
 // tokenRow assembles the token row shape shared by the token queries.

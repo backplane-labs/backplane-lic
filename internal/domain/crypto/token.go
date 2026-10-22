@@ -21,7 +21,21 @@ const AlgoVersion = "v3"
 const (
 	tokenSecretBytes    = 32
 	activationTokenBits = 16
+	// resetTokenBytes is the password-reset token's entropy (hex 48).
+	resetTokenBytes = 24
 )
+
+// GeneratePasswordResetToken generates a raw password-reset token:
+// hex(24) with the version suffix, no prefix block. Its stored digest
+// is DigestV3 like a token's.
+func GeneratePasswordResetToken(rng io.Reader) (string, error) {
+	buf := make([]byte, resetTokenBytes)
+	if _, err := io.ReadFull(rng, buf); err != nil {
+		return "", fmt.Errorf("crypto: password reset token: %w", err)
+	}
+
+	return hex.EncodeToString(buf) + AlgoVersion, nil
+}
 
 // The bearer role names the prefix/kind maps are keyed by (the domain
 // Role type cannot be imported here: domain imports this package).

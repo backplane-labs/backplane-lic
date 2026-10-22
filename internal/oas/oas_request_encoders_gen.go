@@ -11,6 +11,37 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeAttachGroupOwnersRequest(
+	req AttachGroupOwnersReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *AttachGroupOwnersReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *AttachGroupOwnersReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *AttachGroupOwnersReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeAttachPolicyEntitlementsRequest(
 	req AttachPolicyEntitlementsReq,
 	r *http.Request,
@@ -60,6 +91,37 @@ func encodeCreateEntitlementRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *CreateEntitlementReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeCreateGroupRequest(
+	req CreateGroupReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateGroupReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateGroupReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateGroupReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{
@@ -197,6 +259,161 @@ func encodeCreateProductTokenRequest(
 	}
 }
 
+func encodeCreateUserRequest(
+	req CreateUserReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateUserReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateUserReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateUserReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeCreateUserSecondFactorRequest(
+	req CreateUserSecondFactorReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateUserSecondFactorReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateUserSecondFactorReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateUserSecondFactorReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeCreateUserTokenRequest(
+	req CreateUserTokenReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateUserTokenReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateUserTokenReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateUserTokenReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeDeleteUserSecondFactorRequest(
+	req DeleteUserSecondFactorReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *DeleteUserSecondFactorReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *DeleteUserSecondFactorReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *DeleteUserSecondFactorReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeDetachGroupOwnersRequest(
+	req DetachGroupOwnersReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *DetachGroupOwnersReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *DetachGroupOwnersReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *DetachGroupOwnersReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeDetachPolicyEntitlementsRequest(
 	req DetachPolicyEntitlementsReq,
 	r *http.Request,
@@ -259,6 +476,68 @@ func encodeGenerateTokenRequest(
 	}
 }
 
+func encodeRequestPasswordResetRequest(
+	req RequestPasswordResetReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *RequestPasswordResetReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *RequestPasswordResetReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *RequestPasswordResetReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeResetUserPasswordRequest(
+	req ResetUserPasswordReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *ResetUserPasswordReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *ResetUserPasswordReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *ResetUserPasswordReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeUpdateEntitlementRequest(
 	req UpdateEntitlementReq,
 	r *http.Request,
@@ -277,6 +556,37 @@ func encodeUpdateEntitlementRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *UpdateEntitlementReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateGroupRequest(
+	req UpdateGroupReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateGroupReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateGroupReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateGroupReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{
@@ -370,6 +680,130 @@ func encodeUpdateProductRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *UpdateProductReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateUserRequest(
+	req UpdateUserReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateUserReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateUserReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateUserReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateUserGroupRequest(
+	req UpdateUserGroupReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateUserGroupReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateUserGroupReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateUserGroupReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateUserPasswordRequest(
+	req UpdateUserPasswordReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateUserPasswordReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateUserPasswordReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateUserPasswordReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateUserSecondFactorRequest(
+	req UpdateUserSecondFactorReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateUserSecondFactorReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateUserSecondFactorReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateUserSecondFactorReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{

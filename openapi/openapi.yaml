@@ -182,6 +182,352 @@ paths:
           description: No content.
         default:
           $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups:
+    get:
+      operationId: listGroups
+      summary: List groups
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Group collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createGroup
+      summary: Create a group
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Group document.
+          headers:
+            Location:
+              description: The new group's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}:
+    get:
+      operationId: showGroup
+      summary: Show a group
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateGroup
+      summary: Update a group
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: deleteGroup
+      summary: Delete a group (members keep existing, group nulled)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/users:
+    get:
+      operationId: listGroupUsers
+      summary: List a group's users
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/users/{userId}:
+    get:
+      operationId: showGroupUser
+      summary: Show one of a group's users (id or email alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/licenses:
+    get:
+      operationId: listGroupLicenses
+      summary: List a group's licenses
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserLicenseCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}:
+    get:
+      operationId: showGroupLicense
+      summary: Show one of a group's licenses (id or key alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: licenseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserLicenseDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/machines:
+    get:
+      operationId: listGroupMachines
+      summary: List a group's machines
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserMachineCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/machines/{machineId}:
+    get:
+      operationId: showGroupMachine
+      summary: Show one of a group's machines (id or fingerprint alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: machineId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserMachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/owners:
+    get:
+      operationId: listGroupOwners
+      summary: List a group's owners (group-owner join resources)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Group-owner collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupOwnerCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: attachGroupOwners
+      summary: Attach users as group owners
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Group-owner collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupOwnerCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: detachGroupOwners
+      summary: Detach group owners
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/groups/{groupId}/owners/{ownerId}:
+    get:
+      operationId: showGroupOwner
+      summary: Show one of a group's owners
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: groupId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: ownerId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Group-owner document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupOwnerDocument'
+        default:
+          $ref: '#/components/responses/Error'
   /v1/accounts/{account}/keys:
     get:
       operationId: indexKeys
@@ -311,6 +657,29 @@ paths:
             application/vnd.api+json:
               schema:
                 $ref: '#/components/schemas/PolicyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/passwords:
+    post:
+      operationId: requestPasswordReset
+      summary: Request a password reset
+      description: Always answers 204; unknown emails trigger nothing.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204':
+          description: No content.
         default:
           $ref: '#/components/responses/Error'
   /v1/accounts/{account}/policies:
@@ -918,6 +1287,712 @@ paths:
                 $ref: '#/components/schemas/TokenDocument'
         default:
           $ref: '#/components/responses/Error'
+    get:
+      operationId: listTokens
+      summary: List tokens
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Token collection (no secrets).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      operationId: regenerateCurrentToken
+      summary: Regenerate the current token (deprecated)
+      description: 404 unless the request itself is token-authenticated.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Token document (with the new raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/tokens/{tokenId}:
+    get:
+      operationId: showToken
+      summary: Show a token (no secret)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: tokenId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Token document (no secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      operationId: regenerateToken
+      summary: Regenerate a token
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: tokenId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Token document (with the new raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: revokeToken
+      summary: Revoke a token
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: tokenId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users:
+    get:
+      operationId: listUsers
+      summary: List users
+      description: Users of the account (default roles[]=user), filtered and paginated.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createUser
+      summary: Create a user
+      description: Creates a user (anonymous only when the account is not protected).
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: User document.
+          headers:
+            Location:
+              description: The new user's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}:
+    get:
+      operationId: showUser
+      summary: Show a user
+      description: The user by UUID or (downcased) email alias.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        description: User id (UUID) or email alias.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateUser
+      summary: Update a user
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: deleteUser
+      summary: Delete a user
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/actions/update-password:
+    post:
+      operationId: updateUserPassword
+      summary: Change the bearer's own password
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/actions/reset-password:
+    post:
+      operationId: resetUserPassword
+      summary: Reset a user's password with a reset token
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/actions/ban:
+    post:
+      operationId: banUser
+      summary: Ban a user
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: User document (status BANNED).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/actions/unban:
+    post:
+      operationId: unbanUser
+      summary: Unban a user
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/second-factors:
+    get:
+      operationId: listUserSecondFactors
+      summary: List a user's second factors
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Second-factor collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SecondFactorCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createUserSecondFactor
+      summary: Create a TOTP second factor
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Second-factor document (secret and uri included).
+          headers:
+            Location:
+              description: The new second factor's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SecondFactorDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}:
+    get:
+      operationId: showUserSecondFactor
+      summary: Show a second factor
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: secondFactorId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Second-factor document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SecondFactorDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateUserSecondFactor
+      summary: Enable or disable a second factor (requires meta.otp)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: secondFactorId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Second-factor document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SecondFactorDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: deleteUserSecondFactor
+      summary: Delete a second factor
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: secondFactorId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/products:
+    get:
+      operationId: listUserProducts
+      summary: List a user's products
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Product collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserProductCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/products/{productId}:
+    get:
+      operationId: showUserProduct
+      summary: Show one of a user's products
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/licenses:
+    get:
+      operationId: listUserLicenses
+      summary: List a user's licenses
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserLicenseCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/licenses/{licenseId}:
+    get:
+      operationId: showUserLicense
+      summary: Show one of a user's licenses (id or key alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: licenseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserLicenseDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/machines:
+    get:
+      operationId: listUserMachines
+      summary: List a user's machines
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserMachineCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/machines/{machineId}:
+    get:
+      operationId: showUserMachine
+      summary: Show one of a user's machines (id or fingerprint alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: machineId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserMachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/tokens:
+    get:
+      operationId: listUserTokens
+      summary: List a user's tokens
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Token collection (no secrets).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenCollectionDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createUserToken
+      summary: Generate a token for a user
+      description: Answers 200 (not 201) with the raw secret included once.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Token document (with the raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/tokens/{tokenId}:
+    get:
+      operationId: showUserToken
+      summary: Show one of a user's tokens
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: tokenId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Token document (no secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/users/{userId}/group:
+    get:
+      operationId: showUserGroup
+      summary: Show a user's group (data null when none)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Group document (data null when the user has no group).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      operationId: updateUserGroup
+      summary: Set or remove a user's group
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: User document (with the updated group linkage).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     AccountPath:
@@ -1097,31 +2172,6 @@ components:
           type: integer
         count:
           type: integer
-    CollectionLinks:
-      type: object
-      required:
-      - self
-      - first
-      - last
-      - prev
-      - next
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        last:
-          type: string
-        prev:
-          type:
-          - string
-          - 'null'
-        next:
-          type:
-          - string
-          - 'null'
-        meta:
-          $ref: '#/components/schemas/PaginationMeta'
     ErrorSource:
       type: object
       properties:
@@ -1147,9 +2197,7 @@ components:
         detail:
           type: string
         code:
-          type:
-          - string
-          - 'null'
+          type: string
         source:
           $ref: '#/components/schemas/ErrorSource'
         links:
@@ -1275,9 +2323,7 @@ components:
         kind:
           type: string
         token:
-          type:
-          - string
-          - 'null'
+          type: string
         expiry:
           type:
           - string
@@ -1989,6 +3035,369 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TokenResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    UserCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    TokenCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    GroupAttributes:
+      type: object
+      required:
+      - name
+      - maxUsers
+      - maxLicenses
+      - maxMachines
+      - metadata
+      - created
+      - updated
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+        maxUsers:
+          type:
+          - integer
+          - 'null'
+        maxLicenses:
+          type:
+          - integer
+          - 'null'
+        maxMachines:
+          type:
+          - integer
+          - 'null'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    GroupRelationships:
+      type: object
+      required:
+      - account
+      - owners
+      - users
+      - licenses
+      - machines
+      properties:
+        account:
+          $ref: '#/components/schemas/ToOneRelationship'
+        owners:
+          $ref: '#/components/schemas/ToManyRelationship'
+        users:
+          $ref: '#/components/schemas/ToManyRelationship'
+        licenses:
+          $ref: '#/components/schemas/ToManyRelationship'
+        machines:
+          $ref: '#/components/schemas/ToManyRelationship'
+    GroupResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - groups
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/GroupAttributes'
+        relationships:
+          $ref: '#/components/schemas/GroupRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    GroupDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          oneOf:
+          - $ref: '#/components/schemas/GroupResource'
+          - type: 'null'
+    GroupCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    GroupOwnerResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - group-owners
+        id:
+          type: string
+        attributes:
+          type: object
+          required:
+          - created
+          - updated
+          properties:
+            created:
+              $ref: '#/components/schemas/Timestamp'
+            updated:
+              $ref: '#/components/schemas/Timestamp'
+        relationships:
+          type: object
+          required:
+          - account
+          - group
+          - user
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+            group:
+              $ref: '#/components/schemas/ToOneRelationship'
+            user:
+              $ref: '#/components/schemas/ToOneRelationship'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    GroupOwnerDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/GroupOwnerResource'
+    GroupOwnerCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupOwnerResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    SecondFactorAttributes:
+      type: object
+      required:
+      - enabled
+      - created
+      - updated
+      properties:
+        uri:
+          type: string
+        secret:
+          type: string
+        enabled:
+          type: boolean
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    SecondFactorResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - second-factors
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SecondFactorAttributes'
+        relationships:
+          type: object
+          required:
+          - account
+          - user
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+            user:
+              $ref: '#/components/schemas/ToOneRelationship'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    SecondFactorDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/SecondFactorResource'
+    SecondFactorCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondFactorResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    UserProductAttributes:
+      type: object
+      additionalProperties: true
+    UserProductResource:
+      type: object
+      required:
+      - type
+      - id
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - products
+        id:
+          type: string
+        attributes:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        relationships:
+          type: object
+          additionalProperties: true
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    UserProductDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/UserProductResource'
+    UserProductCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProductResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    UserLicenseResource:
+      type: object
+      required:
+      - type
+      - id
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - licenses
+        id:
+          type: string
+        attributes:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        relationships:
+          type: object
+          additionalProperties: true
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    UserLicenseDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/UserLicenseResource'
+    UserLicenseCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserLicenseResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    UserMachineResource:
+      type: object
+      required:
+      - type
+      - id
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - machines
+        id:
+          type: string
+        attributes:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        relationships:
+          type: object
+          additionalProperties: true
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    UserMachineDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/UserMachineResource'
+    UserMachineCollectionDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserMachineResource'
         links:
           $ref: '#/components/schemas/ListLinks'
     AccountAttributes:

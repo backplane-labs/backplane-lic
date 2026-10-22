@@ -296,7 +296,7 @@ func (a *API) IndexProductTokens(
 
 	doc := &oas.ProductTokenListDocument{Data: make([]oas.TokenResource, 0, len(page.Items))}
 	for _, token := range page.Items { //nolint:gocritic // mirrors the reference's shape
-		doc.Data = append(doc.Data, render.ProductToken(req.account.ID, token, "").Data)
+		doc.Data = append(doc.Data, render.Token(req.account.ID, token, token.BearerRole, ""))
 	}
 
 	doc.Links = render.Links(linksDoc(req, listParams, page.Count, page.Next))
@@ -325,9 +325,9 @@ func (a *API) CreateProductToken(
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := render.ProductToken(req.account.ID, token, raw)
+	doc := render.Token(req.account.ID, token, token.BearerRole, raw)
 
-	return &doc, nil
+	return &oas.TokenDocument{Data: doc}, nil
 }
 
 // ShowProductToken implements GET /v1/accounts/{account}/products/{productId}/tokens/{tokenId}.
@@ -345,9 +345,9 @@ func (a *API) ShowProductToken(
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := render.ProductToken(req.account.ID, token, "")
+	doc := render.Token(req.account.ID, token, token.BearerRole, "")
 
-	return &doc, nil
+	return &oas.TokenDocument{Data: doc}, nil
 }
 
 // IndexProductUsers implements GET /v1/accounts/{account}/products/{productId}/users.
@@ -374,7 +374,7 @@ func (a *API) IndexProductUsers(
 
 	doc := &oas.ProductUserListDocument{Data: make([]oas.UserResource, 0, len(page.Items))}
 	for _, entry := range page.Items { //nolint:gocritic // mirrors the reference's shape
-		doc.Data = append(doc.Data, userResource(req.account.ID, entry.User, entry.Status))
+		doc.Data = append(doc.Data, render.User(req.account.ID, entry.User, entry.Status))
 	}
 
 	doc.Links = render.Links(linksDoc(req, listParams, page.Count, page.Next))
@@ -399,7 +399,7 @@ func (a *API) ShowProductUser(
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	return &oas.UserDocument{Data: userResource(req.account.ID, entry.User, entry.Status)}, nil
+	return &oas.UserDocument{Data: render.User(req.account.ID, entry.User, entry.Status)}, nil
 }
 
 // roleFilter parses the products users relationship's roles[] filter

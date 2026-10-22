@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -98,8 +99,8 @@ func errorOf(t *apperr.T, req *request) oas.Error {
 
 	if t.Code != "" {
 		// The reference omits the key on code-less errors (the typed
-		// params 400s); the zero value omits it.
-		e.Code = oas.NewOptNilString(t.Code)
+		// params 400s); never null.
+		e.Code = oas.NewOptString(t.Code)
 	}
 
 	if t.Source.Pointer != "" {
@@ -121,9 +122,12 @@ func errorOf(t *apperr.T, req *request) oas.Error {
 	}
 
 	if t.About != "" {
-		e.Links = oas.NewOptErrorLinks(
-			oas.ErrorLinks{About: oas.NewOptString(req.docsBase + "/docs/api/" + t.About)},
-		)
+		about := t.About
+		if !strings.HasPrefix(about, "http") {
+			about = req.docsBase + "/docs/api/" + about
+		}
+
+		e.Links = oas.NewOptErrorLinks(oas.ErrorLinks{About: oas.NewOptString(about)})
 	}
 
 	return e

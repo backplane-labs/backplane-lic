@@ -1,0 +1,498 @@
+{
+  "scenario": "users_create_validation",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data/attributes/email"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:1\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "missing email",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:2\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "missing data",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is invalid",
+            "source": {
+              "pointer": "/data/type"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:3\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "bad type",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "unpermitted parameter",
+            "source": {
+              "pointer": "/data/attributes/bogus"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:4\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unpermitted attribute",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "PASSWORD_TOO_SHORT",
+            "detail": "is too short (minimum is 6 characters)",
+            "links": {
+              "about": "https://keygen.sh/docs/api/users/#users-object-attrs-password"
+            },
+            "source": {
+              "pointer": "/data/attributes/password"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "password too short",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "EMAIL_INVALID",
+            "detail": "is invalid",
+            "links": {
+              "about": "https://keygen.sh/docs/api/users/#users-object-attrs-email"
+            },
+            "source": {
+              "pointer": "/data/attributes/email"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "email invalid",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "taken-\u003crun\u003e@example.com",
+            "firstName": "First",
+            "fullName": "First User",
+            "lastName": "User",
+            "metadata": {
+              "tier": "gold"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:8\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:7\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create taken",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "EMAIL_TAKEN",
+            "detail": "has already been taken",
+            "links": {
+              "about": "https://keygen.sh/docs/api/users/#users-object-attrs-email"
+            },
+            "source": {
+              "pointer": "/data/attributes/email"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "email taken",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is invalid",
+            "source": {
+              "pointer": "/data/attributes/role"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "invalid role",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "ro-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "read-only",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:11\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:8\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:8\u003e/users/\u003cuuid:11\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "admin creates read-only",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure a token or license is present and valid)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:12\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "anonymous create on protected account",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "TOKEN_MISSING",
+            "detail": "You must be authenticated to complete the request",
+            "links": {
+              "about": "https://keygen.test/docs/api/authentication/"
+            },
+            "title": "Unauthorized"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:13\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8",
+        "WWW-Authenticate": "Bearer realm=\"keygen\""
+      },
+      "name": "unauthenticated index",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 401
+    }
+  ]
+}

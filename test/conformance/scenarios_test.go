@@ -103,7 +103,18 @@ func scenarios() []conformance.Scenario {
 		},
 	}
 
-	scenarios := slices.Concat(base, productScenarios(), policyScenarios(), entitlementScenarios(), keyScenarios())
+	scenarios := slices.Concat(
+		base,
+		usersScenarios(),
+		groupsScenarios(),
+		tokensScenarios(),
+		secondFactorsScenarios(),
+		passwordsScenarios(),
+		productScenarios(),
+		policyScenarios(),
+		entitlementScenarios(),
+		keyScenarios(),
+	)
 
 	return scenarios
 }

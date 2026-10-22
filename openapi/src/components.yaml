@@ -178,25 +178,6 @@ components:
         count:
           type: integer
 
-    CollectionLinks:
-      # Offset pagination links; Keygen nests pagination meta inside the
-      # top-level links object. Cursor pagination uses self/next only.
-      type: object
-      required: [self, first, last, prev, next]
-      properties:
-        self:
-          type: string
-        first:
-          type: string
-        last:
-          type: string
-        prev:
-          type: ["string", "null"]
-        next:
-          type: ["string", "null"]
-        meta:
-          $ref: "#/components/schemas/PaginationMeta"
-
     ErrorSource:
       type: object
       properties:
@@ -222,7 +203,8 @@ components:
         detail:
           type: string
         code:
-          type: ["string", "null"]
+          # Absent on typed-params and policy errors; never null.
+          type: string
         source:
           $ref: "#/components/schemas/ErrorSource"
         links:
@@ -320,7 +302,9 @@ components:
         kind:
           type: string
         token:
-          type: ["string", "null"]
+          # Present only on creation/regeneration responses; omitted
+          # everywhere else (the reference's conditional attribute).
+          type: string
         expiry:
           type: ["string", "null"]
         name:
@@ -857,6 +841,323 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TokenResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+
+    # --- users/groups/tokens/second-factors (resource group B2) ---
+
+    UserCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    TokenCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TokenResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    GroupAttributes:
+      type: object
+      required: [name, maxUsers, maxLicenses, maxMachines, metadata, created, updated]
+      properties:
+        name:
+          type: ["string", "null"]
+        maxUsers:
+          type: ["integer", "null"]
+        maxLicenses:
+          type: ["integer", "null"]
+        maxMachines:
+          type: ["integer", "null"]
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    GroupRelationships:
+      type: object
+      required: [account, owners, users, licenses, machines]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        owners:
+          $ref: "#/components/schemas/ToManyRelationship"
+        users:
+          $ref: "#/components/schemas/ToManyRelationship"
+        licenses:
+          $ref: "#/components/schemas/ToManyRelationship"
+        machines:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    GroupResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [groups]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/GroupAttributes"
+        relationships:
+          $ref: "#/components/schemas/GroupRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    GroupDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/GroupResource"
+            - type: "null"
+
+    GroupCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    GroupOwnerResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [group-owners]
+        id:
+          type: string
+        attributes:
+          type: object
+          required: [created, updated]
+          properties:
+            created:
+              $ref: "#/components/schemas/Timestamp"
+            updated:
+              $ref: "#/components/schemas/Timestamp"
+        relationships:
+          type: object
+          required: [account, group, user]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            group:
+              $ref: "#/components/schemas/ToOneRelationship"
+            user:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    GroupOwnerDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/GroupOwnerResource"
+
+    GroupOwnerCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupOwnerResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    SecondFactorAttributes:
+      # uri/secret render only while the factor is disabled.
+      type: object
+      required: [enabled, created, updated]
+      properties:
+        # uri/secret render only while the factor is disabled; omitted
+        # otherwise.
+        uri:
+          type: string
+        secret:
+          type: string
+        enabled:
+          type: boolean
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    SecondFactorResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [second-factors]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/SecondFactorAttributes"
+        relationships:
+          type: object
+          required: [account, user]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            user:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    SecondFactorDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/SecondFactorResource"
+
+    SecondFactorCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SecondFactorResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    # Minimal product/license/machine documents for the user and group
+    # relationship indexes. The full resource groups own their schemas;
+    # these render the same wire shapes for records reached through the
+    # users/groups relationships.
+    UserProductAttributes:
+      type: object
+      additionalProperties: true
+
+    UserProductResource:
+      type: object
+      required: [type, id, links]
+      properties:
+        type:
+          type: string
+          enum: [products]
+        id:
+          type: string
+        attributes:
+          type: ["object", "null"]
+          additionalProperties: true
+        relationships:
+          type: object
+          additionalProperties: true
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    UserProductDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/UserProductResource"
+
+    UserProductCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserProductResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    UserLicenseResource:
+      type: object
+      required: [type, id, links]
+      properties:
+        type:
+          type: string
+          enum: [licenses]
+        id:
+          type: string
+        attributes:
+          type: ["object", "null"]
+          additionalProperties: true
+        relationships:
+          type: object
+          additionalProperties: true
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    UserLicenseDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/UserLicenseResource"
+
+    UserLicenseCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserLicenseResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    UserMachineResource:
+      type: object
+      required: [type, id, links]
+      properties:
+        type:
+          type: string
+          enum: [machines]
+        id:
+          type: string
+        attributes:
+          type: ["object", "null"]
+          additionalProperties: true
+        relationships:
+          type: object
+          additionalProperties: true
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    UserMachineDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/UserMachineResource"
+
+    UserMachineCollectionDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserMachineResource"
         links:
           $ref: "#/components/schemas/ListLinks"
 

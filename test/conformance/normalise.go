@@ -43,6 +43,8 @@ type normaliser struct {
 	token    *regexp.Regexp
 	hex      *regexp.Regexp
 	b64      *regexp.Regexp
+	base32   *regexp.Regexp
+	b32Find  *regexp.Regexp
 }
 
 func (n *normaliser) compile() {
@@ -54,6 +56,8 @@ func (n *normaliser) compile() {
 	n.token = regexp.MustCompile(`^[a-z]+-[0-9a-f]{20,}v[123]$`)
 	n.hex = regexp.MustCompile(`^[0-9a-fA-F]+$`)
 	n.b64 = regexp.MustCompile(`^[A-Za-z0-9+/]+={0,2}$`)
+	n.base32 = regexp.MustCompile(`^[A-Z2-7]{26,}$`)
+	n.b32Find = regexp.MustCompile(`[A-Z2-7]{26,}`)
 }
 
 func (n *normaliser) value(value any) any {
@@ -106,6 +110,16 @@ func (n *normaliser) string(value string) string {
 		return n.placeholder("hex", value)
 	case len(value) >= minBlobLen && n.b64.MatchString(value):
 		return n.placeholder("b64", value)
+	case n.base32.MatchString(value):
+		return n.placeholder("b32", value)
+	}
+
+	// Base32 runs embedded in strings (a TOTP provisioning uri carries
+	// its secret) are masked in place.
+	if n.b32Find.MatchString(value) {
+		return n.b32Find.ReplaceAllStringFunc(value, func(run string) string {
+			return n.placeholder("b32", run)
+		})
 	}
 
 	return value

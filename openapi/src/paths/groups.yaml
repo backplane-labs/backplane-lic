@@ -1,0 +1,357 @@
+# Groups: CRUD plus the users/licenses/machines/owners relationships.
+paths:
+  /v1/accounts/{account}/groups:
+    get:
+      operationId: listGroups
+      summary: List groups
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Group collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createGroup
+      summary: Create a group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Group document.
+          headers:
+            Location:
+              description: The new group's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}:
+    get:
+      operationId: showGroup
+      summary: Show a group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateGroup
+      summary: Update a group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteGroup
+      summary: Delete a group (members keep existing, group nulled)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/users:
+    get:
+      operationId: listGroupUsers
+      summary: List a group's users
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/users/{userId}:
+    get:
+      operationId: showGroupUser
+      summary: Show one of a group's users (id or email alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/licenses:
+    get:
+      operationId: listGroupLicenses
+      summary: List a group's licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserLicenseCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}:
+    get:
+      operationId: showGroupLicense
+      summary: Show one of a group's licenses (id or key alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: licenseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserLicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/machines:
+    get:
+      operationId: listGroupMachines
+      summary: List a group's machines
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserMachineCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/machines/{machineId}:
+    get:
+      operationId: showGroupMachine
+      summary: Show one of a group's machines (id or fingerprint alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: machineId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserMachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/owners:
+    get:
+      operationId: listGroupOwners
+      summary: List a group's owners (group-owner join resources)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group-owner collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupOwnerCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: attachGroupOwners
+      summary: Attach users as group owners
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Group-owner collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupOwnerCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: detachGroupOwners
+      summary: Detach group owners
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/groups/{groupId}/owners/{ownerId}:
+    get:
+      operationId: showGroupOwner
+      summary: Show one of a group's owners
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ownerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group-owner document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupOwnerDocument"
+        default:
+          $ref: "#/components/responses/Error"

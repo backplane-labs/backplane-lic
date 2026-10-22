@@ -8,18 +8,36 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AttachGroupOwners implements attachGroupOwners operation.
+	//
+	// Attach users as group owners.
+	//
+	// POST /v1/accounts/{account}/groups/{groupId}/owners
+	AttachGroupOwners(ctx context.Context, req AttachGroupOwnersReq, params AttachGroupOwnersParams) (*GroupOwnerCollectionDocument, error)
 	// AttachPolicyEntitlements implements attachPolicyEntitlements operation.
 	//
 	// Attach entitlements to a policy.
 	//
 	// POST /v1/accounts/{account}/policies/{policyId}/entitlements
 	AttachPolicyEntitlements(ctx context.Context, req AttachPolicyEntitlementsReq, params AttachPolicyEntitlementsParams) (*PolicyEntitlementListDocument, error)
+	// BanUser implements banUser operation.
+	//
+	// Ban a user.
+	//
+	// POST /v1/accounts/{account}/users/{userId}/actions/ban
+	BanUser(ctx context.Context, params BanUserParams) (*UserDocument, error)
 	// CreateEntitlement implements createEntitlement operation.
 	//
 	// Create an entitlement.
 	//
 	// POST /v1/accounts/{account}/entitlements
 	CreateEntitlement(ctx context.Context, req CreateEntitlementReq, params CreateEntitlementParams) (*EntitlementDocumentHeaders, error)
+	// CreateGroup implements createGroup operation.
+	//
+	// Create a group.
+	//
+	// POST /v1/accounts/{account}/groups
+	CreateGroup(ctx context.Context, req CreateGroupReq, params CreateGroupParams) (*GroupDocumentHeaders, error)
 	// CreateKey implements createKey operation.
 	//
 	// Create a key.
@@ -44,6 +62,42 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/products/{productId}/tokens
 	CreateProductToken(ctx context.Context, req CreateProductTokenReq, params CreateProductTokenParams) (*TokenDocument, error)
+	// CreateUser implements createUser operation.
+	//
+	// Creates a user (anonymous only when the account is not protected).
+	//
+	// POST /v1/accounts/{account}/users
+	CreateUser(ctx context.Context, req CreateUserReq, params CreateUserParams) (*UserDocumentHeaders, error)
+	// CreateUserSecondFactor implements createUserSecondFactor operation.
+	//
+	// Create a TOTP second factor.
+	//
+	// POST /v1/accounts/{account}/users/{userId}/second-factors
+	CreateUserSecondFactor(ctx context.Context, req CreateUserSecondFactorReq, params CreateUserSecondFactorParams) (*SecondFactorDocumentHeaders, error)
+	// CreateUserToken implements createUserToken operation.
+	//
+	// Answers 200 (not 201) with the raw secret included once.
+	//
+	// POST /v1/accounts/{account}/users/{userId}/tokens
+	CreateUserToken(ctx context.Context, req CreateUserTokenReq, params CreateUserTokenParams) (*TokenDocument, error)
+	// DeleteGroup implements deleteGroup operation.
+	//
+	// Delete a group (members keep existing, group nulled).
+	//
+	// DELETE /v1/accounts/{account}/groups/{groupId}
+	DeleteGroup(ctx context.Context, params DeleteGroupParams) error
+	// DeleteUser implements deleteUser operation.
+	//
+	// Delete a user.
+	//
+	// DELETE /v1/accounts/{account}/users/{userId}
+	DeleteUser(ctx context.Context, params DeleteUserParams) error
+	// DeleteUserSecondFactor implements deleteUserSecondFactor operation.
+	//
+	// Delete a second factor.
+	//
+	// DELETE /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+	DeleteUserSecondFactor(ctx context.Context, req DeleteUserSecondFactorReq, params DeleteUserSecondFactorParams) error
 	// DestroyEntitlement implements destroyEntitlement operation.
 	//
 	// Delete an entitlement.
@@ -68,6 +122,12 @@ type Handler interface {
 	//
 	// DELETE /v1/accounts/{account}/products/{productId}
 	DestroyProduct(ctx context.Context, params DestroyProductParams) error
+	// DetachGroupOwners implements detachGroupOwners operation.
+	//
+	// Detach group owners.
+	//
+	// DELETE /v1/accounts/{account}/groups/{groupId}/owners
+	DetachGroupOwners(ctx context.Context, req DetachGroupOwnersReq, params DetachGroupOwnersParams) error
 	// DetachPolicyEntitlements implements detachPolicyEntitlements operation.
 	//
 	// Detach entitlements from a policy.
@@ -165,6 +225,78 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/products
 	IndexProducts(ctx context.Context, params IndexProductsParams) (*ProductListDocument, error)
+	// ListGroupLicenses implements listGroupLicenses operation.
+	//
+	// List a group's licenses.
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/licenses
+	ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*UserLicenseCollectionDocument, error)
+	// ListGroupMachines implements listGroupMachines operation.
+	//
+	// List a group's machines.
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/machines
+	ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*UserMachineCollectionDocument, error)
+	// ListGroupOwners implements listGroupOwners operation.
+	//
+	// List a group's owners (group-owner join resources).
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/owners
+	ListGroupOwners(ctx context.Context, params ListGroupOwnersParams) (*GroupOwnerCollectionDocument, error)
+	// ListGroupUsers implements listGroupUsers operation.
+	//
+	// List a group's users.
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/users
+	ListGroupUsers(ctx context.Context, params ListGroupUsersParams) (*UserCollectionDocument, error)
+	// ListGroups implements listGroups operation.
+	//
+	// List groups.
+	//
+	// GET /v1/accounts/{account}/groups
+	ListGroups(ctx context.Context, params ListGroupsParams) (*GroupCollectionDocument, error)
+	// ListTokens implements listTokens operation.
+	//
+	// List tokens.
+	//
+	// GET /v1/accounts/{account}/tokens
+	ListTokens(ctx context.Context, params ListTokensParams) (*TokenCollectionDocument, error)
+	// ListUserLicenses implements listUserLicenses operation.
+	//
+	// List a user's licenses.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/licenses
+	ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*UserLicenseCollectionDocument, error)
+	// ListUserMachines implements listUserMachines operation.
+	//
+	// List a user's machines.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/machines
+	ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*UserMachineCollectionDocument, error)
+	// ListUserProducts implements listUserProducts operation.
+	//
+	// List a user's products.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/products
+	ListUserProducts(ctx context.Context, params ListUserProductsParams) (*UserProductCollectionDocument, error)
+	// ListUserSecondFactors implements listUserSecondFactors operation.
+	//
+	// List a user's second factors.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/second-factors
+	ListUserSecondFactors(ctx context.Context, params ListUserSecondFactorsParams) (*SecondFactorCollectionDocument, error)
+	// ListUserTokens implements listUserTokens operation.
+	//
+	// List a user's tokens.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/tokens
+	ListUserTokens(ctx context.Context, params ListUserTokensParams) (*TokenCollectionDocument, error)
+	// ListUsers implements listUsers operation.
+	//
+	// Users of the account (default roles[]=user), filtered and paginated.
+	//
+	// GET /v1/accounts/{account}/users
+	ListUsers(ctx context.Context, params ListUsersParams) (*UserCollectionDocument, error)
 	// Me implements me operation.
 	//
 	// The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -190,12 +322,72 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/profile
 	Profile(ctx context.Context, params ProfileParams) (*ProfileDocument, error)
+	// RegenerateCurrentToken implements regenerateCurrentToken operation.
+	//
+	// 404 unless the request itself is token-authenticated.
+	//
+	// PUT /v1/accounts/{account}/tokens
+	RegenerateCurrentToken(ctx context.Context, params RegenerateCurrentTokenParams) (*TokenDocument, error)
+	// RegenerateToken implements regenerateToken operation.
+	//
+	// Regenerate a token.
+	//
+	// PUT /v1/accounts/{account}/tokens/{tokenId}
+	RegenerateToken(ctx context.Context, params RegenerateTokenParams) (*TokenDocument, error)
+	// RequestPasswordReset implements requestPasswordReset operation.
+	//
+	// Always answers 204; unknown emails trigger nothing.
+	//
+	// POST /v1/accounts/{account}/passwords
+	RequestPasswordReset(ctx context.Context, req RequestPasswordResetReq, params RequestPasswordResetParams) error
+	// ResetUserPassword implements resetUserPassword operation.
+	//
+	// Reset a user's password with a reset token.
+	//
+	// POST /v1/accounts/{account}/users/{userId}/actions/reset-password
+	ResetUserPassword(ctx context.Context, req ResetUserPasswordReq, params ResetUserPasswordParams) (*UserDocument, error)
+	// RevokeToken implements revokeToken operation.
+	//
+	// Revoke a token.
+	//
+	// DELETE /v1/accounts/{account}/tokens/{tokenId}
+	RevokeToken(ctx context.Context, params RevokeTokenParams) error
 	// ShowEntitlement implements showEntitlement operation.
 	//
 	// Retrieve an entitlement (by id or code).
 	//
 	// GET /v1/accounts/{account}/entitlements/{entitlementId}
 	ShowEntitlement(ctx context.Context, params ShowEntitlementParams) (*EntitlementDocument, error)
+	// ShowGroup implements showGroup operation.
+	//
+	// Show a group.
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}
+	ShowGroup(ctx context.Context, params ShowGroupParams) (*GroupDocument, error)
+	// ShowGroupLicense implements showGroupLicense operation.
+	//
+	// Show one of a group's licenses (id or key alias).
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}
+	ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*UserLicenseDocument, error)
+	// ShowGroupMachine implements showGroupMachine operation.
+	//
+	// Show one of a group's machines (id or fingerprint alias).
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/machines/{machineId}
+	ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*UserMachineDocument, error)
+	// ShowGroupOwner implements showGroupOwner operation.
+	//
+	// Show one of a group's owners.
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/owners/{ownerId}
+	ShowGroupOwner(ctx context.Context, params ShowGroupOwnerParams) (*GroupOwnerDocument, error)
+	// ShowGroupUser implements showGroupUser operation.
+	//
+	// Show one of a group's users (id or email alias).
+	//
+	// GET /v1/accounts/{account}/groups/{groupId}/users/{userId}
+	ShowGroupUser(ctx context.Context, params ShowGroupUserParams) (*UserDocument, error)
 	// ShowKey implements showKey operation.
 	//
 	// Retrieve a key.
@@ -280,12 +472,72 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/products/{productId}/users/{userId}
 	ShowProductUser(ctx context.Context, params ShowProductUserParams) (*UserDocument, error)
+	// ShowToken implements showToken operation.
+	//
+	// Show a token (no secret).
+	//
+	// GET /v1/accounts/{account}/tokens/{tokenId}
+	ShowToken(ctx context.Context, params ShowTokenParams) (*TokenDocument, error)
+	// ShowUser implements showUser operation.
+	//
+	// The user by UUID or (downcased) email alias.
+	//
+	// GET /v1/accounts/{account}/users/{userId}
+	ShowUser(ctx context.Context, params ShowUserParams) (*UserDocument, error)
+	// ShowUserGroup implements showUserGroup operation.
+	//
+	// Show a user's group (data null when none).
+	//
+	// GET /v1/accounts/{account}/users/{userId}/group
+	ShowUserGroup(ctx context.Context, params ShowUserGroupParams) (*GroupDocument, error)
+	// ShowUserLicense implements showUserLicense operation.
+	//
+	// Show one of a user's licenses (id or key alias).
+	//
+	// GET /v1/accounts/{account}/users/{userId}/licenses/{licenseId}
+	ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*UserLicenseDocument, error)
+	// ShowUserMachine implements showUserMachine operation.
+	//
+	// Show one of a user's machines (id or fingerprint alias).
+	//
+	// GET /v1/accounts/{account}/users/{userId}/machines/{machineId}
+	ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*UserMachineDocument, error)
+	// ShowUserProduct implements showUserProduct operation.
+	//
+	// Show one of a user's products.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/products/{productId}
+	ShowUserProduct(ctx context.Context, params ShowUserProductParams) (*UserProductDocument, error)
+	// ShowUserSecondFactor implements showUserSecondFactor operation.
+	//
+	// Show a second factor.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+	ShowUserSecondFactor(ctx context.Context, params ShowUserSecondFactorParams) (*SecondFactorDocument, error)
+	// ShowUserToken implements showUserToken operation.
+	//
+	// Show one of a user's tokens.
+	//
+	// GET /v1/accounts/{account}/users/{userId}/tokens/{tokenId}
+	ShowUserToken(ctx context.Context, params ShowUserTokenParams) (*TokenDocument, error)
+	// UnbanUser implements unbanUser operation.
+	//
+	// Unban a user.
+	//
+	// POST /v1/accounts/{account}/users/{userId}/actions/unban
+	UnbanUser(ctx context.Context, params UnbanUserParams) (*UserDocument, error)
 	// UpdateEntitlement implements updateEntitlement operation.
 	//
 	// Update an entitlement.
 	//
 	// PATCH /v1/accounts/{account}/entitlements/{entitlementId}
 	UpdateEntitlement(ctx context.Context, req UpdateEntitlementReq, params UpdateEntitlementParams) (*EntitlementDocument, error)
+	// UpdateGroup implements updateGroup operation.
+	//
+	// Update a group.
+	//
+	// PATCH /v1/accounts/{account}/groups/{groupId}
+	UpdateGroup(ctx context.Context, req UpdateGroupReq, params UpdateGroupParams) (*GroupDocument, error)
 	// UpdateKey implements updateKey operation.
 	//
 	// Only the key attribute may change; relationships are not accepted.
@@ -304,6 +556,30 @@ type Handler interface {
 	//
 	// PATCH /v1/accounts/{account}/products/{productId}
 	UpdateProduct(ctx context.Context, req UpdateProductReq, params UpdateProductParams) (*ProductDocument, error)
+	// UpdateUser implements updateUser operation.
+	//
+	// Update a user.
+	//
+	// PATCH /v1/accounts/{account}/users/{userId}
+	UpdateUser(ctx context.Context, req UpdateUserReq, params UpdateUserParams) (*UserDocument, error)
+	// UpdateUserGroup implements updateUserGroup operation.
+	//
+	// Set or remove a user's group.
+	//
+	// PUT /v1/accounts/{account}/users/{userId}/group
+	UpdateUserGroup(ctx context.Context, req UpdateUserGroupReq, params UpdateUserGroupParams) (*UserDocument, error)
+	// UpdateUserPassword implements updateUserPassword operation.
+	//
+	// Change the bearer's own password.
+	//
+	// POST /v1/accounts/{account}/users/{userId}/actions/update-password
+	UpdateUserPassword(ctx context.Context, req UpdateUserPasswordReq, params UpdateUserPasswordParams) (*UserDocument, error)
+	// UpdateUserSecondFactor implements updateUserSecondFactor operation.
+	//
+	// Enable or disable a second factor (requires meta.otp).
+	//
+	// PATCH /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+	UpdateUserSecondFactor(ctx context.Context, req UpdateUserSecondFactorReq, params UpdateUserSecondFactorParams) (*SecondFactorDocument, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

@@ -1,6 +1,7 @@
-# Tokens: the generate endpoint (POST /tokens). The token routes
-# (index/show/regenerate/revoke) and the bearer sub-routes arrive with
-# their scenarios.
+# Tokens: generate (POST /tokens), index, show, regenerate (PUT member
+# and the deprecated PUT collection) and revoke. The bearer sub-routes
+# for products/licenses live with their resource groups; the user
+# sub-routes live in users.yaml.
 paths:
   /v1/accounts/{account}/tokens:
     post:
@@ -39,5 +40,89 @@ paths:
             application/vnd.api+json:
               schema:
                 $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    get:
+      operationId: listTokens
+      summary: List tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Token collection (no secrets).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    put:
+      operationId: regenerateCurrentToken
+      summary: Regenerate the current token (deprecated)
+      description: 404 unless the request itself is token-authenticated.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Token document (with the new raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/tokens/{tokenId}:
+    get:
+      operationId: showToken
+      summary: Show a token (no secret)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token document (no secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    put:
+      operationId: regenerateToken
+      summary: Regenerate a token
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token document (with the new raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: revokeToken
+      summary: Revoke a token
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No content.
         default:
           $ref: "#/components/responses/Error"

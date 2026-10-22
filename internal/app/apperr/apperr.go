@@ -153,11 +153,12 @@ func Conflict(detail string) *T {
 }
 
 // Unprocessable builds a 422 (validation-style errors: code, detail,
-// pointer).
+// pointer) with the "Unprocessable resource" title the reference's
+// render_unprocessable_resource emits.
 func Unprocessable(code, detail, pointer string) *T {
 	return &T{
 		Status: http.StatusUnprocessableEntity,
-		Title:  TitleUnprocessable,
+		Title:  "Unprocessable resource",
 		Detail: detail,
 		Code:   code,
 		Source: Source{Pointer: pointer},

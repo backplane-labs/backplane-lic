@@ -13,6 +13,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 )
@@ -21,16 +22,14 @@ import (
 // never expires by default.
 const UserDuration = 14 * 24 * time.Hour
 
+// The stored polymorphic bearer types.
+const (
+	storedBearerTypeUser    = "User"
+	storedBearerTypeLicense = "License"
+)
+
 // ErrNotFound is the storage port's not-found sentinel.
 var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
-
-// Store is the scenario's consumer-side storage port.
-type Store interface {
-	// InsertToken writes a new token row.
-	InsertToken(ctx context.Context, token domain.Token) error
-	// BearerUser loads the override bearer (a user).
-	BearerUser(ctx context.Context, accountID uuid.UUID, id uuid.UUID) (domain.User, error)
-}
 
 // GenerateInput is the request body of POST /tokens (already decoded and
 // shape-validated by the handler).
@@ -45,14 +44,21 @@ type GenerateInput struct {
 
 // Scenario generates tokens.
 type Scenario struct {
-	store Store
-	rng   io.Reader
-	clock func() time.Time
+	store  Store
+	events events.Publisher
+	rng    io.Reader
+	clock  func() time.Time
 }
 
 // New builds the scenario (rng and clock injectable for tests).
-func New(store Store, rng io.Reader, clock func() time.Time) Scenario {
-	return Scenario{store: store, rng: rng, clock: clock}
+func New(store Store, publisher events.Publisher, rng io.Reader, clock func() time.Time) Scenario {
+	return Scenario{store: store, events: publisher, rng: rng, clock: clock}
+}
+
+// Manager returns the management face (index, show, regenerate, revoke,
+// sub-route creations) over the same store.
+func (s Scenario) Manager() Manager {
+	return Manager{Scenario: s}
 }
 
 // Generate creates a token for the principal (or the admin's override
@@ -145,7 +151,7 @@ func (s Scenario) resolveBearer(
 		return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
 	}
 
-	return user.ID, user.Role, "User", nil
+	return user.ID, user.Role, storedBearerTypeUser, nil
 }
 
 func expiry(explicit *time.Time, role domain.Role, now time.Time) *time.Time {
@@ -165,11 +171,11 @@ func expiry(explicit *time.Time, role domain.Role, now time.Time) *time.Time {
 func storedBearerType(wire string) string {
 	switch wire {
 	case access.BearerUser:
-		return "User"
+		return storedBearerTypeUser
 	case access.BearerProduct:
 		return "Product"
 	case access.BearerLicense:
-		return "License"
+		return storedBearerTypeLicense
 	default:
 		return ""
 	}

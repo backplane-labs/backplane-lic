@@ -1,0 +1,1098 @@
+{
+  "scenario": "users_index_filters",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "maxLicenses": null,
+            "maxMachines": null,
+            "maxUsers": null,
+            "metadata": {},
+            "name": "idx-\u003crun\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "owners": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/owners"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "groups"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "idxa-\u003crun\u003e@example.com",
+            "firstName": "First",
+            "fullName": "First User",
+            "lastName": "User",
+            "metadata": {
+              "tier": "gold"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create idxa",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "idxb-\u003crun\u003e@example.com",
+            "firstName": "First",
+            "fullName": "First User",
+            "lastName": "User",
+            "metadata": {
+              "tier": "gold"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create idxb",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "idxa-\u003crun\u003e@example.com",
+            "firstName": "First",
+            "fullName": "First User",
+            "lastName": "User",
+            "metadata": {
+              "tier": "gold"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "groups"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attach a",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "idxb-\u003crun\u003e@example.com",
+            "firstName": "First",
+            "fullName": "First User",
+            "lastName": "User",
+            "metadata": {
+              "tier": "gold"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "groups"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attach b",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxb-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxa-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:3\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index filtered by group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxb-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxa-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:3\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index filtered by metadata",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index unknown status",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxb-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ],
+        "links": {
+          "first": "/v1/accounts/example-com/users?group=\u003cuuid:1\u003e\u0026page%5Bnumber%5D=1\u0026page%5Bsize%5D=1",
+          "last": "/v1/accounts/example-com/users?group=\u003cuuid:1\u003e\u0026page%5Bnumber%5D=2\u0026page%5Bsize%5D=1",
+          "meta": {
+            "count": 2,
+            "pages": 2
+          },
+          "next": "/v1/accounts/example-com/users?group=\u003cuuid:1\u003e\u0026page%5Bnumber%5D=2\u0026page%5Bsize%5D=1",
+          "prev": null,
+          "self": "/v1/accounts/example-com/users?group=\u003cuuid:1\u003e\u0026page%5Bnumber%5D=1\u0026page%5Bsize%5D=1"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index paginated",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "page number must be a number between 1 and 100 (got 101, please use cursor-based pagination instead)",
+            "source": {
+              "parameter": "page[number]"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index bad page",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxb-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "idxa-\u003crun\u003e@example.com",
+              "firstName": "First",
+              "fullName": "First User",
+              "lastName": "User",
+              "metadata": {
+                "tier": "gold"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:3\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "groups"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "group users index",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "idxa-\u003crun\u003e@example.com",
+            "firstName": "First",
+            "fullName": "First User",
+            "lastName": "User",
+            "metadata": {
+              "tier": "gold"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "groups"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "group user show",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

@@ -87,7 +87,7 @@ func Require(ctx context.Context, permission string) error {
 // ReasonLacksPermission is the verify_permissions! reason when the
 // bearer's role itself does not hold the permission.
 func ReasonLacksPermission(role domain.Role) string {
-	return " (" + roleWhatami(role) + " lacks permission to perform action)"
+	return " (" + Whatami(Principal{Role: role}) + " lacks permission to perform action)"
 }
 
 // ReasonTokenLacksPermission is the verify_permissions! reason when the
@@ -95,18 +95,29 @@ func ReasonLacksPermission(role domain.Role) string {
 // removed it.
 const ReasonTokenLacksPermission = " (token lacks permission to perform action)" //nolint:gosec,lll // a policy reason, not a credential
 
-// roleWhatami names the role like the reference's whatami (underscore,
-// humanized): "read only", "sales agent", "support agent".
-func roleWhatami(role domain.Role) string {
-	switch role {
+// Whatami names the bearer like the reference's policy whatami (the
+// humanized role: user, admin, developer, read only, sales agent,
+// support agent, product, license).
+func Whatami(p Principal) string {
+	switch p.Role {
 	case domain.RoleReadOnly:
 		return "read only"
 	case domain.RoleSalesAgent:
 		return "sales agent"
 	case domain.RoleSupportRole:
 		return "support agent"
+	case domain.RoleUser:
+		return "user"
+	case domain.RoleAdmin:
+		return "admin"
+	case domain.RoleDeveloper:
+		return "developer"
+	case domain.RoleProduct:
+		return "product"
+	case domain.RoleLicense:
+		return "license"
 	default:
-		return string(role)
+		return "bearer"
 	}
 }
 

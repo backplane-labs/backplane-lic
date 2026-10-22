@@ -233,21 +233,6 @@ LIMIT @limit OFFSET @offset;
 SELECT count(*) FROM lic.products
 WHERE account_id = @account_id AND id = @bearer_id;
 
--- A user's licensed products (the products-index post-check input).
--- name: UserProductIDs :many
-SELECT DISTINCT p3.id
-FROM lic.products p3
-JOIN lic.policies po ON po.product_id = p3.id
-JOIN lic.licenses l ON l.policy_id = po.id
-WHERE l.account_id = @account_id
-  AND (
-    l.user_id = @user_id
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      WHERE lu.license_id = l.id AND lu.user_id = @user_id
-    )
-  );
-
 -- The license bearer's own product (through its policy).
 -- name: GetLicenseProductID :one
 SELECT po.product_id

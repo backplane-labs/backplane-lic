@@ -8,24 +8,25 @@ package httpapi
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
+	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
+	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
-	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
+	"github.com/backplane-labs/backplane-lic/internal/infra/render"
 	"github.com/backplane-labs/backplane-lic/internal/oas"
 )
 
@@ -44,15 +45,18 @@ type Spec struct {
 
 // Deps is everything the HTTP face is built from.
 type Deps struct {
-	Accounts     Accounts
-	Authn        authn.Scenario
-	Users        users.Scenario
-	Tokens       tokens.Scenario
-	Products     products.Scenario
-	Policies     policies.Scenario
-	Entitlements entitlements.Scenario
-	Keys         keys.Scenario
-	Spec         Spec
+	Accounts      Accounts
+	Authn         authn.Scenario
+	Users         users.Scenario
+	Tokens        tokens.Scenario
+	Groups        groups.Scenario
+	SecondFactors secondfactors.Scenario
+	Passwords     passwords.Scenario
+	Products      products.Scenario
+	Policies      policies.Scenario
+	Entitlements  entitlements.Scenario
+	Keys          keys.Scenario
+	Spec          Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
 	// DocsHost overrides the docs origin of error links; when empty it
@@ -71,14 +75,17 @@ type Deps struct {
 type API struct {
 	oas.UnimplementedHandler
 
-	accounts     Accounts
-	users        users.Scenario
-	tokens       tokens.Scenario
-	products     products.Scenario
-	policies     policies.Scenario
-	entitlements entitlements.Scenario
-	keys         keys.Scenario
-	spec         Spec
+	accounts      Accounts
+	users         users.Scenario
+	tokens        tokens.Scenario
+	groups        groups.Scenario
+	secondFactors secondfactors.Scenario
+	passwords     passwords.Scenario
+	products      products.Scenario
+	policies      policies.Scenario
+	entitlements  entitlements.Scenario
+	keys          keys.Scenario
+	spec          Spec
 }
 
 // New builds the service's HTTP handler: the ogen server wrapped in the
@@ -86,14 +93,17 @@ type API struct {
 // routing and the platform's HTTP mounting.
 func New(deps Deps) http.Handler {
 	api := &API{
-		accounts:     deps.Accounts,
-		users:        deps.Users,
-		tokens:       deps.Tokens,
-		products:     deps.Products,
-		policies:     deps.Policies,
-		entitlements: deps.Entitlements,
-		keys:         deps.Keys,
-		spec:         deps.Spec,
+		accounts:      deps.Accounts,
+		users:         deps.Users,
+		tokens:        deps.Tokens,
+		groups:        deps.Groups,
+		secondFactors: deps.SecondFactors,
+		passwords:     deps.Passwords,
+		products:      deps.Products,
+		policies:      deps.Policies,
+		entitlements:  deps.Entitlements,
+		keys:          deps.Keys,
+		spec:          deps.Spec,
 	}
 
 	server, err := oas.NewServer(api)
@@ -169,7 +179,7 @@ func (a *API) GenerateToken(
 	return &oas.TokenDocumentHeaders{
 		Location: oas.NewOptString(req.location("/v1/accounts/" +
 			req.account.ID.String() + "/tokens/" + token.ID.String())),
-		Response: oas.TokenDocument{Data: tokenResource(req.account.ID, token, role, raw)},
+		Response: oas.TokenDocument{Data: render.Token(req.account.ID, token, role, raw)},
 	}, nil
 }
 
@@ -187,10 +197,10 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := &oas.MeDocument{Data: userResource(req.account.ID, user, status)}
+	doc := &oas.MeDocument{Data: render.User(req.account.ID, user, status)}
 	if req.token != nil {
 		doc.Included = []oas.TokenResource{
-			tokenResource(req.account.ID, *req.token, req.principal.Role, ""),
+			render.Token(req.account.ID, *req.token, req.principal.Role, ""),
 		}
 	}
 
@@ -217,7 +227,7 @@ func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDoc
 	}
 
 	return &oas.ProfileDocument{
-		Data: userResource(req.account.ID, user, status),
+		Data: render.User(req.account.ID, user, status),
 		Meta: oas.ProfileMeta{TokenId: tokenID},
 	}, nil
 }
@@ -290,147 +300,8 @@ func accountDocument(account domain.Account) *oas.AccountDocument {
 	}
 }
 
-// userResource renders a user as the reference's UserSerializer does.
-func userResource(accountID uuid.UUID, user domain.User, status string) oas.UserResource {
-	base := "/v1/accounts/" + accountID.String() + "/users/" + user.ID.String()
-
-	many := func(path string) oas.ToManyRelationship {
-		return oas.ToManyRelationship{
-			Links: oas.RelationshipLinks{Related: oas.NewNilString(base + path)},
-		}
-	}
-
-	var fullName oas.NilString
-
-	fullName.SetToNull()
-
-	if name := user.FullName(); name != nil {
-		fullName = oas.NewNilString(*name)
-	}
-
-	return oas.UserResource{
-		Type: oas.UserResourceTypeUsers,
-		ID:   user.ID.String(),
-		Attributes: oas.UserAttributes{
-			FullName:  fullName,
-			FirstName: nilString(user.FirstName),
-			LastName:  nilString(user.LastName),
-			Email:     nilString(user.Email),
-			Status:    status,
-			Role:      user.Role.Wire(),
-			Metadata:  metadata(user.Metadata),
-			Created:   timestamp(user.CreatedAt),
-			Updated:   timestamp(user.UpdatedAt),
-		},
-		Relationships: oas.UserRelationships{
-			Account: oas.ToOneRelationship{
-				Links: oas.RelationshipLinks{Related: oas.NewNilString("/v1/accounts/" + accountID.String())},
-				Data: oas.NilResourceIdentifier{
-					Value: oas.ResourceIdentifier{
-						Type: "accounts",
-						ID:   accountID.String(),
-					},
-				},
-			},
-			Group: oas.ToOneRelationship{
-				Links: oas.RelationshipLinks{Related: oas.NewNilString(base + "/group")},
-				Data:  oas.NilResourceIdentifier{Null: true},
-			},
-			Products:      many("/products"),
-			Licenses:      many("/licenses"),
-			Machines:      many("/machines"),
-			Tokens:        many("/tokens"),
-			SecondFactors: many("/second-factors"),
-		},
-		Links: oas.ResourceLinks{Self: base},
-	}
-}
-
-// tokenResource renders a token; raw (the secret) only on
-// creation/regeneration, and kind derived from the bearer's live role.
-func tokenResource(accountID uuid.UUID, token domain.Token, role domain.Role, raw string) oas.TokenResource {
-	base := "/v1/accounts/" + accountID.String()
-
-	expiry := oas.NewNilString(jsonapi.Timestamp(derefTime(token.Expiry)))
-	if token.Expiry == nil {
-		expiry = oas.NilString{Null: true}
-	}
-
-	bearerType, bearerPath := wireBearer(token.BearerType)
-
-	bearerData := oas.NilResourceIdentifier{Null: true}
-	if bearerType != "" {
-		bearerData = oas.NilResourceIdentifier{
-			Value: oas.ResourceIdentifier{Type: bearerType, ID: token.BearerID.String()},
-			Null:  false,
-		}
-	}
-
-	return oas.TokenResource{
-		Type: oas.TokenResourceTypeTokens,
-		ID:   token.ID.String(),
-		Attributes: oas.TokenAttributes{
-			Kind:    crypto.TokenKind(string(role)),
-			Token:   optNilString(raw),
-			Expiry:  expiry,
-			Name:    nilPtrString(token.Name),
-			Created: timestamp(token.CreatedAt),
-			Updated: timestamp(token.UpdatedAt),
-		},
-		Relationships: oas.TokenRelationships{
-			Account: oas.ToOneRelationship{
-				Links: oas.RelationshipLinks{Related: oas.NewNilString(base)},
-				Data: oas.NilResourceIdentifier{
-					Value: oas.ResourceIdentifier{Type: "accounts", ID: accountID.String()},
-				},
-			},
-			Bearer: oas.ToOneRelationship{
-				Links: oas.RelationshipLinks{
-					Related: oas.NewNilString(base + "/" + bearerPath + "/" + token.BearerID.String()),
-				},
-				Data: bearerData,
-			},
-		},
-		Links: oas.ResourceLinks{Self: base + "/tokens/" + token.ID.String()},
-	}
-}
-
-// wireBearer maps the stored bearer type to its wire form (the
-// resource type and the path segment).
-func wireBearer(stored string) (string, string) {
-	switch stored {
-	case "User":
-		return access.BearerUser, access.BearerUser
-	case "Product":
-		return access.BearerProduct, access.BearerProduct
-	case "License":
-		return access.BearerLicense, access.BearerLicense
-	default:
-		return "", access.BearerUser
-	}
-}
-
-// metadata renders the stored metadata camelCased on the wire ({} when
-// empty).
-func metadata(stored map[string]any) oas.Metadata {
-	camel, _ := jsonapi.CamelizeDeep(stored).(map[string]any)
-	if camel == nil {
-		camel = map[string]any{}
-	}
-
-	out := oas.Metadata{}
-
-	for k, v := range camel {
-		raw, err := json.Marshal(v)
-		if err != nil {
-			continue
-		}
-
-		out[k] = raw
-	}
-
-	return out
-}
+// storedBearerUser is the stored polymorphic type of a user bearer.
+const storedBearerUser = "User"
 
 // errNotUserBearer: /me and /profile serve user bearers (the reference
 // serves license documents for license bearers — a later phase).
@@ -450,33 +321,4 @@ func nilString(s string) oas.NilString {
 	}
 
 	return oas.NewNilString(s)
-}
-
-// optNilString renders the raw token secret: present on creation,
-// explicitly null otherwise.
-func optNilString(s string) oas.OptNilString {
-	if s == "" {
-		none := oas.OptNilString{}
-		none.SetToNull()
-
-		return none
-	}
-
-	return oas.NewOptNilString(s)
-}
-
-func nilPtrString(s *string) oas.NilString {
-	if s == nil {
-		return oas.NilString{Null: true}
-	}
-
-	return oas.NewNilString(*s)
-}
-
-func derefTime(t *time.Time) time.Time {
-	if t == nil {
-		return time.Time{}
-	}
-
-	return *t
 }

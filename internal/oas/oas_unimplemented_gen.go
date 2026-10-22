@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AttachGroupOwners implements attachGroupOwners operation.
+//
+// Attach users as group owners.
+//
+// POST /v1/accounts/{account}/groups/{groupId}/owners
+func (UnimplementedHandler) AttachGroupOwners(ctx context.Context, req AttachGroupOwnersReq, params AttachGroupOwnersParams) (r *GroupOwnerCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // AttachPolicyEntitlements implements attachPolicyEntitlements operation.
 //
 // Attach entitlements to a policy.
@@ -22,12 +31,30 @@ func (UnimplementedHandler) AttachPolicyEntitlements(ctx context.Context, req At
 	return r, ht.ErrNotImplemented
 }
 
+// BanUser implements banUser operation.
+//
+// Ban a user.
+//
+// POST /v1/accounts/{account}/users/{userId}/actions/ban
+func (UnimplementedHandler) BanUser(ctx context.Context, params BanUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateEntitlement implements createEntitlement operation.
 //
 // Create an entitlement.
 //
 // POST /v1/accounts/{account}/entitlements
 func (UnimplementedHandler) CreateEntitlement(ctx context.Context, req CreateEntitlementReq, params CreateEntitlementParams) (r *EntitlementDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateGroup implements createGroup operation.
+//
+// Create a group.
+//
+// POST /v1/accounts/{account}/groups
+func (UnimplementedHandler) CreateGroup(ctx context.Context, req CreateGroupReq, params CreateGroupParams) (r *GroupDocumentHeaders, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -67,6 +94,60 @@ func (UnimplementedHandler) CreateProductToken(ctx context.Context, req CreatePr
 	return r, ht.ErrNotImplemented
 }
 
+// CreateUser implements createUser operation.
+//
+// Creates a user (anonymous only when the account is not protected).
+//
+// POST /v1/accounts/{account}/users
+func (UnimplementedHandler) CreateUser(ctx context.Context, req CreateUserReq, params CreateUserParams) (r *UserDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateUserSecondFactor implements createUserSecondFactor operation.
+//
+// Create a TOTP second factor.
+//
+// POST /v1/accounts/{account}/users/{userId}/second-factors
+func (UnimplementedHandler) CreateUserSecondFactor(ctx context.Context, req CreateUserSecondFactorReq, params CreateUserSecondFactorParams) (r *SecondFactorDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateUserToken implements createUserToken operation.
+//
+// Answers 200 (not 201) with the raw secret included once.
+//
+// POST /v1/accounts/{account}/users/{userId}/tokens
+func (UnimplementedHandler) CreateUserToken(ctx context.Context, req CreateUserTokenReq, params CreateUserTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DeleteGroup implements deleteGroup operation.
+//
+// Delete a group (members keep existing, group nulled).
+//
+// DELETE /v1/accounts/{account}/groups/{groupId}
+func (UnimplementedHandler) DeleteGroup(ctx context.Context, params DeleteGroupParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteUser implements deleteUser operation.
+//
+// Delete a user.
+//
+// DELETE /v1/accounts/{account}/users/{userId}
+func (UnimplementedHandler) DeleteUser(ctx context.Context, params DeleteUserParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteUserSecondFactor implements deleteUserSecondFactor operation.
+//
+// Delete a second factor.
+//
+// DELETE /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+func (UnimplementedHandler) DeleteUserSecondFactor(ctx context.Context, req DeleteUserSecondFactorReq, params DeleteUserSecondFactorParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DestroyEntitlement implements destroyEntitlement operation.
 //
 // Delete an entitlement.
@@ -100,6 +181,15 @@ func (UnimplementedHandler) DestroyPolicy(ctx context.Context, params DestroyPol
 //
 // DELETE /v1/accounts/{account}/products/{productId}
 func (UnimplementedHandler) DestroyProduct(ctx context.Context, params DestroyProductParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DetachGroupOwners implements detachGroupOwners operation.
+//
+// Detach group owners.
+//
+// DELETE /v1/accounts/{account}/groups/{groupId}/owners
+func (UnimplementedHandler) DetachGroupOwners(ctx context.Context, req DetachGroupOwnersReq, params DetachGroupOwnersParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -248,6 +338,114 @@ func (UnimplementedHandler) IndexProducts(ctx context.Context, params IndexProdu
 	return r, ht.ErrNotImplemented
 }
 
+// ListGroupLicenses implements listGroupLicenses operation.
+//
+// List a group's licenses.
+//
+// GET /v1/accounts/{account}/groups/{groupId}/licenses
+func (UnimplementedHandler) ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (r *UserLicenseCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListGroupMachines implements listGroupMachines operation.
+//
+// List a group's machines.
+//
+// GET /v1/accounts/{account}/groups/{groupId}/machines
+func (UnimplementedHandler) ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (r *UserMachineCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListGroupOwners implements listGroupOwners operation.
+//
+// List a group's owners (group-owner join resources).
+//
+// GET /v1/accounts/{account}/groups/{groupId}/owners
+func (UnimplementedHandler) ListGroupOwners(ctx context.Context, params ListGroupOwnersParams) (r *GroupOwnerCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListGroupUsers implements listGroupUsers operation.
+//
+// List a group's users.
+//
+// GET /v1/accounts/{account}/groups/{groupId}/users
+func (UnimplementedHandler) ListGroupUsers(ctx context.Context, params ListGroupUsersParams) (r *UserCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListGroups implements listGroups operation.
+//
+// List groups.
+//
+// GET /v1/accounts/{account}/groups
+func (UnimplementedHandler) ListGroups(ctx context.Context, params ListGroupsParams) (r *GroupCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListTokens implements listTokens operation.
+//
+// List tokens.
+//
+// GET /v1/accounts/{account}/tokens
+func (UnimplementedHandler) ListTokens(ctx context.Context, params ListTokensParams) (r *TokenCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUserLicenses implements listUserLicenses operation.
+//
+// List a user's licenses.
+//
+// GET /v1/accounts/{account}/users/{userId}/licenses
+func (UnimplementedHandler) ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (r *UserLicenseCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUserMachines implements listUserMachines operation.
+//
+// List a user's machines.
+//
+// GET /v1/accounts/{account}/users/{userId}/machines
+func (UnimplementedHandler) ListUserMachines(ctx context.Context, params ListUserMachinesParams) (r *UserMachineCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUserProducts implements listUserProducts operation.
+//
+// List a user's products.
+//
+// GET /v1/accounts/{account}/users/{userId}/products
+func (UnimplementedHandler) ListUserProducts(ctx context.Context, params ListUserProductsParams) (r *UserProductCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUserSecondFactors implements listUserSecondFactors operation.
+//
+// List a user's second factors.
+//
+// GET /v1/accounts/{account}/users/{userId}/second-factors
+func (UnimplementedHandler) ListUserSecondFactors(ctx context.Context, params ListUserSecondFactorsParams) (r *SecondFactorCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUserTokens implements listUserTokens operation.
+//
+// List a user's tokens.
+//
+// GET /v1/accounts/{account}/users/{userId}/tokens
+func (UnimplementedHandler) ListUserTokens(ctx context.Context, params ListUserTokensParams) (r *TokenCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListUsers implements listUsers operation.
+//
+// Users of the account (default roles[]=user), filtered and paginated.
+//
+// GET /v1/accounts/{account}/users
+func (UnimplementedHandler) ListUsers(ctx context.Context, params ListUsersParams) (r *UserCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Me implements me operation.
 //
 // The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -285,12 +483,102 @@ func (UnimplementedHandler) Profile(ctx context.Context, params ProfileParams) (
 	return r, ht.ErrNotImplemented
 }
 
+// RegenerateCurrentToken implements regenerateCurrentToken operation.
+//
+// 404 unless the request itself is token-authenticated.
+//
+// PUT /v1/accounts/{account}/tokens
+func (UnimplementedHandler) RegenerateCurrentToken(ctx context.Context, params RegenerateCurrentTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RegenerateToken implements regenerateToken operation.
+//
+// Regenerate a token.
+//
+// PUT /v1/accounts/{account}/tokens/{tokenId}
+func (UnimplementedHandler) RegenerateToken(ctx context.Context, params RegenerateTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RequestPasswordReset implements requestPasswordReset operation.
+//
+// Always answers 204; unknown emails trigger nothing.
+//
+// POST /v1/accounts/{account}/passwords
+func (UnimplementedHandler) RequestPasswordReset(ctx context.Context, req RequestPasswordResetReq, params RequestPasswordResetParams) error {
+	return ht.ErrNotImplemented
+}
+
+// ResetUserPassword implements resetUserPassword operation.
+//
+// Reset a user's password with a reset token.
+//
+// POST /v1/accounts/{account}/users/{userId}/actions/reset-password
+func (UnimplementedHandler) ResetUserPassword(ctx context.Context, req ResetUserPasswordReq, params ResetUserPasswordParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RevokeToken implements revokeToken operation.
+//
+// Revoke a token.
+//
+// DELETE /v1/accounts/{account}/tokens/{tokenId}
+func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenParams) error {
+	return ht.ErrNotImplemented
+}
+
 // ShowEntitlement implements showEntitlement operation.
 //
 // Retrieve an entitlement (by id or code).
 //
 // GET /v1/accounts/{account}/entitlements/{entitlementId}
 func (UnimplementedHandler) ShowEntitlement(ctx context.Context, params ShowEntitlementParams) (r *EntitlementDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowGroup implements showGroup operation.
+//
+// Show a group.
+//
+// GET /v1/accounts/{account}/groups/{groupId}
+func (UnimplementedHandler) ShowGroup(ctx context.Context, params ShowGroupParams) (r *GroupDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowGroupLicense implements showGroupLicense operation.
+//
+// Show one of a group's licenses (id or key alias).
+//
+// GET /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}
+func (UnimplementedHandler) ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (r *UserLicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowGroupMachine implements showGroupMachine operation.
+//
+// Show one of a group's machines (id or fingerprint alias).
+//
+// GET /v1/accounts/{account}/groups/{groupId}/machines/{machineId}
+func (UnimplementedHandler) ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (r *UserMachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowGroupOwner implements showGroupOwner operation.
+//
+// Show one of a group's owners.
+//
+// GET /v1/accounts/{account}/groups/{groupId}/owners/{ownerId}
+func (UnimplementedHandler) ShowGroupOwner(ctx context.Context, params ShowGroupOwnerParams) (r *GroupOwnerDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowGroupUser implements showGroupUser operation.
+//
+// Show one of a group's users (id or email alias).
+//
+// GET /v1/accounts/{account}/groups/{groupId}/users/{userId}
+func (UnimplementedHandler) ShowGroupUser(ctx context.Context, params ShowGroupUserParams) (r *UserDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -420,12 +708,102 @@ func (UnimplementedHandler) ShowProductUser(ctx context.Context, params ShowProd
 	return r, ht.ErrNotImplemented
 }
 
+// ShowToken implements showToken operation.
+//
+// Show a token (no secret).
+//
+// GET /v1/accounts/{account}/tokens/{tokenId}
+func (UnimplementedHandler) ShowToken(ctx context.Context, params ShowTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUser implements showUser operation.
+//
+// The user by UUID or (downcased) email alias.
+//
+// GET /v1/accounts/{account}/users/{userId}
+func (UnimplementedHandler) ShowUser(ctx context.Context, params ShowUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUserGroup implements showUserGroup operation.
+//
+// Show a user's group (data null when none).
+//
+// GET /v1/accounts/{account}/users/{userId}/group
+func (UnimplementedHandler) ShowUserGroup(ctx context.Context, params ShowUserGroupParams) (r *GroupDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUserLicense implements showUserLicense operation.
+//
+// Show one of a user's licenses (id or key alias).
+//
+// GET /v1/accounts/{account}/users/{userId}/licenses/{licenseId}
+func (UnimplementedHandler) ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (r *UserLicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUserMachine implements showUserMachine operation.
+//
+// Show one of a user's machines (id or fingerprint alias).
+//
+// GET /v1/accounts/{account}/users/{userId}/machines/{machineId}
+func (UnimplementedHandler) ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (r *UserMachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUserProduct implements showUserProduct operation.
+//
+// Show one of a user's products.
+//
+// GET /v1/accounts/{account}/users/{userId}/products/{productId}
+func (UnimplementedHandler) ShowUserProduct(ctx context.Context, params ShowUserProductParams) (r *UserProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUserSecondFactor implements showUserSecondFactor operation.
+//
+// Show a second factor.
+//
+// GET /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+func (UnimplementedHandler) ShowUserSecondFactor(ctx context.Context, params ShowUserSecondFactorParams) (r *SecondFactorDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowUserToken implements showUserToken operation.
+//
+// Show one of a user's tokens.
+//
+// GET /v1/accounts/{account}/users/{userId}/tokens/{tokenId}
+func (UnimplementedHandler) ShowUserToken(ctx context.Context, params ShowUserTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UnbanUser implements unbanUser operation.
+//
+// Unban a user.
+//
+// POST /v1/accounts/{account}/users/{userId}/actions/unban
+func (UnimplementedHandler) UnbanUser(ctx context.Context, params UnbanUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateEntitlement implements updateEntitlement operation.
 //
 // Update an entitlement.
 //
 // PATCH /v1/accounts/{account}/entitlements/{entitlementId}
 func (UnimplementedHandler) UpdateEntitlement(ctx context.Context, req UpdateEntitlementReq, params UpdateEntitlementParams) (r *EntitlementDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateGroup implements updateGroup operation.
+//
+// Update a group.
+//
+// PATCH /v1/accounts/{account}/groups/{groupId}
+func (UnimplementedHandler) UpdateGroup(ctx context.Context, req UpdateGroupReq, params UpdateGroupParams) (r *GroupDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -453,6 +831,42 @@ func (UnimplementedHandler) UpdatePolicy(ctx context.Context, req UpdatePolicyRe
 //
 // PATCH /v1/accounts/{account}/products/{productId}
 func (UnimplementedHandler) UpdateProduct(ctx context.Context, req UpdateProductReq, params UpdateProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateUser implements updateUser operation.
+//
+// Update a user.
+//
+// PATCH /v1/accounts/{account}/users/{userId}
+func (UnimplementedHandler) UpdateUser(ctx context.Context, req UpdateUserReq, params UpdateUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateUserGroup implements updateUserGroup operation.
+//
+// Set or remove a user's group.
+//
+// PUT /v1/accounts/{account}/users/{userId}/group
+func (UnimplementedHandler) UpdateUserGroup(ctx context.Context, req UpdateUserGroupReq, params UpdateUserGroupParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateUserPassword implements updateUserPassword operation.
+//
+// Change the bearer's own password.
+//
+// POST /v1/accounts/{account}/users/{userId}/actions/update-password
+func (UnimplementedHandler) UpdateUserPassword(ctx context.Context, req UpdateUserPasswordReq, params UpdateUserPasswordParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateUserSecondFactor implements updateUserSecondFactor operation.
+//
+// Enable or disable a second factor (requires meta.otp).
+//
+// PATCH /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+func (UnimplementedHandler) UpdateUserSecondFactor(ctx context.Context, req UpdateUserSecondFactorReq, params UpdateUserSecondFactorParams) (r *SecondFactorDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -31,7 +32,9 @@ func (r TokensRepo) TokenByDigest(ctx context.Context, accountID uuid.UUID, dige
 		return domain.Token{}, fmt.Errorf("postgres: token: %w", err)
 	}
 
-	return tokenDomain(row), nil
+	return tokenDomain(row.ID, row.AccountID, row.Digest, row.BearerID, row.BearerType,
+		row.BearerRole, row.Kind, row.Name, row.Expiry, row.Permissions,
+		row.CreatedAt, row.UpdatedAt), nil
 }
 
 // InsertToken writes a new token row.
@@ -55,29 +58,34 @@ func (r TokensRepo) InsertToken(ctx context.Context, token domain.Token) error {
 	return nil
 }
 
-func tokenDomain(row db.GetTokenByDigestRow) domain.Token {
-	role, _ := domain.ParseRole(deref(row.BearerRole))
+func tokenDomain(
+	id, accountID uuid.UUID, digest string,
+	bearerID *uuid.UUID, bearerType, bearerRole, kind, name *string,
+	expiry *time.Time, permissions []byte,
+	createdAt, updatedAt time.Time,
+) domain.Token {
+	role, _ := domain.ParseRole(deref(bearerRole))
 
 	var perms []string
 
-	_ = json.Unmarshal(row.Permissions, &perms)
+	_ = json.Unmarshal(permissions, &perms)
 
 	token := domain.Token{
-		ID:          row.ID,
-		AccountID:   row.AccountID,
-		Digest:      row.Digest,
-		BearerType:  deref(row.BearerType),
+		ID:          id,
+		AccountID:   accountID,
+		Digest:      digest,
+		BearerType:  deref(bearerType),
 		BearerRole:  role,
-		Kind:        deref(row.Kind),
-		Name:        row.Name,
-		Expiry:      row.Expiry,
+		Kind:        deref(kind),
+		Name:        name,
+		Expiry:      expiry,
 		Permissions: perms,
-		CreatedAt:   row.CreatedAt,
-		UpdatedAt:   row.UpdatedAt,
+		CreatedAt:   createdAt,
+		UpdatedAt:   updatedAt,
 	}
 
-	if row.BearerID != nil {
-		token.BearerID = *row.BearerID
+	if bearerID != nil {
+		token.BearerID = *bearerID
 	}
 
 	return token

@@ -208,6 +208,9 @@ type Step struct {
 	Body    string            // raw JSON body; empty means no body
 	Headers map[string]string // extra or overriding request headers
 	Capture map[string]string // variable name -> JSONPath-lite path into the body
+	// Prepare runs before the step and may compute variables the body or
+	// headers interpolate (e.g. a TOTP code from a captured secret).
+	Prepare func(tb testing.TB, vars map[string]string)
 }
 
 // Scenario is a named, self-contained sequence of steps: it must create
@@ -275,6 +278,10 @@ func Run(tb testing.TB, target Target, scenario Scenario, signer ed25519.PublicK
 
 	for index := range scenario.Steps {
 		step := scenario.Steps[index]
+
+		if step.Prepare != nil {
+			step.Prepare(tb, vars)
+		}
 
 		transcript.Steps = append(transcript.Steps, runStep(tb, target, step, vars, signer))
 	}

@@ -28,6 +28,9 @@ type LicenseAuth struct {
 	AccountID uuid.UUID
 	Key       string
 	Suspended bool
+	// GroupID is the license's group, when it has one (Valid false
+	// otherwise).
+	GroupID uuid.NullUUID
 	// Expiry is nil when the license never expires.
 	Expiry *time.Time
 	// OwnerBanned: the owning user is banned (license.banned?).
