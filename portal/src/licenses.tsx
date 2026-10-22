@@ -1,17 +1,26 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type API, type Resource } from './api';
+import { APIError, type API, type Resource } from './api';
 import { useAuth } from './auth';
-import { Button, CopyButton, DateValue, Empty, ErrorNotice, LoadError, Loading, Status, useLoad } from './components';
+import { Button, CopyButton, DateValue, Empty, ErrorNotice, LoadError, Loading, Notice, Status, useLoad } from './components';
 import { useLocale } from './i18n';
 
-interface LicenseView { license: Resource; product: Resource; policy: Resource; entitlements: Resource[] }
+interface LicenseView { license: Resource; product: Resource | null; policy: Resource | null; entitlements: Resource[] }
+async function optionalName(api: API, path: string, signal: AbortSignal): Promise<Resource | null> {
+  try { return (await api.request(path, { signal })).data; }
+  catch (cause) {
+    // Default Keygen users lack product.read/policy.read, even for owned licenses.
+    // Optional names must not prevent access to the license itself.
+    if (cause instanceof APIError && cause.status === 403) return null;
+    throw cause;
+  }
+}
 async function enrich(api: API, license: Resource, signal: AbortSignal): Promise<LicenseView> {
   const path = `/licenses/${encodeURIComponent(license.id)}`;
   const [product, policy, entitlements] = await Promise.all([
-    api.request(`${path}/product`, { signal }), api.request(`${path}/policy`, { signal }), api.list(`${path}/entitlements`, signal),
+    optionalName(api, `${path}/product`, signal), optionalName(api, `${path}/policy`, signal), api.list(`${path}/entitlements`, signal),
   ]);
-  return { license, product: product.data, policy: policy.data, entitlements };
+  return { license, product, policy, entitlements };
 }
 function Usage({ license }: { license: Resource }) {
   const { t } = useLocale();
@@ -31,7 +40,8 @@ export function Licenses() {
   return <><header className="page-header"><h1>{t('licenses')}</h1><p>{t('licensesDetail')}</p></header>
     {result.loading ? <Loading /> : result.error ? <LoadError error={result.error} retry={result.reload} /> : !result.value?.length ? <Empty title={t('noLicenses')} description={t('noLicensesDetail')} /> :
       <div className="license-list">{result.value.map(({ license, product, policy, entitlements }) => <article className="license-card" key={license.id}>
-        <div className="license-top"><div><h2><Link to={`/licenses/${encodeURIComponent(license.id)}`}>{product.attributes.name ?? t('unknown')}</Link></h2><p className="plan-name">{policy.attributes.name ?? t('unknown')}{license.attributes.name && <> / {license.attributes.name}</>}</p></div><Status value={license.attributes.status} /></div>
+        <div className="license-top"><div><h2><Link to={`/licenses/${encodeURIComponent(license.id)}`}>{product?.attributes.name ?? license.attributes.name ?? t('key')}</Link></h2><p className="plan-name">{policy?.attributes.name ?? t('unknown')}{product?.attributes.name && license.attributes.name && <> / {license.attributes.name}</>}</p></div><Status value={license.attributes.status} /></div>
+        {(!product || !policy) && <Notice>{t('licenseNamesRestricted')}</Notice>}
         <div className="license-key-row"><code className="license-key">{license.attributes.key ?? t('unknown')}</code>{license.attributes.key && <CopyButton value={license.attributes.key} />}</div>
         <dl className="license-metrics"><div><dt>{t('expiry')}</dt><dd><DateValue value={license.attributes.expiry} /></dd></div><div><dt>{t('uses')}</dt><dd><Usage license={license} /></dd></div></dl>
         <div className="license-footer"><Entitlements values={entitlements} /><Link className="text-link" to={`/licenses/${encodeURIComponent(license.id)}`}>{t('details')}</Link></div>
@@ -52,9 +62,10 @@ export function LicenseDetail() {
   if (result.error) return <LoadError error={result.error} retry={result.reload} />;
   if (!result.value) return null;
   const { license, product, policy, entitlements } = result.value;
-  return <><Link className="back-link" to="/licenses">‹ {t('backLicenses')}</Link><header className="page-header page-header-inline"><div><h1>{product.attributes.name ?? t('unknown')}</h1><p>{policy.attributes.name ?? t('unknown')}{license.attributes.name && <> / {license.attributes.name}</>}</p></div><Status value={license.attributes.status} /></header>
+  return <><Link className="back-link" to="/licenses">‹ {t('backLicenses')}</Link><header className="page-header page-header-inline"><div><h1>{product?.attributes.name ?? license.attributes.name ?? t('key')}</h1><p>{policy?.attributes.name ?? t('unknown')}{product?.attributes.name && license.attributes.name && <> / {license.attributes.name}</>}</p></div><Status value={license.attributes.status} /></header>
+    {(!product || !policy) && <Notice>{t('licenseNamesRestricted')}</Notice>}
     <section className="panel"><h2>{t('key')}</h2><div className="license-key-row"><code className="license-key">{license.attributes.key ?? t('unknown')}</code>{license.attributes.key && <CopyButton value={license.attributes.key} />}</div>
-      <dl className="detail-grid"><div><dt>{t('product')}</dt><dd>{product.attributes.name ?? t('unknown')}</dd></div><div><dt>{t('policy')}</dt><dd>{policy.attributes.name ?? t('unknown')}</dd></div><div><dt>{t('expiry')}</dt><dd><DateValue value={license.attributes.expiry} /></dd></div><div><dt>{t('uses')}</dt><dd><Usage license={license} /></dd></div></dl>
+      <dl className="detail-grid"><div><dt>{t('product')}</dt><dd>{product?.attributes.name ?? t('unknown')}</dd></div><div><dt>{t('policy')}</dt><dd>{policy?.attributes.name ?? t('unknown')}</dd></div><div><dt>{t('expiry')}</dt><dd><DateValue value={license.attributes.expiry} /></dd></div><div><dt>{t('uses')}</dt><dd><Usage license={license} /></dd></div></dl>
     </section>
     <section className="panel"><h2>{t('entitlements')}</h2><Entitlements values={entitlements} /></section>
     <section className="panel"><h2>{t('download')}</h2><p className="section-description">{license.attributes.protected ? t('protectedLicense') : t('downloadHelp')}</p><ErrorNotice error={error} />

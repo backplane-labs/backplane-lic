@@ -120,6 +120,14 @@ licenses; the portal displays permission and API errors rather than bypassing
 those restrictions. Legacy-encrypted keys that the public API omits cannot
 be recovered by the portal; it shows an unavailable value and no copy action.
 
+Default customer permissions also omit `product.read` and `policy.read`.
+Product and plan names therefore aren't available through the direct resource
+or license-relationship read endpoints; `include=product,policy` on a license
+read doesn't provide them either. The portal keeps the license list and detail
+usable, uses the license's own name as the heading, and explains the missing
+names. Keys, status, expiry, usage and entitlements remain visible. If the public
+API permits those relationship reads, the portal displays the names normally.
+
 `make build` installs frontend dependencies with the frozen Yarn lockfile,
 builds the SPA, copies it into `internal/infra/portal/dist`, then compiles Go.
 The release Dockerfile performs the same build in a Node stage before the Go

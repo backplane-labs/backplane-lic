@@ -278,6 +278,27 @@ describe('licenses', () => {
     expect(screen.getByText('Export')).toBeTruthy(); expect(screen.getByText('No expiry')).toBeTruthy();
     expect(fetchMock.mock.calls.some(call => endpoint(call[0]) === '/users/user-1/licenses')).toBe(true);
   });
+  it.each(['list', 'detail'])('keeps the license %s usable when names are forbidden to default users', async view => {
+    signedIn();
+    fetchMock.mockImplementation(async (url: string) => {
+      const path = endpoint(url);
+      if (path.endsWith('/product') || path.endsWith('/policy')) return failure('FORBIDDEN', 403);
+      return mockLicenses(url);
+    });
+    render(<Providers><MemoryRouter initialEntries={[view === 'list' ? '/licenses' : '/licenses/license-1']}><Routes><Route path="/licenses/:id?" element={<Ready>{view === 'list' ? <Licenses /> : <LicenseDetail />}</Ready>} /></Routes></MemoryRouter></Providers>);
+    await screen.findByText('ACME-KEY');
+    expect(screen.getByText('Export')).toBeTruthy();
+    expect(screen.getByText(/cannot read product or plan names/)).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+    if (view === 'detail') expect(screen.getByRole('button', { name: 'Download license file' }).hasAttribute('disabled')).toBe(false);
+  });
+  it('does not hide server failures as restricted product names', async () => {
+    signedIn();
+    fetchMock.mockImplementation(async (url: string) => endpoint(url).endsWith('/product') ? failure('SERVER_ERROR', 500) : mockLicenses(url));
+    route('/licenses', <Licenses />);
+    expect((await screen.findByRole('alert')).textContent).toContain('SERVER_ERROR');
+    expect(screen.queryByText(/cannot read product or plan names/)).toBeNull();
+  });
   it('downloads the public checkout certificate as a .lic file without putting a bearer in the URL', async () => {
     signedIn(); fetchMock.mockImplementation(async (url: string) => mockLicenses(url));
     const createURL = vi.fn().mockReturnValue('blob:local-license'); const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
