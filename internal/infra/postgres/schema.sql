@@ -590,10 +590,7 @@ CREATE TABLE lic.webhook_endpoints (
 CREATE INDEX webhook_endpoints_account_created_at_id_idx ON lic.webhook_endpoints (account_id, created_at DESC, id DESC);
 CREATE INDEX webhook_endpoints_product_idx ON lic.webhook_endpoints (product_id);
 
--- webhook_events: the outbox. Domain writes insert rows in the same
--- transaction; a worker claims due rows with FOR UPDATE SKIP LOCKED and
--- delivers them. Keygen's sidekiq jid is meaningless here — attempts and
--- next_attempt_at replace sidekiq's retry bookkeeping.
+-- webhook_events is the Keygen API resource; delivery scheduling lives in outbox_messages.
 CREATE TABLE lic.webhook_events (
   id                  uuid PRIMARY KEY,
   account_id          uuid NOT NULL REFERENCES lic.accounts (id) ON DELETE CASCADE,
@@ -610,7 +607,6 @@ CREATE TABLE lic.webhook_events (
   -- DELIVERING | DELIVERED | FAILING | FAILED.
   status              text NOT NULL DEFAULT 'DELIVERING',
   attempts            integer NOT NULL DEFAULT 0,
-  next_attempt_at     timestamptz,
   last_response_code  integer,
   last_response_body  text,
   created_at          timestamptz NOT NULL DEFAULT now(),
@@ -623,6 +619,49 @@ CREATE TABLE lic.webhook_events (
 
 CREATE INDEX webhook_events_account_created_at_id_idx ON lic.webhook_events (account_id, created_at DESC, id DESC);
 CREATE INDEX webhook_events_endpoint_idx ON lic.webhook_events (webhook_endpoint_id);
-CREATE INDEX webhook_events_due_idx ON lic.webhook_events (next_attempt_at)
-  WHERE status IN ('DELIVERING', 'FAILING');
 CREATE INDEX webhook_events_idempotency_idx ON lic.webhook_events (idempotency_token);
+
+-- pg-outbox v1.1.0: consolidated declarative form of 0001 + 0002.
+CREATE TABLE lic.outbox_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  topic text NOT NULL,
+  partition_key text,
+  payload bytea NOT NULL,
+  headers jsonb NOT NULL DEFAULT '{}'::jsonb,
+  content_type text,
+  message_type text,
+  status text NOT NULL DEFAULT 'pending',
+  attempts integer NOT NULL DEFAULT 0,
+  max_attempts integer,
+  locked_by text,
+  locked_until timestamptz,
+  next_attempt_at timestamptz NOT NULL DEFAULT now(),
+  last_error text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  published_at timestamptz,
+  lease_token uuid,
+  finished_at timestamptz,
+  CONSTRAINT outbox_messages_status_check CHECK (
+    status IN ('pending', 'processing', 'published', 'dead', 'discarded')
+  )
+);
+
+CREATE INDEX outbox_messages_claim_idx ON lic.outbox_messages (next_attempt_at, created_at)
+  WHERE status IN ('pending', 'processing');
+CREATE INDEX outbox_messages_cleanup_idx ON lic.outbox_messages (published_at)
+  WHERE status = 'published';
+CREATE INDEX outbox_messages_partition_idx ON lic.outbox_messages (partition_key, created_at)
+  WHERE partition_key IS NOT NULL;
+CREATE INDEX outbox_messages_finished_idx ON lic.outbox_messages (finished_at)
+  WHERE status IN ('dead', 'discarded');
+
+CREATE FUNCTION lic.outbox_messages_notify() RETURNS trigger AS $$
+BEGIN
+  PERFORM pg_notify('outbox_messages', '');
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER outbox_messages_notify_trg
+  AFTER INSERT ON lic.outbox_messages
+  FOR EACH STATEMENT EXECUTE FUNCTION lic.outbox_messages_notify();

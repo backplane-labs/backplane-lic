@@ -161,6 +161,27 @@ CREATE TABLE "lic"."machines" (
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY ("id")
 );
+CREATE TABLE "lic"."outbox_messages" (
+  "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+  "topic" text NOT NULL,
+  "partition_key" text,
+  "payload" bytea NOT NULL,
+  "headers" jsonb NOT NULL DEFAULT '{}'::jsonb,
+  "content_type" text,
+  "message_type" text,
+  "status" text NOT NULL DEFAULT 'pending'::text,
+  "attempts" int4 NOT NULL DEFAULT 0,
+  "max_attempts" int4,
+  "locked_by" text,
+  "locked_until" timestamptz,
+  "next_attempt_at" timestamptz NOT NULL DEFAULT now(),
+  "last_error" text,
+  "created_at" timestamptz NOT NULL DEFAULT now(),
+  "published_at" timestamptz,
+  "lease_token" uuid,
+  "finished_at" timestamptz,
+  PRIMARY KEY ("id")
+);
 CREATE TABLE "lic"."policies" (
   "id" uuid NOT NULL,
   "account_id" uuid NOT NULL,
@@ -307,7 +328,6 @@ CREATE TABLE "lic"."webhook_events" (
   "idempotency_token" text NOT NULL,
   "status" text NOT NULL DEFAULT 'DELIVERING'::text,
   "attempts" int4 NOT NULL DEFAULT 0,
-  "next_attempt_at" timestamptz,
   "last_response_code" int4,
   "last_response_body" text,
   "created_at" timestamptz NOT NULL DEFAULT now(),
@@ -327,6 +347,7 @@ ALTER TABLE "lic"."machine_components" ADD CONSTRAINT "machine_components_names_
 ALTER TABLE "lic"."machine_processes" ADD CONSTRAINT "machine_processes_pid_nonempty" CHECK (length(btrim(pid)) > 0);
 ALTER TABLE "lic"."machines" ADD CONSTRAINT "machines_fingerprint_nonempty" CHECK (length(btrim(fingerprint)) > 0);
 ALTER TABLE "lic"."machines" ADD CONSTRAINT "machines_resources_nonnegative" CHECK ((cores IS NULL OR cores >= 0) AND (memory IS NULL OR memory >= 0) AND (disk IS NULL OR disk >= 0) AND (max_processes_override IS NULL OR max_processes_override >= 0));
+ALTER TABLE "lic"."outbox_messages" ADD CONSTRAINT "outbox_messages_status_check" CHECK (status = ANY (ARRAY['pending'::text, 'processing'::text, 'published'::text, 'dead'::text, 'discarded'::text]));
 ALTER TABLE "lic"."policies" ADD CONSTRAINT "policies_authentication_strategy_allowed" CHECK (authentication_strategy IS NULL OR (authentication_strategy = ANY (ARRAY['TOKEN'::text, 'LICENSE'::text, 'SESSION'::text, 'MIXED'::text, 'NONE'::text])));
 ALTER TABLE "lic"."policies" ADD CONSTRAINT "policies_check_in_count_range" CHECK (check_in_interval_count IS NULL OR check_in_interval_count >= 1 AND check_in_interval_count <= 365);
 ALTER TABLE "lic"."policies" ADD CONSTRAINT "policies_check_in_interval_allowed" CHECK (check_in_interval IS NULL OR (check_in_interval = ANY (ARRAY['day'::text, 'week'::text, 'month'::text, 'year'::text])));
@@ -398,6 +419,10 @@ CREATE INDEX "machines_last_heartbeat_idx" ON "lic"."machines" ("last_heartbeat_
 CREATE UNIQUE INDEX "machines_license_fingerprint_key" ON "lic"."machines" ("license_id", "fingerprint");
 CREATE INDEX "machines_license_idx" ON "lic"."machines" ("license_id");
 CREATE INDEX "machines_owner_idx" ON "lic"."machines" ("owner_id");
+CREATE INDEX "outbox_messages_claim_idx" ON "lic"."outbox_messages" ("next_attempt_at", "created_at") WHERE (status = ANY (ARRAY['pending'::text, 'processing'::text]));
+CREATE INDEX "outbox_messages_cleanup_idx" ON "lic"."outbox_messages" ("published_at") WHERE (status = 'published'::text);
+CREATE INDEX "outbox_messages_finished_idx" ON "lic"."outbox_messages" ("finished_at") WHERE (status = ANY (ARRAY['dead'::text, 'discarded'::text]));
+CREATE INDEX "outbox_messages_partition_idx" ON "lic"."outbox_messages" ("partition_key", "created_at") WHERE (partition_key IS NOT NULL);
 CREATE INDEX "policies_account_created_at_id_idx" ON "lic"."policies" ("account_id", "created_at" DESC, "id" DESC);
 CREATE INDEX "policies_product_id_idx" ON "lic"."policies" ("product_id");
 CREATE INDEX "policies_require_heartbeat_idx" ON "lic"."policies" ("require_heartbeat") WHERE require_heartbeat;
@@ -419,7 +444,6 @@ CREATE INDEX "users_group_idx" ON "lic"."users" ("group_id");
 CREATE INDEX "webhook_endpoints_account_created_at_id_idx" ON "lic"."webhook_endpoints" ("account_id", "created_at" DESC, "id" DESC);
 CREATE INDEX "webhook_endpoints_product_idx" ON "lic"."webhook_endpoints" ("product_id");
 CREATE INDEX "webhook_events_account_created_at_id_idx" ON "lic"."webhook_events" ("account_id", "created_at" DESC, "id" DESC);
-CREATE INDEX "webhook_events_due_idx" ON "lic"."webhook_events" ("next_attempt_at") WHERE (status = ANY (ARRAY['DELIVERING'::text, 'FAILING'::text]));
 CREATE INDEX "webhook_events_endpoint_idx" ON "lic"."webhook_events" ("webhook_endpoint_id");
 CREATE INDEX "webhook_events_idempotency_idx" ON "lic"."webhook_events" ("idempotency_token");
 ALTER TABLE "lic"."entitlements" ADD CONSTRAINT "entitlements_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "lic"."accounts" ("id") ON DELETE CASCADE;
@@ -462,8 +486,17 @@ ALTER TABLE "lic"."users" ADD CONSTRAINT "users_account_id_fkey" FOREIGN KEY ("a
 ALTER TABLE "lic"."users" ADD CONSTRAINT "users_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "lic"."groups" ("id") ON DELETE SET NULL;
 ALTER TABLE "lic"."webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "lic"."accounts" ("id") ON DELETE CASCADE;
 ALTER TABLE "lic"."webhook_events" ADD CONSTRAINT "webhook_events_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "lic"."accounts" ("id") ON DELETE CASCADE;
+CREATE FUNCTION "lic"."outbox_messages_notify"() RETURNS trigger LANGUAGE plpgsql VOLATILE PARALLEL UNSAFE AS $$
+BEGIN
+  PERFORM pg_notify('outbox_messages', '');
+  RETURN NULL;
+END;
+$$;
+CREATE TRIGGER "outbox_messages_notify_trg" AFTER INSERT ON "lic"."outbox_messages" FOR EACH STATEMENT EXECUTE FUNCTION "lic"."outbox_messages_notify"();
 
 -- sqld:down
+DROP TRIGGER "outbox_messages_notify_trg" ON "lic"."outbox_messages";
+DROP FUNCTION "lic"."outbox_messages_notify"();
 ALTER TABLE "lic"."webhook_events" DROP CONSTRAINT "webhook_events_account_id_fkey";
 ALTER TABLE "lic"."webhook_endpoints" DROP CONSTRAINT "webhook_endpoints_account_id_fkey";
 ALTER TABLE "lic"."users" DROP CONSTRAINT "users_group_id_fkey";
@@ -506,7 +539,6 @@ ALTER TABLE "lic"."group_owners" DROP CONSTRAINT "group_owners_account_id_fkey";
 ALTER TABLE "lic"."entitlements" DROP CONSTRAINT "entitlements_account_id_fkey";
 DROP INDEX "lic"."webhook_events_idempotency_idx";
 DROP INDEX "lic"."webhook_events_endpoint_idx";
-DROP INDEX "lic"."webhook_events_due_idx";
 DROP INDEX "lic"."webhook_events_account_created_at_id_idx";
 DROP INDEX "lic"."webhook_endpoints_product_idx";
 DROP INDEX "lic"."webhook_endpoints_account_created_at_id_idx";
@@ -528,6 +560,10 @@ DROP INDEX "lic"."policy_entitlements_entitlement_idx";
 DROP INDEX "lic"."policies_require_heartbeat_idx";
 DROP INDEX "lic"."policies_product_id_idx";
 DROP INDEX "lic"."policies_account_created_at_id_idx";
+DROP INDEX "lic"."outbox_messages_partition_idx";
+DROP INDEX "lic"."outbox_messages_finished_idx";
+DROP INDEX "lic"."outbox_messages_cleanup_idx";
+DROP INDEX "lic"."outbox_messages_claim_idx";
 DROP INDEX "lic"."machines_owner_idx";
 DROP INDEX "lic"."machines_license_idx";
 DROP INDEX "lic"."machines_license_fingerprint_key";
@@ -599,6 +635,7 @@ ALTER TABLE "lic"."policies" DROP CONSTRAINT "policies_component_matching_allowe
 ALTER TABLE "lic"."policies" DROP CONSTRAINT "policies_check_in_interval_allowed";
 ALTER TABLE "lic"."policies" DROP CONSTRAINT "policies_check_in_count_range";
 ALTER TABLE "lic"."policies" DROP CONSTRAINT "policies_authentication_strategy_allowed";
+ALTER TABLE "lic"."outbox_messages" DROP CONSTRAINT "outbox_messages_status_check";
 ALTER TABLE "lic"."machines" DROP CONSTRAINT "machines_resources_nonnegative";
 ALTER TABLE "lic"."machines" DROP CONSTRAINT "machines_fingerprint_nonempty";
 ALTER TABLE "lic"."machine_processes" DROP CONSTRAINT "machine_processes_pid_nonempty";
@@ -620,6 +657,7 @@ DROP TABLE "lic"."second_factors";
 DROP TABLE "lic"."products";
 DROP TABLE "lic"."policy_entitlements";
 DROP TABLE "lic"."policies";
+DROP TABLE "lic"."outbox_messages";
 DROP TABLE "lic"."machines";
 DROP TABLE "lic"."machine_processes";
 DROP TABLE "lic"."machine_components";

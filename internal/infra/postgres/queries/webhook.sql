@@ -91,15 +91,15 @@ ORDER BY created_at DESC, id DESC;
 -- name: InsertWebhookEvent :exec
 INSERT INTO lic.webhook_events (
   id, account_id, webhook_endpoint_id, endpoint, event, payload, api_version,
-  idempotency_token, status, attempts, next_attempt_at
+  idempotency_token, status, attempts
 ) VALUES (
   @id, @account_id, @webhook_endpoint_id, @endpoint, @event, @payload, @api_version,
-  @idempotency_token, @status, 0, @next_attempt_at
+  @idempotency_token, @status, 0
 );
 
 -- name: GetWebhookEventByID :one
 SELECT id, account_id, webhook_endpoint_id, endpoint, event, payload, api_version,
-  idempotency_token, status, attempts, next_attempt_at, last_response_code,
+  idempotency_token, status, attempts, last_response_code,
   last_response_body, created_at, updated_at
 FROM lic.webhook_events
 WHERE account_id = @account_id AND id = @id;
@@ -116,7 +116,7 @@ WHERE e.account_id = @account_id
 
 -- name: ListWebhookEvents :many
 SELECT e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,
-  e.api_version, e.idempotency_token, e.status, e.attempts, e.next_attempt_at,
+  e.api_version, e.idempotency_token, e.status, e.attempts,
   e.last_response_code, e.last_response_body, e.created_at, e.updated_at
 FROM lic.webhook_events e
 LEFT JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id
@@ -150,41 +150,12 @@ OFFSET @offset;
 -- name: DeleteWebhookEvent :exec
 DELETE FROM lic.webhook_events WHERE account_id = @account_id AND id = @id;
 
--- name: ClaimDueWebhookEvents :many
--- The delivery worker's claim: the due rows are locked FOR UPDATE SKIP
--- LOCKED and immediately pushed to the lease horizon, all in one short
--- transaction — the delivery itself runs outside any transaction, so a
--- crashed or slow worker reclaims its rows only after the lease and no
--- delivery outcome is ever rolled back together with another's.
-WITH due AS (
-  SELECT e.id
-  FROM lic.webhook_events e
-  JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id
-  WHERE e.account_id = @account_id
-    AND e.status IN ('DELIVERING', 'FAILING')
-    AND (e.next_attempt_at IS NULL OR e.next_attempt_at <= @now::timestamptz)
-    AND we.id IS NOT NULL
-  ORDER BY e.created_at ASC, e.id ASC
-  LIMIT @limit
-  FOR UPDATE OF e SKIP LOCKED
-)
-UPDATE lic.webhook_events e
-SET next_attempt_at = @lease::timestamptz
-FROM due, lic.webhook_endpoints we
-WHERE e.id = due.id
-  AND we.id = e.webhook_endpoint_id
-RETURNING e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,
-  e.api_version, e.idempotency_token, e.status, e.attempts, e.next_attempt_at,
-  e.last_response_code, e.last_response_body, e.created_at, e.updated_at,
-  we.url AS endpoint_url, we.signature_algorithm AS endpoint_signature_algorithm;
-
 -- name: SetWebhookEventDelivered :exec
 UPDATE lic.webhook_events SET
   status = 'DELIVERED',
   last_response_code = @last_response_code,
   last_response_body = @last_response_body,
   attempts = attempts + 1,
-  next_attempt_at = NULL,
   updated_at = now()
 WHERE account_id = @account_id AND id = @id;
 
@@ -194,6 +165,24 @@ UPDATE lic.webhook_events SET
   last_response_code = @last_response_code,
   last_response_body = @last_response_body,
   attempts = attempts + 1,
-  next_attempt_at = @next_attempt_at,
   updated_at = now()
+WHERE account_id = @account_id AND id = @id;
+
+-- name: GetWebhookDeliveryMessage :one
+-- Delivery diagnostics; ids are shared with the API resource.
+SELECT id, status, attempts, next_attempt_at, payload, last_error, finished_at
+FROM lic.outbox_messages WHERE id = @id;
+
+-- name: CountWebhookDeliveryMessages :one
+SELECT count(*)::bigint AS total FROM lic.outbox_messages
+WHERE partition_key = @account_id::text;
+
+-- name: MakeWebhookDeliveryDue :exec
+-- Releasing a scheduled delivery is useful for controlled operational replay.
+UPDATE lic.outbox_messages SET next_attempt_at = now()
+WHERE id = @id AND status = 'pending';
+
+-- name: SetWebhookEventExhausted :exec
+-- Relay budget exhausted without an HTTP outcome (e.g. signing failed).
+UPDATE lic.webhook_events SET status = 'FAILED', updated_at = now()
 WHERE account_id = @account_id AND id = @id;

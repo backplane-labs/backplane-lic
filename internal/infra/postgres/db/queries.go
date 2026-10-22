@@ -4376,10 +4376,10 @@ func (q *Queries) ListSubscribedWebhookEndpoints(ctx context.Context, arg ListSu
 
 const insertWebhookEventSQL = `INSERT INTO lic.webhook_events (
   id, account_id, webhook_endpoint_id, endpoint, event, payload, api_version,
-  idempotency_token, status, attempts, next_attempt_at
+  idempotency_token, status, attempts
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7,
-  $8, $9, 0, $10
+  $8, $9, 0
 );`
 
 type InsertWebhookEventParams struct {
@@ -4392,16 +4392,15 @@ type InsertWebhookEventParams struct {
 	APIVersion        *string
 	IdempotencyToken  string
 	Status            string
-	NextAttemptAt     *time.Time
 }
 
 func (q *Queries) InsertWebhookEvent(ctx context.Context, arg InsertWebhookEventParams) error {
-	_, err := q.db.Exec(ctx, insertWebhookEventSQL, arg.ID, arg.AccountID, arg.WebhookEndpointID, arg.Endpoint, arg.Event, arg.Payload, arg.APIVersion, arg.IdempotencyToken, arg.Status, arg.NextAttemptAt)
+	_, err := q.db.Exec(ctx, insertWebhookEventSQL, arg.ID, arg.AccountID, arg.WebhookEndpointID, arg.Endpoint, arg.Event, arg.Payload, arg.APIVersion, arg.IdempotencyToken, arg.Status)
 	return err
 }
 
 const getWebhookEventByIDSQL = `SELECT id, account_id, webhook_endpoint_id, endpoint, event, payload, api_version,
-  idempotency_token, status, attempts, next_attempt_at, last_response_code,
+  idempotency_token, status, attempts, last_response_code,
   last_response_body, created_at, updated_at
 FROM lic.webhook_events
 WHERE account_id = $1 AND id = $2;`
@@ -4422,7 +4421,6 @@ type GetWebhookEventByIDRow struct {
 	IdempotencyToken  string
 	Status            string
 	Attempts          int32
-	NextAttemptAt     *time.Time
 	LastResponseCode  *int32
 	LastResponseBody  *string
 	CreatedAt         time.Time
@@ -4432,7 +4430,7 @@ type GetWebhookEventByIDRow struct {
 func (q *Queries) GetWebhookEventByID(ctx context.Context, arg GetWebhookEventByIDParams) (GetWebhookEventByIDRow, error) {
 	row := q.db.QueryRow(ctx, getWebhookEventByIDSQL, arg.AccountID, arg.ID)
 	var i GetWebhookEventByIDRow
-	err := row.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt)
+	err := row.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt)
 	return i, err
 }
 
@@ -4448,86 +4446,11 @@ func (q *Queries) DeleteWebhookEvent(ctx context.Context, arg DeleteWebhookEvent
 	return err
 }
 
-const claimDueWebhookEventsSQL = `-- The delivery worker's claim: the due rows are locked FOR UPDATE SKIP
--- LOCKED and immediately pushed to the lease horizon, all in one short
--- transaction — the delivery itself runs outside any transaction, so a
--- crashed or slow worker reclaims its rows only after the lease and no
--- delivery outcome is ever rolled back together with another's.
-WITH due AS (
-  SELECT e.id
-  FROM lic.webhook_events e
-  JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id
-  WHERE e.account_id = $1
-    AND e.status IN ('DELIVERING', 'FAILING')
-    AND (e.next_attempt_at IS NULL OR e.next_attempt_at <= $2::timestamptz)
-    AND we.id IS NOT NULL
-  ORDER BY e.created_at ASC, e.id ASC
-  LIMIT $3
-  FOR UPDATE OF e SKIP LOCKED
-)
-UPDATE lic.webhook_events e
-SET next_attempt_at = $4::timestamptz
-FROM due, lic.webhook_endpoints we
-WHERE e.id = due.id
-  AND we.id = e.webhook_endpoint_id
-RETURNING e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,
-  e.api_version, e.idempotency_token, e.status, e.attempts, e.next_attempt_at,
-  e.last_response_code, e.last_response_body, e.created_at, e.updated_at,
-  we.url AS endpoint_url, we.signature_algorithm AS endpoint_signature_algorithm;`
-
-type ClaimDueWebhookEventsParams struct {
-	AccountID uuid.UUID
-	Now       *time.Time
-	Limit     int64
-	Lease     *time.Time
-}
-
-type ClaimDueWebhookEventsRow struct {
-	ID                         uuid.UUID
-	AccountID                  uuid.UUID
-	WebhookEndpointID          *uuid.UUID
-	Endpoint                   string
-	Event                      string
-	Payload                    string
-	APIVersion                 *string
-	IdempotencyToken           string
-	Status                     string
-	Attempts                   int32
-	NextAttemptAt              *time.Time
-	LastResponseCode           *int32
-	LastResponseBody           *string
-	CreatedAt                  time.Time
-	UpdatedAt                  time.Time
-	EndpointURL                string
-	EndpointSignatureAlgorithm string
-}
-
-func (q *Queries) ClaimDueWebhookEvents(ctx context.Context, arg ClaimDueWebhookEventsParams) ([]ClaimDueWebhookEventsRow, error) {
-	rows, err := q.db.Query(ctx, claimDueWebhookEventsSQL, arg.AccountID, arg.Now, arg.Limit, arg.Lease)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ClaimDueWebhookEventsRow
-	for rows.Next() {
-		var i ClaimDueWebhookEventsRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt, &i.EndpointURL, &i.EndpointSignatureAlgorithm); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const setWebhookEventDeliveredSQL = `UPDATE lic.webhook_events SET
   status = 'DELIVERED',
   last_response_code = $1,
   last_response_body = $2,
   attempts = attempts + 1,
-  next_attempt_at = NULL,
   updated_at = now()
 WHERE account_id = $3 AND id = $4;`
 
@@ -4548,21 +4471,77 @@ const setWebhookEventFailureSQL = `UPDATE lic.webhook_events SET
   last_response_code = $2,
   last_response_body = $3,
   attempts = attempts + 1,
-  next_attempt_at = $4,
   updated_at = now()
-WHERE account_id = $5 AND id = $6;`
+WHERE account_id = $4 AND id = $5;`
 
 type SetWebhookEventFailureParams struct {
 	Status           string
 	LastResponseCode *int32
 	LastResponseBody *string
-	NextAttemptAt    *time.Time
 	AccountID        uuid.UUID
 	ID               uuid.UUID
 }
 
 func (q *Queries) SetWebhookEventFailure(ctx context.Context, arg SetWebhookEventFailureParams) error {
-	_, err := q.db.Exec(ctx, setWebhookEventFailureSQL, arg.Status, arg.LastResponseCode, arg.LastResponseBody, arg.NextAttemptAt, arg.AccountID, arg.ID)
+	_, err := q.db.Exec(ctx, setWebhookEventFailureSQL, arg.Status, arg.LastResponseCode, arg.LastResponseBody, arg.AccountID, arg.ID)
+	return err
+}
+
+const getWebhookDeliveryMessageSQL = `-- Delivery diagnostics; ids are shared with the API resource.
+SELECT id, status, attempts, next_attempt_at, payload, last_error, finished_at
+FROM lic.outbox_messages WHERE id = $1;`
+
+type GetWebhookDeliveryMessageRow struct {
+	ID            uuid.UUID
+	Status        string
+	Attempts      int32
+	NextAttemptAt time.Time
+	Payload       []byte
+	LastError     *string
+	FinishedAt    *time.Time
+}
+
+func (q *Queries) GetWebhookDeliveryMessage(ctx context.Context, id uuid.UUID) (GetWebhookDeliveryMessageRow, error) {
+	row := q.db.QueryRow(ctx, getWebhookDeliveryMessageSQL, id)
+	var i GetWebhookDeliveryMessageRow
+	err := row.Scan(&i.ID, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.Payload, &i.LastError, &i.FinishedAt)
+	return i, err
+}
+
+const countWebhookDeliveryMessagesSQL = `SELECT count(*)::bigint AS total FROM lic.outbox_messages
+WHERE partition_key = $1::text;`
+
+type CountWebhookDeliveryMessagesRow struct {
+	Total int64
+}
+
+func (q *Queries) CountWebhookDeliveryMessages(ctx context.Context, accountID *string) (CountWebhookDeliveryMessagesRow, error) {
+	row := q.db.QueryRow(ctx, countWebhookDeliveryMessagesSQL, accountID)
+	var i CountWebhookDeliveryMessagesRow
+	err := row.Scan(&i.Total)
+	return i, err
+}
+
+const makeWebhookDeliveryDueSQL = `-- Releasing a scheduled delivery is useful for controlled operational replay.
+UPDATE lic.outbox_messages SET next_attempt_at = now()
+WHERE id = $1 AND status = 'pending';`
+
+func (q *Queries) MakeWebhookDeliveryDue(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, makeWebhookDeliveryDueSQL, id)
+	return err
+}
+
+const setWebhookEventExhaustedSQL = `-- Relay budget exhausted without an HTTP outcome (e.g. signing failed).
+UPDATE lic.webhook_events SET status = 'FAILED', updated_at = now()
+WHERE account_id = $1 AND id = $2;`
+
+type SetWebhookEventExhaustedParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) SetWebhookEventExhausted(ctx context.Context, arg SetWebhookEventExhaustedParams) error {
+	_, err := q.db.Exec(ctx, setWebhookEventExhaustedSQL, arg.AccountID, arg.ID)
 	return err
 }
 
@@ -5401,7 +5380,6 @@ type ListWebhookEventsRow struct {
 	IdempotencyToken  string
 	Status            string
 	Attempts          int32
-	NextAttemptAt     *time.Time
 	LastResponseCode  *int32
 	LastResponseBody  *string
 	CreatedAt         time.Time
@@ -5440,7 +5418,7 @@ func (q *Queries) ListWebhookEvents(ctx context.Context, arg ListWebhookEventsPa
 		args = append(args, arg.Offset)
 		positions[7] = len(args)
 	}
-	b.WriteString(fmt.Sprintf("SELECT e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,\n  e.api_version, e.idempotency_token, e.status, e.attempts, e.next_attempt_at,\n  e.last_response_code, e.last_response_body, e.created_at, e.updated_at\nFROM lic.webhook_events e\nLEFT JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id\nWHERE e.account_id = $%d\n  AND ($%d::text[] IS NULL OR e.event = ANY($%d::text[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (e.webhook_endpoint_id IS NOT NULL AND we.product_id = $%d)\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR CASE\n      WHEN $%d::boolean THEN\n        (e.created_at, e.id) > (\n          SELECT c.created_at, c.id FROM lic.webhook_events c WHERE c.id = $%d\n        )\n      ELSE\n        (e.created_at, e.id) < (\n          SELECT c.created_at, c.id FROM lic.webhook_events c WHERE c.id = $%d\n        )\n    END\n  )\nORDER BY\n  CASE WHEN $%d::boolean THEN e.created_at END ASC,\n  CASE WHEN $%d::boolean THEN e.id END ASC,\n  e.created_at DESC,\n  e.id DESC\nLIMIT $%d\nOFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[5], positions[4], positions[4], positions[5], positions[5], positions[6], positions[7]))
+	b.WriteString(fmt.Sprintf("SELECT e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,\n  e.api_version, e.idempotency_token, e.status, e.attempts,\n  e.last_response_code, e.last_response_body, e.created_at, e.updated_at\nFROM lic.webhook_events e\nLEFT JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id\nWHERE e.account_id = $%d\n  AND ($%d::text[] IS NULL OR e.event = ANY($%d::text[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (e.webhook_endpoint_id IS NOT NULL AND we.product_id = $%d)\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR CASE\n      WHEN $%d::boolean THEN\n        (e.created_at, e.id) > (\n          SELECT c.created_at, c.id FROM lic.webhook_events c WHERE c.id = $%d\n        )\n      ELSE\n        (e.created_at, e.id) < (\n          SELECT c.created_at, c.id FROM lic.webhook_events c WHERE c.id = $%d\n        )\n    END\n  )\nORDER BY\n  CASE WHEN $%d::boolean THEN e.created_at END ASC,\n  CASE WHEN $%d::boolean THEN e.id END ASC,\n  e.created_at DESC,\n  e.id DESC\nLIMIT $%d\nOFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[5], positions[4], positions[4], positions[5], positions[5], positions[6], positions[7]))
 	rows, err := q.db.Query(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
@@ -5449,7 +5427,7 @@ func (q *Queries) ListWebhookEvents(ctx context.Context, arg ListWebhookEventsPa
 	var items []ListWebhookEventsRow
 	for rows.Next() {
 		var i ListWebhookEventsRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt); err != nil {
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -128,7 +128,10 @@ func serverUnderTest(t *testing.T) conformance.Target {
 		t.Fatal(err)
 	}
 
-	handler := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")
+	handler, err := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")
+	if err != nil {
+		t.Fatalf("conformance: handler: %v", err)
+	}
 
 	return &conformance.HandlerTarget{Handler: handler, AdminToken: adminToken}
 }

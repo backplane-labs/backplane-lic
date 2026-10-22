@@ -114,14 +114,6 @@ func (s *Store) SubscribedWebhookEndpoints(
 
 // --- delivery worker ---
 
-// ClaimDueWebhookEvents claims the due batch (run inside the delivery
-// transaction).
-func (s *Store) ClaimDueWebhookEvents(
-	ctx context.Context, accountID uuid.UUID, limit int, now, lease time.Time,
-) ([]webhooks.Delivery, error) {
-	return s.Webhooks.ClaimDueWebhookEvents(ctx, accountID, limit, now, lease)
-}
-
 // SetWebhookEventDelivered records a 2xx outcome.
 func (s *Store) SetWebhookEventDelivered(
 	ctx context.Context, accountID, id uuid.UUID, code int, body string,
@@ -132,9 +124,14 @@ func (s *Store) SetWebhookEventDelivered(
 // SetWebhookEventFailure records a failure outcome.
 func (s *Store) SetWebhookEventFailure(
 	ctx context.Context, accountID, id uuid.UUID, status domain.WebhookEventStatus,
-	code *int, body string, nextAttempt *time.Time,
+	code *int, body string,
 ) error {
-	return s.Webhooks.SetWebhookEventFailure(ctx, accountID, id, status, code, body, nextAttempt)
+	return s.Webhooks.SetWebhookEventFailure(ctx, accountID, id, status, code, body)
+}
+
+// SetWebhookEventExhausted records exhaustion without an HTTP outcome.
+func (s *Store) SetWebhookEventExhausted(ctx context.Context, accountID, id uuid.UUID) error {
+	return s.Webhooks.SetWebhookEventExhausted(ctx, accountID, id)
 }
 
 // --- jobs runner ---

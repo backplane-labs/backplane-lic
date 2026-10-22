@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"slices"
 	"time"
@@ -19,6 +18,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
+	"github.com/backplane-labs/backplane-lic/internal/app/port"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
@@ -27,44 +27,10 @@ var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
 
 // Store is the scenario's storage port (satisfied by *postgres.Store;
 // Do runs a transaction the publisher's writes join).
-type Store interface { //nolint:interfacebloat // one port per scenario is the architecture's shape
-	// Do runs fn in one transaction; queries carrying the returned
-	// context join it.
-	Do(ctx context.Context, fn func(ctx context.Context) error) error
-
-	WebhookEndpointByID(ctx context.Context, accountID, id uuid.UUID) (domain.WebhookEndpoint, error)
-	WebhookEndpointByURL(ctx context.Context, accountID uuid.UUID, url string) (domain.WebhookEndpoint, error)
-	InsertWebhookEndpoint(ctx context.Context, endpoint domain.WebhookEndpoint) error
-	UpdateWebhookEndpoint(ctx context.Context, endpoint domain.WebhookEndpoint) error
-	DeleteWebhookEndpoint(ctx context.Context, accountID, id uuid.UUID) error
-	ListWebhookEndpoints(
-		ctx context.Context, accountID uuid.UUID, product uuid.NullUUID, page paging.Params,
-	) ([]domain.WebhookEndpoint, error)
-	CountWebhookEndpoints(ctx context.Context, accountID uuid.UUID, product uuid.NullUUID) (int, error)
-
-	InsertWebhookEvent(ctx context.Context, event domain.WebhookEvent) error
-	WebhookEventByID(ctx context.Context, accountID, id uuid.UUID) (domain.WebhookEvent, error)
-	ListWebhookEvents(
-		ctx context.Context, accountID uuid.UUID, filter EventFilter, product uuid.NullUUID,
-		page paging.Params,
-	) ([]domain.WebhookEvent, error)
-	CountWebhookEvents(
-		ctx context.Context, accountID uuid.UUID, filter EventFilter, product uuid.NullUUID,
-	) (int, error)
-	DeleteWebhookEvent(ctx context.Context, accountID, id uuid.UUID) error
-
-	// WebhookEndpointProduct answers the event's endpoint's product
-	// (the product bearer's read scope); ErrNotFound when the endpoint
-	// row is gone.
-	WebhookEndpointProduct(ctx context.Context, accountID, endpointID uuid.UUID) (uuid.NullUUID, error)
-}
+type Store = port.WebhooksStore
 
 // EventFilter is the webhook-events index filter.
-type EventFilter struct {
-	// Events filters by exact event names (events[]); an unknown name
-	// simply matches nothing.
-	Events []string
-}
+type EventFilter = port.WebhookEventFilter
 
 // Input is the endpoint create/update body after the handler's
 // typed-params validation (types, unpermitted keys, apiVersion
@@ -92,17 +58,17 @@ type Scenario struct {
 	store    Store
 	resolver domain.Resolver
 	allowed  []*net.IPNet
-	rng      io.Reader
+	queue    port.WebhookQueue
 	clock    func() time.Time
 }
 
-// New builds the scenario (resolver, allowlist, rng and clock
+// New builds the scenario (resolver, allowlist, queue and clock
 // injectable for tests).
 func New(
 	store Store, resolver domain.Resolver, allowedPrivate []*net.IPNet,
-	rng io.Reader, clock func() time.Time,
+	queue port.WebhookQueue, clock func() time.Time,
 ) Scenario {
-	return Scenario{store: store, resolver: resolver, allowed: allowedPrivate, rng: rng, clock: clock}
+	return Scenario{store: store, resolver: resolver, allowed: allowedPrivate, queue: queue, clock: clock}
 }
 
 // The docs anchors of the endpoint's validation errors.
@@ -417,12 +383,13 @@ func (s Scenario) Retry(
 		APIVersion:       original.APIVersion,
 		IdempotencyToken: original.IdempotencyToken,
 		Status:           domain.EventDelivering,
-		NextAttemptAt:    &now,
 		CreatedAt:        now,
 		UpdatedAt:        now,
 	}
 
-	if err := s.store.InsertWebhookEvent(ctx, retry); err != nil {
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		return record(ctx, s.store, s.queue, retry)
+	}); err != nil {
 		return domain.WebhookEvent{}, fmt.Errorf("webhooks: insert retry: %w", err)
 	}
 

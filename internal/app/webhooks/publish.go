@@ -11,42 +11,26 @@ import (
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
 
+	outbox "github.com/gopherex/pg-outbox"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
+	"github.com/backplane-labs/backplane-lic/internal/app/port"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
 	"github.com/backplane-labs/backplane-lic/internal/oas"
 )
 
-// Delivery is one claimed outbox row with its endpoint's live URL and
-// signature algorithm (the delivery worker's unit of work).
-type Delivery struct {
-	Event domain.WebhookEvent
-	// EndpointURL is the endpoint's current URL (rows whose endpoint
-	// row is gone are never claimed).
-	EndpointURL        string
-	SignatureAlgorithm string
-}
-
 // PublisherStore is the publisher's storage port: the subscribed
 // endpoints, the outbox writes and the lookups the payload and the
 // product filter need.
-type PublisherStore interface {
-	SubscribedWebhookEndpoints(
-		ctx context.Context, accountID uuid.UUID, event string,
-	) ([]domain.WebhookEndpoint, error)
-	InsertWebhookEvent(ctx context.Context, event domain.WebhookEvent) error
-
-	UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error)
-	UserHasActiveLicense(ctx context.Context, accountID, id uuid.UUID) (bool, error)
-	UserLicensedToProduct(ctx context.Context, accountID, userID, productID uuid.UUID) (bool, error)
-	PolicyByID(ctx context.Context, accountID, id uuid.UUID) (domain.Policy, error)
-}
+type PublisherStore = port.WebhookPublisherStore
 
 // Publisher is the real events.Publisher: inside the caller's
 // transaction it writes one webhook_events row per subscribed endpoint
-// (the outbox), with the payload the delivery POSTs carry.
+// and enqueues a reference with the payload the delivery POSTs carry.
 type Publisher struct {
 	store     PublisherStore
+	queue     port.WebhookQueue
 	accountID uuid.UUID
 	rng       io.Reader
 	clock     func() time.Time
@@ -55,9 +39,9 @@ type Publisher struct {
 // NewPublisher builds the publisher over the store (the account's id:
 // the installation's single account).
 func NewPublisher(
-	store PublisherStore, accountID uuid.UUID, rng io.Reader, clock func() time.Time,
+	store PublisherStore, queue port.WebhookQueue, accountID uuid.UUID, rng io.Reader, clock func() time.Time,
 ) *Publisher {
-	return &Publisher{store: store, accountID: accountID, rng: rng, clock: clock}
+	return &Publisher{store: store, queue: queue, accountID: accountID, rng: rng, clock: clock}
 }
 
 // Publish records the event for delivery to every endpoint subscribed
@@ -65,6 +49,12 @@ func NewPublisher(
 // the rows land in the caller's transaction — the change and its
 // events commit together or not at all.
 func (p *Publisher) Publish(ctx context.Context, event string, resource any) error {
+	return p.store.Do(ctx, func(ctx context.Context) error { //nolint:wrapcheck // preserve the transaction error
+		return p.publish(ctx, event, resource)
+	})
+}
+
+func (p *Publisher) publish(ctx context.Context, event string, resource any) error {
 	endpoints, err := p.store.SubscribedWebhookEndpoints(ctx, p.accountID, event)
 	if err != nil {
 		return fmt.Errorf("webhooks: publish %s: endpoints: %w", event, err)
@@ -108,12 +98,11 @@ func (p *Publisher) Publish(ctx context.Context, event string, resource any) err
 			APIVersion:       endpoint.APIVersion,
 			IdempotencyToken: token,
 			Status:           domain.EventDelivering,
-			NextAttemptAt:    &now,
 			CreatedAt:        now,
 			UpdatedAt:        now,
 		}
 
-		if err := p.store.InsertWebhookEvent(ctx, row); err != nil {
+		if err := record(ctx, p.store, p.queue, row); err != nil {
 			return fmt.Errorf("webhooks: publish %s: insert: %w", event, err)
 		}
 	}
@@ -263,3 +252,22 @@ func idempotencyToken(rng io.Reader) (string, error) {
 // ErrNoResource answers a publish of a value the publisher cannot
 // render (every event must carry its resource document).
 var ErrNoResource = errors.New("webhooks: event without a renderable resource")
+
+// record writes the API resource and its delivery reference in one transaction.
+// Both callers own the pgtx boundary; Enqueue resolves that context's tx.DB.
+func record(ctx context.Context, store port.WebhookEventWriter,
+	queue port.WebhookQueue, event domain.WebhookEvent,
+) error {
+	if err := store.InsertWebhookEvent(ctx, event); err != nil {
+		return fmt.Errorf("webhooks: insert event: %w", err)
+	}
+
+	if err := queue.Enqueue(ctx, outbox.Message{
+		ID: event.ID.String(), Topic: "webhooks", PartitionKey: event.AccountID.String(),
+		Payload: []byte(event.ID.String()), ContentType: "text/plain", MessageType: "webhook-event",
+	}); err != nil {
+		return fmt.Errorf("webhooks: enqueue event: %w", err)
+	}
+
+	return nil
+}

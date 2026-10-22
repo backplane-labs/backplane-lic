@@ -64,8 +64,8 @@ func (e WebhookEndpoint) Subscribed(event string) bool {
 	return false
 }
 
-// WebhookEvent is one queued delivery: the outbox row the domain writes
-// in the same transaction as the change it describes.
+// WebhookEvent is the Keygen API resource describing a delivery and its outcome.
+// The delivery reference is enqueued atomically alongside this resource.
 type WebhookEvent struct {
 	ID               uuid.UUID
 	AccountID        uuid.UUID
@@ -77,7 +77,6 @@ type WebhookEvent struct {
 	IdempotencyToken string
 	Status           WebhookEventStatus
 	Attempts         int
-	NextAttemptAt    *time.Time
 	LastResponseCode *int
 	LastResponseBody *string
 	CreatedAt        time.Time

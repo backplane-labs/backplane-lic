@@ -121,6 +121,7 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 		Keys:          KeysRepo{q: queries, txRunner: runner},
 		Webhooks:      WebhooksRepo{q: queries},
 		SecondFactors: SecondFactorsRepo{q: queries, txRunner: runner},
+		Jobs:          JobsRepo{q: queries},
 	}, nil
 }
 

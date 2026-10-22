@@ -210,7 +210,6 @@ func (r WebhooksRepo) InsertWebhookEvent(ctx context.Context, e domain.WebhookEv
 		APIVersion:        &e.APIVersion,
 		IdempotencyToken:  e.IdempotencyToken,
 		Status:            string(e.Status),
-		NextAttemptAt:     e.NextAttemptAt,
 	})
 	if err != nil {
 		return fmt.Errorf("postgres: insert webhook event %s: %w", e.ID, err)
@@ -227,7 +226,7 @@ func (r WebhooksRepo) WebhookEventByID(
 
 	return eventDomain(row.ID, row.AccountID, row.WebhookEndpointID, row.Endpoint, row.Event,
 		row.Payload, row.APIVersion, row.IdempotencyToken, row.Status, row.Attempts,
-		row.NextAttemptAt, row.LastResponseCode, row.LastResponseBody, row.CreatedAt,
+		row.LastResponseCode, row.LastResponseBody, row.CreatedAt,
 		row.UpdatedAt, "id", err)
 }
 
@@ -261,7 +260,7 @@ func (r WebhooksRepo) ListWebhookEvents(
 
 		event, err := eventDomain(row.ID, row.AccountID, row.WebhookEndpointID, row.Endpoint,
 			row.Event, row.Payload, row.APIVersion, row.IdempotencyToken, row.Status, row.Attempts,
-			row.NextAttemptAt, row.LastResponseCode, row.LastResponseBody, row.CreatedAt,
+			row.LastResponseCode, row.LastResponseBody, row.CreatedAt,
 			row.UpdatedAt, "", nil)
 		if err != nil {
 			return nil, err
@@ -305,42 +304,6 @@ func (r WebhooksRepo) DeleteWebhookEvent(ctx context.Context, accountID, id uuid
 
 // --- worker face ---
 
-// ClaimDueWebhookEvents claims the due batch and pushes it to the
-// lease horizon in one short transaction (FOR UPDATE SKIP LOCKED); the
-// deliveries run outside any transaction.
-func (r WebhooksRepo) ClaimDueWebhookEvents(
-	ctx context.Context, accountID uuid.UUID, limit int, now, lease time.Time,
-) ([]webhooks.Delivery, error) {
-	rows, err := r.q.ClaimDueWebhookEvents(ctx, db.ClaimDueWebhookEventsParams{
-		AccountID: accountID, Now: &now, Limit: int64(limit), Lease: &lease,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("postgres: claim webhook events: %w", err)
-	}
-
-	out := make([]webhooks.Delivery, 0, len(rows))
-
-	for i := range rows {
-		row := rows[i]
-
-		event, err := eventDomain(row.ID, row.AccountID, row.WebhookEndpointID, row.Endpoint,
-			row.Event, row.Payload, row.APIVersion, row.IdempotencyToken, row.Status, row.Attempts,
-			row.NextAttemptAt, row.LastResponseCode, row.LastResponseBody, row.CreatedAt,
-			row.UpdatedAt, "", nil)
-		if err != nil {
-			return nil, err
-		}
-
-		out = append(out, webhooks.Delivery{
-			Event:              event,
-			EndpointURL:        row.EndpointURL,
-			SignatureAlgorithm: row.EndpointSignatureAlgorithm,
-		})
-	}
-
-	return out, nil
-}
-
 // SetWebhookEventDelivered records a 2xx outcome.
 func (r WebhooksRepo) SetWebhookEventDelivered(
 	ctx context.Context, accountID, id uuid.UUID, code int, body string,
@@ -363,7 +326,7 @@ func (r WebhooksRepo) SetWebhookEventDelivered(
 // SetWebhookEventFailure records a non-2xx or transport outcome.
 func (r WebhooksRepo) SetWebhookEventFailure(
 	ctx context.Context, accountID, id uuid.UUID, status domain.WebhookEventStatus,
-	code *int, body string, nextAttempt *time.Time,
+	code *int, body string,
 ) error {
 	var code32 *int32
 
@@ -378,10 +341,21 @@ func (r WebhooksRepo) SetWebhookEventFailure(
 		Status:           string(status),
 		LastResponseCode: code32,
 		LastResponseBody: &body,
-		NextAttemptAt:    nextAttempt,
 	})
 	if err != nil {
 		return fmt.Errorf("postgres: mark webhook event %s failed: %w", id, err)
+	}
+
+	return nil
+}
+
+// SetWebhookEventExhausted marks a relay budget exhausted without inventing
+// an HTTP response or an extra delivery attempt.
+func (r WebhooksRepo) SetWebhookEventExhausted(ctx context.Context, accountID, id uuid.UUID) error {
+	if err := r.q.SetWebhookEventExhausted(ctx, db.SetWebhookEventExhaustedParams{
+		AccountID: accountID, ID: id,
+	}); err != nil {
+		return fmt.Errorf("postgres: webhook event exhausted: %w", err)
 	}
 
 	return nil
@@ -437,7 +411,7 @@ func endpointOf(
 func eventDomain(
 	id, accountID uuid.UUID, endpointID *uuid.UUID, endpoint, event, payload string,
 	apiVersion *string, idempotencyToken, status string, attempts int32,
-	nextAttemptAt *time.Time, lastResponseCode *int32, lastResponseBody *string,
+	lastResponseCode *int32, lastResponseBody *string,
 	createdAt, updatedAt time.Time, by string, err error,
 ) (domain.WebhookEvent, error) {
 	if by != "" && errors.Is(err, pgx.ErrNoRows) {
@@ -458,7 +432,7 @@ func eventDomain(
 		ID: id, AccountID: accountID, Endpoint: endpoint, Event: event, Payload: payload,
 		APIVersion: version, IdempotencyToken: idempotencyToken,
 		Status: domain.WebhookEventStatus(status), Attempts: int(attempts),
-		NextAttemptAt: nextAttemptAt, CreatedAt: createdAt, UpdatedAt: updatedAt,
+		CreatedAt: createdAt, UpdatedAt: updatedAt,
 	}
 	if endpointID != nil {
 		out.EndpointID = uuid.NullUUID{UUID: *endpointID, Valid: true}
