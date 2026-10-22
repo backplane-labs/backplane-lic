@@ -83,6 +83,12 @@ func (r ProductsRepo) UpdateProduct(ctx context.Context, p domain.Product) error
 
 // DeleteProduct destroys the product; false when it was gone already.
 func (r ProductsRepo) DeleteProduct(ctx context.Context, accountID, id uuid.UUID) (bool, error) {
+	// The product's tokens go with it, as the reference's dependent destroy.
+	err := r.q.DeleteTokensOfProduct(ctx, db.DeleteTokensOfProductParams{AccountID: accountID, BearerID: &id})
+	if err != nil {
+		return false, fmt.Errorf("postgres: delete product tokens %s: %w", id, err)
+	}
+
 	n, err := r.q.DeleteProduct(ctx, db.DeleteProductParams{AccountID: accountID, ID: id})
 	if err != nil {
 		return false, fmt.Errorf("postgres: delete product %s: %w", id, err)

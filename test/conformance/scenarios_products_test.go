@@ -37,6 +37,25 @@ func productScenarios() []conformance.Scenario {
 
 	return []conformance.Scenario{
 		{
+			Name: "product_token_after_delete",
+			Steps: []conformance.Step{
+				create("gone"),
+				{
+					Name: "mint product token", Method: http.MethodPost, Path: account + "/products/{{gone_id}}/tokens", Auth: admin,
+					Capture: map[string]string{"gone_token": "data.attributes.token"},
+				},
+				{
+					Name: "token works", Method: http.MethodGet, Path: account + "/me",
+					Auth: conformance.Auth{Kind: conformance.AuthTokenVar, Var: "gone_token"},
+				},
+				{Name: "delete product", Method: http.MethodDelete, Path: account + "/products/{{gone_id}}", Auth: admin},
+				{
+					Name: "token of a deleted product is invalid", Method: http.MethodGet, Path: account + "/me",
+					Auth: conformance.Auth{Kind: conformance.AuthTokenVar, Var: "gone_token"},
+				},
+			},
+		},
+		{
 			Name: "product_crud",
 			Steps: []conformance.Step{
 				create("crud"),

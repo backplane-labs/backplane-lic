@@ -67,6 +67,10 @@ func (f fakeStore) LicenseByID(
 	return domain.LicenseAuth{}, authn.ErrNotFound
 }
 
+func (f fakeStore) ProductByID(_ context.Context, _, id uuid.UUID) (domain.Product, error) {
+	return domain.Product{ID: id}, nil
+}
+
 func (f fakeStore) EnabledSecondFactorSecret(context.Context, uuid.UUID) (string, bool, error) {
 	return "test-secret", f.factorEnabled, nil
 }

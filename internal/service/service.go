@@ -45,6 +45,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	bpautomation "github.com/backplane-labs/backplane-lic/internal/infra/automation"
+	liccache "github.com/backplane-labs/backplane-lic/internal/infra/cache"
 	"github.com/backplane-labs/backplane-lic/internal/infra/console"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/portal"
@@ -106,16 +107,16 @@ func New(root backplane.Root[Config]) (*Service, error) {
 
 		relayOutbox = relay
 
-		throttler := newThrottler(cache)
+		throttler, cached := newThrottler(cache), newTokenCache(cache)
 
 		decorate := func(publisher events.Publisher) events.Publisher {
 			return appautomation.NewPublisher(store.Get(), publisher, relay, contracts,
 				cfg.Automation.PortalBase, cfg.Automation.Locale, brand, time.Now)
 		}
 		publisher := decorate(webhooks.NewPublisher(store.Get(), relay, spec.ID, rand.Reader, time.Now))
-		activities.Set(appautomation.NewActivities(store.Get(), licenseScenario(store.Get(), publisher, time.Now),
+		activities.Set(appautomation.NewActivities(store.Get(), licenseScenario(store.Get(), cached, publisher, time.Now),
 			spec.ID, time.Now))
-		late.set(handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate))
+		late.set(handler(store.Get(), throttler, cached, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate))
 
 		return nil
 	})
@@ -159,6 +160,15 @@ func customerFacing(cfg Config, account string, api http.Handler) (domain.Brand,
 	}
 
 	return brand, public, nil
+}
+
+// newTokenCache caches token lookups in Valkey when it is configured.
+func newTokenCache(aside deps.Optional[valkey.AsideClient]) tokenCache { //nolint:ireturn // chosen at runtime
+	if client, ok := aside.Get(); ok {
+		return liccache.NewTokens(client, liccache.TokenTTL)
+	}
+
+	return liccache.None{}
 }
 
 // newThrottler counts password attempts in Valkey when it is configured,
@@ -235,7 +245,7 @@ func Handler(
 		return nil, err
 	}
 
-	api := handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision, queue,
+	api := handler(store, httpapi.NewMemoryThrottler(), liccache.None{}, spec, cfg, docsHost, revision, queue,
 		func(publisher events.Publisher) events.Publisher { return publisher })
 
 	public, err := portal.New(cfg.Portal, domain.Brand{Name: domain.DefaultBrandName}, spec.ID.String(), api)
@@ -246,9 +256,16 @@ func Handler(
 	return public, nil
 }
 
+// tokenCache decorates the ports that read or change tokens.
+type tokenCache interface {
+	Authn(inner authn.Store) authn.Store
+	Manage(inner tokens.Store) tokens.Store
+	Users(inner users.Store) users.Store
+}
+
 func handler(
-	store *postgres.Store, throttler httpapi.Throttler, spec accounts.Spec, cfg HTTP, docsHost, revision string,
-	queue port.WebhookQueue, decorate func(events.Publisher) events.Publisher,
+	store *postgres.Store, throttler httpapi.Throttler, cached tokenCache, spec accounts.Spec, cfg HTTP,
+	docsHost, revision string, queue port.WebhookQueue, decorate func(events.Publisher) events.Publisher,
 ) http.Handler {
 	clock := time.Now
 	publisher := decorate(webhooks.NewPublisher(store, queue, spec.ID, rand.Reader, clock))
@@ -262,11 +279,11 @@ func handler(
 		Webhooks:      webhooks.New(store, resolver, allow, queue, clock),
 		Search:        search.New(store),
 		Accounts:      store.Accounts,
-		Authn:         authn.New(store, clock),
-		Users:         users.New(store, publisher, clock),
-		Tokens:        tokens.New(store, publisher, rand.Reader, clock),
+		Authn:         authn.New(cached.Authn(store), clock),
+		Users:         users.New(cached.Users(store), publisher, clock),
+		Tokens:        tokens.New(cached.Manage(store), publisher, rand.Reader, clock),
 		Groups:        groups.New(store, publisher, clock),
-		Licenses:      licenseScenario(store, publisher, clock),
+		Licenses:      licenseScenario(store, cached, publisher, clock),
 		Products: products.New(store.Products, store.Tokens, store.Users,
 			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),
@@ -280,10 +297,12 @@ func handler(
 	})
 }
 
-func licenseScenario(store *postgres.Store, publisher events.Publisher, clock func() time.Time) licenses.Scenario {
+func licenseScenario(
+	store *postgres.Store, cached tokenCache, publisher events.Publisher, clock func() time.Time,
+) licenses.Scenario {
 	return licenses.New(store.Licenses, store.Licenses, store.Policies, store.Products, store,
 		store, store.Entitlements, store.Keys,
-		tokens.Manager{Scenario: tokens.New(store, publisher, rand.Reader, clock)},
+		tokens.Manager{Scenario: tokens.New(cached.Manage(store), publisher, rand.Reader, clock)},
 		publisher, rand.Reader, clock, store.Do)
 }
 

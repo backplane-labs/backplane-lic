@@ -3316,9 +3316,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) er
 }
 
 const deleteProductSQL = `DELETE FROM lic.products
-WHERE account_id = $1 AND id = $2;
-
--- The admin-side scope: every product of the account.`
+WHERE account_id = $1 AND id = $2;`
 
 type DeleteProductParams struct {
 	AccountID uuid.UUID
@@ -3328,6 +3326,21 @@ type DeleteProductParams struct {
 func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (int64, error) {
 	tag, err := q.db.Exec(ctx, deleteProductSQL, arg.AccountID, arg.ID)
 	return tag.RowsAffected(), err
+}
+
+const deleteTokensOfProductSQL = `DELETE FROM lic.tokens WHERE account_id = $1
+  AND bearer_type = 'Product' AND bearer_id = $2;
+
+-- The admin-side scope: every product of the account.`
+
+type DeleteTokensOfProductParams struct {
+	AccountID uuid.UUID
+	BearerID  *uuid.UUID
+}
+
+func (q *Queries) DeleteTokensOfProduct(ctx context.Context, arg DeleteTokensOfProductParams) error {
+	_, err := q.db.Exec(ctx, deleteTokensOfProductSQL, arg.AccountID, arg.BearerID)
+	return err
 }
 
 const listProductsForUserDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,

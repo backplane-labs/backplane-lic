@@ -71,6 +71,10 @@ func (pipeStore) LicenseByID(context.Context, uuid.UUID, uuid.UUID) (domain.Lice
 	return domain.LicenseAuth{}, authn.ErrNotFound
 }
 
+func (pipeStore) ProductByID(_ context.Context, _, id uuid.UUID) (domain.Product, error) {
+	return domain.Product{ID: id}, nil
+}
+
 func (pipeStore) EnabledSecondFactorSecret(context.Context, uuid.UUID) (string, bool, error) {
 	return "", false, nil
 }

@@ -41,6 +41,10 @@ WHERE account_id = @account_id AND id = @id;
 DELETE FROM lic.products
 WHERE account_id = @account_id AND id = @id;
 
+-- name: DeleteTokensOfProduct :exec
+DELETE FROM lic.tokens WHERE account_id = @account_id
+  AND bearer_type = 'Product' AND bearer_id = @bearer_id;
+
 -- The admin-side scope: every product of the account.
 -- name: ListProductsDesc :many
 SELECT id, account_id, name, code, distribution_strategy, url, platforms,

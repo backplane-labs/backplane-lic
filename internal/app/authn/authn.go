@@ -34,6 +34,8 @@ type Store interface {
 	LicenseByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error)
 	// LicenseByID loads the license-auth slice by id; ErrNotFound.
 	LicenseByID(ctx context.Context, accountID uuid.UUID, id uuid.UUID) (domain.LicenseAuth, error)
+	// ProductByID loads a product bearer; ErrNotFound when none.
+	ProductByID(ctx context.Context, accountID uuid.UUID, id uuid.UUID) (domain.Product, error)
 	// EnabledSecondFactorSecret loads the user's enabled TOTP secret;
 	// ok is false when the user has none.
 	EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (secret string, ok bool, err error)
@@ -151,15 +153,14 @@ func (s Scenario) token(ctx context.Context, account domain.Account, value strin
 			return access.Principal{}, result, err
 		}
 
-		// The live record governs authorization (a demoted user's
-		// token loses its old privilege immediately): the role comes
-		// from the user row, the token's own snapshot never does.
-		principal.BearerType = access.BearerUser
-		principal.Role = user.Role
-		principal.Permissions = access.Effective(user.Role, token.Permissions)
+		principal = userPrincipal(principal, user, token)
 		result.User = &user
 
 	case "Product":
+		if err := s.bearerProduct(ctx, account, token.BearerID); err != nil {
+			return access.Principal{}, result, err
+		}
+
 		principal.BearerType = access.BearerProduct
 		principal.Role = domain.RoleProduct
 		principal.Permissions = access.RolePermissions(domain.RoleProduct)
@@ -197,6 +198,32 @@ func (s Scenario) tokenLookup(
 	}
 
 	return domain.Token{}, ErrNotFound
+}
+
+// userPrincipal derives a user bearer's authorization from the live
+// record (a demoted user's token loses its old privilege immediately):
+// the role comes from the user row, the token's own snapshot never does.
+func userPrincipal(principal access.Principal, user domain.User, token domain.Token) access.Principal {
+	principal.BearerType = access.BearerUser
+	principal.Role = user.Role
+	principal.Permissions = access.Effective(user.Role, token.Permissions)
+
+	return principal
+}
+
+// bearerProduct requires the token's product to exist: a deleted
+// product's token no longer authenticates.
+func (s Scenario) bearerProduct(ctx context.Context, account domain.Account, id uuid.UUID) error {
+	_, err := s.store.ProductByID(ctx, account.ID, id)
+	if errors.Is(err, ErrNotFound) {
+		return apperr.TokenUnauthorized("TOKEN_INVALID", "")
+	}
+
+	if err != nil {
+		return fmt.Errorf("authn: bearer product: %w", err)
+	}
+
+	return nil
 }
 
 // bearerUser runs the post-lookup checks for a user bearer: the banned
