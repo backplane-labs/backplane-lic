@@ -439,34 +439,52 @@ func (a *API) ShowUserProduct(
 // ListUserLicenses implements GET /users/{userId}/licenses.
 func (a *API) ListUserLicenses(
 	ctx context.Context, params oas.ListUserLicensesParams,
-) (*oas.UserLicenseCollectionDocument, error) {
+) (*oas.LicenseListDocument, error) {
 	req := requestOf(ctx)
 
-	ids, err := a.users.Related(ctx, req.account, req.principal, params.UserId, "licenses")
+	if err := checkEnvironment(req); err != nil {
+		return nil, err
+	}
+
+	listParams, err := listParams(req)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := a.users.RelatedUser(ctx, req.account, req.principal, params.UserId, "licenses")
 	if err != nil {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := &oas.UserLicenseCollectionDocument{Data: make([]oas.UserLicenseResource, 0, len(ids))}
-	for _, id := range ids {
-		doc.Data = append(doc.Data, render.LicenseStub(req.account.ID, id))
+	page, err := a.licenses.OfUser(ctx, req.account, user.ID, licenseFilter(req.query), listParams)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	return doc, nil
+	return a.licenseListDocument(req, page, listParams), nil
 }
 
 // ShowUserLicense implements GET /users/{userId}/licenses/{licenseId}.
 func (a *API) ShowUserLicense(
 	ctx context.Context, params oas.ShowUserLicenseParams,
-) (*oas.UserLicenseDocument, error) {
+) (*oas.LicenseDocument, error) {
 	req := requestOf(ctx)
 
-	id, err := a.users.RelatedShow(ctx, req.account, req.principal, params.UserId, "licenses", params.LicenseId)
+	if err := checkEnvironment(req); err != nil {
+		return nil, err
+	}
+
+	user, err := a.users.RelatedUser(ctx, req.account, req.principal, params.UserId, "licenses")
 	if err != nil {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	return &oas.UserLicenseDocument{Data: render.LicenseStub(req.account.ID, id)}, nil
+	license, err := a.licenses.OfUserShow(ctx, req.account, user.ID, params.LicenseId)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
 }
 
 // ListUserMachines implements GET /users/{userId}/machines.

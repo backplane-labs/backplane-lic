@@ -152,7 +152,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: "#/components/schemas/LicenseStubListDocument"
+                $ref: "#/components/schemas/LicenseListDocument"
         default:
           $ref: "#/components/responses/Error"
 
@@ -170,8 +170,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: "#/components/schemas/LicenseDocument"
         default:
           $ref: "#/components/responses/Error"
 

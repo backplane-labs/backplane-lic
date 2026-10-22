@@ -40,16 +40,18 @@ func (r TokensRepo) TokenByDigest(ctx context.Context, accountID uuid.UUID, dige
 // InsertToken writes a new token row.
 func (r TokensRepo) InsertToken(ctx context.Context, token domain.Token) error {
 	err := r.q.InsertToken(ctx, db.InsertTokenParams{
-		ID:          token.ID,
-		AccountID:   token.AccountID,
-		Digest:      token.Digest,
-		BearerID:    uuidPtr(token.BearerID),
-		BearerType:  ref(token.BearerType),
-		BearerRole:  ref(string(token.BearerRole)),
-		Kind:        ref(token.Kind),
-		Name:        token.Name,
-		Expiry:      token.Expiry,
-		Permissions: jsonList(token.Permissions),
+		ID:               token.ID,
+		AccountID:        token.AccountID,
+		Digest:           token.Digest,
+		BearerID:         uuidPtr(token.BearerID),
+		BearerType:       ref(token.BearerType),
+		BearerRole:       ref(string(token.BearerRole)),
+		Kind:             ref(token.Kind),
+		Name:             token.Name,
+		Expiry:           token.Expiry,
+		Permissions:      jsonList(token.Permissions),
+		MaxActivations:   int32Ptr(token.MaxActivations),
+		MaxDeactivations: int32Ptr(token.MaxDeactivations),
 	})
 	if err != nil {
 		return fmt.Errorf("postgres: insert token %s: %w", token.ID, err)

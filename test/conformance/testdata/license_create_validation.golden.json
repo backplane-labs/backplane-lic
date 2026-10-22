@@ -1,0 +1,713 @@
+{
+  "scenario": "license_create_validation",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "lic-probe-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": null,
+            "checkInIntervalCount": null,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": null,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": false,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": null,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "lic-policy-\u003crun\u003e",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_MACHINE",
+            "protected": true,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": false,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data/relationships"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:4\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "missing policy relationship",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "POLICY_NOT_FOUND",
+            "detail": "must exist",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/licenses/#licenses-object-relationships-policy"
+            },
+            "source": {
+              "pointer": "/data/relationships/policy"
+            },
+            "title": "Unprocessable resource"
+          },
+          {
+            "code": "PRODUCT_NOT_FOUND",
+            "detail": "must exist",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/licenses/#licenses-object-relationships-product"
+            },
+            "source": {
+              "pointer": "/data/relationships/product"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unknown policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "KEY_TOO_SHORT",
+            "detail": "is too short (minimum is 6 characters)",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/licenses/#licenses-object-attrs-key"
+            },
+            "source": {
+              "pointer": "/data/attributes/key"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "custom key too short",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "KEY_NOT_ALLOWED",
+            "detail": "is reserved",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/licenses/#licenses-object-attrs-key"
+            },
+            "source": {
+              "pointer": "/data/attributes/key"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:7\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "custom key reserved",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "unpermitted parameter",
+            "source": {
+              "pointer": "/data/attributes/notAnAttribute"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:8\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unpermitted attribute",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": false,
+            "key": "dup-key-\u003crun\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:9\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:9\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create for key conflict",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "KEY_TAKEN",
+            "detail": "has already been taken",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/licenses/#licenses-object-attrs-key"
+            },
+            "source": {
+              "pointer": "/data/attributes/key"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "duplicate key",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": false,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:11\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:11\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create patch target",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "unpermitted parameter",
+            "source": {
+              "pointer": "/data/attributes/key"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:12\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "key not updatable",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    }
+  ]
+}

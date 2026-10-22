@@ -1,0 +1,790 @@
+{
+  "scenario": "license_validation_webhooks",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "license-webhook-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "apiVersion": "1.8",
+            "created": "\u003cts\u003e",
+            "signatureAlgorithm": "ed25519",
+            "subscriptions": [
+              "license.validation.succeeded",
+              "license.validation.failed"
+            ],
+            "updated": "\u003cts\u003e",
+            "url": "https://example.com/hook?license-validation=\u003crun\u003e"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/webhook-endpoints/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+              }
+            }
+          },
+          "type": "webhook-endpoints"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "endpoint",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": null,
+            "checkInIntervalCount": null,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": null,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": true,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": null,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "license-webhook-\u003crun\u003e",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_MACHINE",
+            "protected": true,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": false,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "license-webhook-\u003crun\u003e",
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "license-webhook-\u003crun\u003e",
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        },
+        "meta": {
+          "code": "VALID",
+          "detail": "is valid",
+          "nonce": 42,
+          "scope": {
+            "product": "\u003cuuid:1\u003e",
+            "user": null
+          },
+          "ts": "\u003cts\u003e",
+          "valid": true
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "anonymous validation succeeds",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "apiVersion": "1.8",
+            "created": "\u003cts\u003e",
+            "endpoint": "https://example.com/hook?license-validation=\u003crun\u003e",
+            "event": "license.validation.succeeded",
+            "lastResponseBody": null,
+            "lastResponseCode": null,
+            "payload": "{\"data\":{\"attributes\":{\"created\":\"\\u003cts\\u003e\",\"encrypted\":false,\"expiry\":null,\"floating\":true,\"key\":\"\\u003clicense-key:1\\u003e\",\"lastCheckIn\":null,\"lastCheckOut\":null,\"lastValidated\":\"\\u003cts\\u003e\",\"maxCores\":null,\"maxDisk\":null,\"maxMachines\":null,\"maxMemory\":null,\"maxProcesses\":null,\"maxUsers\":null,\"maxUses\":null,\"metadata\":{},\"name\":\"license-webhook-\\u003crun\\u003e\",\"nextCheckIn\":null,\"protected\":true,\"requireCheckIn\":false,\"requireHeartbeat\":false,\"scheme\":null,\"status\":\"ACTIVE\",\"strict\":false,\"suspended\":false,\"updated\":\"\\u003cts\\u003e\",\"uses\":0,\"version\":null},\"id\":\"\\u003cuuid:5\\u003e\",\"links\":{\"self\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e\"},\"relationships\":{\"account\":{\"data\":{\"id\":\"\\u003cuuid:2\\u003e\",\"type\":\"accounts\"},\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e\"}},\"entitlements\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/entitlements\"}},\"group\":{\"data\":null,\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/group\"}},\"machines\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/machines\"},\"meta\":{\"cores\":0,\"count\":0,\"disk\":0,\"memory\":0}},\"owner\":{\"data\":null,\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/owner\"}},\"policy\":{\"data\":{\"id\":\"\\u003cuuid:4\\u003e\",\"type\":\"policies\"},\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/policy\"}},\"product\":{\"data\":{\"id\":\"\\u003cuuid:1\\u003e\",\"type\":\"products\"},\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/product\"}},\"tokens\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/tokens\"}},\"users\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/users\"},\"meta\":{\"count\":0}}},\"type\":\"licenses\"},\"meta\":{\"code\":\"VALID\",\"detail\":\"is valid\",\"nonce\":42,\"scope\":{\"product\":\"\\u003cuuid:1\\u003e\",\"user\":null},\"ts\":\"\\u003cts\\u003e\",\"valid\":true}}",
+            "status": "\u003cdelivery-status\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:6\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/webhook-events/\u003cuuid:6\u003e"
+          },
+          "meta": {
+            "idempotencyToken": "\u003cb64:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            }
+          },
+          "type": "webhook-events"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show validation succeeded event",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "license-webhook-\u003crun\u003e",
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        },
+        "meta": {
+          "code": "PRODUCT_SCOPE_MISMATCH",
+          "detail": "product scope does not match",
+          "nonce": 0,
+          "scope": {
+            "product": "other-product"
+          },
+          "ts": "\u003cts\u003e",
+          "valid": false
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "validation fails",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "apiVersion": "1.8",
+            "created": "\u003cts\u003e",
+            "endpoint": "https://example.com/hook?license-validation=\u003crun\u003e",
+            "event": "license.validation.failed",
+            "lastResponseBody": null,
+            "lastResponseCode": null,
+            "payload": "{\"data\":{\"attributes\":{\"created\":\"\\u003cts\\u003e\",\"encrypted\":false,\"expiry\":null,\"floating\":true,\"key\":\"\\u003clicense-key:1\\u003e\",\"lastCheckIn\":null,\"lastCheckOut\":null,\"lastValidated\":\"\\u003cts\\u003e\",\"maxCores\":null,\"maxDisk\":null,\"maxMachines\":null,\"maxMemory\":null,\"maxProcesses\":null,\"maxUsers\":null,\"maxUses\":null,\"metadata\":{},\"name\":\"license-webhook-\\u003crun\\u003e\",\"nextCheckIn\":null,\"protected\":true,\"requireCheckIn\":false,\"requireHeartbeat\":false,\"scheme\":null,\"status\":\"ACTIVE\",\"strict\":false,\"suspended\":false,\"updated\":\"\\u003cts\\u003e\",\"uses\":0,\"version\":null},\"id\":\"\\u003cuuid:5\\u003e\",\"links\":{\"self\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e\"},\"relationships\":{\"account\":{\"data\":{\"id\":\"\\u003cuuid:2\\u003e\",\"type\":\"accounts\"},\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e\"}},\"entitlements\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/entitlements\"}},\"group\":{\"data\":null,\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/group\"}},\"machines\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/machines\"},\"meta\":{\"cores\":0,\"count\":0,\"disk\":0,\"memory\":0}},\"owner\":{\"data\":null,\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/owner\"}},\"policy\":{\"data\":{\"id\":\"\\u003cuuid:4\\u003e\",\"type\":\"policies\"},\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/policy\"}},\"product\":{\"data\":{\"id\":\"\\u003cuuid:1\\u003e\",\"type\":\"products\"},\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/product\"}},\"tokens\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/tokens\"}},\"users\":{\"links\":{\"related\":\"/v1/accounts/\\u003cuuid:2\\u003e/licenses/\\u003cuuid:5\\u003e/users\"},\"meta\":{\"count\":0}}},\"type\":\"licenses\"},\"meta\":{\"code\":\"PRODUCT_SCOPE_MISMATCH\",\"detail\":\"product scope does not match\",\"nonce\":0,\"scope\":{\"product\":\"other-product\"},\"ts\":\"\\u003cts\\u003e\",\"valid\":false}}",
+            "status": "\u003cdelivery-status\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/webhook-events/\u003cuuid:7\u003e"
+          },
+          "meta": {
+            "idempotencyToken": "\u003cb64:2\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            }
+          },
+          "type": "webhook-events"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show validation failed event",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "remove endpoint",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    }
+  ]
+}

@@ -91,7 +91,9 @@ func WebhookEvent(accountID uuid.UUID, e domain.WebhookEvent) oas.WebhookEventRe
 // that need extra inputs (the user's status, the second factor's email)
 // are resolved by the caller before this; an unknown type is an error,
 // never a wrong payload.
-func PayloadDocument(accountID uuid.UUID, resource any) (any, error) {
+func PayloadDocument( //nolint:cyclop,funlen // one branch per resource
+	accountID uuid.UUID, resource any,
+) (any, error) {
 	switch v := resource.(type) {
 	case domain.User:
 		// The caller renders users itself (the status needs a lookup).
@@ -119,6 +121,29 @@ func PayloadDocument(accountID uuid.UUID, resource any) (any, error) {
 		return oas.PolicyEntitlementListDocument{
 			Data: []oas.PolicyEntitlementResource{PolicyEntitlementResource(accountID, v)},
 		}, nil
+	case domain.License:
+		// Webhook renders use the live status clock of the publisher.
+		return nil, fmt.Errorf("render: webhook payload: license %s: %w", v.ID, errWebhookExtras)
+	case domain.LicenseUser:
+		return oas.LicenseUserListDocument{Data: []oas.LicenseUserResource{LicenseUser(accountID, v)}}, nil
+	case []domain.LicenseUser:
+		users := make([]oas.LicenseUserResource, 0, len(v))
+		for _, join := range v {
+			users = append(users, LicenseUser(accountID, join))
+		}
+
+		return oas.LicenseUserListDocument{Data: users}, nil
+	case domain.LicenseEntitlement:
+		return oas.LicenseEntitlementListDocument{
+			Data: []oas.LicenseEntitlementResource{LicenseEntitlement(accountID, v)},
+		}, nil
+	case []domain.LicenseEntitlement:
+		rows := make([]oas.LicenseEntitlementResource, 0, len(v))
+		for _, join := range v {
+			rows = append(rows, LicenseEntitlement(accountID, join))
+		}
+
+		return oas.LicenseEntitlementListDocument{Data: rows}, nil
 	case domain.Key:
 		return oas.KeyDocument{Data: KeyResource(accountID, v)}, nil
 	case domain.Token:

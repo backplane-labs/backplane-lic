@@ -21,8 +21,8 @@ type LicensesRepo struct {
 	q *db.Queries
 }
 
-// LicenseByKey loads the license-auth slice by key.
-func (r LicensesRepo) LicenseByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error) {
+// AuthByKey loads the license-auth slice by key.
+func (r LicensesRepo) AuthByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error) {
 	row, err := r.q.GetLicenseAuthByKey(ctx, db.GetLicenseAuthByKeyParams{AccountID: accountID, Key: key})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.LicenseAuth{}, fmt.Errorf("postgres: license: %w", authn.ErrNotFound)
@@ -36,8 +36,8 @@ func (r LicensesRepo) LicenseByKey(ctx context.Context, accountID uuid.UUID, key
 		row.GroupID, row.OwnerBanned, row.AuthenticationStrategy, row.ExpirationStrategy), nil
 }
 
-// LicenseByID loads the license-auth slice by id.
-func (r LicensesRepo) LicenseByID(ctx context.Context, accountID, id uuid.UUID) (domain.LicenseAuth, error) {
+// AuthByID loads the license-auth slice by id.
+func (r LicensesRepo) AuthByID(ctx context.Context, accountID, id uuid.UUID) (domain.LicenseAuth, error) {
 	row, err := r.q.GetLicenseAuthByID(ctx, db.GetLicenseAuthByIDParams{AccountID: accountID, ID: id})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.LicenseAuth{}, fmt.Errorf("postgres: license: %w", authn.ErrNotFound)

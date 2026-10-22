@@ -22,6 +22,24 @@ func (UnimplementedHandler) AttachGroupOwners(ctx context.Context, req AttachGro
 	return r, ht.ErrNotImplemented
 }
 
+// AttachLicenseEntitlements implements attachLicenseEntitlements operation.
+//
+// Attach entitlements to a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/entitlements
+func (UnimplementedHandler) AttachLicenseEntitlements(ctx context.Context, req AttachLicenseEntitlementsReq, params AttachLicenseEntitlementsParams) (r *LicenseEntitlementListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// AttachLicenseUsers implements attachLicenseUsers operation.
+//
+// Attach users to a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/users
+func (UnimplementedHandler) AttachLicenseUsers(ctx context.Context, req AttachLicenseUsersReq, params AttachLicenseUsersParams) (r *LicenseUserListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // AttachPolicyEntitlements implements attachPolicyEntitlements operation.
 //
 // Attach entitlements to a policy.
@@ -37,6 +55,33 @@ func (UnimplementedHandler) AttachPolicyEntitlements(ctx context.Context, req At
 //
 // POST /v1/accounts/{account}/users/{userId}/actions/ban
 func (UnimplementedHandler) BanUser(ctx context.Context, params BanUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CheckInLicense implements checkInLicense operation.
+//
+// Check in a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-in
+func (UnimplementedHandler) CheckInLicense(ctx context.Context, params CheckInLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CheckoutLicense implements checkoutLicense operation.
+//
+// Check out a license file (JSON:API document).
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+func (UnimplementedHandler) CheckoutLicense(ctx context.Context, req CheckoutLicenseReq, params CheckoutLicenseParams) (r *LicenseFileDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CheckoutLicenseFile implements checkoutLicenseFile operation.
+//
+// Check out a license file (binary certificate).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+func (UnimplementedHandler) CheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (r *CheckoutLicenseFileOKHeaders, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -64,6 +109,24 @@ func (UnimplementedHandler) CreateGroup(ctx context.Context, req CreateGroupReq,
 //
 // POST /v1/accounts/{account}/keys
 func (UnimplementedHandler) CreateKey(ctx context.Context, req CreateKeyReq, params CreateKeyParams) (r *KeyDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateLicense implements createLicense operation.
+//
+// Create a license.
+//
+// POST /v1/accounts/{account}/licenses
+func (UnimplementedHandler) CreateLicense(ctx context.Context, req CreateLicenseReq, params CreateLicenseParams) (r *LicenseDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateLicenseToken implements createLicenseToken operation.
+//
+// Generate an activation token for a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/tokens
+func (UnimplementedHandler) CreateLicenseToken(ctx context.Context, req CreateLicenseTokenReq, params CreateLicenseTokenParams) (r *TokenDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -131,6 +194,15 @@ func (UnimplementedHandler) CreateWebhookEndpoint(ctx context.Context, req Creat
 	return r, ht.ErrNotImplemented
 }
 
+// DecrementLicenseUsage implements decrementLicenseUsage operation.
+//
+// Decrement a license's usage counter.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage
+func (UnimplementedHandler) DecrementLicenseUsage(ctx context.Context, req DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteGroup implements deleteGroup operation.
 //
 // Delete a group (members keep existing, group nulled).
@@ -173,6 +245,15 @@ func (UnimplementedHandler) DestroyEntitlement(ctx context.Context, params Destr
 //
 // DELETE /v1/accounts/{account}/keys/{keyId}
 func (UnimplementedHandler) DestroyKey(ctx context.Context, params DestroyKeyParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DestroyLicense implements destroyLicense operation.
+//
+// Delete a license.
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}
+func (UnimplementedHandler) DestroyLicense(ctx context.Context, params DestroyLicenseParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -221,6 +302,24 @@ func (UnimplementedHandler) DetachGroupOwners(ctx context.Context, req DetachGro
 	return ht.ErrNotImplemented
 }
 
+// DetachLicenseEntitlements implements detachLicenseEntitlements operation.
+//
+// Detach entitlements from a license.
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}/entitlements
+func (UnimplementedHandler) DetachLicenseEntitlements(ctx context.Context, req DetachLicenseEntitlementsReq, params DetachLicenseEntitlementsParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DetachLicenseUsers implements detachLicenseUsers operation.
+//
+// Detach users from a license.
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}/users
+func (UnimplementedHandler) DetachLicenseUsers(ctx context.Context, req DetachLicenseUsersReq, params DetachLicenseUsersParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DetachPolicyEntitlements implements detachPolicyEntitlements operation.
 //
 // Detach entitlements from a policy.
@@ -258,6 +357,15 @@ func (UnimplementedHandler) Health(ctx context.Context) error {
 	return ht.ErrNotImplemented
 }
 
+// IncrementLicenseUsage implements incrementLicenseUsage operation.
+//
+// Increment a license's usage counter.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
+func (UnimplementedHandler) IncrementLicenseUsage(ctx context.Context, req IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // IndexEntitlements implements indexEntitlements operation.
 //
 // List entitlements.
@@ -273,6 +381,51 @@ func (UnimplementedHandler) IndexEntitlements(ctx context.Context, params IndexE
 //
 // GET /v1/accounts/{account}/keys
 func (UnimplementedHandler) IndexKeys(ctx context.Context, params IndexKeysParams) (r *KeyListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexLicenseEntitlements implements indexLicenseEntitlements operation.
+//
+// List a license's entitlements (policy and license attached).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements
+func (UnimplementedHandler) IndexLicenseEntitlements(ctx context.Context, params IndexLicenseEntitlementsParams) (r *EntitlementListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexLicenseMachines implements indexLicenseMachines operation.
+//
+// List a license's machines.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/machines
+func (UnimplementedHandler) IndexLicenseMachines(ctx context.Context, params IndexLicenseMachinesParams) (r *MachineListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexLicenseTokens implements indexLicenseTokens operation.
+//
+// List a license's tokens.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/tokens
+func (UnimplementedHandler) IndexLicenseTokens(ctx context.Context, params IndexLicenseTokensParams) (r *TokenCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexLicenseUsers implements indexLicenseUsers operation.
+//
+// List a license's users (owner and licensees).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/users
+func (UnimplementedHandler) IndexLicenseUsers(ctx context.Context, params IndexLicenseUsersParams) (r *UserCollectionDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexLicenses implements indexLicenses operation.
+//
+// List licenses.
+//
+// GET /v1/accounts/{account}/licenses
+func (UnimplementedHandler) IndexLicenses(ctx context.Context, params IndexLicensesParams) (r *LicenseListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -299,7 +452,7 @@ func (UnimplementedHandler) IndexPolicyEntitlements(ctx context.Context, params 
 // List a policy's licenses.
 //
 // GET /v1/accounts/{account}/policies/{policyId}/licenses
-func (UnimplementedHandler) IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (r *LicenseStubListDocument, _ error) {
+func (UnimplementedHandler) IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (r *LicenseListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -317,7 +470,7 @@ func (UnimplementedHandler) IndexPolicyPool(ctx context.Context, params IndexPol
 // List a product's licenses.
 //
 // GET /v1/accounts/{account}/products/{productId}/licenses
-func (UnimplementedHandler) IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (r *LicenseStubListDocument, _ error) {
+func (UnimplementedHandler) IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (r *LicenseListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -371,7 +524,7 @@ func (UnimplementedHandler) IndexProducts(ctx context.Context, params IndexProdu
 // List a group's licenses.
 //
 // GET /v1/accounts/{account}/groups/{groupId}/licenses
-func (UnimplementedHandler) ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (r *UserLicenseCollectionDocument, _ error) {
+func (UnimplementedHandler) ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (r *LicenseListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -425,7 +578,7 @@ func (UnimplementedHandler) ListTokens(ctx context.Context, params ListTokensPar
 // List a user's licenses.
 //
 // GET /v1/accounts/{account}/users/{userId}/licenses
-func (UnimplementedHandler) ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (r *UserLicenseCollectionDocument, _ error) {
+func (UnimplementedHandler) ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (r *LicenseListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -530,6 +683,15 @@ func (UnimplementedHandler) Profile(ctx context.Context, params ProfileParams) (
 	return r, ht.ErrNotImplemented
 }
 
+// QuickValidateLicense implements quickValidateLicense operation.
+//
+// Quickly validate a license (no scope checks).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+func (UnimplementedHandler) QuickValidateLicense(ctx context.Context, params QuickValidateLicenseParams) (r *LicenseValidateDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RegenerateCurrentToken implements regenerateCurrentToken operation.
 //
 // 404 unless the request itself is token-authenticated.
@@ -545,6 +707,24 @@ func (UnimplementedHandler) RegenerateCurrentToken(ctx context.Context, params R
 //
 // PUT /v1/accounts/{account}/tokens/{tokenId}
 func (UnimplementedHandler) RegenerateToken(ctx context.Context, params RegenerateTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ReinstateLicense implements reinstateLicense operation.
+//
+// Reinstate a suspended license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reinstate
+func (UnimplementedHandler) ReinstateLicense(ctx context.Context, params ReinstateLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RenewLicense implements renewLicense operation.
+//
+// Renew a license's expiry.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/renew
+func (UnimplementedHandler) RenewLicense(ctx context.Context, params RenewLicenseParams) (r *LicenseDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -566,6 +746,15 @@ func (UnimplementedHandler) RequestPasswordReset(ctx context.Context, req Reques
 	return ht.ErrNotImplemented
 }
 
+// ResetLicenseUsage implements resetLicenseUsage operation.
+//
+// Reset a license's usage counter.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
+func (UnimplementedHandler) ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ResetUserPassword implements resetUserPassword operation.
 //
 // Reset a user's password with a reset token.
@@ -583,6 +772,15 @@ func (UnimplementedHandler) ResetUserPassword(ctx context.Context, req ResetUser
 // POST /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry
 func (UnimplementedHandler) RetryWebhookEvent(ctx context.Context, req RetryWebhookEventReq, params RetryWebhookEventParams) (r *WebhookEventDocumentHeaders, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// RevokeLicense implements revokeLicense operation.
+//
+// Revoke a license (destroys it).
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}/actions/revoke
+func (UnimplementedHandler) RevokeLicense(ctx context.Context, params RevokeLicenseParams) error {
+	return ht.ErrNotImplemented
 }
 
 // RevokeToken implements revokeToken operation.
@@ -617,7 +815,7 @@ func (UnimplementedHandler) ShowGroup(ctx context.Context, params ShowGroupParam
 // Show one of a group's licenses (id or key alias).
 //
 // GET /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}
-func (UnimplementedHandler) ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (r *UserLicenseDocument, _ error) {
+func (UnimplementedHandler) ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (r *LicenseDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -675,6 +873,96 @@ func (UnimplementedHandler) ShowKeyProduct(ctx context.Context, params ShowKeyPr
 	return r, ht.ErrNotImplemented
 }
 
+// ShowLicense implements showLicense operation.
+//
+// Retrieve a license (by id or key).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}
+func (UnimplementedHandler) ShowLicense(ctx context.Context, params ShowLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseEntitlement implements showLicenseEntitlement operation.
+//
+// Retrieve one of a license's entitlements.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements/{entitlementId}
+func (UnimplementedHandler) ShowLicenseEntitlement(ctx context.Context, params ShowLicenseEntitlementParams) (r *EntitlementDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseGroup implements showLicenseGroup operation.
+//
+// Retrieve a license's group.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/group
+func (UnimplementedHandler) ShowLicenseGroup(ctx context.Context, params ShowLicenseGroupParams) (r *GroupDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseMachine implements showLicenseMachine operation.
+//
+// Retrieve one of a license's machines (by id or fingerprint).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/machines/{machineId}
+func (UnimplementedHandler) ShowLicenseMachine(ctx context.Context, params ShowLicenseMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseOwner implements showLicenseOwner operation.
+//
+// Retrieve a license's owner.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/owner
+func (UnimplementedHandler) ShowLicenseOwner(ctx context.Context, params ShowLicenseOwnerParams) (r *LicenseOwnerDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicensePolicy implements showLicensePolicy operation.
+//
+// Retrieve a license's policy.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/policy
+func (UnimplementedHandler) ShowLicensePolicy(ctx context.Context, params ShowLicensePolicyParams) (r *PolicyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseProduct implements showLicenseProduct operation.
+//
+// Retrieve a license's product.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/product
+func (UnimplementedHandler) ShowLicenseProduct(ctx context.Context, params ShowLicenseProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseToken implements showLicenseToken operation.
+//
+// Retrieve one of a license's tokens.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/tokens/{tokenId}
+func (UnimplementedHandler) ShowLicenseToken(ctx context.Context, params ShowLicenseTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseUser implements showLicenseUser operation.
+//
+// Retrieve one of a license's users (by id or email).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/users/{userId}
+func (UnimplementedHandler) ShowLicenseUser(ctx context.Context, params ShowLicenseUserParams) (r *LicenseOwnerDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowLicenseUserAlias implements showLicenseUserAlias operation.
+//
+// Retrieve a license's owner (v1.5 alias).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/user
+func (UnimplementedHandler) ShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (r *LicenseOwnerDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ShowPolicy implements showPolicy operation.
 //
 // Retrieve a policy.
@@ -698,7 +986,7 @@ func (UnimplementedHandler) ShowPolicyEntitlement(ctx context.Context, params Sh
 // Retrieve one of a policy's licenses.
 //
 // GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
-func (UnimplementedHandler) ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (r ShowPolicyLicenseOK, _ error) {
+func (UnimplementedHandler) ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (r *LicenseDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -734,7 +1022,7 @@ func (UnimplementedHandler) ShowProduct(ctx context.Context, params ShowProductP
 // Retrieve one of a product's licenses.
 //
 // GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}
-func (UnimplementedHandler) ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (r ShowProductLicenseOK, _ error) {
+func (UnimplementedHandler) ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (r *LicenseDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -806,7 +1094,7 @@ func (UnimplementedHandler) ShowUserGroup(ctx context.Context, params ShowUserGr
 // Show one of a user's licenses (id or key alias).
 //
 // GET /v1/accounts/{account}/users/{userId}/licenses/{licenseId}
-func (UnimplementedHandler) ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (r *UserLicenseDocument, _ error) {
+func (UnimplementedHandler) ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (r *LicenseDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -864,6 +1152,15 @@ func (UnimplementedHandler) ShowWebhookEvent(ctx context.Context, params ShowWeb
 	return r, ht.ErrNotImplemented
 }
 
+// SuspendLicense implements suspendLicense operation.
+//
+// Suspend a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/suspend
+func (UnimplementedHandler) SuspendLicense(ctx context.Context, params SuspendLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UnbanUser implements unbanUser operation.
 //
 // Unban a user.
@@ -897,6 +1194,51 @@ func (UnimplementedHandler) UpdateGroup(ctx context.Context, req UpdateGroupReq,
 //
 // PATCH /v1/accounts/{account}/keys/{keyId}
 func (UnimplementedHandler) UpdateKey(ctx context.Context, req UpdateKeyReq, params UpdateKeyParams) (r *KeyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateLicense implements updateLicense operation.
+//
+// Update a license.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}
+func (UnimplementedHandler) UpdateLicense(ctx context.Context, req UpdateLicenseReq, params UpdateLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateLicenseGroup implements updateLicenseGroup operation.
+//
+// Set a license's group.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/group
+func (UnimplementedHandler) UpdateLicenseGroup(ctx context.Context, req UpdateLicenseGroupReq, params UpdateLicenseGroupParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateLicenseOwner implements updateLicenseOwner operation.
+//
+// Set a license's owner.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/owner
+func (UnimplementedHandler) UpdateLicenseOwner(ctx context.Context, req UpdateLicenseOwnerReq, params UpdateLicenseOwnerParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateLicensePolicy implements updateLicensePolicy operation.
+//
+// Transfer a license to a policy.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/policy
+func (UnimplementedHandler) UpdateLicensePolicy(ctx context.Context, req UpdateLicensePolicyReq, params UpdateLicensePolicyParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateLicenseUserAlias implements updateLicenseUserAlias operation.
+//
+// Set a license's owner (v1.5 alias).
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/user
+func (UnimplementedHandler) UpdateLicenseUserAlias(ctx context.Context, req UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (r *LicenseDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -960,6 +1302,24 @@ func (UnimplementedHandler) UpdateUserSecondFactor(ctx context.Context, req Upda
 //
 // PATCH /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
 func (UnimplementedHandler) UpdateWebhookEndpoint(ctx context.Context, req UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (r *WebhookEndpointDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ValidateLicense implements validateLicense operation.
+//
+// Validate a license (with meta.scope).
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+func (UnimplementedHandler) ValidateLicense(ctx context.Context, req ValidateLicenseReq, params ValidateLicenseParams) (r *LicenseValidateDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ValidateLicenseKey implements validateLicenseKey operation.
+//
+// Validate a license by key (authentication optional).
+//
+// POST /v1/accounts/{account}/licenses/actions/validate-key
+func (UnimplementedHandler) ValidateLicenseKey(ctx context.Context, req ValidateLicenseKeyReq, params ValidateLicenseKeyParams) (r *LicenseValidateDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

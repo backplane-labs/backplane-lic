@@ -32,6 +32,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/jobs"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/port"
@@ -119,8 +120,22 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	runner := deps.NewComponent(root, "jobs")
 	runner.Go(func(ctx context.Context) error {
 		jobsRunner := jobs.NewRunner(store.Get(), time.Now)
+		publisher := webhooks.NewPublisher(store.Get(), relayOutbox, spec.ID, rand.Reader, time.Now)
+		notifier := licenses.NewNotifier(store.Get().Licenses, publisher, spec.ID, time.Now, store.Get().Do)
 
-		return loop(ctx, time.Minute, jobsRunner.Tick)
+		return loop(ctx, time.Minute, func(ctx context.Context) error {
+			if err := jobsRunner.Tick(ctx); err != nil {
+				return err //nolint:wrapcheck // scenario error
+			}
+
+			// Keygen schedules expiration and check-in notices every ten minutes.
+			const notificationMinutes = 10
+			if time.Now().UTC().Minute()%notificationMinutes != 0 {
+				return nil
+			}
+
+			return notifier.Tick(ctx)
+		})
 	})
 
 	return &Service{Store: store, Cache: cache, HTTP: public}, nil
@@ -203,6 +218,12 @@ func handler(
 		Users:         users.New(store, publisher, clock),
 		Tokens:        tokens.New(store, publisher, rand.Reader, clock),
 		Groups:        groups.New(store, publisher, clock),
+		Licenses: licenses.New(
+			store.Licenses, store.Licenses, store.Policies, store.Products, store,
+			store, store.Entitlements, store.Keys,
+			tokens.Manager{Scenario: tokens.New(store, publisher, rand.Reader, clock)},
+			publisher, rand.Reader, clock, store.Do,
+		),
 		Products: products.New(store.Products, store.Tokens, store.Users,
 			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),

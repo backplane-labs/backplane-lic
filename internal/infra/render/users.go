@@ -95,17 +95,6 @@ func ProductStub(accountID, id uuid.UUID) oas.UserProductResource {
 	}
 }
 
-// LicenseStub renders the minimal license document of the user/group
-// relationship indexes.
-func LicenseStub(accountID, id uuid.UUID) oas.UserLicenseResource {
-	return oas.UserLicenseResource{
-		Type:       oas.UserLicenseResourceTypeLicenses,
-		ID:         id.String(),
-		Attributes: oas.NewOptNilUserLicenseResourceAttributes(oas.UserLicenseResourceAttributes{}),
-		Links:      oas.ResourceLinks{Self: "/v1/accounts/" + accountID.String() + "/licenses/" + id.String()},
-	}
-}
-
 // MachineStub renders the minimal machine document of the user/group
 // relationship indexes.
 func MachineStub(accountID, id uuid.UUID) oas.UserMachineResource {

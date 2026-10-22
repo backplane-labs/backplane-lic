@@ -345,7 +345,7 @@
             "code": "GROUP_USER_LIMIT_EXCEEDED",
             "detail": "user count has exceeded maximum allowed by current group (1)",
             "links": {
-              "about": "https://keygen.sh/docs/api/users/#users-object-relationships-group"
+              "about": "https://\u003cdocs-host\u003e/docs/api/users/#users-object-relationships-group"
             },
             "source": {
               "pointer": "/data/relationships/group"
@@ -448,7 +448,7 @@
             "code": "GROUP_NOT_FOUND",
             "detail": "must exist",
             "links": {
-              "about": "https://keygen.sh/docs/api/users/#users-object-relationships-group"
+              "about": "https://\u003cdocs-host\u003e/docs/api/users/#users-object-relationships-group"
             },
             "source": {
               "pointer": "/data/relationships/group"

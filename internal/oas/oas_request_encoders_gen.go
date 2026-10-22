@@ -42,6 +42,68 @@ func encodeAttachGroupOwnersRequest(
 	}
 }
 
+func encodeAttachLicenseEntitlementsRequest(
+	req AttachLicenseEntitlementsReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *AttachLicenseEntitlementsReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *AttachLicenseEntitlementsReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *AttachLicenseEntitlementsReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeAttachLicenseUsersRequest(
+	req AttachLicenseUsersReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *AttachLicenseUsersReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *AttachLicenseUsersReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *AttachLicenseUsersReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeAttachPolicyEntitlementsRequest(
 	req AttachPolicyEntitlementsReq,
 	r *http.Request,
@@ -60,6 +122,37 @@ func encodeAttachPolicyEntitlementsRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *AttachPolicyEntitlementsReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeCheckoutLicenseRequest(
+	req CheckoutLicenseReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CheckoutLicenseReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CheckoutLicenseReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CheckoutLicenseReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{
@@ -153,6 +246,68 @@ func encodeCreateKeyRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *CreateKeyReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeCreateLicenseRequest(
+	req CreateLicenseReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateLicenseReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateLicenseReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateLicenseReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeCreateLicenseTokenRequest(
+	req CreateLicenseTokenReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateLicenseTokenReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateLicenseTokenReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateLicenseTokenReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{
@@ -383,6 +538,37 @@ func encodeCreateWebhookEndpointRequest(
 	}
 }
 
+func encodeDecrementLicenseUsageRequest(
+	req DecrementLicenseUsageReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *DecrementLicenseUsageReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *DecrementLicenseUsageReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *DecrementLicenseUsageReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeDeleteUserSecondFactorRequest(
 	req DeleteUserSecondFactorReq,
 	r *http.Request,
@@ -445,6 +631,68 @@ func encodeDetachGroupOwnersRequest(
 	}
 }
 
+func encodeDetachLicenseEntitlementsRequest(
+	req DetachLicenseEntitlementsReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *DetachLicenseEntitlementsReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *DetachLicenseEntitlementsReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *DetachLicenseEntitlementsReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeDetachLicenseUsersRequest(
+	req DetachLicenseUsersReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *DetachLicenseUsersReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *DetachLicenseUsersReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *DetachLicenseUsersReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeDetachPolicyEntitlementsRequest(
 	req DetachPolicyEntitlementsReq,
 	r *http.Request,
@@ -494,6 +742,37 @@ func encodeGenerateTokenRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *GenerateTokenReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeIncrementLicenseUsageRequest(
+	req IncrementLicenseUsageReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *IncrementLicenseUsageReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *IncrementLicenseUsageReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *IncrementLicenseUsageReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{
@@ -724,6 +1003,161 @@ func encodeUpdateKeyRequest(
 	}
 }
 
+func encodeUpdateLicenseRequest(
+	req UpdateLicenseReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateLicenseReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateLicenseReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateLicenseReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateLicenseGroupRequest(
+	req UpdateLicenseGroupReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateLicenseGroupReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateLicenseGroupReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateLicenseGroupReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateLicenseOwnerRequest(
+	req UpdateLicenseOwnerReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateLicenseOwnerReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateLicenseOwnerReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateLicenseOwnerReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateLicensePolicyRequest(
+	req UpdateLicensePolicyReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateLicensePolicyReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateLicensePolicyReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateLicensePolicyReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateLicenseUserAliasRequest(
+	req UpdateLicenseUserAliasReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateLicenseUserAliasReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateLicenseUserAliasReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateLicenseUserAliasReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeUpdatePolicyRequest(
 	req UpdatePolicyReq,
 	r *http.Request,
@@ -928,6 +1362,68 @@ func encodeUpdateWebhookEndpointRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *UpdateWebhookEndpointReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeValidateLicenseRequest(
+	req ValidateLicenseReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *ValidateLicenseReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *ValidateLicenseReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *ValidateLicenseReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeValidateLicenseKeyRequest(
+	req ValidateLicenseKeyReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *ValidateLicenseKeyReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *ValidateLicenseKeyReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *ValidateLicenseKeyReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{

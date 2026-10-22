@@ -133,7 +133,9 @@ func serverUnderTest(t *testing.T) conformance.Target {
 		t.Fatalf("conformance: handler: %v", err)
 	}
 
-	return &conformance.HandlerTarget{Handler: handler, AdminToken: adminToken}
+	return &conformance.HandlerTarget{
+		Handler: handler, AdminToken: adminToken,
+	}
 }
 
 func referenceURL() string {

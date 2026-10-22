@@ -203,7 +203,7 @@ func policyDomain(row db.GetPolicyByIDRow, err error) (domain.Policy, error) {
 	meta := map[string]any{}
 	_ = json.Unmarshal(row.Metadata, &meta)
 
-	return domain.Policy{
+	return domain.Policy{ //nolint:dupl // the license repository mirrors these columns
 		ID:                            row.ID,
 		AccountID:                     row.AccountID,
 		ProductID:                     row.ProductID,
