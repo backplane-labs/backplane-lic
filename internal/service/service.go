@@ -76,6 +76,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	spec := accounts.Spec{ID: id, Name: cfg.Account.Name, Slug: cfg.Account.Slug}
 	late := &lateHandler{}
 	contracts := bpautomation.Declare(root)
+	activities := bpautomation.NewActivityServer(root)
 
 	var relayOutbox *outbox.Outbox
 
@@ -105,6 +106,9 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			return appautomation.NewPublisher(store.Get(), publisher, relay, contracts,
 				cfg.Automation.PortalBase, cfg.Automation.Locale, time.Now)
 		}
+		publisher := decorate(webhooks.NewPublisher(store.Get(), relay, spec.ID, rand.Reader, time.Now))
+		activities.Set(appautomation.NewActivities(store.Get(), licenseScenario(store.Get(), publisher, time.Now),
+			spec.ID, time.Now))
 		late.set(handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate))
 
 		return nil
@@ -124,25 +128,31 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	runner := deps.NewComponent(root, "jobs")
 	runner.Go(func(ctx context.Context) error {
 		jobsRunner := jobs.NewRunner(store.Get(), time.Now)
-		publisher := webhooks.NewPublisher(store.Get(), relayOutbox, spec.ID, rand.Reader, time.Now)
+		publisher := appautomation.NewPublisher(store.Get(),
+			webhooks.NewPublisher(store.Get(), relayOutbox, spec.ID, rand.Reader, time.Now),
+			relayOutbox, contracts, cfg.Automation.PortalBase, cfg.Automation.Locale, time.Now)
 		notifier := licenses.NewNotifier(store.Get().Licenses, publisher, spec.ID, time.Now, store.Get().Do)
 
-		return loop(ctx, time.Minute, func(ctx context.Context) error {
-			if err := jobsRunner.Tick(ctx); err != nil {
-				return err //nolint:wrapcheck // scenario error
-			}
-
-			// Keygen schedules expiration and check-in notices every ten minutes.
-			const notificationMinutes = 10
-			if time.Now().UTC().Minute()%notificationMinutes != 0 {
-				return nil
-			}
-
-			return notifier.Tick(ctx)
-		})
+		return loop(ctx, time.Minute, notificationPass(jobsRunner, notifier))
 	})
 
 	return &Service{Store: store, Cache: cache, HTTP: late}, nil
+}
+
+func notificationPass(jobsRunner *jobs.Runner, notifier licenses.Notifier) func(context.Context) error {
+	return func(ctx context.Context) error {
+		if err := jobsRunner.Tick(ctx); err != nil {
+			return err //nolint:wrapcheck // scenario error
+		}
+
+		// Keygen schedules expiration and check-in notices every ten minutes.
+		const notificationMinutes = 10
+		if time.Now().UTC().Minute()%notificationMinutes != 0 {
+			return nil
+		}
+
+		return notifier.Tick(ctx)
+	}
 }
 
 // loop runs a periodic pass until the context ends.
@@ -216,12 +226,7 @@ func handler(
 		Users:         users.New(store, publisher, clock),
 		Tokens:        tokens.New(store, publisher, rand.Reader, clock),
 		Groups:        groups.New(store, publisher, clock),
-		Licenses: licenses.New(
-			store.Licenses, store.Licenses, store.Policies, store.Products, store,
-			store, store.Entitlements, store.Keys,
-			tokens.Manager{Scenario: tokens.New(store, publisher, rand.Reader, clock)},
-			publisher, rand.Reader, clock, store.Do,
-		),
+		Licenses:      licenseScenario(store, publisher, clock),
 		Products: products.New(store.Products, store.Tokens, store.Users,
 			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),
@@ -233,6 +238,13 @@ func handler(
 		TrustedProxies: cfg.TrustedProxies,
 		Clock:          clock,
 	})
+}
+
+func licenseScenario(store *postgres.Store, publisher events.Publisher, clock func() time.Time) licenses.Scenario {
+	return licenses.New(store.Licenses, store.Licenses, store.Policies, store.Products, store,
+		store, store.Entitlements, store.Keys,
+		tokens.Manager{Scenario: tokens.New(store, publisher, rand.Reader, clock)},
+		publisher, rand.Reader, clock, store.Do)
 }
 
 // lateHandler serves the handler built at start; before that, 503.
@@ -263,7 +275,9 @@ func webhookOutbox(store *postgres.Store, accountID uuid.UUID, cfg HTTP, instanc
 	return newOutbox(store, instance, log, delivery)
 }
 
-func newOutbox(store *postgres.Store, instance string, log *slog.Logger, delivery outbox.Publisher) (*outbox.Outbox, error) {
+func newOutbox(store *postgres.Store, instance string, log *slog.Logger,
+	delivery outbox.Publisher,
+) (*outbox.Outbox, error) {
 	relay, err := outbox.New(store.Pool, store.DB.DB, delivery,
 		outbox.WithSchema(postgres.Schema), outbox.WithInstanceID(instance),
 		outbox.WithListenPool(store.Pool), outbox.WithLogger(log),

@@ -100,8 +100,9 @@ automation:
 
 The environment overrides are `LIC_AUTOMATION_PORTAL_BASE` and
 `LIC_AUTOMATION_LOCALE`. `portalBase` must identify the public portal, not
-the API; the reset link appends `/reset` and carries `account_id`, `user_id`
-and `passwordResetToken`. The portal submits that claim with `newPassword`
+the API; the reset link appends `/reset#account=<uuid>&user=<uuid>&token=<claim>`.
+The fragment stays in the browser, out of server/proxy logs and Referer headers.
+The portal reads it client-side and submits `token` as `passwordResetToken` with `newPassword`
 to the existing user `reset-password` action. Templates include English and
 Russian; the templates service handles language fallback.
 
@@ -131,3 +132,30 @@ Event IDs survive relay retries; consumers must deduplicate by ID. Installations
 need NATS JetStream for events and Backplane's hook execution transport for
 mail. A missing transport leaves committed work pending; it never turns a
 committed password reset into an HTTP delivery error.
+
+### Activities
+
+Other services can call these typed activities from wiring:
+
+| Activity | Input | Result |
+|---|---|---|
+| `lic.CreateLicense` | `policy_id`, optional `owner_id`, `name`, `key`, `expiry`, `metadata` | license snapshot and key |
+| `lic.GetLicense` | `license` (UUID or key) | license snapshot and key |
+| `lic.SuspendLicense` / `lic.RenewLicense` | `license` | updated snapshot and key |
+| `lic.ValidateKey` | `key`, optional `product`, `policy`, `fingerprints`, `entitlements` | `valid`, `code`, `detail`, nullable license |
+| `lic.IncrementUsage` | `license`, `increment` | updated snapshot and key |
+
+These are installation-internal **admin** operations, not an alternative
+public authentication API. Restrict who can author wiring and invoke internal
+activities. The handlers use the same application scenarios as HTTP, so policy
+checks, key generation and Keygen webhooks still apply.
+
+Mutating activities, including validation touches, commit a durable result
+receipt with the business write. They take their key from
+`activity.InfoOf(ctx).Key`; concurrent attempts serialize under a PostgreSQL
+transaction lock. Repeating the same key returns the committed result, while
+reusing it with different input fails permanently. Receipts have no automatic
+expiry: deleting one permits an old retry to repeat its mutation. They may
+contain a license key, including the one-time plaintext of a legacy-encrypted
+key, so treat this table as credential storage. Domain validation errors fail
+without retry; storage and transport failures remain retryable.

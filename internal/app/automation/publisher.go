@@ -61,6 +61,10 @@ func (p Publisher) Publish(ctx context.Context, name string, resource any) error
 
 func (p Publisher) record(ctx context.Context, name string, resource any) error {
 	switch value := resource.(type) {
+	case domain.License:
+		return p.recordLicense(ctx, name, value, "")
+	case domain.LicenseValidationEvent:
+		return p.recordLicense(ctx, name, value.License, value.Code)
 	case domain.User:
 		if name == "user.created" {
 			return p.enqueue(ctx, EventTopic, "UserCreated", userEvent(value, p.clock()))
@@ -92,18 +96,18 @@ func userEvent(user domain.User, now time.Time) port.UserEvent {
 }
 
 func (p Publisher) passwordReset(reset domain.PasswordReset) port.DeliverIn {
-	// The portal forwards user_id and passwordResetToken to the existing
-	// reset-password action; account_id also supports installations behind a proxy.
-	query := url.Values{
-		"account_id": {reset.User.AccountID.String()}, "user_id": {reset.User.ID.String()},
-		"passwordResetToken": {reset.Token},
+	// Fragments stay in the browser, out of request logs and Referer headers.
+	// The SPA submits token as passwordResetToken to the reset-password action.
+	fragment := url.Values{
+		"account": {reset.User.AccountID.String()}, "user": {reset.User.ID.String()}, "token": {reset.Token},
 	}
 
 	return port.DeliverIn{
-		Template: "lic.password-reset", Recipient: reset.User.Email, Locale: p.locale,
+		AccountID: reset.User.AccountID,
+		Template:  "lic.password-reset", Recipient: reset.User.Email, Locale: p.locale,
 		Data: port.DeliveryData{
 			UserID: reset.User.ID, UserName: strings.TrimSpace(reset.User.FirstName + " " + reset.User.LastName),
-			UserEmail: reset.User.Email, ResetURL: strings.TrimRight(p.portalBase, "/") + "/reset?" + query.Encode(),
+			UserEmail: reset.User.Email, ResetURL: strings.TrimRight(p.portalBase, "/") + "/reset#" + fragment.Encode(),
 		},
 	}
 }
@@ -114,8 +118,19 @@ func (p Publisher) enqueue(ctx context.Context, topic, name string, payload any)
 		return fmt.Errorf("automation: encode %s: %w", name, err)
 	}
 
+	var accountID uuid.UUID
+
+	switch value := payload.(type) {
+	case port.UserEvent:
+		accountID = value.AccountID
+	case port.LicenseEvent:
+		accountID = value.AccountID
+	case port.DeliverIn:
+		accountID = value.AccountID
+	}
+
 	if err := p.queue.Enqueue(ctx, outbox.Message{
-		ID: uuid.NewString(), Topic: topic,
+		ID: uuid.NewString(), Topic: topic, PartitionKey: accountID.String(),
 		MessageType: name, ContentType: "application/json", Payload: encoded,
 	}); err != nil {
 		return fmt.Errorf("automation: enqueue %s: %w", name, err)

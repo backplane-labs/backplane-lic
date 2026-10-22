@@ -5,11 +5,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
 // DeliverIn is the installation-owned rendering and delivery contract.
 // ResetURL contains a credential: keep it out of logs and event payloads.
 type DeliverIn struct {
+	AccountID uuid.UUID    `json:"account_id"`
 	Template  string       `json:"template"`
 	Recipient string       `json:"recipient"`
 	Locale    string       `json:"locale"`
@@ -38,6 +41,8 @@ type Delivery interface {
 // AutomationStore supplies the transaction boundary shared by event and webhook writes.
 type AutomationStore interface {
 	Do(ctx context.Context, fn func(context.Context) error) error
+	UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error)
+	ProductByID(ctx context.Context, accountID, id uuid.UUID) (domain.Product, error)
 }
 
 // UserEvent intentionally excludes passwords, reset claims and user metadata.

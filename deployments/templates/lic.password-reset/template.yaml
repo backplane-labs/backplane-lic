@@ -3,4 +3,4 @@ default_language: en
 sample:
   user_name: Alex
   user_email: alex@example.com
-  reset_url: https://licenses.example.com/portal/reset?user_id=example&passwordResetToken=sample
+  reset_url: https://licenses.example.com/portal/reset#account=example&user=example&token=sample

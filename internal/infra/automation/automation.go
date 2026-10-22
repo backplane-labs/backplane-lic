@@ -78,6 +78,7 @@ func NewWorker(contracts Contracts, webhooks outbox.Publisher) Worker {
 func (w Worker) Publish(ctx context.Context, messages []outbox.Message) error {
 	for i := range messages {
 		message := messages[i]
+
 		var err error
 
 		switch message.Topic {
