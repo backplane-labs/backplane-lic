@@ -101,6 +101,10 @@ type IncrementLicenseUsageReq interface {
 	incrementLicenseUsageReq()
 }
 
+type ReplaceUserSecondFactorReq interface {
+	replaceUserSecondFactorReq()
+}
+
 type RequestPasswordResetReq interface {
 	requestPasswordResetReq()
 }

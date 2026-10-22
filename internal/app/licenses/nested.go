@@ -6,6 +6,7 @@ package licenses
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/google/uuid"
 
@@ -22,7 +23,7 @@ func (s Scenario) OfPolicy(
 ) (List, error) {
 	f.PolicyID = uuid.NullUUID{UUID: policy.ID, Valid: true}
 
-	return s.nestedIndex(ctx, account, f, params, "policy.read")
+	return s.nestedIndex(ctx, account, f, params, "policy.read", "")
 }
 
 // OfPolicyShow answers one of the policy's licenses by id or key.
@@ -40,7 +41,7 @@ func (s Scenario) OfProduct(
 ) (List, error) {
 	f.ProductID = uuid.NullUUID{UUID: product.ID, Valid: true}
 
-	return s.nestedIndex(ctx, account, f, params, "license.read")
+	return s.nestedIndex(ctx, account, f, params, "license.read", "")
 }
 
 // OfProductShow answers one of the product's licenses.
@@ -59,7 +60,7 @@ func (s Scenario) OfUser(
 	// The user filter covers owner ∪ licensees.
 	f.UserID = uuid.NullUUID{UUID: userID, Valid: true}
 
-	return s.nestedIndex(ctx, account, f, params, "license.read")
+	return s.nestedIndex(ctx, account, f, params, "license.read", "")
 }
 
 // OfUserShow answers one of the user's licenses.
@@ -83,20 +84,64 @@ func (s Scenario) OfGroup(
 ) (List, error) {
 	f.GroupID = uuid.NullUUID{UUID: group.ID, Valid: true}
 
-	return s.nestedIndex(ctx, account, f, params, "license.read")
+	if access.PrincipalOf(ctx).Role != domain.RoleUser {
+		return s.nestedIndex(ctx, account, f, params, "group.licenses.read", "")
+	}
+
+	owned, err := s.groups.OwnedGroupIDsOfUser(ctx, account.ID, access.PrincipalOf(ctx).BearerID)
+	if err != nil {
+		return List{}, fmt.Errorf("licenses: owned groups: %w", err)
+	}
+
+	if len(owned) == 0 {
+		return List{}, apperr.ForbiddenReason(access.ReasonAllResources)
+	}
+
+	if !slices.Contains(owned, group.ID) {
+		return List{Items: []domain.License{}}, nil
+	}
+
+	return s.nestedIndex(ctx, account, f, params, "group.licenses.read", "group_owner")
 }
 
 // OfGroupShow answers one of the group's licenses.
 func (s Scenario) OfGroupShow(
 	ctx context.Context, account domain.Account, group domain.Group, idOrKey string,
 ) (domain.License, error) {
-	return s.nestedShow(ctx, account, idOrKey, "license.read", func(license domain.License) bool {
-		return license.GroupID.Valid && license.GroupID.UUID == group.ID
-	})
+	license, err := s.loadRecord(ctx, account, idOrKey)
+	if err != nil {
+		return domain.License{}, err
+	}
+
+	if !license.GroupID.Valid || license.GroupID.UUID != group.ID {
+		return domain.License{}, apperr.NotFound("license", idOrKey)
+	}
+
+	if err := access.Require(ctx, "group.licenses.read"); err != nil {
+		return domain.License{}, err //nolint:wrapcheck // authorization error
+	}
+
+	principal := access.PrincipalOf(ctx)
+	groupOwned := false
+
+	if principal.Role == domain.RoleUser {
+		owned, err := s.groups.OwnedGroupIDsOfUser(ctx, account.ID, principal.BearerID)
+		if err != nil {
+			return domain.License{}, fmt.Errorf("licenses: owned groups: %w", err)
+		}
+
+		groupOwned = slices.Contains(owned, group.ID)
+	}
+
+	if err := access.GroupLicenseShow(principal, license, groupOwned); err != nil {
+		return domain.License{}, err //nolint:wrapcheck // authorization error
+	}
+
+	return license, nil
 }
 
 func (s Scenario) nestedIndex(
-	ctx context.Context, account domain.Account, f Filter, params paging.Params, permission string,
+	ctx context.Context, account domain.Account, f Filter, params paging.Params, permission, scopeOverride string,
 ) (List, error) {
 	if err := access.Require(ctx, permission); err != nil {
 		return List{}, err //nolint:wrapcheck // the authorization's own error
@@ -105,6 +150,9 @@ func (s Scenario) nestedIndex(
 	principal := access.PrincipalOf(ctx)
 
 	scopeKind, scopeID := licenseScope(principal)
+	if scopeOverride != "" {
+		scopeKind = scopeOverride
+	}
 
 	window := params.Window()
 	now := s.now()
@@ -116,7 +164,7 @@ func (s Scenario) nestedIndex(
 
 	attached := map[uuid.UUID]bool{}
 
-	if principal.Role == domain.RoleUser {
+	if principal.Role == domain.RoleUser && scopeKind != "group_owner" {
 		for i := range items {
 			var attachErr error
 
@@ -127,8 +175,11 @@ func (s Scenario) nestedIndex(
 		}
 	}
 
-	if err := access.LicenseIndexPostCheck(principal, items, attached); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+	// The group-owner route has its own policy, not LicensePolicy#index?.
+	if scopeKind != "group_owner" {
+		if err := access.LicenseIndexPostCheck(principal, items, attached); err != nil {
+			return List{}, err //nolint:wrapcheck // the authorization's own error
+		}
 	}
 
 	out := List{Items: items, Count: len(items)}

@@ -27,8 +27,8 @@ func New(store Store, publisher events.Publisher, clock func() time.Time) Scenar
 	return Scenario{store: store, events: publisher, clock: clock}
 }
 
-// SeedAdmin creates the configured admin user when her email is not
-// taken (bcrypt, like the reference's has_secure_password).
+// SeedAdmin creates the passwordless test admin when her email is not
+// taken. Testkit issues its bearer directly without password authentication.
 func (s Scenario) SeedAdmin(ctx context.Context, accountID uuid.UUID, email string) error {
 	now := s.clock()
 

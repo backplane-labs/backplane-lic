@@ -24,6 +24,21 @@ type GroupsRepo struct {
 	q *db.Queries
 }
 
+// OwnedGroupIDsOfUser answers ownership without membership-only groups.
+func (r GroupsRepo) OwnedGroupIDsOfUser(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := r.q.OwnedGroupIdsForUser(ctx, db.OwnedGroupIdsForUserParams{AccountID: accountID, UserID: userID})
+	if err != nil {
+		return nil, fmt.Errorf("postgres: owned groups: %w", err)
+	}
+
+	ids := make([]uuid.UUID, 0, len(rows))
+	for _, row := range rows {
+		ids = append(ids, row.GroupID)
+	}
+
+	return ids, nil
+}
+
 // GroupByID loads a group.
 func (r GroupsRepo) GroupByID(ctx context.Context, accountID, id uuid.UUID) (domain.Group, error) {
 	row, err := r.q.GetGroupByID(ctx, db.GetGroupByIDParams{AccountID: accountID, ID: id})

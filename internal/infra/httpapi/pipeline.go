@@ -7,6 +7,8 @@ package httpapi
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -36,6 +39,13 @@ const (
 	poweredBy        = "Ruby, Rails, and a lot of coffee. (And the occasional Islay.)"
 	jsonapiCT        = "application/vnd.api+json; charset=utf-8"
 
+	// passwordLimit is the reference's "req/ip/auth" throttle: 5
+	// attempts per minute.
+	passwordLimit          = 5
+	passwordWindow         = time.Minute
+	secondFactorWindow     = 10 * time.Minute
+	secondFactorRouteDepth = 6
+
 	// maxBodyBytes caps the request body before decoding.
 	maxBodyBytes = 1 << 20
 	// registrableLabels is the label count of a registrable domain (the
@@ -45,13 +55,15 @@ const (
 
 // pipeline is the wrapper around the ogen server.
 type pipeline struct {
-	server   *oas.Server
-	accounts Accounts
-	authn    authn.Scenario
-	spec     Spec
-	revision string
-	docsHost string
-	clock    func() time.Time
+	server         *oas.Server
+	accounts       Accounts
+	authn          authn.Scenario
+	spec           Spec
+	revision       string
+	docsHost       string
+	throttle       Throttler
+	trustedProxies []*net.IPNet
+	clock          func() time.Time
 }
 
 // ServeHTTP walks the request through the pipeline.
@@ -182,6 +194,14 @@ func (p *pipeline) serveAccountScoped(
 		return
 	}
 
+	// Rack::Attack runs before authentication and typed body validation.
+	if name, count, window := p.limited(r, routePath); name != "" {
+		w.Header().Set("X-Request-Id", req.id.String())
+		p.throttleError(w, name, count, window, p.clock())
+
+		return
+	}
+
 	cred := authn.Parse(r.Header.Get("Authorization"), queryCredential(r))
 
 	if hasBody(r.Method) {
@@ -212,7 +232,7 @@ func (p *pipeline) serveAccountScoped(
 	case mode == authModeOptional && cred.Kind == authn.CredentialNone:
 		// Soft authentication without a credential: anonymous principal.
 	default:
-		principal, result, err = p.authn.Authenticate(r.Context(), account, cred, authnMode)
+		principal, result, err = p.authn.Authenticate(r.Context(), account, cred, authnMode, bodyOTP(req.body))
 		if err != nil {
 			req.challenge = challenge(cred)
 			p.fail(w, req, apperrFrom(err), alg)
@@ -450,6 +470,76 @@ func middlewareDoc(e *apperr.T) map[string]any {
 	}
 }
 
+// throttleError renders the reference's 429: the rate-limit headers and
+// a bare error document, no meta.
+func (p *pipeline) throttleError(w http.ResponseWriter, name string, count int64, window time.Duration, now time.Time) {
+	h := w.Header()
+	h.Set("Content-Type", jsonapiCT)
+
+	reset := now.Truncate(window).Add(window)
+	h["X-RateLimit-Window"] = []string{name}
+	h["X-RateLimit-Count"] = []string{strconv.FormatInt(count, 10)}
+	h["X-RateLimit-Limit"] = []string{strconv.Itoa(passwordLimit)}
+	h["X-RateLimit-Remaining"] = []string{"0"}
+	h["X-RateLimit-Reset"] = []string{strconv.FormatInt(reset.Unix(), 10)}
+	h.Set("Retry-After", strconv.FormatInt(reset.Unix()-now.Unix(), 10))
+	h["Date"] = nil
+
+	writeJSON(w, http.StatusTooManyRequests, middlewareDoc(errTooManyRequests))
+}
+
+// limited returns the first exceeded reference throttle. Buckets are namespaced:
+// one account/IP/email login counter cannot spend a user's MFA budget.
+func (p *pipeline) limited(r *http.Request, routePath string) (string, int64, time.Duration) {
+	if p.throttle == nil {
+		return "", 0, 0
+	}
+
+	name, identity, window := throttleRule(r, routePath)
+
+	if name == "" {
+		return "", 0, 0
+	}
+
+	hash := sha256.Sum256([]byte(strings.ToLower(identity)))
+	key := name + "/" + p.spec.ID.String() + "/" + p.clientIP(r) + "/" + hex.EncodeToString(hash[:])
+
+	count, err := p.throttle.Inc(r.Context(), key, window)
+	if err == nil && count > passwordLimit {
+		return name, count, window
+	}
+
+	return "", 0, 0
+}
+
+// throttleRule selects the Rack::Attack authentication or MFA mutation bucket.
+func throttleRule(r *http.Request, routePath string) (string, string, time.Duration) {
+	if r.Method == http.MethodPost && strings.HasSuffix(routePath, "/tokens") {
+		cred := authn.Parse(r.Header.Get("Authorization"), "")
+		if cred.Kind == authn.CredentialBasic && strings.Contains(cred.Value, "@") && strings.TrimSpace(cred.Secret) != "" {
+			return "auth", cred.Value, passwordWindow
+		}
+	}
+
+	parts := strings.Split(strings.Trim(routePath, "/"), "/")
+	if len(parts) < secondFactorRouteDepth || parts[3] != typeUserPlural || parts[5] != "second-factors" {
+		return "", "", 0
+	}
+
+	if r.Method == http.MethodPost && len(parts) == secondFactorRouteDepth {
+		return "mutmfa", parts[4], secondFactorWindow
+	}
+
+	if len(parts) > secondFactorRouteDepth {
+		switch r.Method {
+		case http.MethodPatch, http.MethodPut, http.MethodDelete:
+			return "mutmfa", parts[4], secondFactorWindow
+		}
+	}
+
+	return "", "", 0
+}
+
 // docsBase answers the docs origin: the configured host or the request
 // host's registrable part (its last two labels, like the reference
 // derives its domain).
@@ -508,6 +598,18 @@ func decodeBody(r *http.Request) (map[string]any, error) {
 	}
 
 	return obj, nil
+}
+
+// bodyOTP pulls meta.otp out of the decoded body (already underscored).
+func bodyOTP(body map[string]any) *string {
+	meta, ok := body["meta"].(map[string]any)
+	if !ok || meta["otp"] == nil {
+		return nil
+	}
+
+	otp := fmt.Sprint(meta["otp"])
+
+	return &otp
 }
 
 // rewriteBare maps the singleplayer bare paths (/v1/me, /v1/users/…)
@@ -606,10 +708,87 @@ func challenge(cred authn.Credentials) string {
 	return strings.ToUpper(cred.Scheme[:1]) + strings.ToLower(cred.Scheme[1:])
 }
 
+// clientIP answers the requesting IP: the remote address, or — only
+// when that address lies inside a configured trusted-proxy CIDR — the
+// right-most X-Forwarded-For hop outside the trusted set (the first
+// hop a spoofing client cannot rewrite). A client rotating a spoofed
+// X-Forwarded-For from an untrusted peer never changes the key.
+func (p *pipeline) clientIP(r *http.Request) string {
+	remote := bareHost(r.RemoteAddr)
+	if !p.trustedProxy(remote) {
+		return remote
+	}
+
+	hops := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+	for i := len(hops) - 1; i >= 0; i-- {
+		hop := bareHost(hops[i])
+		if hop == "" {
+			continue
+		}
+
+		if !p.trustedProxy(hop) {
+			return hop
+		}
+	}
+
+	return remote
+}
+
+// trustedProxy reports whether the address lies inside one of the
+// configured proxy CIDRs (empty list: nothing is trusted).
+func (p *pipeline) trustedProxy(addr string) bool {
+	parsed := net.ParseIP(addr)
+	if parsed == nil {
+		return false
+	}
+
+	for _, cidr := range p.trustedProxies {
+		if cidr.Contains(parsed) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // bitsPerByte converts an IP's byte length to a prefix length.
+const bitsPerByte = 8
 
 // parseCIDRs parses the configured proxy list: each entry a CIDR or a
 // bare IP (treated as a single host); unparseable entries are skipped.
+func parseCIDRs(entries []string) []*net.IPNet {
+	cidrs := make([]*net.IPNet, 0, len(entries))
+
+	for _, entry := range entries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+
+		if _, network, err := net.ParseCIDR(entry); err == nil {
+			cidrs = append(cidrs, network)
+
+			continue
+		}
+
+		if parsed := net.ParseIP(entry); parsed != nil {
+			bits := len(parsed) * bitsPerByte
+			cidrs = append(cidrs, &net.IPNet{IP: parsed, Mask: net.CIDRMask(bits, bits)})
+		}
+	}
+
+	return cidrs
+}
+
+// bareHost strips the port of an address, tolerating a bare IP.
+func bareHost(addr string) string {
+	addr = strings.TrimSpace(addr)
+	if host, _, err := net.SplitHostPort(addr); err == nil {
+		return host
+	}
+
+	return addr
+}
 
 func hostWithoutPort(host string) string {
 	if _, _, err := net.SplitHostPort(host); err != nil {
@@ -675,6 +854,14 @@ var (
 		Title:  apperr.TitleBadRequest,
 		Detail: "The request could not be completed because it contains invalid JSON (check formatting/encoding)",
 		Code:   "JSON_INVALID",
+	}
+
+	errTooManyRequests = &apperr.T{
+		Status: http.StatusTooManyRequests,
+		Title:  apperr.TitleTooManyRequests,
+		Detail: "Throttle limit has been reached for your IP address. Please slow down. " +
+			"See https://keygen.sh/docs/api/rate-limiting/ for more info.",
+		Code: "TOO_MANY_REQUESTS",
 	}
 )
 

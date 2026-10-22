@@ -12,6 +12,7 @@ import (
 // which the normaliser masks) and never depends on global resource counts.
 func scenarios() []conformance.Scenario {
 	admin := conformance.Auth{Kind: conformance.AuthAdmin}
+	basic := conformance.Auth{Kind: conformance.AuthBasic, BasicUser: conformance.AdminEmail, BasicPass: conformance.AdminPass}
 	account := "/v1/accounts/" + conformance.AccountSlug
 	tokens := account + "/tokens"
 
@@ -32,6 +33,38 @@ func scenarios() []conformance.Scenario {
 			Name: "account_show",
 			Steps: []conformance.Step{
 				{Name: "show by slug", Method: http.MethodGet, Path: account, Auth: admin},
+			},
+		},
+		{
+			Name: "token_generate_basic",
+			Steps: []conformance.Step{
+				{
+					Name:   "generate with password",
+					Method: http.MethodPost,
+					Path:   tokens,
+					Auth:   basic,
+					Body:   `{"data":{"type":"tokens","attributes":{"name":"conformance-{{run}}"}}}`,
+					Capture: map[string]string{
+						"token": "data.attributes.token",
+					},
+				},
+				{
+					Name:   "use the generated token",
+					Method: http.MethodGet,
+					Path:   account,
+					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "token"},
+				},
+				{
+					Name:   "wrong password",
+					Method: http.MethodPost,
+					Path:   tokens,
+					Auth: conformance.Auth{
+						Kind:      conformance.AuthBasic,
+						BasicUser: conformance.AdminEmail,
+						BasicPass: "wrong-password-{{run}}",
+					},
+					Body: `{"data":{"type":"tokens"}}`,
+				},
 			},
 		},
 		{
@@ -77,11 +110,15 @@ func scenarios() []conformance.Scenario {
 		keyScenarios(),
 		licensesScenarios(),
 		licenseUserScenarios(),
+		licenseGroupOwnerScenarios(),
 		licenseEdgeScenarios(),
 		licenseWebhookScenarios(),
 		metadataScenarios(),
 		webhookScenarios(),
-		notImplementedScenarios(),
+		resourceUserScenarios(),
+		secondFactorsScenarios(),
+		passwordsScenarios(),
+		authScenarios(),
 	)
 
 	return scenarios

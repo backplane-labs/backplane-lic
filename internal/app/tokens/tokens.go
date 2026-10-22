@@ -4,6 +4,7 @@ package tokens
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -33,8 +34,10 @@ var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
 // GenerateInput is the request body of POST /tokens (already decoded and
 // shape-validated by the handler).
 type GenerateInput struct {
-	Name   *string
-	Expiry *time.Time
+	// ExpirySet distinguishes explicit null (non-expiring) from the default.
+	ExpirySet bool
+	Name      *string
+	Expiry    *time.Time
 	// BearerType/BearerID carry an admin's relationships.bearer override
 	// (wire types: users, products, licenses); empty when absent.
 	BearerType string
@@ -94,13 +97,19 @@ func (s Scenario) Generate(
 		BearerRole:  bearerRole,
 		Kind:        crypto.TokenKind(string(bearerRole)),
 		Name:        in.Name,
-		Expiry:      expiry(in.Expiry, bearerRole, now),
+		Expiry:      expiry(in.Expiry, in.ExpirySet, bearerRole, now),
 		Permissions: []string{"*"},
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
 
-	if err := s.store.InsertToken(ctx, token); err != nil {
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertToken(ctx, token); err != nil {
+			return fmt.Errorf("tokens: insert: %w", err)
+		}
+
+		return s.events.Publish(ctx, "token.generated", token)
+	}); err != nil {
 		return domain.Token{}, "", fmt.Errorf("tokens: insert: %w", err)
 	}
 
@@ -111,18 +120,16 @@ func (s Scenario) Generate(
 // selected (mirroring the reference's TokenPolicy#generate? — only
 // admin/developer may mint for a plain user) or the principal itself.
 func (s Scenario) resolveBearer(
-	_ context.Context,
-	_ domain.Account,
+	ctx context.Context,
+	account domain.Account,
 	principal access.Principal,
 	in GenerateInput,
 ) (uuid.UUID, domain.Role, string, error) {
-	if in.BearerType == access.BearerUser || (in.BearerType == "" && principal.BearerType == access.BearerUser) {
-		// User-bearer tokens are retired with end-user authentication:
-		// bearers are admin, product and license only.
-		return uuid.Nil, "", "", apperr.NotImplemented()
-	}
-
 	if in.BearerType == "" {
+		if principal.Role == domain.RoleUser && principal.UserBanned {
+			return uuid.Nil, "", "", apperr.ForbiddenReason(" (user is banned)")
+		}
+
 		if !allowsGenerateSelf(principal) {
 			// The policy admits no self-token for this bearer kind (a
 			// product or license bearer cannot mint its own token).
@@ -132,14 +139,39 @@ func (s Scenario) resolveBearer(
 		return principal.BearerID, principal.Role, storedBearerType(principal.BearerType), nil
 	}
 
-	// The typed shape allows product/license bearers, but the token
-	// policy never admits them (their sub-routes arrive with their own
-	// scenarios).
-	return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
+	if in.BearerType != access.BearerUser {
+		// The typed shape allows product/license bearers, but the
+		// token policy never admits them (their sub-routes arrive
+		// with their own scenarios).
+		return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
+	}
+
+	user, err := s.store.BearerUser(ctx, account.ID, in.BearerID)
+	if errors.Is(err, ErrNotFound) {
+		return uuid.Nil, "", "", apperr.NotFound("user", in.BearerID.String())
+	}
+
+	if err != nil {
+		return uuid.Nil, "", "", fmt.Errorf("tokens: bearer user: %w", err)
+	}
+
+	// The caller's own bearer always passes the first clause; an
+	// override to another bearer only the admin/developer-for-user
+	// clause.
+	self := principal.BearerType == access.BearerUser && user.ID == principal.BearerID
+	if !self && !allowsGenerateFor(principal, user.Role) {
+		return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
+	}
+
+	if self && principal.Role == domain.RoleUser && principal.UserBanned {
+		return uuid.Nil, "", "", apperr.ForbiddenReason(" (user is banned)")
+	}
+
+	return user.ID, user.Role, storedBearerTypeUser, nil
 }
 
-func expiry(explicit *time.Time, role domain.Role, now time.Time) *time.Time {
-	if explicit != nil {
+func expiry(explicit *time.Time, present bool, role domain.Role, now time.Time) *time.Time {
+	if present || explicit != nil {
 		return explicit
 	}
 
@@ -174,6 +206,19 @@ func allowsGenerateSelf(p access.Principal) bool {
 	case domain.RoleAdmin, domain.RoleDeveloper, domain.RoleSalesAgent,
 		domain.RoleSupportRole, domain.RoleReadOnly, domain.RoleUser:
 		return p.BearerType == access.BearerUser
+	default:
+		return false
+	}
+}
+
+// allowsGenerateFor mirrors the override clauses of TokenPolicy#generate?:
+// an admin or developer may mint tokens for plain users (and for
+// themselves); sales/support/read-only and everyone else may not mint
+// for anyone but themselves (the self case never reaches an override).
+func allowsGenerateFor(p access.Principal, target domain.Role) bool {
+	switch p.Role {
+	case domain.RoleAdmin, domain.RoleDeveloper:
+		return target == domain.RoleUser
 	default:
 		return false
 	}

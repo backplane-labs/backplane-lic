@@ -77,7 +77,7 @@ func (s Scenario) SetGroup(
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
-		if err := s.store.UpdateUser(ctx, user); err != nil {
+		if err := s.store.UpdateUser(ctx, user, Attrs{GroupSet: true}); err != nil {
 			return fmt.Errorf("users: set group: %w", err)
 		}
 

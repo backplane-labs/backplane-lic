@@ -9,11 +9,11 @@ import (
 // --- webhook endpoints (WebhookEndpointPolicy) ---
 
 // WebhookEndpointShow mirrors WebhookEndpointPolicy#show?: the admin
-// family (admin, developer, read_only, sales and support), or the
+// read roles (admin, developer, read_only; not sales or support), or the
 // product bearer for its own endpoint.
 func WebhookEndpointShow(p Principal, endpoint domain.WebhookEndpoint) error {
 	switch {
-	case isAdminFamily(p):
+	case isWriteFamily(p) || p.Role == domain.RoleReadOnly:
 		return nil
 	case p.Role == domain.RoleProduct && endpoint.ProductID.UUID == p.BearerID:
 		return nil
@@ -41,7 +41,7 @@ func WebhookEndpointWrite(p Principal, endpoint domain.WebhookEndpoint) error {
 // (the scoped query already narrowed it — the post-check reasserts).
 func WebhookEndpointIndex(p Principal, page []domain.WebhookEndpoint) error {
 	switch {
-	case isAdminFamily(p):
+	case isWriteFamily(p) || p.Role == domain.RoleReadOnly:
 		return nil
 	case p.Role == domain.RoleProduct:
 		for _, endpoint := range page { //nolint:gocritic // mirrors the reference's shape
@@ -62,7 +62,7 @@ func WebhookEndpointIndex(p Principal, page []domain.WebhookEndpoint) error {
 // or the product bearer for events of its own endpoints.
 func WebhookEventIndex(p Principal, page []domain.WebhookEvent, productOf func(uuid.UUID) uuid.UUID) error {
 	switch {
-	case isAdminFamily(p):
+	case isWriteFamily(p) || p.Role == domain.RoleReadOnly:
 		return nil
 	case p.Role == domain.RoleProduct:
 		for _, event := range page { //nolint:gocritic // mirrors the reference's shape
@@ -80,7 +80,7 @@ func WebhookEventIndex(p Principal, page []domain.WebhookEvent, productOf func(u
 // WebhookEventShow mirrors WebhookEventPolicy#show?.
 func WebhookEventShow(p Principal, _ domain.WebhookEvent, productID uuid.UUID, hasEndpoint bool) error {
 	switch {
-	case isAdminFamily(p):
+	case isWriteFamily(p) || p.Role == domain.RoleReadOnly:
 		return nil
 	case p.Role == domain.RoleProduct && hasEndpoint && productID == p.BearerID:
 		return nil

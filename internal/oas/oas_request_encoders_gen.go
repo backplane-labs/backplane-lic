@@ -786,6 +786,37 @@ func encodeIncrementLicenseUsageRequest(
 	}
 }
 
+func encodeReplaceUserSecondFactorRequest(
+	req ReplaceUserSecondFactorReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *ReplaceUserSecondFactorReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *ReplaceUserSecondFactorReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *ReplaceUserSecondFactorReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeRequestPasswordResetRequest(
 	req RequestPasswordResetReq,
 	r *http.Request,

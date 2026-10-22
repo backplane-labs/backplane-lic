@@ -1231,6 +1231,20 @@ func encodeRenewLicenseResponse(response *LicenseDocument, w http.ResponseWriter
 	return nil
 }
 
+func encodeReplaceUserSecondFactorResponse(response *SecondFactorDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeRequestPasswordResetResponse(response *RequestPasswordResetNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
 	span.SetStatus(codes.Ok, http.StatusText(204))

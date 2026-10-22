@@ -1,12 +1,12 @@
 {
-  "scenario": "end_user_auth_not_implemented",
+  "scenario": "second_factor_throttle",
   "steps": [
     {
       "body": {
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "email": "ni-\u003crun\u003e@example.com",
+            "email": "mfa-limit-\u003crun\u003e@example.com",
             "firstName": null,
             "fullName": null,
             "lastName": null,
@@ -70,7 +70,61 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "create the target user",
+      "name": "create factor owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "enabled": false,
+            "secret": "\u003cb32:1\u003e",
+            "updated": "\u003cts\u003e",
+            "uri": "otpauth://totp/Keygen:mfa-limit-\u003crun\u003e%40example.com?secret=\u003cb32:1\u003e\u0026image=https%3A%2F%2Fkeygen.sh%2Fimages%2Flogomark.png\u0026issuer=Keygen"
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/second-factors/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "user": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+              }
+            }
+          },
+          "type": "second-factors"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create factor spends first attempt",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -85,40 +139,10 @@
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:3\u003e"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "basic password login on tokens",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 501
-    },
-    {
-      "body": {
-        "errors": [
-          {
-            "code": "TOKEN_INVALID",
-            "detail": "You must be authenticated to complete the request",
-            "links": {
-              "about": "https://\u003cdocs-host\u003e/docs/api/authentication/#token-authentication"
+            "code": "OTP_INVALID",
+            "detail": "second factor must be valid",
+            "source": {
+              "pointer": "/meta/otp"
             },
             "title": "Unauthorized"
           }
@@ -132,9 +156,9 @@
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8",
-        "WWW-Authenticate": "Basic realm=\"keygen\""
+        "WWW-Authenticate": "Bearer realm=\"keygen\""
       },
-      "name": "basic password login on the account",
+      "name": "wrong OTP one",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -149,9 +173,12 @@
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "code": "OTP_INVALID",
+            "detail": "second factor must be valid",
+            "source": {
+              "pointer": "/meta/otp"
+            },
+            "title": "Unauthorized"
           }
         ],
         "meta": {
@@ -162,9 +189,10 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
+        "Keygen-Version": "1.8",
+        "WWW-Authenticate": "Bearer realm=\"keygen\""
       },
-      "name": "user token minting",
+      "name": "wrong OTP two",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -173,15 +201,18 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 401
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "code": "OTP_INVALID",
+            "detail": "second factor must be valid",
+            "source": {
+              "pointer": "/meta/otp"
+            },
+            "title": "Unauthorized"
           }
         ],
         "meta": {
@@ -192,9 +223,10 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
+        "Keygen-Version": "1.8",
+        "WWW-Authenticate": "Bearer realm=\"keygen\""
       },
-      "name": "token generation for a user bearer",
+      "name": "wrong OTP three",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -203,15 +235,18 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 401
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "code": "OTP_INVALID",
+            "detail": "second factor must be valid",
+            "source": {
+              "pointer": "/meta/otp"
+            },
+            "title": "Unauthorized"
           }
         ],
         "meta": {
@@ -222,9 +257,10 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
+        "Keygen-Version": "1.8",
+        "WWW-Authenticate": "Bearer realm=\"keygen\""
       },
-      "name": "second factors index",
+      "name": "wrong OTP four",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -233,127 +269,53 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 401
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "code": "TOO_MANY_REQUESTS",
+            "detail": "Throttle limit has been reached for your IP address. Please slow down. See https://keygen.sh/docs/api/rate-limiting/ for more info.",
+            "title": "Too many requests"
           }
-        ],
-        "meta": {
-          "id": "\u003cuuid:8\u003e"
-        }
+        ]
       },
       "headers": {
         "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
+        "X-RateLimit-Count": "6",
+        "X-RateLimit-Limit": "5",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Window": "mutmfa"
       },
-      "name": "second factor create",
+      "name": "throttled",
       "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 429
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "code": "TOO_MANY_REQUESTS",
+            "detail": "Throttle limit has been reached for your IP address. Please slow down. See https://keygen.sh/docs/api/rate-limiting/ for more info.",
+            "title": "Too many requests"
           }
-        ],
-        "meta": {
-          "id": "\u003cuuid:9\u003e"
-        }
+        ]
       },
       "headers": {
         "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
+        "X-RateLimit-Count": "7",
+        "X-RateLimit-Limit": "5",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Window": "mutmfa"
       },
-      "name": "password update",
+      "name": "still throttled",
       "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
         "X-Request-Id"
       ],
-      "status": 501
-    },
-    {
-      "body": {
-        "errors": [
-          {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:10\u003e"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "password reset",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 501
-    },
-    {
-      "body": {
-        "errors": [
-          {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:11\u003e"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "password reset request",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 501
+      "status": 429
     }
   ]
 }

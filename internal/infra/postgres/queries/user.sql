@@ -25,17 +25,14 @@ INSERT INTO lic.users (
 
 -- name: UpdateUserColumns :exec
 UPDATE lic.users SET
-  first_name = @first_name,
-  last_name = @last_name,
-  email = @email,
-  password_digest = @password_digest,
-  role = @role,
-  group_id = @group_id,
-  metadata = @metadata,
-  password_reset_token = @password_reset_token,
-  password_reset_sent_at = @password_reset_sent_at,
-  banned_at = @banned_at,
-  updated_at = now()
+ first_name = CASE WHEN @first_name_set THEN @first_name ELSE first_name END,
+ last_name = CASE WHEN @last_name_set THEN @last_name ELSE last_name END,
+ email = CASE WHEN @email_set THEN @email ELSE email END,
+ password_digest = CASE WHEN @password_set THEN @password_digest ELSE password_digest END,
+ role = CASE WHEN @role_set THEN @role ELSE role END,
+ group_id = CASE WHEN @group_set THEN @group_id ELSE group_id END,
+ metadata = CASE WHEN @metadata_set THEN @metadata ELSE metadata END,
+ updated_at = now()
 WHERE account_id = @account_id AND id = @id;
 
 -- name: DeleteUser :exec

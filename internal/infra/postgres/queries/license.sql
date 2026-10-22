@@ -505,6 +505,9 @@ WHERE l.account_id = @account_id
         )
       )
     )
+    OR (@scope_kind::text = 'group_owner' AND EXISTS (
+      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = @scope_id
+    ))
     OR (@scope_kind::text = 'license' AND l.id = @scope_id)
   )
   AND (
@@ -691,6 +694,9 @@ WHERE l.account_id = @account_id
         )
       )
     )
+    OR (@scope_kind::text = 'group_owner' AND EXISTS (
+      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = @scope_id
+    ))
     OR (@scope_kind::text = 'license' AND l.id = @scope_id)
   )
   AND (
@@ -847,6 +853,9 @@ WHERE l.account_id = @account_id
         )
       )
     )
+    OR (@scope_kind::text = 'group_owner' AND EXISTS (
+      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = @scope_id
+    ))
     OR (@scope_kind::text = 'license' AND l.id = @scope_id)
   )
 ;

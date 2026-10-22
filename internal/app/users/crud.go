@@ -14,6 +14,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 )
 
 // emailRe mirrors the users table's email CHECK (and the reference's
@@ -35,10 +36,10 @@ type Attrs struct {
 	FirstName *string
 	LastName  *string
 	Email     *string
-	// Password is nil when absent (a passwordless user); an empty
-	// string clears it.
-	Password *string
-	Metadata map[string]any
+	// Password is nil when absent or explicitly null; PasswordSet distinguishes them.
+	Password    *string
+	PasswordSet bool
+	Metadata    map[string]any
 	// Role is the requested role (wire form); empty keeps the current
 	// one (or "user" on create).
 	Role string
@@ -79,9 +80,12 @@ func (s Scenario) Create(
 
 	applyAttrs(&user, attrs)
 
-	if err := validatePassword(attrs.Password); err != nil {
+	digest, err := s.passwordDigest(attrs.Password)
+	if err != nil {
 		return Listed{}, err
 	}
+
+	user.PasswordDigest = digest
 
 	if err := s.validateNew(ctx, account.ID, user, attrs.GroupSet); err != nil {
 		return Listed{}, err
@@ -163,7 +167,7 @@ func (s Scenario) Update(
 		user.GroupID = attrs.Group
 	}
 
-	if err := validatePassword(attrs.Password); err != nil {
+	if err := s.applyPassword(&user, attrs); err != nil {
 		return Listed{}, err
 	}
 
@@ -174,8 +178,10 @@ func (s Scenario) Update(
 		return Listed{}, err
 	}
 
+	user.Role = role
+
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
-		if err := s.store.UpdateUser(ctx, user); err != nil {
+		if err := s.store.UpdateUser(ctx, user, attrs); err != nil {
 			if errors.Is(err, ErrEmailTaken) {
 				return unprocessable("EMAIL_TAKEN", "has already been taken", "attributes/email")
 			}
@@ -398,32 +404,35 @@ func applyAttrs(user *domain.User, attrs Attrs) {
 	}
 }
 
-// validatePassword keeps the reference's wire validation of the
-// password attribute (length bounds); the value itself is no longer
-// stored — end-user authentication is out of scope, nothing reads a
-// digest.
-func validatePassword(password *string) error {
+// passwordDigest validates the password length and answers its bcrypt
+// digest (nil password → passwordless, empty string → cleared).
+func (s Scenario) passwordDigest(password *string) (string, error) {
 	if password == nil {
-		return nil
+		return "", nil
 	}
 
 	n := utf8.RuneCountInString(*password)
 	switch {
 	case n < minPasswordLen:
-		return unprocessable(
+		return "", unprocessable(
 			"PASSWORD_TOO_SHORT",
 			"is too short (minimum is 6 characters)",
 			"attributes/password",
 		)
 	case n > maxPasswordLen:
-		return unprocessable(
+		return "", unprocessable(
 			"PASSWORD_TOO_LONG",
 			"is too long (maximum is 72 characters)",
 			"attributes/password",
 		)
 	}
 
-	return nil
+	digest, err := crypto.HashPassword(*password)
+	if err != nil {
+		return "", fmt.Errorf("users: password: %w", err)
+	}
+
+	return digest, nil
 }
 
 // validateNew runs the model validations of a create (group existence
@@ -562,4 +571,19 @@ func unprocessable(code, detail, attrPath string) *apperr.T {
 	t.About = docsOrigin + "/users/#users-object-attrs-" + strings.ReplaceAll(attr, "/", "-")
 
 	return t
+}
+
+func (s Scenario) applyPassword(user *domain.User, attrs Attrs) error {
+	if attrs.Password == nil && !attrs.PasswordSet {
+		return nil
+	}
+
+	digest, err := s.passwordDigest(attrs.Password)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordDigest = digest
+
+	return nil
 }

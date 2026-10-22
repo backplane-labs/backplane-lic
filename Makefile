@@ -150,7 +150,7 @@ conformance: ## Diff the server (in-process over the compose PostgreSQL) against
 	go test -count=1 ./test/conformance
 
 .PHONY: conformance-record
-conformance-record: ## Re-record conformance goldens from the Keygen CE reference (:3900)
+conformance-record: ## Record Keygen CE (:3900); LIC_CONFORMANCE_REFERENCE_TOKEN skips password login
 	go test -count=1 ./test/conformance -record
 
 .PHONY: build

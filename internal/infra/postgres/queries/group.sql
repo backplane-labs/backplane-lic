@@ -32,6 +32,10 @@ WHERE account_id = @account_id
   AND (
     @member_user::uuid IS NULL
     OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = @member_user)
+    OR EXISTS (
+      SELECT 1 FROM lic.group_owners go
+      WHERE go.account_id = @account_id AND go.group_id = lic.groups.id AND go.user_id = @member_user
+    )
   );
 
 -- name: ListGroups :many
@@ -42,6 +46,10 @@ WHERE account_id = @account_id
   AND (
     @member_user::uuid IS NULL
     OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = @member_user)
+    OR EXISTS (
+      SELECT 1 FROM lic.group_owners go
+      WHERE go.account_id = @account_id AND go.group_id = lic.groups.id AND go.user_id = @member_user
+    )
   )
   AND (
     @member_license::uuid IS NULL
@@ -65,6 +73,10 @@ ORDER BY
   id DESC
 LIMIT @limit
 OFFSET @offset;
+
+-- name: OwnedGroupIDsForUser :many
+SELECT group_id FROM lic.group_owners
+WHERE account_id = @account_id AND user_id = @user_id;
 
 -- name: GetGroupByUser :one
 SELECT g.id, g.account_id, g.name, g.max_users, g.max_licenses, g.max_machines,

@@ -2,12 +2,113 @@ package users
 
 import (
 	"context"
+	"crypto/subtle"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
+	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 )
+
+// The password-reset token's validity window.
+const resetTokenTTL = 24 * time.Hour
+
+// UpdatePassword changes the bearer's own password (oldPassword
+// verified), revoking every other token of the user.
+func (s Scenario) UpdatePassword(
+	ctx context.Context,
+	account domain.Account,
+	principal access.Principal,
+	alias, oldPassword, newPassword string,
+) (Listed, error) {
+	if err := access.Require(ctx, "user.password.update"); err != nil {
+		return Listed{}, err //nolint:wrapcheck // the port's own error
+	}
+
+	user, err := s.visible(ctx, account, principal, alias)
+	if err != nil {
+		return Listed{}, err
+	}
+
+	if err := access.UserPasswordUpdate(principal, user); err != nil {
+		return Listed{}, err //nolint:wrapcheck // the authorization's own error
+	}
+
+	valid := user.Authenticates(oldPassword)
+	if !valid {
+		return Listed{}, apperr.UnauthorizedSource("", "is not valid", "", "/meta/oldPassword")
+	}
+
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.setPassword(ctx, account.ID, user.ID, newPassword); err != nil {
+			return err
+		}
+
+		return s.store.DeleteUserTokensExcept(ctx, account.ID, user.ID, principal.TokenID)
+	}); err != nil {
+		return Listed{}, fmt.Errorf("users: password: %w", err)
+	}
+
+	return s.show(ctx, account.ID, user.ID)
+}
+
+// ResetPassword resets the password with the emailed reset token
+// (anti-enumeration: a token mismatch is the user 404), revoking every
+// token of the user.
+func (s Scenario) ResetPassword(
+	ctx context.Context,
+	account domain.Account,
+	principal access.Principal,
+	alias, resetToken, newPassword string,
+) (Listed, error) {
+	// The reset policy skips authentication entirely (anonymous resets
+	// are the point); a passwordless user of a protected account cannot
+	// reset (nothing to prove the claim with).
+	if principal.BearerType != "" {
+		if err := access.Require(ctx, "user.password.reset"); err != nil {
+			return Listed{}, err //nolint:wrapcheck // the port's own error
+		}
+	}
+
+	// Unscoped lookup: the reset token itself proves the claim.
+	user, err := s.byAlias(ctx, account.ID, alias)
+	if errors.Is(err, ErrNotFound) {
+		return Listed{}, apperr.NotFound("user", alias)
+	}
+
+	if err != nil {
+		return Listed{}, err
+	}
+
+	if user.Role == domain.RoleUser && account.Protected && !user.HasPassword() {
+		return Listed{}, apperr.ForbiddenReason(access.ReasonAllResources)
+	}
+
+	if principal.BearerType != "" && user.ID != principal.BearerID {
+		return Listed{}, apperr.ForbiddenReason(access.ReasonAllResources)
+	}
+
+	if err := s.verifyResetToken(account, user, alias, resetToken); err != nil {
+		return Listed{}, err
+	}
+
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.setPassword(ctx, account.ID, user.ID, newPassword); err != nil {
+			return err
+		}
+
+		return s.store.DeleteUserTokens(ctx, account.ID, user.ID)
+	}); err != nil {
+		return Listed{}, fmt.Errorf("users: password: %w", err)
+	}
+
+	return s.show(ctx, account.ID, user.ID)
+}
 
 func (s Scenario) Ban(
 	ctx context.Context, account domain.Account, principal access.Principal, alias string,
@@ -67,6 +168,53 @@ func (s Scenario) setBanned(
 		return s.events.Publish(ctx, event, user)
 	}); err != nil {
 		return Listed{}, fmt.Errorf("users: ban: %w", err)
+	}
+
+	status, err := s.status(ctx, user)
+	if err != nil {
+		return Listed{}, err
+	}
+
+	return Listed{User: user, Status: status}, nil
+}
+
+// verifyResetToken checks the reset claim (anti-enumeration 404) and
+// its 24h window.
+func (s Scenario) verifyResetToken(
+	account domain.Account, user domain.User, alias, resetToken string,
+) error {
+	stored := []byte(user.PasswordResetToken)
+	given := []byte(crypto.DigestV3(account.Keys.SecretKey, resetToken))
+
+	if user.PasswordResetToken == "" ||
+		subtle.ConstantTimeCompare(stored, given) != 1 {
+		return apperr.NotFound("user", alias)
+	}
+
+	if user.PasswordResetSentAt != nil &&
+		s.clock().Sub(*user.PasswordResetSentAt) > resetTokenTTL {
+		return apperr.UnauthorizedSource("", "is expired", "", "/meta/passwordResetToken")
+	}
+
+	return nil
+}
+
+// setPassword validates and writes the new password digest, clearing
+// the reset fields.
+func (s Scenario) setPassword(ctx context.Context, accountID, id uuid.UUID, password string) error {
+	digest, err := s.passwordDigest(&password)
+	if err != nil {
+		return err
+	}
+
+	return s.store.UpdateUserPassword(ctx, accountID, id, digest) //nolint:wrapcheck // the store's own error
+}
+
+// show loads the user fresh (post-write) with her status.
+func (s Scenario) show(ctx context.Context, accountID, id uuid.UUID) (Listed, error) {
+	user, err := s.store.UserByID(ctx, accountID, id)
+	if err != nil {
+		return Listed{}, err //nolint:wrapcheck // the caller maps the sentinel
 	}
 
 	status, err := s.status(ctx, user)

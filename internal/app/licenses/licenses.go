@@ -178,6 +178,7 @@ type ProductStore interface {
 // GroupStore is the group seam.
 type GroupStore interface {
 	GroupByID(ctx context.Context, accountID, id uuid.UUID) (domain.Group, error)
+	OwnedGroupIDsOfUser(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error)
 }
 
 // EntitlementStore loads entitlements for attach.

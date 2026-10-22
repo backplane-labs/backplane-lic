@@ -291,6 +291,12 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/UserResource"
+        meta:
+          type: object
+          required: [passwordResetToken]
+          properties:
+            passwordResetToken:
+              type: string
 
     TokenAttributes:
       # token (the raw secret) and the activation counters are optional:

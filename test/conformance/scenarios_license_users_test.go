@@ -1,49 +1,11 @@
 package conformance_test
 
 import (
-	"crypto/rand"
 	"net/http"
 	"testing"
-	"time"
 
-	"github.com/google/uuid"
-
-	"github.com/backplane-labs/backplane-lic/internal/domain"
-	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
-	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	conformance "github.com/backplane-labs/backplane-lic/test/conformance"
 )
-
-// seedLicenseUserToken only provisions authentication. Every operation under
-// test still traverses the real HTTP pipeline, including bearer lookup.
-func seedLicenseUserToken(tb testing.TB, store *postgres.Store, accountID, userID uuid.UUID) string {
-	tb.Helper()
-
-	account, err := store.Account(tb.Context(), accountID)
-	if err != nil {
-		tb.Fatal(err)
-	}
-
-	raw, err := crypto.GenerateTokenSecret(rand.Reader, string(domain.RoleUser))
-	if err != nil {
-		tb.Fatal(err)
-	}
-
-	now := time.Now()
-	expiry := now.Add(14 * 24 * time.Hour)
-	token := domain.Token{
-		ID: uuid.New(), AccountID: accountID, BearerID: userID,
-		BearerType: "User", BearerRole: domain.RoleUser, Kind: crypto.TokenKind(string(domain.RoleUser)),
-		Digest: crypto.DigestV3(account.Keys.SecretKey, raw), Permissions: []string{"*"},
-		Expiry: &expiry, CreatedAt: now, UpdatedAt: now,
-	}
-
-	if err := store.InsertToken(tb.Context(), token); err != nil {
-		tb.Fatal(err)
-	}
-
-	return raw
-}
 
 func licenseUserScenarios() []conformance.Scenario {
 	admin := conformance.Auth{Kind: conformance.AuthAdmin}

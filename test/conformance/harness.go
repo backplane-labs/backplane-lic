@@ -16,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -80,6 +81,7 @@ func NewReferenceTarget(baseURL string) *HTTPTarget {
 	target := NewTarget(baseURL)
 	target.Header.Set("Host", referenceHost)
 	target.Header.Set("X-Forwarded-Proto", "https")
+	target.adminToken = os.Getenv("LIC_CONFORMANCE_REFERENCE_TOKEN")
 
 	return target
 }
@@ -133,12 +135,9 @@ type HandlerTarget struct {
 	Handler http.Handler
 
 	// AdminToken is the raw admin token the test seeded directly in
-	// the database (the email:password mint is retired); the harness
-	// authenticates with it.
+	// the database; the harness authenticates with it without spending
+	// the password-login throttle budget.
 	AdminToken string
-	// SeedUserToken provisions a bearer fixture without exercising the user
-	// token endpoint, which is tested by its own resource group.
-	SeedUserToken func(tb testing.TB, userID string) string
 }
 
 // The poll's cadence and budget.
@@ -231,7 +230,18 @@ func (h *HandlerTarget) Do(req *http.Request) (*http.Response, error) {
 	rec := httptest.NewRecorder()
 	h.Handler.ServeHTTP(rec, req)
 
-	return rec.Result(), nil
+	resp := rec.Result()
+	// A real net/http client canonicalizes names while parsing the response.
+	// Do the same for this socket-free target, including intentionally spelled
+	// reference headers such as X-RateLimit-*.
+	resp.Header = make(http.Header)
+	for name, values := range rec.Header() {
+		for _, value := range values {
+			resp.Header.Add(name, value)
+		}
+	}
+
+	return resp, nil
 }
 
 // AuthKind selects the authentication scheme of a step.
@@ -312,6 +322,10 @@ func recordedHeaderNames() []string {
 		"Keygen-Edition",
 		"Keygen-Mode",
 		"WWW-Authenticate",
+		"X-RateLimit-Window",
+		"X-RateLimit-Count",
+		"X-RateLimit-Limit",
+		"X-RateLimit-Remaining",
 	}
 }
 
@@ -487,38 +501,31 @@ func applyAuth(tb testing.TB, target Target, req *http.Request, auth Auth, vars 
 	}
 }
 
-// UserToken provisions a user-bearer fixture for resource authorization tests.
-// The reference mints through its API; in-process tests seed the same token
-// directly, keeping these scenarios independent of password/login flows.
+// UserToken mints a user-bearer fixture through the real API on both servers.
 func UserToken(tb testing.TB, target Target, userID string) string {
 	tb.Helper()
 
-	switch tgt := target.(type) {
-	case *HandlerTarget:
-		return tgt.SeedUserToken(tb, userID)
-	default:
-		status, raw := call(tb, target, http.MethodPost,
-			"/v1/accounts/"+AccountSlug+"/users/"+userID+"/tokens", "", map[string]string{
-				"Authorization": "Bearer " + AdminToken(tb, target),
-			})
-		if status != http.StatusOK {
-			tb.Fatalf("conformance: mint user fixture: status %d: %s", status, raw)
-		}
-
-		var doc struct {
-			Data struct {
-				Attributes struct {
-					Token string `json:"token"`
-				} `json:"attributes"`
-			} `json:"data"`
-		}
-
-		if err := json.Unmarshal(raw, &doc); err != nil || doc.Data.Attributes.Token == "" {
-			tb.Fatalf("conformance: decode user fixture: %v: %s", err, raw)
-		}
-
-		return doc.Data.Attributes.Token
+	status, raw := call(tb, target, http.MethodPost,
+		"/v1/accounts/"+AccountSlug+"/users/"+userID+"/tokens", "", map[string]string{
+			"Authorization": "Bearer " + AdminToken(tb, target),
+		})
+	if status != http.StatusOK {
+		tb.Fatalf("conformance: mint user fixture: status %d: %s", status, raw)
 	}
+
+	var doc struct {
+		Data struct {
+			Attributes struct {
+				Token string `json:"token"`
+			} `json:"attributes"`
+		} `json:"data"`
+	}
+
+	if err := json.Unmarshal(raw, &doc); err != nil || doc.Data.Attributes.Token == "" {
+		tb.Fatalf("conformance: decode user fixture: %v: %s", err, raw)
+	}
+
+	return doc.Data.Attributes.Token
 }
 
 // cachedAdminToken mints the admin token at most once per target: password

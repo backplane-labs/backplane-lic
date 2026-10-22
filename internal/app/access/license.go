@@ -346,3 +346,18 @@ func LicenseUsageWrite(p Principal, license domain.License, action string) error
 		return deny()
 	}
 }
+
+// GroupLicenseShow is Groups::LicensePolicy#show?: unlike an ordinary
+// license show, this route admits group owners without individual ownership.
+func GroupLicenseShow(p Principal, license domain.License, groupOwned bool) error {
+	switch {
+	case isAdminFamily(p):
+		return nil
+	case p.Role == domain.RoleProduct && license.ProductID == p.BearerID:
+		return nil
+	case p.Role == domain.RoleUser && groupOwned:
+		return nil
+	default:
+		return deny()
+	}
+}

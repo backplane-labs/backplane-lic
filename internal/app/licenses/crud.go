@@ -392,23 +392,9 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, idOrKey s
 func (s Scenario) load(ctx context.Context, account domain.Account, idOrKey string) (domain.License, error) {
 	principal := access.PrincipalOf(ctx)
 
-	var (
-		license domain.License
-		err     error
-	)
-
-	if uuidRe.MatchString(idOrKey) {
-		license, err = s.store.LicenseByID(ctx, account.ID, uuid.MustParse(idOrKey))
-	} else {
-		license, err = s.store.LicenseByKey(ctx, account.ID, idOrKey)
-	}
-
-	if errors.Is(err, ErrNotFound) {
-		return domain.License{}, apperr.NotFound("license", idOrKey)
-	}
-
+	license, err := s.loadRecord(ctx, account, idOrKey)
 	if err != nil {
-		return domain.License{}, fmt.Errorf("licenses: load: %w", err)
+		return domain.License{}, err
 	}
 
 	switch licenseScopeOnly(principal) {
@@ -429,6 +415,31 @@ func (s Scenario) load(ctx context.Context, account domain.Account, idOrKey stri
 		if license.ID != principal.BearerID {
 			return domain.License{}, apperr.NotFound("license", idOrKey)
 		}
+	}
+
+	return license, nil
+}
+
+// loadRecord loads within the account; each caller applies its route's
+// ownership scope (ordinary license ownership or group ownership).
+func (s Scenario) loadRecord(ctx context.Context, account domain.Account, idOrKey string) (domain.License, error) {
+	var (
+		license domain.License
+		err     error
+	)
+
+	if uuidRe.MatchString(idOrKey) {
+		license, err = s.store.LicenseByID(ctx, account.ID, uuid.MustParse(idOrKey))
+	} else {
+		license, err = s.store.LicenseByKey(ctx, account.ID, idOrKey)
+	}
+
+	if errors.Is(err, ErrNotFound) {
+		return domain.License{}, apperr.NotFound("license", idOrKey)
+	}
+
+	if err != nil {
+		return domain.License{}, fmt.Errorf("licenses: load: %w", err)
 	}
 
 	return license, nil

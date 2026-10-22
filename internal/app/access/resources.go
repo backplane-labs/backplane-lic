@@ -46,7 +46,7 @@ func ProductShow(p Principal, product domain.Product, licensedToBearer bool) err
 	case p.Role == domain.RoleProduct && product.ID == p.BearerID:
 		return nil
 	case (p.Role == domain.RoleUser || p.Role == domain.RoleLicense) &&
-		(product.Open() || licensedToBearer):
+		(product.Open() || product.Licensed() && licensedToBearer):
 		return nil
 	default:
 		return deny()

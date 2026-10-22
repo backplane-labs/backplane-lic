@@ -85,6 +85,7 @@ const (
 	RegenerateTokenOperation           OperationName = "RegenerateToken"
 	ReinstateLicenseOperation          OperationName = "ReinstateLicense"
 	RenewLicenseOperation              OperationName = "RenewLicense"
+	ReplaceUserSecondFactorOperation   OperationName = "ReplaceUserSecondFactor"
 	RequestPasswordResetOperation      OperationName = "RequestPasswordReset"
 	ResetLicenseUsageOperation         OperationName = "ResetLicenseUsage"
 	ResetUserPasswordOperation         OperationName = "ResetUserPassword"

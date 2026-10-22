@@ -19,8 +19,8 @@ import (
 // --- users scenario ---
 
 // UpdateUser writes every mutable column of the row.
-func (s *Store) UpdateUser(ctx context.Context, user domain.User) error {
-	return s.Users.UpdateUser(ctx, user)
+func (s *Store) UpdateUser(ctx context.Context, user domain.User, attrs users.Attrs) error {
+	return s.Users.UpdateUser(ctx, user, attrs)
 }
 
 // DeleteUser removes the row.
@@ -192,6 +192,11 @@ func (s *Store) DeleteGroupOwnersByUsers(
 	return s.Groups.DeleteGroupOwnersByUsers(ctx, accountID, groupID, userIDs)
 }
 
+// OwnedGroupIDsOfUser answers the user's ownership-only group scope.
+func (s *Store) OwnedGroupIDsOfUser(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error) {
+	return s.Groups.OwnedGroupIDsOfUser(ctx, accountID, userID)
+}
+
 // --- tokens scenario (management face) ---
 
 // TokenByID loads a token by its id.
@@ -250,3 +255,39 @@ var (
 	_ groups.Store = (*Store)(nil)
 	_ tokens.Store = (*Store)(nil)
 )
+
+// --- second factors scenario ---
+
+// SecondFactorByID loads the user's factor.
+func (s *Store) SecondFactorByID(
+	ctx context.Context, accountID, userID, id uuid.UUID,
+) (domain.SecondFactor, error) {
+	return s.SecondFactors.SecondFactorByID(ctx, accountID, userID, id)
+}
+
+// AnySecondFactor loads the user's (only) factor.
+func (s *Store) AnySecondFactor(ctx context.Context, userID uuid.UUID) (domain.SecondFactor, error) {
+	return s.SecondFactors.AnySecondFactor(ctx, userID)
+}
+
+// InsertSecondFactor writes the factor.
+func (s *Store) InsertSecondFactor(ctx context.Context, factor domain.SecondFactor) error {
+	return s.SecondFactors.InsertSecondFactor(ctx, factor)
+}
+
+// UpdateSecondFactor writes enabled and the replay guard.
+func (s *Store) UpdateSecondFactor(ctx context.Context, factor domain.SecondFactor) error {
+	return s.SecondFactors.UpdateSecondFactor(ctx, factor)
+}
+
+// DeleteSecondFactor removes the factor.
+func (s *Store) DeleteSecondFactor(ctx context.Context, accountID, userID, id uuid.UUID) error {
+	return s.SecondFactors.DeleteSecondFactor(ctx, accountID, userID, id)
+}
+
+// ListSecondFactors answers the user's factors.
+func (s *Store) ListSecondFactors(
+	ctx context.Context, accountID, userID uuid.UUID, limit int,
+) ([]domain.SecondFactor, error) {
+	return s.SecondFactors.ListSecondFactors(ctx, accountID, userID, limit)
+}

@@ -53,8 +53,8 @@ type Store interface {
 	UserByEmail(ctx context.Context, accountID uuid.UUID, email string) (domain.User, error)
 	// InsertUser writes a new user row.
 	InsertUser(ctx context.Context, user domain.User) error
-	// UpdateUser writes every mutable column of the row.
-	UpdateUser(ctx context.Context, user domain.User) error
+	// UpdateUser writes only the addressed attributes, preserving concurrent auth state.
+	UpdateUser(ctx context.Context, user domain.User, attrs Attrs) error
 	// DeleteUser removes the row.
 	DeleteUser(ctx context.Context, accountID, id uuid.UUID) error
 	// UserHasActiveLicense answers the user's status input.

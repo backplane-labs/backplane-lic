@@ -728,6 +728,15 @@ func (UnimplementedHandler) RenewLicense(ctx context.Context, params RenewLicens
 	return r, ht.ErrNotImplemented
 }
 
+// ReplaceUserSecondFactor implements replaceUserSecondFactor operation.
+//
+// Enable or disable a second factor (requires meta.otp).
+//
+// PUT /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+func (UnimplementedHandler) ReplaceUserSecondFactor(ctx context.Context, req ReplaceUserSecondFactorReq, params ReplaceUserSecondFactorParams) (r *SecondFactorDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RequestPasswordReset implements requestPasswordReset operation.
 //
 // Always answers 204; unknown emails trigger nothing.

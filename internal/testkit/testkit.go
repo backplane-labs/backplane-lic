@@ -1,6 +1,6 @@
 // Package testkit holds the helpers tests share: creating the
-// bootstrap admin user and her token directly in the database (the
-// email:password flow is retired).
+// bootstrap admin user and her token directly in the database. Tests do
+// not spend password-login throttle budgets to bootstrap themselves.
 package testkit
 
 import (
@@ -19,8 +19,8 @@ import (
 
 // SeedAdmin creates the account's bootstrap admin user when her email
 // is not taken (idempotent per email) and answers the raw secret of an
-// admin token issued directly in the database — the replacement for
-// the retired email:password mint.
+// admin token issued directly in the database, independently of Basic
+// authentication or its throttle.
 func SeedAdmin(ctx context.Context, db *postgres.Store, accountID uuid.UUID, email string) (string, error) {
 	scenario := users.New(db, events.None{}, time.Now)
 

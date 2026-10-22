@@ -34,8 +34,10 @@ type Page struct {
 // CreateAttrs is the write payload of a token creation (the generate
 // endpoint and the bearer sub-routes).
 type CreateAttrs struct {
-	Name   *string
-	Expiry *time.Time
+	// ExpirySet distinguishes explicit null (non-expiring) from the default.
+	ExpirySet bool
+	Name      *string
+	Expiry    *time.Time
 	// MaxActivations/MaxDeactivations apply to activation tokens (the
 	// license sub-route).
 	MaxActivations   *int
@@ -126,6 +128,30 @@ func (m Manager) Show(
 	}
 
 	return token, nil
+}
+
+// CreateForUser mints a token FOR the user (the /users/{id}/tokens
+// route): admin, developer, or a product the user is licensed to.
+func (m Manager) CreateForUser(
+	ctx context.Context,
+	account domain.Account,
+	principal access.Principal,
+	user domain.User,
+	attrs CreateAttrs,
+) (domain.Token, string, error) {
+	if err := access.Require(ctx, "token.generate"); err != nil {
+		return domain.Token{}, "", err //nolint:wrapcheck // the port's own error
+	}
+
+	if err := access.TokenGenerateForUser(principal, user, func() bool {
+		ok, err := m.store.UserLicensedToProduct(ctx, account.ID, user.ID, principal.BearerID)
+
+		return err == nil && ok
+	}); err != nil {
+		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+	}
+
+	return m.insert(ctx, account, user.ID, "User", user.Role, attrs)
 }
 
 // CreateForLicense mints an activation token for the license (the
@@ -301,7 +327,7 @@ func (m Manager) insert(
 		BearerRole:       role,
 		Kind:             crypto.TokenKind(string(role)),
 		Name:             attrs.Name,
-		Expiry:           expiry(attrs.Expiry, role, now),
+		Expiry:           expiry(attrs.Expiry, attrs.ExpirySet, role, now),
 		Permissions:      []string{"*"},
 		MaxActivations:   attrs.MaxActivations,
 		MaxDeactivations: attrs.MaxDeactivations,
