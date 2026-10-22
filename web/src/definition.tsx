@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useClient } from '@backplane-labs/backplane-react';
 import { definePlugin, usePluginContext, usePluginNavigate } from '@backplane-labs/backplane-plugin-sdk';
@@ -10,6 +10,7 @@ import { call, ConsoleServiceClient, info, request, type Info } from './rpc';
 import { byName, resources, tokenFields, type Action, type FieldSpec, type Relationship, type ResourceSpec } from './resources';
 import { decodeDocument, labelOf, listData, nextPage, parseJSON, writableAttributes, type Document, type Resource } from './model';
 import { relationshipBody, relationFields } from './schemas';
+import { actionPayload } from './editor-model';
 import { ErrorNotice, Loading, ObjectView, OperationForm, Result, mono, row, useText, type Operation } from './components';
 import navigation from './navigation';
 import ru, { schemaFormsRussian } from './locales/ru';
@@ -24,7 +25,8 @@ function Shell() {
   const { i18n } = useTranslation(), navigate = usePluginNavigate();
   useEffect(() => { i18n.addResourceBundle('ru', 'module.lic', ru, false, true); i18n.addResourceBundle('ru', 'backplane.schemaForms', schemaFormsRussian, false, true); }, [i18n]);
   const t = useText(), client = useClient(ConsoleServiceClient), { environment } = usePluginContext();
-  const state = usePlatformQuery('lic:info', (signal) => info(client, signal));
+  const location = useLocation();
+  const state = usePlatformQuery(`lic:info:${location.pathname}`, (signal) => info(client, signal));
   return <Stack gap={16} style={{ minWidth: 0 }}><ConnectionNotice />
     {environment === 'standalone' && <Panel><p>{t('standaloneHelp')}</p></Panel>}
     <nav aria-label={t('title')} style={row}>{navigation.nav.map((entry) => <Button variant="ghost" size="sm" key={entry.path} onClick={() => navigate(entry.path)}>{t(entry.labelKey)}</Button>)}</nav>
@@ -125,7 +127,7 @@ function actionOperation(action: Action, spec: ResourceSpec, path: string, api: 
         const link = document.createElement('a'); link.href = url; link.download = `${path.split('/').pop()}.lic`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
         return { meta: { status: t('completed') } };
       }
-      return api.call(action.method, target, {}, action.meta ? { meta: values } : Object.keys(values).length ? values : undefined, signal);
+      return api.call(action.method, target, {}, actionPayload(action, values), signal);
     },
   };
 }

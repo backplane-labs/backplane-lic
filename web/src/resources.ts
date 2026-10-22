@@ -7,6 +7,7 @@ const limits = (names: string): FieldSpec[] => names.split(' ').map((name) => ({
 const bools = (names: string): FieldSpec[] => names.split(' ').map((name) => ({ name, kind: 'bool' }));
 const metadata: FieldSpec = { name: 'metadata', kind: 'json' };
 const tokenRel: Relationship = { name: 'tokens', type: 'tokens', many: true, create: true, secret: true };
+export const checkoutAlgorithms = ['base64', 'aes-256-gcm'].flatMap((encoding) => ['ed25519', 'rsa-pss-sha256', 'rsa-sha256', 'ecdsa-p256'].map((signing) => `${encoding}+${signing}`));
 const tokenAttrs: FieldSpec[] = [{ name: 'name', nullable: true }, { name: 'expiry', nullable: true }];
 const usage = (verb: 'increment' | 'decrement'): Action => ({ name: `${verb}Usage`, method: 'POST', suffix: `actions/${verb}-usage`, fields: [{ name: verb, kind: 'int64' }], meta: true, initial: { [verb]: 1 } });
 export const resources: ResourceSpec[] = [
@@ -27,8 +28,8 @@ export const resources: ResourceSpec[] = [
       { name: 'validateKey', method: 'POST', suffix: 'actions/validate-key', collection: true, fields: [{ name: 'key', required: true }, { name: 'nonce', kind: 'int64' }, { name: 'scope', kind: 'json' }, ...bools('encrypted legacyEncrypted')], meta: true },
       ...['renew', 'suspend', 'reinstate', 'check-in'].map((name) => ({ name, method: 'POST', suffix: `actions/${name}`, dangerous: name === 'suspend' })),
       usage('increment'), usage('decrement'), { name: 'resetUsage', method: 'POST', suffix: 'actions/reset-usage', dangerous: true },
-      { name: 'checkout', method: 'POST', suffix: 'actions/check-out', fields: [...bools('encrypt'), { name: 'algorithm', choices: ['ed25519', 'rsa-pss-sha256', 'rsa-sha256', 'ecdsa-p256'] }, { name: 'ttl', kind: 'int64', nullable: true }, { name: 'include', kind: 'json' }], meta: true },
-      { name: 'downloadLicense', method: 'GET', suffix: 'actions/check-out', binary: true, fields: [...bools('encrypt'), { name: 'algorithm', choices: ['ed25519', 'rsa-pss-sha256', 'rsa-sha256', 'ecdsa-p256'] }, { name: 'ttl', kind: 'int64', nullable: true }] },
+      { name: 'checkout', method: 'POST', suffix: 'actions/check-out', fields: [...bools('encrypt'), { name: 'algorithm', choices: checkoutAlgorithms }, { name: 'ttl', kind: 'int64', nullable: true }, { name: 'include', kind: 'json' }], meta: true },
+      { name: 'downloadLicense', method: 'GET', suffix: 'actions/check-out', binary: true, fields: [...bools('encrypt'), { name: 'algorithm', choices: checkoutAlgorithms }, { name: 'ttl', kind: 'int64', nullable: true }] },
       { name: 'revoke', method: 'DELETE', suffix: 'actions/revoke', dangerous: true, removes: true },
     ] },
   { name: 'users', type: 'users', attributes: [{ name: 'email', required: true }, ...strings('firstName lastName'), { name: 'password', secret: true }, { name: 'role', choices: ['admin', 'developer', 'sales-agent', 'support-agent', 'read-only', 'user'] }, metadata], createRelationships: [{ name: 'group', type: 'groups' }], filters: ['email', 'status', 'group', 'product', 'license', 'roles[]'],
