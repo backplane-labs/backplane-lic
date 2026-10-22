@@ -1,4 +1,4 @@
-// Package testkit holds the helpers tests and operator tools share:
+// Package testkit holds the helpers tests share:
 // creating an admin user directly in the database, the replacement for
 // the removed configuration admin seeding (admin tokens are issued from
 // the console instead).

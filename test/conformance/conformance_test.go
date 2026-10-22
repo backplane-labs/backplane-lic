@@ -3,10 +3,22 @@ package conformance_test
 import (
 	"encoding/json"
 	"flag"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/backplane-labs/backplane/pkg/backplane/config"
+	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
+	"github.com/google/uuid"
+
+	"github.com/gopherex/xlog"
+
+	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
+	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
+	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
+	"github.com/backplane-labs/backplane-lic/internal/service"
+	"github.com/backplane-labs/backplane-lic/internal/testkit"
 	conformance "github.com/backplane-labs/backplane-lic/test/conformance"
 )
 
@@ -45,12 +57,7 @@ func TestConformance(t *testing.T) {
 		return
 	}
 
-	targetURL := os.Getenv("LIC_CONFORMANCE_TARGET")
-	if targetURL == "" {
-		t.Skip("LIC_CONFORMANCE_TARGET is not set — start backplane-lic and export its URL")
-	}
-
-	target := conformance.NewTarget(targetURL)
+	target := serverUnderTest(t)
 	key := conformance.Ed25519Key(t, target)
 
 	for _, sc := range scns {
@@ -62,6 +69,46 @@ func TestConformance(t *testing.T) {
 			compare(t, golden, live)
 		})
 	}
+}
+
+// serverUnderTest is the running backplane-lic at LIC_CONFORMANCE_TARGET,
+// or one served in-process over the database at LIC_TEST_DATABASE_URL with
+// the reference's account and admin.
+//
+//nolint:ireturn // either target
+func serverUnderTest(t *testing.T) conformance.Target {
+	t.Helper()
+
+	if url := os.Getenv("LIC_CONFORMANCE_TARGET"); url != "" {
+		return conformance.NewTarget(url)
+	}
+
+	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
+	if dsn == "" {
+		t.Skip("set LIC_CONFORMANCE_TARGET or LIC_TEST_DATABASE_URL (make up)")
+	}
+
+	ctx := t.Context()
+
+	store, err := postgres.Open(ctx, xlog.NewJSON(xlog.WithWriter(io.Discard)), sdkpg.Config{DSN: config.Secret(dsn)})
+	if err != nil {
+		t.Fatalf("conformance: open store: %v", err)
+	}
+
+	t.Cleanup(store.Close)
+
+	spec := accounts.Spec{ID: uuid.MustParse(conformance.AccountID), Name: "example.com", Slug: conformance.AccountSlug}
+	if _, err := accounts.Bootstrap(ctx, store.Accounts, spec); err != nil {
+		t.Fatalf("conformance: bootstrap: %v", err)
+	}
+
+	if err := testkit.SeedAdmin(ctx, store, spec.ID, conformance.AdminEmail, conformance.AdminPass); err != nil {
+		t.Fatalf("conformance: seed admin: %v", err)
+	}
+
+	handler := service.Handler(store, httpapi.NewMemoryThrottler(), spec, service.HTTP{}, "keygen.test", "conformance")
+
+	return &conformance.HandlerTarget{Handler: handler}
 }
 
 func referenceURL() string {

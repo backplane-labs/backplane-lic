@@ -137,7 +137,8 @@ test-live: ## Tests against the compose PostgreSQL and Valkey
 	go test -race -count=1 ./...
 
 .PHONY: conformance
-conformance: ## Run the differential conformance suite (skips unless LIC_CONFORMANCE_TARGET is set)
+conformance: ## Diff the server (in-process over the compose PostgreSQL) against the recorded goldens
+	LIC_TEST_DATABASE_URL="postgres://lic:lic@127.0.0.1:5440/lic?sslmode=disable" \
 	go test -count=1 ./test/conformance
 
 .PHONY: conformance-record

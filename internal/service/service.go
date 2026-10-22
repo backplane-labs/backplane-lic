@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/backplane-labs/backplane/pkg/backplane"
@@ -20,7 +21,6 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
-	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 )
@@ -30,13 +30,14 @@ type Service struct {
 	Store deps.Dependency[*postgres.Store]
 	Cache deps.Optional[valkey.AsideClient]
 	// HTTP is the public JSON:API (the full middleware pipeline: request
-	// id, negotiation, authentication, response signing).
+	// id, negotiation, authentication, response signing); it answers 503
+	// until the tree has started.
 	HTTP http.Handler
 }
 
-// New builds the tree under root: the store and cache dependencies, the
-// account bootstrap (the row is created from configuration at start)
-// and the HTTP handler.
+// New builds the tree under root: the store and cache dependencies, and
+// a start step that creates the account row from configuration and
+// builds the HTTP handler over the started store.
 func New(root backplane.Root[Config]) (*Service, error) {
 	cfg := root.Config()
 
@@ -49,7 +50,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	}
 
 	spec := accounts.Spec{ID: id, Name: cfg.Account.Name, Slug: cfg.Account.Slug}
-	scenarioStore := lazyStore{store: store}
+	late := &lateHandler{}
 
 	bootstrap := deps.NewComponent(root, "bootstrap")
 	bootstrap.OnStart(func(ctx context.Context) error {
@@ -57,98 +58,54 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			return fmt.Errorf("bootstrap: %w", err)
 		}
 
+		throttler := httpapi.Throttler(httpapi.NewMemoryThrottler())
+		if client, ok := cache.Get(); ok {
+			throttler = httpapi.NewValkeyThrottler(client.Client())
+		}
+
+		late.set(Handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit))
+
 		return nil
 	})
 
-	throttler := httpapi.Throttler(httpapi.NewMemoryThrottler())
-	if client, ok := cache.Get(); ok {
-		throttler = httpapi.NewValkeyThrottler(client.Client())
-	}
+	return &Service{Store: store, Cache: cache, HTTP: late}, nil
+}
 
+// Handler builds the public API over an opened store: the production tree
+// calls it at start, tests call it directly.
+func Handler(
+	store *postgres.Store, throttler httpapi.Throttler, spec accounts.Spec, cfg HTTP, docsHost, revision string,
+) http.Handler {
 	clock := time.Now
 
-	handler := httpapi.New(httpapi.Deps{
-		Accounts:       lazyStore{store: store},
-		Authn:          authn.New(scenarioStore, clock),
-		Users:          users.New(scenarioStore, clock),
-		Tokens:         tokens.New(scenarioStore, rand.Reader, clock),
-		Spec:           httpapi.Spec{ID: id, Slug: spec.Slug},
-		Revision:       build.Get().Commit,
-		DocsHost:       cfg.DocsHost,
+	return httpapi.New(httpapi.Deps{
+		Accounts:       store.Accounts,
+		Authn:          authn.New(store, clock),
+		Users:          users.New(store, clock),
+		Tokens:         tokens.New(store, rand.Reader, clock),
+		Spec:           httpapi.Spec{ID: spec.ID, Slug: spec.Slug},
+		Revision:       revision,
+		DocsHost:       docsHost,
 		Throttle:       throttler,
-		TrustedProxies: cfg.HTTP.TrustedProxies,
+		TrustedProxies: cfg.TrustedProxies,
 		Clock:          clock,
 	})
-
-	return &Service{
-		Store: store,
-		Cache: cache,
-		HTTP:  handler,
-	}, nil
 }
 
-// lazyStore reads the store lazily: the dependency provides it only
-// when the tree starts, after constructors have run, so every scenario
-// store port goes through here.
-type lazyStore struct {
-	store deps.Dependency[*postgres.Store]
+// lateHandler serves the handler built at start; before that, 503.
+type lateHandler struct {
+	h atomic.Pointer[http.Handler]
 }
 
-// The delegations below are the union of the scenario storage ports
-// (accounts, authn, users, tokens); each calls into the store the tree
-// provides at start.
+func (l *lateHandler) set(h http.Handler) { l.h.Store(&h) }
 
-// Account loads the configured account.
-func (l lazyStore) Account(ctx context.Context, id uuid.UUID) (domain.Account, error) {
-	return l.store.Get().Accounts.Account(ctx, id) //nolint:wrapcheck // the repository's own error
-}
+func (l *lateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h := l.h.Load()
+	if h == nil {
+		http.Error(w, "starting", http.StatusServiceUnavailable)
 
-// TokenByDigest loads a token by its digest.
-func (l lazyStore) TokenByDigest(ctx context.Context, accountID uuid.UUID, digest string) (domain.Token, error) {
-	return l.store.Get().TokenByDigest(ctx, accountID, digest) //nolint:wrapcheck // the repository's own error
-}
+		return
+	}
 
-// InsertToken writes a new token row.
-func (l lazyStore) InsertToken(ctx context.Context, token domain.Token) error {
-	return l.store.Get().InsertToken(ctx, token) //nolint:wrapcheck // the repository's own error
-}
-
-// BearerUser loads the override bearer (a user).
-func (l lazyStore) BearerUser(ctx context.Context, accountID, id uuid.UUID) (domain.User, error) {
-	return l.store.Get().BearerUser(ctx, accountID, id) //nolint:wrapcheck // the repository's own error
-}
-
-// UserByID loads a user; ErrNotFound when none.
-func (l lazyStore) UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error) {
-	return l.store.Get().UserByID(ctx, accountID, id) //nolint:wrapcheck // the repository's own error
-}
-
-// UserByEmail loads a user by downcased email; ErrNotFound when none.
-func (l lazyStore) UserByEmail(ctx context.Context, accountID uuid.UUID, email string) (domain.User, error) {
-	return l.store.Get().UserByEmail(ctx, accountID, email) //nolint:wrapcheck // the repository's own error
-}
-
-// InsertUser writes a new user row.
-func (l lazyStore) InsertUser(ctx context.Context, user domain.User) error {
-	return l.store.Get().InsertUser(ctx, user) //nolint:wrapcheck // the repository's own error
-}
-
-// UserHasActiveLicense answers the user's status input.
-func (l lazyStore) UserHasActiveLicense(ctx context.Context, accountID, id uuid.UUID) (bool, error) {
-	return l.store.Get().UserHasActiveLicense(ctx, accountID, id) //nolint:wrapcheck // the repository's own error
-}
-
-// EnabledSecondFactorSecret loads the user's enabled TOTP secret.
-func (l lazyStore) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (string, bool, error) {
-	return l.store.Get().EnabledSecondFactorSecret(ctx, userID) //nolint:wrapcheck // the repository's own error
-}
-
-// LicenseByKey loads the license-auth slice by key.
-func (l lazyStore) LicenseByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error) {
-	return l.store.Get().LicenseByKey(ctx, accountID, key) //nolint:wrapcheck // the repository's own error
-}
-
-// LicenseByID loads the license-auth slice by id.
-func (l lazyStore) LicenseByID(ctx context.Context, accountID, id uuid.UUID) (domain.LicenseAuth, error) {
-	return l.store.Get().LicenseByID(ctx, accountID, id) //nolint:wrapcheck // the repository's own error
+	(*h).ServeHTTP(w, r)
 }
