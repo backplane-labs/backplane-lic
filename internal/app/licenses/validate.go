@@ -42,6 +42,9 @@ type Scope struct {
 	Entitlements []string
 	Checksum     *string
 	Version      *string
+	// Nonce and Echo preserve request metadata for validation webhook payloads.
+	Nonce *int64
+	Echo  map[string]any
 }
 
 // ValidateQuick runs the GET validate (scope checks skipped, no touch
@@ -131,7 +134,12 @@ func (s Scenario) validateAndTouch(
 			return err
 		}
 
-		if err := s.publish(ctx, validationEvent(verdict), *license); err != nil {
+		resource := domain.LicenseValidationEvent{
+			License: *license, Valid: verdict.Valid, Detail: verdict.Detail, Code: verdict.Code,
+			Time: now, Nonce: scope.Nonce, Scope: scope.Echo,
+		}
+
+		if err := s.publish(ctx, validationEvent(verdict), resource); err != nil {
 			return err
 		}
 

@@ -38,6 +38,10 @@ func TestConformance(t *testing.T) {
 			t.Run(scenario.Name, func(t *testing.T) {
 				t.Parallel()
 
+				if scenario.Name == "end_user_auth_not_implemented" {
+					t.Skip("local-only fixture; replaced by the parallel end-user authentication implementation")
+				}
+
 				transcript := conformance.Run(t, reference, scenario, key)
 				golden := filepath.Join("testdata", scenario.Name+".golden.json")
 

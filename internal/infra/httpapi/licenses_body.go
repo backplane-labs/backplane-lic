@@ -723,6 +723,8 @@ func validateValidationBody( //nolint:cyclop,gocritic,nonamedreturns // the type
 		rawScope = validationScopeEcho(scopeRaw)
 	}
 
+	scope.Nonce, scope.Echo = nonce, rawScope
+
 	return nonce, scope, rawScope, key, legacy, nil
 }
 

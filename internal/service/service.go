@@ -106,8 +106,16 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	runner := deps.NewComponent(root, "jobs")
 	runner.Go(func(ctx context.Context) error {
 		jobsRunner := jobs.NewRunner(store.Get(), time.Now)
+		publisher := webhooks.NewPublisher(store.Get(), relayOutbox, spec.ID, rand.Reader, time.Now)
+		notifier := licenses.NewNotifier(store.Get().Licenses, publisher, spec.ID, time.Now, store.Get().Do)
 
-		return loop(ctx, time.Minute, jobsRunner.Tick)
+		return loop(ctx, time.Minute, func(ctx context.Context) error {
+			if err := jobsRunner.Tick(ctx); err != nil {
+				return err //nolint:wrapcheck // scenario error
+			}
+
+			return notifier.Tick(ctx)
+		})
 	})
 
 	return &Service{Store: store, Cache: cache, HTTP: late}, nil

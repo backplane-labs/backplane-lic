@@ -4,7 +4,6 @@ package httpapi
 import (
 	"context"
 	"crypto/rand"
-	"encoding/json"
 	"strings"
 	"time"
 
@@ -16,7 +15,6 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
-	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
 	"github.com/backplane-labs/backplane-lic/internal/oas"
 )
@@ -850,33 +848,10 @@ func (a *API) ValidateLicenseKey(
 func validationMeta(
 	now time.Time, verdict licenses.Verdict, nonce *int64, rawScope map[string]any,
 ) oas.LicenseValidateMeta {
-	meta := oas.LicenseValidateMeta{
-		Ts:     render.Timestamp(now),
-		Valid:  verdict.Valid,
-		Detail: verdict.Detail,
-		Code:   verdict.Code,
-	}
-
-	if nonce != nil {
-		meta.Nonce = oas.NewOptInt(int(*nonce))
-	}
-
-	if rawScope != nil {
-		out := oas.LicenseValidateMetaScope{}
-
-		for key, value := range rawScope {
-			raw, err := json.Marshal(value)
-			if err != nil {
-				continue
-			}
-
-			out[jsonapi.CamelizeKey(key)] = raw
-		}
-
-		meta.Scope = oas.NewOptLicenseValidateMetaScope(out)
-	}
-
-	return meta
+	return render.LicenseValidationMeta(domain.LicenseValidationEvent{
+		Time: now, Valid: verdict.Valid, Detail: verdict.Detail, Code: verdict.Code,
+		Nonce: nonce, Scope: rawScope,
+	})
 }
 
 // RevokeLicense implements DELETE …/licenses/{licenseId}/actions/revoke.

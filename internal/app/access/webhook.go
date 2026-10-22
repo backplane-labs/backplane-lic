@@ -120,6 +120,8 @@ func ProductMayRead(productID uuid.UUID, resource any) bool {
 		return v.BearerType == "Product" && v.BearerID == productID
 	case domain.User:
 		return v.Role == domain.RoleUser
+	case domain.LicenseValidationEvent:
+		return v.License.ProductID == productID
 	case domain.License:
 		return v.ProductID == productID
 	case domain.LicenseUser, domain.LicenseEntitlement,

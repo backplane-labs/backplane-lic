@@ -353,6 +353,7 @@ func Run(tb testing.TB, target Target, scenario Scenario, signer ed25519.PublicK
 		}
 
 		transcript.Steps = append(transcript.Steps, runStep(tb, target, step, vars, signer))
+		settleValidationTouch(tb, target, step, transcript.Steps[index])
 	}
 
 	return transcript

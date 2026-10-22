@@ -1027,7 +1027,7 @@
             "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": "\u003cts\u003e",
             "lastCheckOut": null,
-            "lastValidated": null,
+            "lastValidated": "\u003cts\u003e",
             "maxCores": null,
             "maxDisk": null,
             "maxMachines": 1,

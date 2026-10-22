@@ -3434,6 +3434,80 @@ func (q *Queries) GetLicenseEntitlementOf(ctx context.Context, arg GetLicenseEnt
 	return i, err
 }
 
+const licenseNotificationCandidatesSQL = `SELECT l.id, l.last_expiration_event_sent_at, l.last_expiring_soon_event_sent_at,
+       l.last_check_in_event_sent_at, l.last_check_in_soon_event_sent_at
+FROM lic.licenses l
+JOIN lic.policies p ON p.id = l.policy_id
+WHERE l.account_id = $1
+  AND (
+    l.expiry BETWEEN $2::timestamptz - interval '3 days' AND $2::timestamptz + interval '3 days'
+    OR (
+      p.require_check_in
+      AND p.check_in_interval_count IS NOT NULL
+      AND p.check_in_interval IS NOT NULL
+      AND l.last_check_in_at + (p.check_in_interval_count || ' ' || p.check_in_interval)::interval
+          BETWEEN $2::timestamptz - interval '3 days' AND $2::timestamptz + interval '3 days'
+    )
+  )
+ORDER BY l.id;`
+
+type LicenseNotificationCandidatesParams struct {
+	AccountID uuid.UUID
+	Now       time.Time
+}
+
+type LicenseNotificationCandidatesRow struct {
+	ID                          uuid.UUID
+	LastExpirationEventSentAt   *time.Time
+	LastExpiringSoonEventSentAt *time.Time
+	LastCheckInEventSentAt      *time.Time
+	LastCheckInSoonEventSentAt  *time.Time
+}
+
+func (q *Queries) LicenseNotificationCandidates(ctx context.Context, arg LicenseNotificationCandidatesParams) ([]LicenseNotificationCandidatesRow, error) {
+	rows, err := q.db.Query(ctx, licenseNotificationCandidatesSQL, arg.AccountID, arg.Now)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LicenseNotificationCandidatesRow
+	for rows.Next() {
+		var i LicenseNotificationCandidatesRow
+		if err := rows.Scan(&i.ID, &i.LastExpirationEventSentAt, &i.LastExpiringSoonEventSentAt, &i.LastCheckInEventSentAt, &i.LastCheckInSoonEventSentAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const stampLicenseNotificationSQL = `UPDATE lic.licenses SET
+  last_expiration_event_sent_at = CASE WHEN $1::text = 'license.expired'
+    THEN $2::timestamptz ELSE last_expiration_event_sent_at END,
+  last_expiring_soon_event_sent_at = CASE WHEN $1::text = 'license.expiring-soon'
+    THEN $2::timestamptz ELSE last_expiring_soon_event_sent_at END,
+  last_check_in_event_sent_at = CASE WHEN $1::text = 'license.check-in-overdue'
+    THEN $2::timestamptz ELSE last_check_in_event_sent_at END,
+  last_check_in_soon_event_sent_at = CASE WHEN $1::text = 'license.check-in-required-soon'
+    THEN $2::timestamptz ELSE last_check_in_soon_event_sent_at END,
+  updated_at = $2::timestamptz
+WHERE account_id = $3 AND id = $4;`
+
+type StampLicenseNotificationParams struct {
+	Event     string
+	Now       time.Time
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) StampLicenseNotification(ctx context.Context, arg StampLicenseNotificationParams) error {
+	_, err := q.db.Exec(ctx, stampLicenseNotificationSQL, arg.Event, arg.Now, arg.AccountID, arg.ID)
+	return err
+}
+
 const getPolicyByIDSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
   use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
   max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
