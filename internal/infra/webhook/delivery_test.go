@@ -19,6 +19,7 @@ import (
 	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/google/uuid"
 
+	outbox "github.com/gopherex/pg-outbox"
 	"github.com/gopherex/xlog"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
@@ -59,9 +60,7 @@ type capture struct {
 // licensing package's webhook verifier — the same verification a
 // Keygen client performs, for every signature algorithm. Requires
 // PostgreSQL (LIC_TEST_DATABASE_URL); skipped without it.
-func TestDeliveryWithSignature(t *testing.T) {
-	t.Parallel()
-
+func TestDeliveryWithSignature(t *testing.T) { //nolint:paralleltest // bootstrap and migrations share a database
 	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
 	if dsn == "" {
 		t.Skip("LIC_TEST_DATABASE_URL not set (make up first)")
@@ -157,7 +156,7 @@ func deliverAndVerify(
 		t.Fatalf("insert user: %v", err)
 	}
 
-	publisher := webhooks.NewPublisher(store, account.ID, rand.Reader, func() time.Time {
+	publisher := webhooks.NewPublisher(store, testQueue(t, store, account.ID), account.ID, rand.Reader, func() time.Time {
 		return now
 	})
 
@@ -202,7 +201,7 @@ func deliverAndVerify(
 		},
 	}
 
-	if err := worker.DeliverDue(ctx); err != nil {
+	if err := publishEvents(ctx, t, store, account, worker); err != nil {
 		t.Fatalf("deliver: %v", err)
 	}
 
@@ -367,9 +366,7 @@ func testClient(allowed []*net.IPNet, roots *x509.CertPool, receiverAddr string)
 // loopback — the delivery is refused at dial time (RESOLV_ERROR), and
 // no request ever reaches the receiver. Requires PostgreSQL
 // (LIC_TEST_DATABASE_URL); skipped without it.
-func TestRebindingBlocked(t *testing.T) {
-	t.Parallel()
-
+func TestRebindingBlocked(t *testing.T) { //nolint:paralleltest // bootstrap and migrations share a database
 	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
 	if dsn == "" {
 		t.Skip("LIC_TEST_DATABASE_URL not set (make up first)")
@@ -414,7 +411,7 @@ func TestRebindingBlocked(t *testing.T) {
 		t.Fatalf("insert user: %v", err)
 	}
 
-	publisher := webhooks.NewPublisher(store, account.ID, rand.Reader, func() time.Time { return now })
+	publisher := webhooks.NewPublisher(store, testQueue(t, store, account.ID), account.ID, rand.Reader, func() time.Time { return now })
 
 	if err := publisher.Publish(ctx, "user.created", user); err != nil {
 		t.Fatalf("publish: %v", err)
@@ -427,8 +424,8 @@ func TestRebindingBlocked(t *testing.T) {
 	roots.AddCert(receiver.Certificate())
 	worker.client = testClient(nil, roots, receiver.Listener.Addr().String())
 
-	if err := worker.DeliverDue(ctx); err != nil {
-		t.Fatalf("deliver: %v", err)
+	if err := publishEvents(ctx, t, store, account, worker); !errors.Is(err, errDelivery) {
+		t.Fatalf("deliver = %v, want retryable failure", err)
 	}
 
 	select {
@@ -473,9 +470,7 @@ func (s failingOutcomeStore) SetWebhookEventDelivered(
 // short transaction and every outcome is recorded on its own — a store
 // failure recording one delivery's success must not undo another's.
 // Requires PostgreSQL (LIC_TEST_DATABASE_URL); skipped without it.
-func TestOutcomeIsolation(t *testing.T) {
-	t.Parallel()
-
+func TestOutcomeIsolation(t *testing.T) { //nolint:paralleltest // bootstrap and migrations share a database
 	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
 	if dsn == "" {
 		t.Skip("LIC_TEST_DATABASE_URL not set (make up first)")
@@ -536,7 +531,7 @@ func TestOutcomeIsolation(t *testing.T) {
 		t.Fatalf("insert user: %v", err)
 	}
 
-	publisher := webhooks.NewPublisher(store, account.ID, rand.Reader, func() time.Time { return now })
+	publisher := webhooks.NewPublisher(store, testQueue(t, store, account.ID), account.ID, rand.Reader, func() time.Time { return now })
 
 	if err := publisher.Publish(ctx, "user.created", user); err != nil {
 		t.Fatalf("publish: %v", err)
@@ -551,12 +546,26 @@ func TestOutcomeIsolation(t *testing.T) {
 	)
 	worker.client = testClient(allowed, roots, failReceiver.Listener.Addr().String())
 
-	if err := worker.DeliverDue(ctx); err == nil {
-		t.Fatal("DeliverDue: the outcome failure must surface")
+	observed := make(chan outbox.Message, 2)
+	relay := relayForTest(t, store, account.ID, worker,
+		outcomeHooks{events: observed, accountID: account.ID.String()})
+	stop := startRelay(t, relay)
+	firstOutcome := awaitOutcome(t, observed)
+	secondOutcome := awaitOutcome(t, observed)
+
+	stop()
+
+	if firstOutcome.Status == secondOutcome.Status {
+		t.Fatalf("outcomes not isolated: %s / %s", firstOutcome.Status, secondOutcome.Status)
+	}
+
+	failedMessage, err := store.Q.GetWebhookDeliveryMessage(ctx, firstEvent.ID)
+	if err != nil || failedMessage.Status != "pending" || failedMessage.Attempts != 1 {
+		t.Fatalf("failed recording was not scheduled independently: %+v, err=%v", failedMessage, err)
 	}
 
 	// The first delivery happened (its recording failed): still
-	// DELIVERING under its claim lease.
+	// DELIVERING while pg-outbox schedules an independent retry.
 	recorded := eventOf(ctx, t, store, account, first.URL)
 	if recorded.Status != domain.EventDelivering {
 		t.Errorf("first event status = %s, want DELIVERING (recording failed)", recorded.Status)
@@ -571,19 +580,6 @@ func TestOutcomeIsolation(t *testing.T) {
 	if other.LastResponseCode == nil || *other.LastResponseCode != http.StatusOK {
 		t.Errorf("second event code = %v, want 200", other.LastResponseCode)
 	}
-
-	// The lease keeps the unrecorded row invisible: a second pass (with
-	// a healthy store) re-delivers only after the lease, not now.
-	worker2 := NewWorker(store, account.ID, stubResolver{}, allowed, func() time.Time { return now })
-	worker2.client = worker.client
-
-	if err := worker2.DeliverDue(ctx); err != nil {
-		t.Fatalf("second pass: %v", err)
-	}
-
-	if again := eventOf(ctx, t, store, account, first.URL); again.Status != domain.EventDelivering {
-		t.Errorf("first event re-delivered inside the lease: %s", again.Status)
-	}
 }
 
 // deliveryAccount opens the store and bootstraps a fresh account.
@@ -591,6 +587,9 @@ func deliveryAccount(ctx context.Context, t *testing.T) (*postgres.Store, domain
 	t.Helper()
 
 	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
+	if dsn == "" {
+		t.Skip("LIC_TEST_DATABASE_URL not set")
+	}
 
 	store, err := postgres.Open(ctx, xlog.NewJSON(xlog.WithWriter(io.Discard)),
 		sdkpg.Config{DSN: config.Secret(dsn)})
@@ -636,4 +635,47 @@ func eventOf(
 	t.Fatalf("no event for endpoint %s", endpointURL)
 
 	return domain.WebhookEvent{}
+}
+
+// testQueue builds only the enqueue facade; construction starts nothing.
+func testQueue(t *testing.T, store *postgres.Store, accountID uuid.UUID) *outbox.Outbox {
+	t.Helper()
+
+	queue, err := outbox.New(store.Pool, store.DB.DB,
+		NewWorker(store, accountID, stubResolver{}, []*net.IPNet{}, time.Now),
+		outbox.WithSchema(postgres.Schema), outbox.WithBatchSize(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return queue
+}
+
+// publishEvents drives the transport contract, independently for each event.
+// Relay scheduling and lease behavior are covered by the outbox integration tests.
+func publishEvents(ctx context.Context, t *testing.T, store *postgres.Store,
+	account domain.Account, worker *Worker,
+) error {
+	t.Helper()
+
+	events, err := store.ListWebhookEvents(ctx, account.ID, webhooks.EventFilter{},
+		uuid.NullUUID{}, paging.Params{Limit: 100, Order: paging.OrderDesc})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var failures []error
+
+	for i := range events {
+		event := events[i]
+		if event.Status != domain.EventDelivering {
+			continue
+		}
+
+		if err := worker.Publish(ctx, []outbox.Message{{Payload: []byte(event.ID.String()), Attempts: 1}}); err != nil {
+			failures = append(failures, err)
+		}
+	}
+
+	return errors.Join(failures...)
 }

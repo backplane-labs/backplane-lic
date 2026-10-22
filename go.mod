@@ -7,6 +7,7 @@ require (
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/uuid v1.6.0
+	github.com/gopherex/pg-outbox v1.1.0
 	github.com/gopherex/pgtx v1.1.1
 	github.com/gopherex/xlog v1.2.1
 	github.com/jackc/pgx/v5 v5.11.0
@@ -42,7 +43,7 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/cel-go v0.30.0 // indirect
 	github.com/gopherex/schemapb/go v1.7.0 // indirect
-	github.com/gopherex/sqld v1.1.3 // indirect
+	github.com/gopherex/sqld v1.1.10 // indirect
 	github.com/gopherex/xconf v1.4.0 // indirect
 	github.com/gopherex/xconf/contrib/decoders/json v1.4.0 // indirect
 	github.com/gopherex/xconf/contrib/decoders/yaml v1.4.0 // indirect
