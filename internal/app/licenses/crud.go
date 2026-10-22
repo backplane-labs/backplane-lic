@@ -243,26 +243,24 @@ func (s Scenario) Create( //nolint:cyclop,funlen // the creation ladder, in the 
 		license.LastCheckInAt = &now
 	}
 
-	if err := s.setKey(ctx, account, &license, in.Key); err != nil {
-		return domain.License{}, err
-	}
-
-	if err := s.validate(ctx, account, license, true); err != nil {
-		return domain.License{}, err
-	}
-
-	if err := access.LicenseCreate(access.PrincipalOf(ctx), license); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
-	}
-
 	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.setKey(ctx, account, &license, in.Key); err != nil {
+			return err
+		}
+
+		if err := s.validate(ctx, account, license, true); err != nil {
+			return err
+		}
+
+		if err := access.LicenseCreate(access.PrincipalOf(ctx), license); err != nil {
+			return err //nolint:wrapcheck // the authorization's own error
+		}
+
 		if err := s.store.InsertLicense(ctx, license); err != nil {
 			return fmt.Errorf("licenses: create: %w", err)
 		}
 
-		s.publish(ctx, "license.created", license)
-
-		return nil
+		return s.publish(ctx, "license.created", license)
 	}); err != nil {
 		return domain.License{}, err
 	}
@@ -344,11 +342,15 @@ func (s Scenario) Update( //nolint:cyclop,funlen // one branch per attribute
 		return domain.License{}, err
 	}
 
-	if err := s.store.UpdateLicense(ctx, license); err != nil {
-		return domain.License{}, fmt.Errorf("licenses: update: %w", err)
-	}
+	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateLicense(ctx, license); err != nil {
+			return fmt.Errorf("licenses: update: %w", err)
+		}
 
-	s.publish(ctx, "license.updated", license)
+		return s.publish(ctx, "license.updated", license)
+	}); err != nil {
+		return domain.License{}, err
+	}
 
 	return license, nil
 }
@@ -369,7 +371,9 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, idOrKey s
 	}
 
 	if err := s.write(ctx, func(ctx context.Context) error {
-		s.publish(ctx, "license.deleted", license)
+		if err := s.publish(ctx, "license.deleted", license); err != nil {
+			return err
+		}
 
 		if err := s.store.DeleteLicense(ctx, account.ID, license.ID); err != nil {
 			return fmt.Errorf("licenses: destroy: %w", err)

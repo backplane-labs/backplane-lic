@@ -1391,6 +1391,29 @@ func (q *Queries) KeyIsLicenseKey(ctx context.Context, arg KeyIsLicenseKeyParams
 	return i, err
 }
 
+const licenseUsesForUpdateSQL = `SELECT uses FROM lic.licenses
+WHERE account_id = $1 AND id = $2
+FOR UPDATE NOWAIT;
+
+-- License authentication lookups (internal/app/authn). The license-auth
+-- slice: the row, the owner's ban state and the policy's strategies.`
+
+type LicenseUsesForUpdateParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type LicenseUsesForUpdateRow struct {
+	Uses int32
+}
+
+func (q *Queries) LicenseUsesForUpdate(ctx context.Context, arg LicenseUsesForUpdateParams) (LicenseUsesForUpdateRow, error) {
+	row := q.db.QueryRow(ctx, licenseUsesForUpdateSQL, arg.AccountID, arg.ID)
+	var i LicenseUsesForUpdateRow
+	err := row.Scan(&i.Uses)
+	return i, err
+}
+
 const getLicenseAuthByKeySQL = `SELECT l.id, l.account_id, l.key, l.suspended, l.expiry, l.group_id,
   (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,
   p.authentication_strategy, p.expiration_strategy

@@ -570,12 +570,9 @@ func optionalIntAttr(obj map[string]any, key string) (groups.OptionalInt, error)
 		return groups.OptionalInt{Set: true, Null: true}, nil
 	}
 
-	n, ok := raw.(float64)
-	if !ok || n != float64(int(n)) {
-		return out, apperr.BadRequestSource(
-			"type mismatch (received "+jsonKind(raw)+" expected integer)",
-			pointerOf("data", "attributes", key),
-		)
+	n, err := int64Of(raw, pointerOf("data", "attributes", key))
+	if err != nil {
+		return out, err
 	}
 
 	return groups.OptionalInt{Set: true, Value: int(n)}, nil

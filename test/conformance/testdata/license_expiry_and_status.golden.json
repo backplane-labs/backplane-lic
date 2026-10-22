@@ -81,7 +81,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create product",
       "present": [
@@ -191,7 +191,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create policy",
       "present": [
@@ -301,7 +301,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create plain policy",
       "present": [
@@ -322,7 +322,7 @@
             "encrypted": false,
             "expiry": "\u003cts\u003e",
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -428,7 +428,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create with duration",
       "present": [
@@ -449,7 +449,7 @@
             "encrypted": false,
             "expiry": "\u003cts\u003e",
             "floating": false,
-            "key": "\u003clicense-key:3\u003e",
+            "key": "\u003clicense-key:2\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -555,7 +555,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create already expired",
       "present": [
@@ -576,7 +576,7 @@
             "encrypted": false,
             "expiry": "\u003cts\u003e",
             "floating": false,
-            "key": "\u003clicense-key:3\u003e",
+            "key": "\u003clicense-key:2\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -682,7 +682,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "renew without expiry anchor",
       "present": [
@@ -703,7 +703,7 @@
             "encrypted": false,
             "expiry": "\u003cts\u003e",
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -809,7 +809,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "renew",
       "present": [
@@ -830,7 +830,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:4\u003e",
+            "key": "\u003clicense-key:3\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -936,7 +936,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "renew a no-duration license",
       "present": [
@@ -965,7 +965,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "renew without duration",
       "present": [

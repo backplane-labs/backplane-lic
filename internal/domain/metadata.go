@@ -2,7 +2,10 @@
 // resource that carries metadata.
 package domain
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 // The metadata limits.
 const (
@@ -11,9 +14,9 @@ const (
 	MetadataMaxKeys  = 64
 )
 
-// MetadataViolation answers the model-level metadata violation's
-// detail ("" when the metadata holds): bytesize, depth, then keys, all
-// rendered METADATA_TOO_LONG.
+// MetadataViolation returns the first model-level metadata violation in the
+// reference's wire order: bytesize, depth, then keys. The reference renders
+// only the first error for a given attribute and validation code.
 func MetadataViolation(m map[string]any) string {
 	if len(m) == 0 {
 		return ""
@@ -24,7 +27,8 @@ func MetadataViolation(m map[string]any) string {
 		return ""
 	}
 
-	if len(raw) > MetadataMaxBytes {
+	// JSON.generate does not perform Go's HTML/JavaScript escaping.
+	if len(raw)-metadataEscapeOverhead(m) > MetadataMaxBytes {
 		return "too large (exceeded limit of 16384 bytes)"
 	}
 
@@ -37,6 +41,38 @@ func MetadataViolation(m map[string]any) string {
 	}
 
 	return ""
+}
+
+// metadataEscapeOverhead is the byte expansion Go adds beyond Ruby's JSON
+// representation. Count original characters, not escape sequences, so literal
+// strings such as "\\u2028" remain distinct from the Unicode character.
+func metadataEscapeOverhead(value any) int {
+	switch typed := value.(type) {
+	case string:
+		const (
+			htmlExpansion      = 5
+			separatorExpansion = 3
+		)
+
+		return htmlExpansion*(strings.Count(typed, "<")+strings.Count(typed, ">")+strings.Count(typed, "&")) +
+			separatorExpansion*(strings.Count(typed, "\u2028")+strings.Count(typed, "\u2029"))
+	case map[string]any:
+		overhead := 0
+		for key, item := range typed {
+			overhead += metadataEscapeOverhead(key) + metadataEscapeOverhead(item)
+		}
+
+		return overhead
+	case []any:
+		overhead := 0
+		for _, item := range typed {
+			overhead += metadataEscapeOverhead(item)
+		}
+
+		return overhead
+	default:
+		return 0
+	}
 }
 
 func metadataDepth(value any) int {

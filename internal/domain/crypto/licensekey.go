@@ -304,7 +304,7 @@ func jwtRS256(in KeyInput, claimsJSON string) (string, error) {
 		return "", ErrJWTClaimsInvalid
 	}
 
-	header := base64.RawURLEncoding.EncodeToString([]byte(`{"typ":"JWT","alg":"RS256"}`))
+	header := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"RS256"}`))
 	payload := base64.RawURLEncoding.EncodeToString([]byte(claimsJSON))
 
 	hashed := sha256.Sum256([]byte(header + "." + payload))

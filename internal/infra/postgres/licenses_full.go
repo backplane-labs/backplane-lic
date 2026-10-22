@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -179,6 +180,23 @@ func (r LicensesRepo) SetLicenseExpiry(
 		ctx, db.SetLicenseExpiryParams{
 			AccountID: accountID, ID: id, Expiry: expiry, UpdatedAt: now,
 		})
+}
+
+// LicenseUsesForUpdate locks the counter without waiting, like Keygen's
+// usage actions. The caller owns the pgtx boundary.
+func (r LicensesRepo) LicenseUsesForUpdate(ctx context.Context, accountID, id uuid.UUID) (int32, error) {
+	uses, err := r.q.LicenseUsesForUpdate(ctx, db.LicenseUsesForUpdateParams{AccountID: accountID, ID: id})
+
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "55P03" {
+		return 0, fmt.Errorf("postgres: usage row lock: %w", licenses.ErrUsageConflict)
+	}
+
+	if err != nil {
+		return 0, fmt.Errorf("postgres: usage row lock: %w", err)
+	}
+
+	return uses.Uses, nil
 }
 
 // SetLicenseUses writes the usage counter.

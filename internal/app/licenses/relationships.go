@@ -23,6 +23,7 @@ type MachinePage struct {
 	Next  uuid.NullUUID
 }
 
+// devices: deferred; relationship reads expose the zero-machine state.
 // Machines answers the license's machines (the fingerprint, product
 // and user filters apply).
 func (s Scenario) Machines(
@@ -276,9 +277,7 @@ func (s Scenario) Transfer(
 			return fmt.Errorf("licenses: transfer reload: %w", err)
 		}
 
-		s.publish(ctx, "license.policy.updated", out)
-
-		return nil
+		return s.publish(ctx, "license.policy.updated", out)
 	}); err != nil {
 		return domain.License{}, err
 	}
@@ -404,9 +403,7 @@ func (s Scenario) SetGroup(
 			return fmt.Errorf("licenses: set group reload: %w", err)
 		}
 
-		s.publish(ctx, "license.group.updated", out)
-
-		return nil
+		return s.publish(ctx, "license.group.updated", out)
 	}); err != nil {
 		return domain.License{}, err
 	}
@@ -471,7 +468,7 @@ func (s Scenario) Owner(ctx context.Context, account domain.Account, idOrKey str
 
 // SetOwner writes the license's owner (PATCH owner and the v1.5 user
 // alias); OwnerSet false clears it.
-func (s Scenario) SetOwner( //nolint:cyclop,funlen // the transfer's validations, verbatim
+func (s Scenario) SetOwner( //nolint:cyclop // the transfer's validations, verbatim
 	ctx context.Context, account domain.Account, idOrKey string, owner uuid.NullUUID, v15 bool,
 ) (domain.License, error) {
 	license, err := s.load(ctx, account, idOrKey)
@@ -543,12 +540,10 @@ func (s Scenario) SetOwner( //nolint:cyclop,funlen // the transfer's validations
 		}
 
 		if v15 {
-			s.publish(ctx, "license.user.updated", out)
-		} else {
-			s.publish(ctx, "license.owner.updated", out)
+			return s.publish(ctx, "license.user.updated", out)
 		}
 
-		return nil
+		return s.publish(ctx, "license.owner.updated", out)
 	}); err != nil {
 		return domain.License{}, err
 	}

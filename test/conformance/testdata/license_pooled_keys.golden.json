@@ -81,7 +81,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create product",
       "present": [
@@ -191,7 +191,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create pooled policy",
       "present": [
@@ -252,7 +252,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "add pool key",
       "present": [
@@ -379,7 +379,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "license pops the pooled key",
       "present": [
@@ -415,7 +415,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "empty pool",
       "present": [

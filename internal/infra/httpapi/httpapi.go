@@ -186,16 +186,16 @@ func (a *API) GenerateToken(
 func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 	req := requestOf(ctx)
 
-	if !req.principal.IsUser() {
-		return nil, errNotUserBearer
-	}
-
 	if req.principal.IsLicense() {
 		return a.meLicense(ctx, req)
 	}
 
 	if req.principal.IsProduct() {
 		return a.meProduct(ctx, req)
+	}
+
+	if !req.principal.IsUser() {
+		return nil, errNotUserBearer
 	}
 
 	user, status, err := a.users.Me(ctx, req.account.ID, req.principal.BearerID)
@@ -222,16 +222,16 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDocument, error) {
 	req := requestOf(ctx)
 
-	if !req.principal.IsUser() {
-		return nil, errNotUserBearer
-	}
-
 	if req.principal.IsLicense() {
 		return a.profileLicense(ctx, req)
 	}
 
 	if req.principal.IsProduct() {
 		return a.profileProduct(ctx, req)
+	}
+
+	if !req.principal.IsUser() {
+		return nil, errNotUserBearer
 	}
 
 	user, status, err := a.users.Me(ctx, req.account.ID, req.principal.BearerID)

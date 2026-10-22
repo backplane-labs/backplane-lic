@@ -4,6 +4,7 @@ package licenses
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -29,7 +30,9 @@ func (s Scenario) Revoke(ctx context.Context, account domain.Account, idOrKey st
 	}
 
 	return s.write(ctx, func(ctx context.Context) error {
-		s.publish(ctx, "license.revoked", license)
+		if err := s.publish(ctx, "license.revoked", license); err != nil {
+			return err
+		}
 
 		if err := s.store.DeleteLicense(ctx, account.ID, license.ID); err != nil {
 			return fmt.Errorf("licenses: revoke: %w", err)
@@ -79,14 +82,18 @@ func (s Scenario) Renew(ctx context.Context, account domain.Account, idOrKey str
 		expiry = license.Expiry.Add(duration)
 	}
 
-	if err := s.store.SetLicenseExpiry(ctx, account.ID, license.ID, &expiry, now); err != nil {
-		return domain.License{}, fmt.Errorf("licenses: renew: %w", err)
+	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.store.SetLicenseExpiry(ctx, account.ID, license.ID, &expiry, now); err != nil {
+			return fmt.Errorf("licenses: renew: %w", err)
+		}
+
+		license.Expiry = &expiry
+		license.UpdatedAt = now
+
+		return s.publish(ctx, "license.renewed", license)
+	}); err != nil {
+		return domain.License{}, err
 	}
-
-	license.Expiry = &expiry
-	license.UpdatedAt = now
-
-	s.publish(ctx, "license.renewed", license)
 
 	return license, nil
 }
@@ -108,14 +115,18 @@ func (s Scenario) Suspend(ctx context.Context, account domain.Account, idOrKey s
 
 	now := s.now()
 
-	if err := s.store.SetLicenseSuspended(ctx, account.ID, license.ID, true, now); err != nil {
-		return domain.License{}, fmt.Errorf("licenses: suspend: %w", err)
+	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.store.SetLicenseSuspended(ctx, account.ID, license.ID, true, now); err != nil {
+			return fmt.Errorf("licenses: suspend: %w", err)
+		}
+
+		license.Suspended = true
+		license.UpdatedAt = now
+
+		return s.publish(ctx, "license.suspended", license)
+	}); err != nil {
+		return domain.License{}, err
 	}
-
-	license.Suspended = true
-	license.UpdatedAt = now
-
-	s.publish(ctx, "license.suspended", license)
 
 	return license, nil
 }
@@ -137,14 +148,18 @@ func (s Scenario) Reinstate(ctx context.Context, account domain.Account, idOrKey
 
 	now := s.now()
 
-	if err := s.store.SetLicenseSuspended(ctx, account.ID, license.ID, false, now); err != nil {
-		return domain.License{}, fmt.Errorf("licenses: reinstate: %w", err)
+	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.store.SetLicenseSuspended(ctx, account.ID, license.ID, false, now); err != nil {
+			return fmt.Errorf("licenses: reinstate: %w", err)
+		}
+
+		license.Suspended = false
+		license.UpdatedAt = now
+
+		return s.publish(ctx, "license.reinstated", license)
+	}); err != nil {
+		return domain.License{}, err
 	}
-
-	license.Suspended = false
-	license.UpdatedAt = now
-
-	s.publish(ctx, "license.reinstated", license)
 
 	return license, nil
 }
@@ -167,14 +182,18 @@ func (s Scenario) CheckIn(ctx context.Context, account domain.Account, idOrKey s
 
 	now := s.now()
 
-	if err := s.store.SetLicenseLastCheckIn(ctx, account.ID, license.ID, now, now); err != nil {
-		return domain.License{}, fmt.Errorf("licenses: check-in: %w", err)
+	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.store.SetLicenseLastCheckIn(ctx, account.ID, license.ID, now, now); err != nil {
+			return fmt.Errorf("licenses: check-in: %w", err)
+		}
+
+		license.LastCheckInAt = &now
+		license.UpdatedAt = now
+
+		return s.publish(ctx, "license.checked-in", license)
+	}); err != nil {
+		return domain.License{}, err
 	}
-
-	license.LastCheckInAt = &now
-	license.UpdatedAt = now
-
-	s.publish(ctx, "license.checked-in", license)
 
 	return license, nil
 }
@@ -192,19 +211,7 @@ func (s Scenario) IncrementUsage(
 		return domain.License{}, err
 	}
 
-	if increment > math.MaxInt32 {
-		return domain.License{}, apperr.BadRequestSource("integer is too large", "/meta/increment")
-	}
-
-	uses := license.Uses + int32(increment) //nolint:gosec // bounded by the MaxInt32 check above
-
-	if limit := license.MaxUses(); limit != nil && uses > *limit {
-		return domain.License{}, apperr.Validation("USES_LIMIT_EXCEEDED",
-			fmt.Sprintf("usage exceeds maximum allowed for license (%d)", *limit),
-			"/data/attributes/uses", "licenses/#licenses-object-attrs-uses")
-	}
-
-	return s.writeUsage(ctx, account, license, uses, "license.usage.incremented")
+	return s.writeUsage(ctx, account, license, increment, "license.usage.incremented")
 }
 
 // DecrementUsage subtracts from the usage counter (default 1).
@@ -220,19 +227,7 @@ func (s Scenario) DecrementUsage(
 		return domain.License{}, err
 	}
 
-	if decrement > math.MaxInt32 {
-		return domain.License{}, apperr.BadRequestSource("integer is too large", "/meta/decrement")
-	}
-
-	uses := license.Uses - int32(decrement) //nolint:gosec // bounded by the MaxInt32 check above
-
-	if uses < 0 {
-		return domain.License{}, apperr.Validation("USES_INVALID",
-			"must be greater than or equal to 0",
-			"/data/attributes/uses", "licenses/#licenses-object-attrs-uses")
-	}
-
-	return s.writeUsage(ctx, account, license, uses, "license.usage.decremented")
+	return s.writeUsage(ctx, account, license, decrement, "license.usage.decremented")
 }
 
 // ResetUsage zeroes the usage counter.
@@ -250,11 +245,32 @@ func (s Scenario) ResetUsage(ctx context.Context, account domain.Account, idOrKe
 }
 
 func (s Scenario) writeUsage(
-	ctx context.Context, account domain.Account, license domain.License, uses int32, event string,
+	ctx context.Context, account domain.Account, license domain.License, amount int64, event string,
 ) (domain.License, error) {
 	now := s.now()
 
 	if err := s.write(ctx, func(ctx context.Context) error {
+		uses := int32(0)
+
+		if event != "license.usage.reset" {
+			current, err := s.store.LicenseUsesForUpdate(ctx, account.ID, license.ID)
+			if errors.Is(err, ErrUsageConflict) {
+				conflict := apperr.Conflict("failed to increment due to another conflicting update")
+				conflict.Source.Pointer = "/data/attributes/uses"
+
+				return conflict
+			}
+
+			if err != nil {
+				return fmt.Errorf("licenses: usage lock: %w", err)
+			}
+
+			uses, err = usageValue(current, amount, event == "license.usage.incremented", license.MaxUses())
+			if err != nil {
+				return err
+			}
+		}
+
 		if err := s.store.SetLicenseUses(ctx, account.ID, license.ID, uses, now); err != nil {
 			return fmt.Errorf("licenses: usage: %w", err)
 		}
@@ -262,7 +278,9 @@ func (s Scenario) writeUsage(
 		license.Uses = uses
 		license.UpdatedAt = now
 
-		s.publish(ctx, event, license)
+		if err := s.publish(ctx, event, license); err != nil {
+			return err
+		}
 
 		// The first use starts the expiry clock of FROM_FIRST_USE
 		// policies.
@@ -283,6 +301,41 @@ func (s Scenario) writeUsage(
 	}
 
 	return license, nil
+}
+
+// usageValue checks model validations before the database's integer range.
+// Comparisons precede arithmetic, so even MinInt64/MaxInt64 inputs cannot wrap.
+func usageValue( //nolint:cyclop // ordered model/range bounds without overflowing arithmetic
+	current int32, amount int64, increment bool, limit *int32,
+) (int32, error) {
+	base := int64(current)
+
+	negative := increment && amount < -base || !increment && amount > base
+	if negative {
+		return 0, apperr.Validation("USES_INVALID", "must be greater than or equal to 0",
+			"/data/attributes/uses", "licenses/#licenses-object-attrs-uses")
+	}
+
+	if limit != nil && (increment && amount > int64(*limit)-base || !increment && amount < base-int64(*limit)) {
+		return 0, apperr.Validation("USES_LIMIT_EXCEEDED",
+			fmt.Sprintf("usage exceeds maximum allowed for license (%d)", *limit),
+			"/data/attributes/uses", "licenses/#licenses-object-attrs-uses")
+	}
+
+	parameter := "decrement"
+	if increment {
+		parameter = "increment"
+	}
+
+	if increment && amount > math.MaxInt32-base || !increment && amount < base-math.MaxInt32 {
+		return 0, apperr.BadRequestSource("integer is too large", "/meta/"+parameter)
+	}
+
+	if increment {
+		return int32(base + amount), nil //nolint:gosec // range checked above
+	}
+
+	return int32(base - amount), nil //nolint:gosec // range checked above
 }
 
 // action runs the acting routes' shared permission and record checks.

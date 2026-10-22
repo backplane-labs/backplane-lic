@@ -6,6 +6,8 @@
 package httpapi
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -718,14 +720,44 @@ func validateValidationBody( //nolint:cyclop,gocritic,nonamedreturns // the type
 			return nil, scope, nil, "", false, err
 		}
 
-		rawScope, _ = scopeRaw.(map[string]any)
+		rawScope = validationScopeEcho(scopeRaw)
 	}
 
 	return nonce, scope, rawScope, key, legacy, nil
 }
 
+// validationScopeEcho mirrors typed_params dropping optional nil fields,
+// while retaining the explicitly nullable user scope.
+func validationScopeEcho(raw any) map[string]any {
+	out := make(map[string]any)
+
+	switch fields := raw.(type) { //nolint:gocritic // project rules prefer a type switch to an assertion
+	case map[string]any:
+		for name, value := range fields {
+			if value != nil || name == "user" {
+				out[name] = value
+			}
+		}
+	}
+
+	return out
+}
+
+func scopeString(obj map[string]any, name string) (*string, error) {
+	value, err := str(obj[name], "/meta/scope/"+name)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.TrimSpace(value) == "" {
+		return nil, apperr.BadRequestSource("cannot be blank", "/meta/scope/"+name)
+	}
+
+	return &value, nil
+}
+
 // validateScope decodes meta.scope.
-func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop,funlen // the typed-params ladder
+func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop // the typed-params ladder
 	var scope licenses.Scope
 
 	obj, err := hash(raw, "/meta/scope")
@@ -741,18 +773,9 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop,funlen // 
 
 	scope.Present = true
 
-	strPtr := func(name string) (*string, error) {
-		value, err := str(obj[name], "/meta/scope/"+name)
-		if err != nil {
-			return nil, err
-		}
-
-		return &value, nil
-	}
-
 	for _, name := range []string{"product", "policy", "machine", "checksum", "version"} {
 		if _, has := obj[name]; has && obj[name] != nil {
-			ptr, err := strPtr(name)
+			ptr, err := scopeString(obj, name)
 			if err != nil {
 				return scope, err
 			}
@@ -772,8 +795,10 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop,funlen // 
 		}
 	}
 
-	if _, hasUser := obj["user"]; hasUser && obj["user"] != nil {
-		ptr, err := strPtr("user")
+	_, scope.UserSet = obj["user"]
+
+	if scope.UserSet && obj["user"] != nil {
+		ptr, err := scopeString(obj, "user")
 		if err != nil {
 			return scope, err
 		}
@@ -781,6 +806,14 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop,funlen // 
 		scope.User = ptr
 	}
 
+	if err := scopeLists(obj, &scope); err != nil {
+		return scope, err
+	}
+
+	return scope, nil
+}
+
+func scopeLists(obj map[string]any, scope *licenses.Scope) error {
 	for _, name := range []string{"fingerprint", "fingerprints", "components", "entitlements"} {
 		if obj[name] == nil {
 			continue
@@ -794,21 +827,26 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop,funlen // 
 		)
 
 		if name == "fingerprint" {
-			var single string
+			var single *string
 
-			single, err = str(item, "/meta/scope/fingerprint")
-			list = []string{single}
+			single, err = scopeString(obj, name)
+			if err == nil {
+				list = []string{*single}
+			}
 		} else {
-			list, _, err = stringsAttr(obj, name)
-			list = scopeList(list, "/meta/scope/"+name)
+			list, err = scopeStrings(item, "/meta/scope/"+name)
 		}
 
 		if err != nil {
-			return scope, err
+			return err
 		}
 
 		switch name {
 		case "fingerprint", "fingerprints":
+			if scope.Fingerprints == nil {
+				scope.Fingerprints = []string{}
+			}
+
 			scope.Fingerprints = append(scope.Fingerprints, list...)
 		case "components":
 			scope.Components = list
@@ -817,17 +855,32 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop,funlen // 
 		}
 	}
 
-	return scope, nil
+	return nil
 }
 
-func scopeList(list []string, pointer string) []string {
-	if list == nil {
-		return []string{}
+func scopeStrings(raw any, pointer string) ([]string, error) {
+	items, ok := raw.([]any)
+	if !ok {
+		return nil, apperr.BadRequestSource("type mismatch (received "+jsonKind(raw)+" expected array)", pointer)
 	}
 
-	_ = pointer
+	out := make([]string, 0, len(items))
+	for index, item := range items {
+		path := fmt.Sprintf("%s/%d", pointer, index)
 
-	return list
+		value, err := str(item, path)
+		if err != nil {
+			return nil, err
+		}
+
+		if strings.TrimSpace(value) == "" {
+			return nil, apperr.BadRequestSource("cannot be blank", path)
+		}
+
+		out = append(out, value)
+	}
+
+	return out, nil
 }
 
 // validateUsageBody decodes meta.increment / meta.decrement.

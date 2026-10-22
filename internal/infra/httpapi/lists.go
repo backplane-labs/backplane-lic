@@ -1,6 +1,8 @@
 package httpapi
 
 import (
+	"encoding/json"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -348,13 +350,19 @@ func stringsAttr(attrs map[string]any, name string) ([]string, bool, error) {
 
 // int64Of coerces a decoded JSON integer.
 func int64Of(raw any, pointer string) (int64, error) {
-	value, ok := raw.(float64)
-	if !ok || value != trunc(value) {
-		return 0, apperr.BadRequestSource(
-			"type mismatch (received "+jsonKind(raw)+" expected integer)", pointer)
+	switch value := raw.(type) {
+	case json.Number:
+		if integer, err := value.Int64(); err == nil {
+			return integer, nil
+		}
+	case float64:
+		if value == math.Trunc(value) && value >= math.MinInt64 && value < -float64(math.MinInt64) {
+			return int64(value), nil
+		}
 	}
 
-	return int64(value), nil
+	return 0, apperr.BadRequestSource(
+		"type mismatch (received "+jsonKind(raw)+" expected integer)", pointer)
 }
 
 // nonBlankStringAttr reads an optional string attribute whose blank

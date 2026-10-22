@@ -81,7 +81,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create product",
       "present": [
@@ -191,7 +191,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create policy",
       "present": [
@@ -212,7 +212,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -318,7 +318,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create license",
       "present": [
@@ -339,7 +339,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": "\u003cts\u003e",
@@ -451,7 +451,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "strict without machines",
       "present": [
@@ -472,7 +472,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": "\u003cts\u003e",
@@ -588,7 +588,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "scope product mismatch",
       "present": [
@@ -609,7 +609,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": "\u003cts\u003e",
@@ -725,7 +725,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "scope product match",
       "present": [
@@ -757,7 +757,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "unpermitted scope key",
       "present": [
@@ -778,7 +778,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": "\u003cts\u003e",
@@ -891,7 +891,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "validate-key anonymous",
       "present": [
@@ -918,7 +918,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "validate-key unknown",
       "present": [
@@ -950,7 +950,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "validate-key missing key",
       "present": [
@@ -977,7 +977,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "validate-key legacy form",
       "present": [

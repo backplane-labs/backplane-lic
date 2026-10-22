@@ -76,6 +76,9 @@ func scenarios() []conformance.Scenario {
 		entitlementScenarios(),
 		keyScenarios(),
 		licensesScenarios(),
+		licenseUserScenarios(),
+		licenseEdgeScenarios(),
+		metadataScenarios(),
 		webhookScenarios(),
 		notImplementedScenarios(),
 	)

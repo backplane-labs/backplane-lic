@@ -8,6 +8,7 @@ package licenses
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -26,6 +27,9 @@ var ErrNotFound = domain.ErrNotFound
 
 // ErrKeyTaken: the custom key already exists in the account.
 var ErrKeyTaken = errors.New("licenses: key taken")
+
+// ErrUsageConflict indicates another writer holds the license row lock.
+var ErrUsageConflict = errors.New("licenses: usage conflict")
 
 // Filter is the licenses index filter set (the reference's has_scope
 // declarations); the hash filters arrive pre-resolved to timestamp
@@ -108,6 +112,7 @@ type Store interface { //nolint:interfacebloat // one repository, one port
 	LicenseKeyTaken(ctx context.Context, accountID uuid.UUID, key string) (bool, error)
 	LicenseIDExists(ctx context.Context, accountID, id uuid.UUID) (bool, error)
 	SetLicenseExpiry(ctx context.Context, accountID, id uuid.UUID, expiry *time.Time, now time.Time) error
+	LicenseUsesForUpdate(ctx context.Context, accountID, id uuid.UUID) (int32, error)
 	SetLicenseUses(ctx context.Context, accountID, id uuid.UUID, uses int32, now time.Time) error
 	SetLicenseSuspended(ctx context.Context, accountID, id uuid.UUID, suspended bool, now time.Time) error
 	TouchLicenseValidated(ctx context.Context, accountID, id uuid.UUID, at time.Time, checksum, version *string) error
@@ -244,8 +249,12 @@ type List struct {
 	Next  uuid.NullUUID
 }
 
-func (s Scenario) publish(ctx context.Context, event string, resource any) {
-	_ = s.events.Publish(ctx, event, resource)
+func (s Scenario) publish(ctx context.Context, event string, resource any) error {
+	if err := s.events.Publish(ctx, event, resource); err != nil {
+		return fmt.Errorf("licenses: publish %s: %w", event, err)
+	}
+
+	return nil
 }
 
 func (s Scenario) now() time.Time { return s.clock() }

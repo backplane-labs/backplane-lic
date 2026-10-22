@@ -47,10 +47,14 @@ func (s Scenario) validateScopes( //nolint:gocognit,gocyclo,cyclop,funlen,mainti
 	}
 
 	// User scope.
-	if scope.User != nil && *scope.User != "" { //nolint:nestif // the user-scope match
-		ident := *scope.User
+	if scope.User != nil || scope.UserSet { //nolint:nestif // the user-scope match
+		ident := ""
+		if scope.User != nil {
+			ident = *scope.User
+		}
 
-		matches := license.OwnerID.Valid && license.OwnerID.UUID.String() == ident
+		matches := !license.OwnerID.Valid && scope.User == nil ||
+			license.OwnerID.Valid && license.OwnerID.UUID.String() == ident
 
 		if !matches {
 			var (
@@ -109,7 +113,7 @@ func (s Scenario) validateScopes( //nolint:gocognit,gocyclo,cyclop,funlen,mainti
 	}
 
 	// Fingerprint scope(s).
-	if len(scope.Fingerprints) > 0 { //nolint:nestif // the fingerprint scope, verbatim
+	if scope.Fingerprints != nil { //nolint:nestif // the fingerprint scope, verbatim
 		fingerprints := uniq(scope.Fingerprints)
 		if len(fingerprints) == 0 {
 			return fail("fingerprint scope is empty", "FINGERPRINT_SCOPE_EMPTY")
@@ -484,15 +488,19 @@ func (s Scenario) aliveMachinesForUser(machines []domain.Machine, ident string) 
 // touch persists the validation touches and answers the license with
 // them applied (the response renders the touched values).
 func (s Scenario) touch(
-	ctx context.Context, account domain.Account, license domain.License, verdict Verdict, now time.Time,
-) domain.License {
-	_ = s.store.TouchLicenseValidated(ctx, account.ID, license.ID, now, verdict.Checksum, verdict.Version)
+	ctx context.Context, account domain.Account, license *domain.License, verdict Verdict, now time.Time,
+) error {
+	if err := s.store.TouchLicenseValidated(
+		ctx, account.ID, license.ID, now, verdict.Checksum, verdict.Version,
+	); err != nil {
+		return fmt.Errorf("licenses: validation touch: %w", err)
+	}
 
 	license.LastValidatedAt = &now
 	license.LastValidatedChecksum = verdict.Checksum
 	license.LastValidatedVersion = verdict.Version
 
-	return license
+	return nil
 }
 
 // touchOnFirstValidation starts the FROM_FIRST_VALIDATION expiry

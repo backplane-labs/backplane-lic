@@ -146,9 +146,22 @@ func LicenseAction(p Principal, license domain.License, clause string, userAttac
 
 func licenseUserClause(p Principal, license domain.License, clause string) error {
 	switch clause {
-	case "check-out", "validate":
+	case "validate":
 		return nil
-	case "revoke", "renew", "check-in", "usage.increment":
+	case "check-out":
+		if license.ProtectedFlag() {
+			return deny()
+		}
+
+		return nil
+	case "revoke", "renew":
+		if !license.OwnerID.Valid || license.OwnerID.UUID != p.BearerID ||
+			license.Policy.Protected != nil && *license.Policy.Protected {
+			return deny()
+		}
+
+		return nil
+	case "check-in", "usage.increment":
 		if !license.OwnerID.Valid || license.OwnerID.UUID != p.BearerID {
 			return deny()
 		}

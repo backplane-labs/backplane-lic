@@ -1,3 +1,8 @@
+-- name: LicenseUsesForUpdate :one
+SELECT uses FROM lic.licenses
+WHERE account_id = @account_id AND id = @id
+FOR UPDATE NOWAIT;
+
 -- License authentication lookups (internal/app/authn). The license-auth
 -- slice: the row, the owner's ban state and the policy's strategies.
 

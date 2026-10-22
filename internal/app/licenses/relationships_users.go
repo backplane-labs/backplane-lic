@@ -176,9 +176,9 @@ func (s Scenario) AttachUsers( //nolint:cyclop // the attach validations, verbat
 			return fmt.Errorf("licenses: attach users: %w", err)
 		}
 
-		if err := s.store.SetLicenseUsersCount(
-			ctx, account.ID, license.ID, license.UsersCount()+int32(len(userIDs)), //nolint:gosec // bounded by the request limit
-		); err != nil {
+		count := license.LicenseUsersCount + int32(len(userIDs)) //nolint:gosec // bounded by the request limit
+
+		if err := s.store.SetLicenseUsersCount(ctx, account.ID, license.ID, count); err != nil {
 			return fmt.Errorf("licenses: attach users count: %w", err)
 		}
 
@@ -187,9 +187,7 @@ func (s Scenario) AttachUsers( //nolint:cyclop // the attach validations, verbat
 			return fmt.Errorf("licenses: attached users: %w", err)
 		}
 
-		s.publish(ctx, "license.users.attached", rows)
-
-		return nil
+		return s.publish(ctx, "license.users.attached", rows)
 	})
 	if err != nil {
 		return nil, err //nolint:wrapcheck // the boundary's own error
@@ -260,9 +258,7 @@ func (s Scenario) DetachUsers(
 			return fmt.Errorf("licenses: detach users count: %w", err)
 		}
 
-		s.publish(ctx, "license.users.detached", rows)
-
-		return nil
+		return s.publish(ctx, "license.users.detached", rows)
 	})
 }
 
@@ -390,9 +386,7 @@ func (s Scenario) AttachEntitlements(
 			return fmt.Errorf("licenses: attached entitlements: %w", err)
 		}
 
-		s.publish(ctx, "license.entitlements.attached", rows)
-
-		return nil
+		return s.publish(ctx, "license.entitlements.attached", rows)
 	})
 	if err != nil {
 		return nil, err //nolint:wrapcheck // the boundary's own error
@@ -451,9 +445,7 @@ func (s Scenario) DetachEntitlements(
 			return fmt.Errorf("licenses: detach entitlements: %w", err)
 		}
 
-		s.publish(ctx, "license.entitlements.detached", rows)
-
-		return nil
+		return s.publish(ctx, "license.entitlements.detached", rows)
 	})
 }
 

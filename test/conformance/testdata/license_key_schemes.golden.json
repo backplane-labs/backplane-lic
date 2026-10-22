@@ -81,7 +81,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create product",
       "present": [
@@ -191,7 +191,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create ed25519 policy",
       "present": [
@@ -301,7 +301,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create rsa sign v2 policy",
       "present": [
@@ -411,7 +411,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create rsa pss v2 policy",
       "present": [
@@ -521,7 +521,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create jwt policy",
       "present": [
@@ -631,7 +631,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "create encrypt policy",
       "present": [
@@ -652,7 +652,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:2\u003e",
+            "key": "\u003clicense-key:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -758,7 +758,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "ed25519 license",
       "present": [
@@ -779,7 +779,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:3\u003e",
+            "key": "\u003clicense-key:2\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -885,7 +885,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "rsa sign v2 license",
       "present": [
@@ -906,7 +906,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003clicense-key:4\u003e",
+            "key": "\u003clicense-key:3\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -1012,7 +1012,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "rsa pss v2 license",
       "present": [
@@ -1033,7 +1033,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "\u003cjwt:1\u003e",
+            "key": "\u003clicense-key:4\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -1139,7 +1139,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "jwt license",
       "present": [
@@ -1175,7 +1175,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "custom jwt claims key",
       "present": [
@@ -1196,7 +1196,7 @@
             "encrypted": false,
             "expiry": null,
             "floating": false,
-            "key": "iApZkqjvyecgh2q7BY82QEHJn1ok4JZAvedjq3KcLMv2kAn38aLVgZzmrFBPwiV41W8U-AMgi_Hz0wUXobHiHzQjVMQSs8XxnX8ETbmGVr0htJpEaFTjPBd5XZObO_rJPrX761zrtMuEAEJgWeggCS0wkEB3R3mbG6e5M-mdiycdXNslCVrCv0uBbuRr1tjHj-i33KZly-bDgrgYO0TloQ4G62ttI4WmJnODQjxkQRJeheETIrPKiTLEOtz3kx-ALpWP3Kt4f_dqDLCrLlODei3k5ZSikyFOoDmzCN8WoYV3Qk3m-pS6h8V4S1n9cXBYEoYbtbMDI-8SWXuHmX_Ddg==",
+            "key": "\u003cb64:1\u003e",
             "lastCheckIn": null,
             "lastCheckOut": null,
             "lastValidated": null,
@@ -1302,7 +1302,7 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "\u003clicense-key:1\u003e"
+        "Keygen-Version": "1.8"
       },
       "name": "encrypt license",
       "present": [

@@ -1,20 +1,17 @@
-// The request-layer metadata depth rule: every request body's metadata
-// hash nests at most two levels (typed_params depth maximum 2); a
-// deeper hash is the 400 "maximum depth of 2 exceeded" pointing at the
-// offending key.
+// Request-layer metadata containers have typed_params' depth limit of two.
+// Arrays consume a nesting level just like hashes and include their index in
+// the error pointer. The model separately enforces its depth-four limit.
 package httpapi
 
 import (
+	"strconv"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
 )
 
-// metadataDepthLimit is the request body's metadata nesting limit.
 const metadataDepthLimit = 2
 
-// metadataOf reads a metadata hash, enforcing the request-layer depth
-// rule (the pointer is where the metadata lives, e.g.
-// /data/attributes/metadata).
 func metadataOf(raw any, pointer string) (map[string]any, error) {
 	meta, err := hash(raw, pointer)
 	if err != nil {
@@ -28,21 +25,28 @@ func metadataOf(raw any, pointer string) (map[string]any, error) {
 	return meta, nil
 }
 
-func metadataDepthCheck(m map[string]any, pointer string, level int) error {
-	for key, value := range m {
-		inner, ok := value.(map[string]any)
-		if !ok {
-			continue
+func metadataDepthCheck(value any, pointer string, level int) error {
+	switch node := value.(type) {
+	case map[string]any:
+		if level > metadataDepthLimit {
+			return apperr.BadRequestSource("maximum depth of 2 exceeded", pointer)
 		}
 
-		path := pointer + "/" + jsonapi.CamelizeKey(key)
-
-		if level+1 > metadataDepthLimit {
-			return apperr.BadRequestSource("maximum depth of 2 exceeded", path)
+		for _, key := range sortedKeys(node) {
+			path := pointer + "/" + jsonapi.CamelizeKey(key)
+			if err := metadataDepthCheck(node[key], path, level+1); err != nil {
+				return err
+			}
+		}
+	case []any:
+		if level > metadataDepthLimit {
+			return apperr.BadRequestSource("maximum depth of 2 exceeded", pointer)
 		}
 
-		if err := metadataDepthCheck(inner, path, level+1); err != nil {
-			return err
+		for index, item := range node {
+			if err := metadataDepthCheck(item, pointer+"/"+strconv.Itoa(index), level+1); err != nil {
+				return err
+			}
 		}
 	}
 

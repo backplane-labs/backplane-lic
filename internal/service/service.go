@@ -19,8 +19,6 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/valkey"
 	"github.com/google/uuid"
 
-	"github.com/gopherex/pgtx/pkg/tx"
-
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
@@ -153,7 +151,7 @@ func Handler(
 			store.Licenses, store.Licenses, store.Policies, store.Products, store,
 			store, store.Entitlements, store.Keys,
 			tokens.Manager{Scenario: tokens.New(store, publisher, rand.Reader, clock)},
-			publisher, rand.Reader, clock, txDo(store),
+			publisher, rand.Reader, clock, store.Do,
 		),
 		Groups: groups.New(store, publisher, clock),
 		Products: products.New(store.Products, store.Tokens, store.Users,
@@ -167,13 +165,6 @@ func Handler(
 		TrustedProxies: cfg.TrustedProxies,
 		Clock:          clock,
 	})
-}
-
-// txDo wraps pgtx's serializable boundary for the scenarios' writes.
-func txDo(store *postgres.Store) func(context.Context, func(context.Context) error) error {
-	return func(ctx context.Context, fn func(context.Context) error) error {
-		return tx.DoSerializable(ctx, store.Trm, fn)
-	}
 }
 
 // lateHandler serves the handler built at start; before that, 503.

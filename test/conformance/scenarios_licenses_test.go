@@ -12,8 +12,8 @@ import (
 // generation, the relationship routes, the actions (validate,
 // validate-key, revoke, renew, suspend, reinstate, check-in, usage,
 // check-out), license-key authentication, /me for product and license
-// bearers, and the metadata limits. Bearers are admin, product and
-// license only (user authentication is out of scope).
+// bearers, and the metadata limits. User-bearer authorization is covered
+// separately by licenseUserScenarios.
 func licensesScenarios() []conformance.Scenario {
 	admin := conformance.Auth{Kind: conformance.AuthAdmin}
 	account := "/v1/accounts/" + conformance.AccountSlug

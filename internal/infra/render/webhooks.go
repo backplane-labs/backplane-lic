@@ -91,7 +91,9 @@ func WebhookEvent(accountID uuid.UUID, e domain.WebhookEvent) oas.WebhookEventRe
 // that need extra inputs (the user's status, the second factor's email)
 // are resolved by the caller before this; an unknown type is an error,
 // never a wrong payload.
-func PayloadDocument(accountID uuid.UUID, resource any) (any, error) {
+func PayloadDocument( //nolint:cyclop,funlen // one branch per resource
+	accountID uuid.UUID, resource any,
+) (any, error) {
 	switch v := resource.(type) {
 	case domain.User:
 		// The caller renders users itself (the status needs a lookup).

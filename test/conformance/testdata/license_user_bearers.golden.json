@@ -1,0 +1,4832 @@
+{
+  "scenario": "license_user_bearers",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "user-licenses-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": "day",
+            "checkInIntervalCount": 1,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": 86400,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": true,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": null,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "user-licenses-\u003crun\u003e",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_MACHINE",
+            "protected": false,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": true,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unprotected policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-owner-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-attached-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create attached",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-outsider-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:6\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:6\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create outsider",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 1
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owned license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:8\u003e",
+            "links": {
+              "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "license": {
+                "data": {
+                  "id": "\u003cuuid:7\u003e",
+                  "type": "licenses"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+                }
+              },
+              "user": {
+                "data": {
+                  "id": "\u003cuuid:5\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e"
+                }
+              }
+            },
+            "type": "license-users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attach licensee",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-owner-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        },
+        "included": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "expiry": "\u003cts\u003e",
+              "kind": "user-token",
+              "name": null,
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:9\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/tokens/\u003cuuid:9\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "bearer": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+                }
+              }
+            },
+            "type": "tokens"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner me",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-owner-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        },
+        "meta": {
+          "tokenId": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner profile",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": "\u003cts\u003e",
+              "floating": true,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": "\u003cts\u003e",
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": null,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {},
+              "name": null,
+              "nextCheckIn": "\u003cts\u003e",
+              "protected": false,
+              "requireCheckIn": true,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "EXPIRING",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:7\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+                },
+                "meta": {
+                  "count": 2
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner index",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner show",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        },
+        "meta": {
+          "code": "VALID",
+          "detail": "is valid",
+          "ts": "\u003cts\u003e",
+          "valid": true
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner validate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        },
+        "meta": {
+          "code": "VALID",
+          "detail": "is valid",
+          "ts": "\u003cts\u003e",
+          "valid": true
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner validate key",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner update denied",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:11\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:12\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-owner-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested group was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:13\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "license-attached-\u003crun\u003e@example.com",
+              "firstName": null,
+              "fullName": null,
+              "lastName": null,
+              "metadata": {},
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "license-owner-\u003crun\u003e@example.com",
+              "firstName": null,
+              "fullName": null,
+              "lastName": null,
+              "metadata": {},
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner users",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner entitlements",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner machines",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:14\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner tokens",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner check-in",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner renew",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner increment-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:15\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner decrement-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:16\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner reset-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:17\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner suspend",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:18\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner reinstate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": "\u003cts\u003e",
+              "floating": true,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": "\u003cts\u003e",
+              "lastCheckOut": null,
+              "lastValidated": "\u003cts\u003e",
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": null,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {},
+              "name": null,
+              "nextCheckIn": "\u003cts\u003e",
+              "protected": false,
+              "requireCheckIn": true,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "EXPIRING",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 1,
+              "version": null
+            },
+            "id": "\u003cuuid:7\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+                },
+                "meta": {
+                  "count": 2
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached index",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached show",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        },
+        "meta": {
+          "code": "VALID",
+          "detail": "is valid",
+          "ts": "\u003cts\u003e",
+          "valid": true
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached validate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        },
+        "meta": {
+          "code": "VALID",
+          "detail": "is valid",
+          "ts": "\u003cts\u003e",
+          "valid": true
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached validate key",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:19\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached update denied",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:20\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:21\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "license-owner-\u003crun\u003e@example.com",
+            "firstName": null,
+            "fullName": null,
+            "lastName": null,
+            "metadata": {},
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested group was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:22\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "license-attached-\u003crun\u003e@example.com",
+              "firstName": null,
+              "fullName": null,
+              "lastName": null,
+              "metadata": {},
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:5\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "license-owner-\u003crun\u003e@example.com",
+              "firstName": null,
+              "fullName": null,
+              "lastName": null,
+              "metadata": {},
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached users",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached entitlements",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached machines",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:23\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached tokens",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:24\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached check-in",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:25\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached renew",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:26\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached increment-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:27\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached decrement-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:28\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached reset-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:29\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached suspend",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (user lacks permission to perform action)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:30\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached reinstate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider index",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:31\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider show",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:32\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider validate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:33\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider validate key",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:34\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider update denied",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:35\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:36\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:37\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider owner",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:38\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:39\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider users",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:40\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider entitlements",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:41\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider machines",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:42\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider tokens",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:43\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider check-in",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:44\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider renew",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:45\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider increment-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:46\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider decrement-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:47\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider reset-usage",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:48\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider suspend",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:49\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider reinstate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:2\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:50\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:50\u003e/users"
+              },
+              "meta": {
+                "count": 1
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "user creates own license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": true,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "protect license override",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": true,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner renews protected override",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:51\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner cannot check in protected override",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:52\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner cannot check out protected override",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:53\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached cannot check out protected override",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": "\u003cts\u003e",
+            "lastCheckOut": null,
+            "lastValidated": "\u003cts\u003e",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": null,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": "\u003cts\u003e",
+            "protected": false,
+            "requireCheckIn": true,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 1,
+            "version": null
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e/users"
+              },
+              "meta": {
+                "count": 2
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unprotect license override",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "algorithm": "base64+ed25519",
+            "certificate": "\u003ccertificate:1\u003e",
+            "expiry": "\u003cts\u003e",
+            "includes": [],
+            "issued": "\u003cts\u003e",
+            "ttl": 2629746
+          },
+          "id": "\u003cuuid:54\u003e",
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+              }
+            }
+          },
+          "type": "license-files"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner check-out",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "algorithm": "base64+ed25519",
+            "certificate": "\u003ccertificate:2\u003e",
+            "expiry": "\u003cts\u003e",
+            "includes": [],
+            "issued": "\u003cts\u003e",
+            "ttl": 2629746
+          },
+          "id": "\u003cuuid:55\u003e",
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:7\u003e"
+              }
+            }
+          },
+          "type": "license-files"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "attached check-out",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested license '\u003cuuid:7\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:56\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "outsider check-out",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:57\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licensee cannot revoke",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner revokes",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "owner destroys",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    }
+  ]
+}

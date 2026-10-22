@@ -353,7 +353,7 @@ func validateWebhookRelationships( //nolint:cyclop // the typed-params ladder
 		return in, err
 	}
 
-	if typeRaw != "product" && typeRaw != "products" {
+	if typeRaw != typeProductSingular && typeRaw != "products" {
 		return in, badRequest("is invalid", "/data/relationships/product/data/type")
 	}
 

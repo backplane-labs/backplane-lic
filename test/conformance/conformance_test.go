@@ -115,7 +115,14 @@ func serverUnderTest(t *testing.T) conformance.Target {
 
 	handler := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")
 
-	return &conformance.HandlerTarget{Handler: handler, AdminToken: adminToken}
+	return &conformance.HandlerTarget{
+		Handler: handler, AdminToken: adminToken,
+		SeedUserToken: func(tb testing.TB, userID string) string {
+			tb.Helper()
+
+			return seedLicenseUserToken(tb, store, spec.ID, uuid.MustParse(userID))
+		},
+	}
 }
 
 func referenceURL() string {

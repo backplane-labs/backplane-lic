@@ -85,9 +85,11 @@
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data/type"
+            },
+            "title": "Bad request"
           }
         ],
         "meta": {
@@ -109,7 +111,7 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 400
     },
     {
       "body": {
@@ -149,9 +151,11 @@
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data/type"
+            },
+            "title": "Bad request"
           }
         ],
         "meta": {
@@ -173,19 +177,44 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 400
     },
     {
       "body": {
-        "errors": [
-          {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:6\u003e"
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "expiry": "\u003cts\u003e",
+            "kind": "user-token",
+            "name": null,
+            "token": "\u003ctoken:1\u003e",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:6\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/tokens/\u003cuuid:6\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "bearer": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+              }
+            }
+          },
+          "type": "tokens"
         }
       },
       "headers": {
@@ -203,20 +232,11 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 201
     },
     {
       "body": {
-        "errors": [
-          {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:7\u003e"
-        }
+        "data": []
       },
       "headers": {
         "Content-Type": "application/vnd.api+json; charset=utf-8",
@@ -233,19 +253,21 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 200
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data/type"
+            },
+            "title": "Bad request"
           }
         ],
         "meta": {
-          "id": "\u003cuuid:8\u003e"
+          "id": "\u003cuuid:7\u003e"
         }
       },
       "headers": {
@@ -263,19 +285,18 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 400
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
           }
         ],
         "meta": {
-          "id": "\u003cuuid:9\u003e"
+          "id": "\u003cuuid:8\u003e"
         }
       },
       "headers": {
@@ -293,19 +314,18 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 403
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
+            "detail": "You do not have permission to complete the request (ensure a token or license is present and valid)",
+            "title": "Access denied"
           }
         ],
         "meta": {
-          "id": "\u003cuuid:10\u003e"
+          "id": "\u003cuuid:9\u003e"
         }
       },
       "headers": {
@@ -323,23 +343,11 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 403
     },
     {
-      "body": {
-        "errors": [
-          {
-            "code": "NOT_IMPLEMENTED",
-            "detail": "end-user authentication is not supported",
-            "title": "Not implemented"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:11\u003e"
-        }
-      },
+      "body": null,
       "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
@@ -353,7 +361,7 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 501
+      "status": 204
     }
   ]
 }

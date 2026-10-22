@@ -162,14 +162,18 @@ func (s Scenario) Checkout( //nolint:cyclop,funlen // the parameter ladder, verb
 		return Checkout{}, err
 	}
 
-	if err := s.store.SetLicenseLastCheckOut(ctx, account.ID, license.ID, now, now); err != nil {
-		return Checkout{}, fmt.Errorf("licenses: checkout: %w", err)
+	if err := s.write(ctx, func(ctx context.Context) error {
+		if err := s.store.SetLicenseLastCheckOut(ctx, account.ID, license.ID, now, now); err != nil {
+			return fmt.Errorf("licenses: checkout: %w", err)
+		}
+
+		license.LastCheckOutAt = &now
+		out.License = license
+
+		return s.publish(ctx, "license.checked-out", license)
+	}); err != nil {
+		return Checkout{}, err
 	}
-
-	license.LastCheckOutAt = &now
-	out.License = license
-
-	s.publish(ctx, "license.checked-out", license)
 
 	return out, nil
 }

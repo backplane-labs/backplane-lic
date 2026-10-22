@@ -487,7 +487,14 @@ func decodeBody(r *http.Request) (map[string]any, error) {
 	}
 
 	var decoded any
-	if err := json.Unmarshal(raw, &decoded); err != nil {
+	if !json.Valid(raw) {
+		return nil, json.Unmarshal(raw, &decoded) //nolint:wrapcheck // maps to JSON_INVALID
+	}
+
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+
+	if err := decoder.Decode(&decoded); err != nil {
 		return nil, err //nolint:wrapcheck // the decode error maps to JSON_INVALID
 	}
 

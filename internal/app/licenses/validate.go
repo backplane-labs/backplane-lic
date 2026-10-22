@@ -27,10 +27,13 @@ type Verdict struct {
 // Scope is the meta.scope of a validation request (nil values mean the
 // key was absent).
 type Scope struct {
+	// Skip suppresses all scope checks for the legacy GET quick validation.
+	Skip    bool
 	Present bool
 	Product *string
 	Policy  *string
 	User    *string
+	UserSet bool
 	Machine *string
 	// Fingerprint/Fingerprints/Components/Entitlements are the matched
 	// lists (compacted and uniq'd).
@@ -53,10 +56,14 @@ func (s Scenario) ValidateQuick(
 
 	now := s.now()
 
-	verdict := s.runValidation(ctx, account, &license, Scope{Present: false}, now)
+	verdict := s.runValidation(ctx, account, &license, Scope{Skip: true}, now)
 
 	if !skipTouch {
-		license = s.touch(ctx, account, license, verdict, now)
+		if err := s.write(ctx, func(ctx context.Context) error {
+			return s.touch(ctx, account, &license, verdict, now)
+		}); err != nil {
+			return domain.License{}, Verdict{}, err
+		}
 	}
 
 	return license, verdict, nil
@@ -71,15 +78,9 @@ func (s Scenario) Validate(
 		return domain.License{}, Verdict{}, err
 	}
 
-	now := s.now()
+	verdict, err := s.validateAndTouch(ctx, account, &license, scope)
 
-	verdict := s.runValidation(ctx, account, &license, scope, now)
-	s.touch(ctx, account, license, verdict, now)
-	_ = s.touchOnFirstValidation(ctx, account, license, now)
-
-	s.publish(ctx, validationEvent(verdict), license)
-
-	return license, verdict, nil
+	return license, verdict, err
 }
 
 // ValidateKey runs the POST validate-key (anonymous allowed); the
@@ -89,34 +90,55 @@ func (s Scenario) ValidateKey(
 ) (*domain.License, Verdict, error) {
 	license := s.lookupKey(ctx, account, key, legacyEncrypted)
 
-	// Anonymous bearers and unknown keys pass straight through.
+	// Unknown keys have no resource to authorize or touch.
 	principal := access.PrincipalOf(ctx)
-	if principal.BearerID == uuid.Nil || license == nil {
-		return license, s.runValidation(ctx, account, license, scope, s.now()), nil
+	if license == nil {
+		return nil, s.runValidation(ctx, account, license, scope, s.now()), nil
 	}
 
-	if err := access.Require(ctx, "license.validate"); err != nil {
-		return nil, Verdict{}, err //nolint:wrapcheck // the authorization's own error
+	if principal.BearerID != uuid.Nil {
+		if err := access.Require(ctx, "license.validate"); err != nil {
+			return nil, Verdict{}, err //nolint:wrapcheck // the authorization's own error
+		}
+
+		attached, err := s.userAttached(ctx, account.ID, principal.BearerID, *license)
+		if err != nil {
+			return nil, Verdict{}, err
+		}
+
+		if err := access.LicenseAction(principal, *license, "validate", attached); err != nil {
+			return nil, Verdict{}, err //nolint:wrapcheck // the authorization's own error
+		}
 	}
 
-	attached, err := s.userAttached(ctx, account.ID, principal.BearerID, *license)
-	if err != nil {
-		return nil, Verdict{}, err
-	}
+	verdict, err := s.validateAndTouch(ctx, account, license, scope)
 
-	if err := access.LicenseAction(principal, *license, "validate", attached); err != nil {
-		return nil, Verdict{}, err //nolint:wrapcheck // the authorization's own error
-	}
+	return license, verdict, err
+}
 
-	now := s.now()
+// validateAndTouch keeps validation bookkeeping and the event in the same
+// transaction. Anonymous validate-key calls have the same side effects.
+func (s Scenario) validateAndTouch(
+	ctx context.Context, account domain.Account, license *domain.License, scope Scope,
+) (Verdict, error) {
+	var verdict Verdict
 
-	verdict := s.runValidation(ctx, account, license, scope, now)
+	err := s.write(ctx, func(ctx context.Context) error {
+		now := s.now()
+		verdict = s.runValidation(ctx, account, license, scope, now)
 
-	*license = s.touch(ctx, account, *license, verdict, now)
-	_ = s.touchOnFirstValidation(ctx, account, *license, now)
-	s.publish(ctx, validationEvent(verdict), *license)
+		if err := s.touch(ctx, account, license, verdict, now); err != nil {
+			return err
+		}
 
-	return license, verdict, nil
+		if err := s.publish(ctx, validationEvent(verdict), *license); err != nil {
+			return err
+		}
+
+		return s.touchOnFirstValidation(ctx, account, *license, now)
+	})
+
+	return verdict, err
 }
 
 // lookupKey resolves the license key (the legacy encrypted form
@@ -231,7 +253,7 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 		if done {
 			return verdict
 		}
-	} else {
+	} else if !scope.Skip {
 		if policy.RequireProductScope {
 			return Verdict{false, "product scope is required", "PRODUCT_SCOPE_REQUIRED", nil, nil}
 		}

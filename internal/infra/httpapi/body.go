@@ -1,7 +1,10 @@
 package httpapi
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -282,6 +285,12 @@ func jsonKind(raw any) string {
 		return "null"
 	case bool:
 		return "boolean"
+	case json.Number:
+		if !strings.ContainsAny(string(v), ".eE") {
+			return "integer"
+		}
+
+		return "number"
 	case float64:
 		if v == trunc(v) {
 			return "integer"
@@ -300,11 +309,7 @@ func jsonKind(raw any) string {
 }
 
 func trunc(v float64) float64 {
-	if v < 0 {
-		return -float64(int64(-v))
-	}
-
-	return float64(int64(v))
+	return math.Trunc(v)
 }
 
 func sortedKeys(obj map[string]any) []string {
