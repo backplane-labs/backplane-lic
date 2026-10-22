@@ -11,14 +11,25 @@ import (
 
 	"github.com/backplane-labs/backplane/pkg/backplane"
 	"github.com/backplane-labs/backplane/pkg/backplane/drivers/standard"
+	"google.golang.org/grpc"
 
 	"github.com/backplane-labs/backplane-lic/internal/service"
+	"github.com/backplane-labs/backplane-lic/internal/ui"
+	licconsolev1 "github.com/backplane-labs/backplane-lic/proto/lic/console/v1"
 )
 
 func run(ctx context.Context) error {
 	svc, err := backplane.Open(ctx, service.New, standard.Drivers(), backplane.Name("lic"))
 	if err != nil {
 		return fmt.Errorf("lic: %w", err)
+	}
+
+	svc.Internal(func(r grpc.ServiceRegistrar) {
+		licconsolev1.RegisterConsoleServiceServer(r, svc.State().Console)
+	})
+
+	if bundle := ui.Bundle(); bundle != nil {
+		svc.UI(bundle)
 	}
 
 	// The public JSON:API: the full middleware pipeline mounted at the

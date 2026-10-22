@@ -76,6 +76,11 @@ func (s Scenario) Generate(
 		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
 	}
 
+	if principal.Console && in.BearerType == "" {
+		return domain.Token{}, "", apperr.BadRequestSource(
+			"select a user bearer for the token", "/data/relationships/bearer")
+	}
+
 	bearerID, bearerRole, bearerType, err := s.resolveBearer(ctx, account, principal, in)
 	if err != nil {
 		return domain.Token{}, "", err
@@ -159,7 +164,7 @@ func (s Scenario) resolveBearer(
 	// override to another bearer only the admin/developer-for-user
 	// clause.
 	self := principal.BearerType == access.BearerUser && user.ID == principal.BearerID
-	if !self && !allowsGenerateFor(principal, user.Role) {
+	if !self && !principal.Console && !allowsGenerateFor(principal, user.Role) {
 		return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
 	}
 

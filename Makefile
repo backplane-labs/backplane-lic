@@ -16,6 +16,10 @@ EASYP_VERSION              := v0.16.6
 PROTOC_GEN_GO_VERSION      := v1.36.11
 PROTOC_GEN_GO_GRPC_VERSION := v1.6.2
 
+# The console's TS protobuf generators are installed with configure-web.
+EASYP := PATH="$(CURDIR)/web/node_modules/.bin:$(BIN):$$PATH" "$(BIN)/easyp"
+YARN := env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn
+
 OGEN        := go run github.com/ogen-go/ogen/cmd/ogen@v1.20.3
 OPENAPI     := openapi/openapi.yaml
 # ogen consumes OpenAPI 3.0; this is the down-projected build artifact.
@@ -103,6 +107,25 @@ keygen-down: ## Stop the Keygen CE reference server
 .PHONY: spec
 spec: ## Bundle openapi/src fragments into openapi/openapi.yaml (3.1)
 	python3 scripts/bundle_openapi.py openapi/src openapi/openapi.yaml
+
+.PHONY: configure-web
+configure-web: ## Install the console plugin dependencies
+	cd "$(CURDIR)/web" && $(YARN) install --frozen-lockfile
+
+.PHONY: gen
+gen: lint-proto ## Generate the console Go API and TypeScript client
+	$(EASYP) generate
+
+.PHONY: lint-proto
+lint-proto: ## Lint the console protocol
+	"$(BIN)/easyp" lint -p proto
+
+.PHONY: web
+web: ## Build and embed the console module (run before build)
+	cd "$(CURDIR)/web" && $(YARN) typecheck && $(YARN) build
+	rm -rf "$(CURDIR)/internal/ui/dist"/*
+	cp -r "$(CURDIR)/web/dist/plugin/." "$(CURDIR)/internal/ui/dist/"
+	rm -rf "$(CURDIR)/internal/ui/dist/.vite"
 
 .PHONY: gen-api
 gen-api: spec ## Generate the ogen server code into internal/oas

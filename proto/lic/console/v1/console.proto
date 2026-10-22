@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package lic.console.v1;
+
+option go_package = "github.com/backplane-labs/backplane-lic/proto/lic/console/v1;licconsolev1";
+
+// ConsoleService is the operator-only, internal console API. Backplane's
+// relay supplies the session; callers cannot supply an admin credential.
+service ConsoleService {
+  // Call executes the Keygen-compatible HTTP API in-process as an admin.
+  rpc Call(CallRequest) returns (CallResponse);
+  // Info returns installation identity, public keys and resource counts.
+  rpc Info(InfoRequest) returns (InfoResponse);
+}
+
+message CallRequest {
+  string method = 1;
+  // An API path, without an origin, query or fragment.
+  string path = 2;
+  map<string, string> query = 3;
+  bytes body = 4;
+}
+
+message CallResponse {
+  int32 status = 1;
+  map<string, string> headers = 2;
+  bytes body = 3;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+  string account_id = 1;
+  string account_slug = 2;
+  // Only public material: rsa/ecdsa PEM and ed25519 hex.
+  map<string, string> public_keys = 3;
+  string version = 4;
+  map<string, int64> counts = 5;
+  string account_name = 6;
+}

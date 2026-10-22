@@ -10,6 +10,10 @@ bin/
 # OpenAPI build artifacts
 openapi/.build/
 
+# Built console assets (make web), keep the backend-only embed directory.
+internal/ui/dist/*
+!internal/ui/dist/.keep
+
 # local scratch state
 /.dev/
 .claude/

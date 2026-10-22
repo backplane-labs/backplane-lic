@@ -25,6 +25,9 @@ type principalKey struct{}
 // Principal is the authenticated caller: what every scenario authorizes
 // against.
 type Principal struct {
+	// Console is set only by the in-process operator bridge, never from a
+	// credential. Its synthetic bearer is not a persisted user.
+	Console bool
 	// UserBanned is the live password-authenticated user state for TokenPolicy.
 	UserBanned bool
 	// BearerType is the wire type: users, products or licenses.

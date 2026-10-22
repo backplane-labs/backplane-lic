@@ -90,6 +90,36 @@ func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) er
 	return err
 }
 
+const consoleCountsSQL = `SELECT
+  (SELECT count(*) FROM lic.products WHERE account_id = $1)::bigint AS products,
+  (SELECT count(*) FROM lic.policies WHERE account_id = $1)::bigint AS policies,
+  (SELECT count(*) FROM lic.licenses WHERE account_id = $1)::bigint AS licenses,
+  (SELECT count(*) FROM lic.users WHERE account_id = $1)::bigint AS users,
+  (SELECT count(*) FROM lic.groups WHERE account_id = $1)::bigint AS groups,
+  (SELECT count(*) FROM lic.entitlements WHERE account_id = $1)::bigint AS entitlements,
+  (SELECT count(*) FROM lic.tokens WHERE account_id = $1)::bigint AS tokens,
+  (SELECT count(*) FROM lic.webhook_endpoints WHERE account_id = $1)::bigint AS webhook_endpoints,
+  (SELECT count(*) FROM lic.webhook_events WHERE account_id = $1)::bigint AS webhook_events;`
+
+type ConsoleCountsRow struct {
+	Products         int64
+	Policies         int64
+	Licenses         int64
+	Users            int64
+	Groups           int64
+	Entitlements     int64
+	Tokens           int64
+	WebhookEndpoints int64
+	WebhookEvents    int64
+}
+
+func (q *Queries) ConsoleCounts(ctx context.Context, accountID uuid.UUID) (ConsoleCountsRow, error) {
+	row := q.db.QueryRow(ctx, consoleCountsSQL, accountID)
+	var i ConsoleCountsRow
+	err := row.Scan(&i.Products, &i.Policies, &i.Licenses, &i.Users, &i.Groups, &i.Entitlements, &i.Tokens, &i.WebhookEndpoints, &i.WebhookEvents)
+	return i, err
+}
+
 const getEntitlementByIDSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
 FROM lic.entitlements
 WHERE account_id = $1 AND id = $2;`

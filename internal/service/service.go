@@ -41,6 +41,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/infra/console"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	whwebhook "github.com/backplane-labs/backplane-lic/internal/infra/webhook"
@@ -48,8 +49,9 @@ import (
 
 // Service is the built tree plus what main declares on the platform.
 type Service struct {
-	Store deps.Dependency[*postgres.Store]
-	Cache deps.Optional[valkey.AsideClient]
+	Console *console.Server
+	Store   deps.Dependency[*postgres.Store]
+	Cache   deps.Optional[valkey.AsideClient]
 	// HTTP is the public JSON:API (the full middleware pipeline: request
 	// id, negotiation, authentication, response signing); it answers 503
 	// until the tree has started.
@@ -117,7 +119,11 @@ func New(root backplane.Root[Config]) (*Service, error) {
 		return loop(ctx, time.Minute, jobsRunner.Tick)
 	})
 
-	return &Service{Store: store, Cache: cache, HTTP: late}, nil
+	consoleComponent := deps.NewComponent(root, "console")
+	admin := console.New(late, consoleStore{store: store}, id, build.Get().Version,
+		slog.New(xlog.NewSlogHandler(consoleComponent.Log())))
+
+	return &Service{Console: admin, Store: store, Cache: cache, HTTP: late}, nil
 }
 
 // loop runs a periodic pass until the context ends.

@@ -164,6 +164,14 @@ const (
 	authModePasswordOrToken
 )
 
+func authenticationMode(mode authMode) authn.Mode {
+	if mode == authModePasswordOrToken {
+		return authn.ModePasswordOrToken
+	}
+
+	return authn.ModeToken
+}
+
 // hasBody reports whether the method carries a request body at all.
 func hasBody(method string) bool {
 	switch method {
@@ -215,12 +223,13 @@ func (p *pipeline) serveAccountScoped(
 		err       error
 	)
 
-	authnMode := authn.ModeToken
-	if mode == authModePasswordOrToken {
-		authnMode = authn.ModePasswordOrToken
-	}
+	authnMode := authenticationMode(mode)
+
+	operator, console := consolePrincipal(r.Context())
 
 	switch {
+	case console:
+		principal = operator
 	case mode == authModeNone:
 		// No authentication at all.
 	case mode == authModeOptional && cred.Kind == authn.CredentialNone:

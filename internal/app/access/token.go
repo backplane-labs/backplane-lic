@@ -104,7 +104,7 @@ func TokenGenerateForUser(p Principal, user domain.User, licensedTo func() bool)
 
 	switch {
 	case p.Role == domain.RoleAdmin || p.Role == domain.RoleDeveloper:
-		if p.IsUser() && (user.ID == p.BearerID || user.Role == domain.RoleUser) {
+		if p.IsUser() && (p.Console || user.ID == p.BearerID || user.Role == domain.RoleUser) {
 			return nil
 		}
 	case p.IsProduct():
