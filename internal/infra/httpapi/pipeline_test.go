@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -112,8 +113,8 @@ func pipeSetup(t *testing.T) (http.Handler, string, string) {
 	handler := httpapi.New(httpapi.Deps{
 		Accounts: fakeAccounts{account},
 		Authn:    authn.New(store, clock),
-		Users:    users.New(userStore{store: store}, clock),
-		Tokens:   tokens.New(tokenStore{}, rand.Reader, clock),
+		Users:    users.New(userStore{store: store}, events.None{}, clock),
+		Tokens:   tokens.New(tokenStore{}, events.None{}, rand.Reader, clock),
 		Spec:     httpapi.Spec{ID: account.ID, Slug: account.Slug},
 		Revision: "deadbeef",
 		Throttle: httpapi.NewMemoryThrottler(),
@@ -124,6 +125,8 @@ func pipeSetup(t *testing.T) (http.Handler, string, string) {
 }
 
 type userStore struct {
+	users.Store
+
 	store pipeStore
 }
 
@@ -141,7 +144,9 @@ func (userStore) UserHasActiveLicense(context.Context, uuid.UUID, uuid.UUID) (bo
 	return false, nil
 }
 
-type tokenStore struct{}
+type tokenStore struct {
+	tokens.Store
+}
 
 func (tokenStore) InsertToken(context.Context, domain.Token) error { return nil }
 

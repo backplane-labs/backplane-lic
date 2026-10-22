@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User is an account's user: a license owner or an admin bearer.
@@ -21,6 +22,10 @@ type User struct {
 	Permissions map[string]struct{}
 	GroupID     uuid.NullUUID
 	Metadata    map[string]any
+	// PasswordResetToken is the HMAC digest of the outstanding
+	// password-reset token (plaintext only in the webhook/email).
+	PasswordResetToken  string
+	PasswordResetSentAt *time.Time
 	// BannedAt is set when the user is banned; nil otherwise.
 	BannedAt  *time.Time
 	CreatedAt time.Time
@@ -62,4 +67,10 @@ func (u User) Status(activeLicense bool, now time.Time) string {
 	}
 
 	return "INACTIVE"
+}
+
+// Authenticates reports whether the password matches the digest
+// (bcrypt, like the reference's has_secure_password).
+func (u User) Authenticates(password string) bool {
+	return u.HasPassword() && bcrypt.CompareHashAndPassword([]byte(u.PasswordDigest), []byte(password)) == nil
 }

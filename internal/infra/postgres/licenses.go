@@ -33,7 +33,7 @@ func (r LicensesRepo) LicenseByKey(ctx context.Context, accountID uuid.UUID, key
 	}
 
 	return licenseAuth(row.ID, row.AccountID, row.Key, row.Suspended, row.Expiry,
-		row.OwnerBanned, row.AuthenticationStrategy, row.ExpirationStrategy), nil
+		row.GroupID, row.OwnerBanned, row.AuthenticationStrategy, row.ExpirationStrategy), nil
 }
 
 // LicenseByID loads the license-auth slice by id.
@@ -48,7 +48,7 @@ func (r LicensesRepo) LicenseByID(ctx context.Context, accountID, id uuid.UUID) 
 	}
 
 	return licenseAuth(row.ID, row.AccountID, row.Key, row.Suspended, row.Expiry,
-		row.OwnerBanned, row.AuthenticationStrategy, row.ExpirationStrategy), nil
+		row.GroupID, row.OwnerBanned, row.AuthenticationStrategy, row.ExpirationStrategy), nil
 }
 
 func licenseAuth(
@@ -56,6 +56,7 @@ func licenseAuth(
 	key string,
 	suspended bool,
 	expiry *time.Time,
+	groupID *uuid.UUID,
 	ownerBanned bool,
 	authenticationStrategy, expirationStrategy *string,
 ) domain.LicenseAuth {
@@ -65,10 +66,20 @@ func licenseAuth(
 		Key:                          key,
 		Suspended:                    suspended,
 		Expiry:                       expiry,
+		GroupID:                      nullUUID(groupID),
 		OwnerBanned:                  ownerBanned,
 		PolicyAuthenticationStrategy: deref(authenticationStrategy),
 		PolicyExpirationStrategy:     deref(expirationStrategy),
 	}
+}
+
+// nullUUID converts a nullable column to its NullUUID form.
+func nullUUID(id *uuid.UUID) uuid.NullUUID {
+	if id == nil {
+		return uuid.NullUUID{}
+	}
+
+	return uuid.NullUUID{UUID: *id, Valid: true}
 }
 
 func jsonList(list []string) json.RawMessage {

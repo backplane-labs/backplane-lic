@@ -67,15 +67,46 @@ func PrincipalOf(ctx context.Context) Principal {
 }
 
 // Require authorizes the permission for the context's principal. The
-// returned error is the 403 document (with the missing-permission
-// reason); resource-specific ownership rules build on top of this.
+// returned error is the 403 document with the reference's
+// missing-permission reason ("<role> lacks permission to perform
+// action"); resource-specific ownership rules build on top of this.
 func Require(ctx context.Context, permission string) error {
 	p := PrincipalOf(ctx)
 	if p.Allows(permission) {
 		return nil
 	}
 
-	return apperr.ForbiddenReason(ReasonAllResources)
+	return apperr.ForbiddenReason(lacksPermissionReason(p))
+}
+
+// lacksPermissionReason is verify_permissions!'s inline deny reason.
+func lacksPermissionReason(p Principal) string {
+	return " (" + Whatami(p) + " lacks permission to perform action)"
+}
+
+// Whatami names the bearer like the reference's policy whatami (the
+// humanized role).
+func Whatami(p Principal) string {
+	switch p.Role {
+	case domain.RoleReadOnly:
+		return "read only"
+	case domain.RoleSalesAgent:
+		return "sales agent"
+	case domain.RoleSupportRole:
+		return "support agent"
+	case domain.RoleUser:
+		return "user"
+	case domain.RoleAdmin:
+		return "admin"
+	case domain.RoleDeveloper:
+		return "developer"
+	case domain.RoleProduct:
+		return "product"
+	case domain.RoleLicense:
+		return "license"
+	default:
+		return "bearer"
+	}
 }
 
 // RequireBearerKind authorizes the bearer kinds (any of kinds).

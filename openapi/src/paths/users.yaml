@@ -1,0 +1,644 @@
+# Users: CRUD, actions (passwords, ban), relationships (second factors,
+# products, licenses, machines, tokens, group). Bodies are free-form on
+# the wire: the handler shape-validates them like the reference's typed
+# params, reproducing its exact error pointers.
+paths:
+  /v1/accounts/{account}/users:
+    get:
+      operationId: listUsers
+      summary: List users
+      description: Users of the account (default roles[]=user), filtered and paginated.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createUser
+      summary: Create a user
+      description: Creates a user (anonymous only when the account is not protected).
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: User document.
+          headers:
+            Location:
+              description: The new user's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}:
+    get:
+      operationId: showUser
+      summary: Show a user
+      description: The user by UUID or (downcased) email alias.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          description: User id (UUID) or email alias.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateUser
+      summary: Update a user
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteUser
+      summary: Delete a user
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/actions/update-password:
+    post:
+      operationId: updateUserPassword
+      summary: Change the bearer's own password
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/actions/reset-password:
+    post:
+      operationId: resetUserPassword
+      summary: Reset a user's password with a reset token
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/actions/ban:
+    post:
+      operationId: banUser
+      summary: Ban a user
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User document (status BANNED).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/actions/unban:
+    post:
+      operationId: unbanUser
+      summary: Unban a user
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/second-factors:
+    get:
+      operationId: listUserSecondFactors
+      summary: List a user's second factors
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Second-factor collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/SecondFactorCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createUserSecondFactor
+      summary: Create a TOTP second factor
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Second-factor document (secret and uri included).
+          headers:
+            Location:
+              description: The new second factor's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/SecondFactorDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}:
+    get:
+      operationId: showUserSecondFactor
+      summary: Show a second factor
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secondFactorId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Second-factor document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/SecondFactorDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateUserSecondFactor
+      summary: Enable or disable a second factor (requires meta.otp)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secondFactorId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Second-factor document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/SecondFactorDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteUserSecondFactor
+      summary: Delete a second factor
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secondFactorId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/products:
+    get:
+      operationId: listUserProducts
+      summary: List a user's products
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserProductCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/products/{productId}:
+    get:
+      operationId: showUserProduct
+      summary: Show one of a user's products
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/licenses:
+    get:
+      operationId: listUserLicenses
+      summary: List a user's licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserLicenseCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/licenses/{licenseId}:
+    get:
+      operationId: showUserLicense
+      summary: Show one of a user's licenses (id or key alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: licenseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserLicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/machines:
+    get:
+      operationId: listUserMachines
+      summary: List a user's machines
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserMachineCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/machines/{machineId}:
+    get:
+      operationId: showUserMachine
+      summary: Show one of a user's machines (id or fingerprint alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: machineId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserMachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/tokens:
+    get:
+      operationId: listUserTokens
+      summary: List a user's tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token collection (no secrets).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createUserToken
+      summary: Generate a token for a user
+      description: Answers 200 (not 201) with the raw secret included once.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Token document (with the raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/tokens/{tokenId}:
+    get:
+      operationId: showUserToken
+      summary: Show one of a user's tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token document (no secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/users/{userId}/group:
+    get:
+      operationId: showUserGroup
+      summary: Show a user's group (data null when none)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group document (data null when the user has no group).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    put:
+      operationId: updateUserGroup
+      summary: Set or remove a user's group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: User document (with the updated group linkage).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"

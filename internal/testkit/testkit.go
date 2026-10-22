@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 )
@@ -18,7 +19,7 @@ import (
 // the admin role) when her email is not taken; an existing user is left
 // alone, so the call is idempotent per email.
 func SeedAdmin(ctx context.Context, db *postgres.Store, accountID uuid.UUID, email, password string) error {
-	scenario := users.New(db.Users, time.Now)
+	scenario := users.New(db, events.None{}, time.Now)
 
 	return scenario.SeedAdmin(ctx, accountID, email, password) //nolint:wrapcheck // the scenario's own error
 }

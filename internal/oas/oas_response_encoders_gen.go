@@ -14,6 +14,178 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func encodeAttachGroupOwnersResponse(response *GroupOwnerCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeBanUserResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeCreateGroupResponse(response *GroupDocumentHeaders, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.Header().Set("Access-Control-Expose-Headers", "Location")
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Location" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				if val, ok := response.Location.Get(); ok {
+					return e.EncodeValue(conv.StringToString(val))
+				}
+				return nil
+			}); err != nil {
+				return errors.Wrap(err, "encode Location header")
+			}
+		}
+	}
+	w.WriteHeader(201)
+	span.SetStatus(codes.Ok, http.StatusText(201))
+
+	e := new(jx.Encoder)
+	response.Response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeCreateUserResponse(response *UserDocumentHeaders, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.Header().Set("Access-Control-Expose-Headers", "Location")
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Location" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				if val, ok := response.Location.Get(); ok {
+					return e.EncodeValue(conv.StringToString(val))
+				}
+				return nil
+			}); err != nil {
+				return errors.Wrap(err, "encode Location header")
+			}
+		}
+	}
+	w.WriteHeader(201)
+	span.SetStatus(codes.Ok, http.StatusText(201))
+
+	e := new(jx.Encoder)
+	response.Response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeCreateUserSecondFactorResponse(response *SecondFactorDocumentHeaders, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.Header().Set("Access-Control-Expose-Headers", "Location")
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Location" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				if val, ok := response.Location.Get(); ok {
+					return e.EncodeValue(conv.StringToString(val))
+				}
+				return nil
+			}); err != nil {
+				return errors.Wrap(err, "encode Location header")
+			}
+		}
+	}
+	w.WriteHeader(201)
+	span.SetStatus(codes.Ok, http.StatusText(201))
+
+	e := new(jx.Encoder)
+	response.Response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeCreateUserTokenResponse(response *TokenDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeDeleteGroupResponse(response *DeleteGroupNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
+func encodeDeleteUserResponse(response *DeleteUserNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
+func encodeDeleteUserSecondFactorResponse(response *DeleteUserSecondFactorNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
+func encodeDetachGroupOwnersResponse(response *DetachGroupOwnersNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
 func encodeGenerateTokenResponse(response *TokenDocumentHeaders, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.Header().Set("Access-Control-Expose-Headers", "Location")
@@ -69,6 +241,174 @@ func encodeHealthResponse(response *HealthNoContent, w http.ResponseWriter, span
 	return nil
 }
 
+func encodeListGroupLicensesResponse(response *UserLicenseCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListGroupMachinesResponse(response *UserMachineCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListGroupOwnersResponse(response *GroupOwnerCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListGroupUsersResponse(response *UserCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListGroupsResponse(response *GroupCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListTokensResponse(response *TokenCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListUserLicensesResponse(response *UserLicenseCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListUserMachinesResponse(response *UserMachineCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListUserProductsResponse(response *UserProductCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListUserSecondFactorsResponse(response *SecondFactorCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListUserTokensResponse(response *TokenCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListUsersResponse(response *UserCollectionDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeMeResponse(response *MeDocument, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(200)
@@ -91,6 +431,328 @@ func encodePingResponse(response *PingOK, w http.ResponseWriter, span trace.Span
 }
 
 func encodeProfileResponse(response *ProfileDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeRegenerateCurrentTokenResponse(response *TokenDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeRegenerateTokenResponse(response *TokenDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeRequestPasswordResetResponse(response *RequestPasswordResetNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
+func encodeResetUserPasswordResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeRevokeTokenResponse(response *RevokeTokenNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	span.SetStatus(codes.Ok, http.StatusText(204))
+
+	return nil
+}
+
+func encodeShowGroupResponse(response *GroupDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowGroupLicenseResponse(response *UserLicenseDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowGroupMachineResponse(response *UserMachineDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowGroupOwnerResponse(response *GroupOwnerDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowGroupUserResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowTokenResponse(response *TokenDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserGroupResponse(response *GroupDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserLicenseResponse(response *UserLicenseDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserMachineResponse(response *UserMachineDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserProductResponse(response *UserProductDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserSecondFactorResponse(response *SecondFactorDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeShowUserTokenResponse(response *TokenDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUnbanUserResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateGroupResponse(response *GroupDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateUserResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateUserGroupResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateUserPasswordResponse(response *UserDocument, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateUserSecondFactorResponse(response *SecondFactorDocument, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

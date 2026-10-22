@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -66,6 +67,14 @@ func (r *request) location(path string) string {
 	return r.scheme + "://" + r.host + path
 }
 
+// originalPath answers the path exactly as the client sent it (without
+// the query): the base of pagination links.
+func (r *request) originalPath() string {
+	path, _, _ := strings.Cut(r.originalURI, "?")
+
+	return path
+}
+
 // apperrFrom extracts the typed app error, replacing anything else
 // (storage failures included) with the 500.
 func apperrFrom(err error) *apperr.T {
@@ -78,10 +87,7 @@ func errorStatus(t *apperr.T, req *request) *oas.ErrorStatusCode {
 	e := oas.Error{Title: t.Title, Detail: t.Detail}
 
 	if t.Code != "" {
-		e.Code = oas.NewOptNilString(t.Code)
-	} else {
-		e.Code = oas.NewOptNilString("")
-		e.Code.SetToNull()
+		e.Code = oas.NewOptString(t.Code)
 	}
 
 	if t.Source.Pointer != "" {
@@ -103,9 +109,12 @@ func errorStatus(t *apperr.T, req *request) *oas.ErrorStatusCode {
 	}
 
 	if t.About != "" {
-		e.Links = oas.NewOptErrorLinks(
-			oas.ErrorLinks{About: oas.NewOptString(req.docsBase + "/docs/api/" + t.About)},
-		)
+		about := t.About
+		if !strings.HasPrefix(about, "http") {
+			about = req.docsBase + "/docs/api/" + about
+		}
+
+		e.Links = oas.NewOptErrorLinks(oas.ErrorLinks{About: oas.NewOptString(about)})
 	}
 
 	doc.Errors = []oas.Error{e}

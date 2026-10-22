@@ -24,6 +24,10 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
+	"github.com/backplane-labs/backplane-lic/internal/app/groups"
+	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
+	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -79,14 +83,17 @@ func TestEndToEnd(t *testing.T) {
 	}
 
 	handler := httpapi.New(httpapi.Deps{
-		Accounts: store.Accounts,
-		Authn:    authn.New(store, clock),
-		Users:    users.New(store.Users, clock),
-		Tokens:   tokens.New(store, rand.Reader, clock),
-		Spec:     httpapi.Spec{ID: id, Slug: spec.Slug},
-		Revision: "deadbeef",
-		Throttle: httpapi.NewMemoryThrottler(),
-		Clock:    clock,
+		Accounts:      store.Accounts,
+		Authn:         authn.New(store, clock),
+		Users:         users.New(store, events.None{}, clock),
+		Tokens:        tokens.New(store, events.None{}, rand.Reader, clock),
+		Groups:        groups.New(store, events.None{}, clock),
+		SecondFactors: secondfactors.New(store, events.None{}, rand.Reader, clock),
+		Passwords:     passwords.New(store, events.None{}, rand.Reader, clock),
+		Spec:          httpapi.Spec{ID: id, Slug: spec.Slug},
+		Revision:      "deadbeef",
+		Throttle:      httpapi.NewMemoryThrottler(),
+		Clock:         clock,
 	})
 
 	base := "/v1/accounts/" + id.String()

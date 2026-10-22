@@ -1,6 +1,6 @@
 // Package users is the user scenario: the bootstrap admin seed, the
-// status computation and the me/profile reads. The full CRUD arrives
-// with the users routes.
+// status computation, CRUD, the password/ban actions and the
+// relationship reads (me/profile included).
 package users
 
 import (
@@ -12,37 +12,20 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
-// ErrNotFound is the storage port's not-found sentinel.
-var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
-
-// ErrEmailTaken is the unique-index violation of (account, email).
-var ErrEmailTaken = errors.New("users: email taken")
-
-// Store is the scenario's consumer-side storage port.
-type Store interface {
-	// UserByID loads a user; ErrNotFound when none.
-	UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error)
-	// UserByEmail loads a user by downcased email; ErrNotFound.
-	UserByEmail(ctx context.Context, accountID uuid.UUID, email string) (domain.User, error)
-	// InsertUser writes a new user row.
-	InsertUser(ctx context.Context, user domain.User) error
-	// UserHasActiveLicense answers the user's status input: a license
-	// created/validated/checked-in/out within the last 90 days.
-	UserHasActiveLicense(ctx context.Context, accountID, id uuid.UUID) (bool, error)
-}
-
-// Scenario reads and seeds users.
+// Scenario runs the user scenarios.
 type Scenario struct {
-	store Store
-	clock func() time.Time
+	store  Store
+	events events.Publisher
+	clock  func() time.Time
 }
 
-// New builds the scenario.
-func New(store Store, clock func() time.Time) Scenario {
-	return Scenario{store: store, clock: clock}
+// New builds the scenario (events publishes the user webhook events).
+func New(store Store, publisher events.Publisher, clock func() time.Time) Scenario {
+	return Scenario{store: store, events: publisher, clock: clock}
 }
 
 // SeedAdmin creates the configured admin user when her email is not
@@ -89,10 +72,25 @@ func (s Scenario) Me(ctx context.Context, accountID, id uuid.UUID) (domain.User,
 		return domain.User{}, "", fmt.Errorf("users: me: %w", err)
 	}
 
-	active, err := s.store.UserHasActiveLicense(ctx, accountID, id)
+	status, err := s.status(ctx, user)
 	if err != nil {
-		return domain.User{}, "", fmt.Errorf("users: me: active license: %w", err)
+		return domain.User{}, "", err
 	}
 
-	return user, user.Status(active, s.clock()), nil
+	return user, status, nil
+}
+
+// status computes the user's wire status (the active-license input is
+// loaded per user).
+func (s Scenario) status(ctx context.Context, user domain.User) (string, error) {
+	if user.Banned() {
+		return "BANNED", nil
+	}
+
+	active, err := s.store.UserHasActiveLicense(ctx, user.AccountID, user.ID)
+	if err != nil {
+		return "", fmt.Errorf("users: status: %w", err)
+	}
+
+	return user.Status(active, s.clock()), nil
 }

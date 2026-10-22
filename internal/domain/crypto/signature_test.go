@@ -278,8 +278,9 @@ func TestTokenShapeChecks(t *testing.T) {
 	}
 }
 
-// TestVerifyTOTP pins the RFC 6238 vector: a fixed time step and code,
-// including drift of one step.
+// TestVerifyTOTP pins the reference's ROTP drift_behind=10s window: the
+// code of the current step, the previous one only within 10s of the
+// boundary, never a future one.
 func TestVerifyTOTP(t *testing.T) {
 	t.Parallel()
 
@@ -293,11 +294,18 @@ func TestVerifyTOTP(t *testing.T) {
 		t.Fatalf("totp %q not accepted at its own step", otp)
 	}
 
-	if !crypto.VerifyTOTP(secret, otp, time.Unix(now-30, 0)) {
-		t.Error("totp not accepted one step earlier")
+	// now is 10s into its step; a PREVIOUS-step code stays within the
+	// 10s drift for 5 more seconds, then ages out at 15s in.
+	prev := totpCode(t, secret, now/30-1)
+	if !crypto.VerifyTOTP(secret, prev, time.Unix(now-5, 0)) {
+		t.Error("previous-step code not accepted within the drift window")
 	}
 
-	if crypto.VerifyTOTP(secret, otp, time.Unix(now-5*30, 0)) {
-		t.Error("totp accepted five steps earlier")
+	if crypto.VerifyTOTP(secret, prev, time.Unix(now+5, 0)) {
+		t.Error("previous-step code accepted outside the drift window")
+	}
+
+	if crypto.VerifyTOTP(secret, totpCode(t, secret, now/30+1), time.Unix(now, 0)) {
+		t.Error("future-step code accepted")
 	}
 }

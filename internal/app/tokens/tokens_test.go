@@ -11,6 +11,8 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
+	"github.com/backplane-labs/backplane-lic/internal/app/paging"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
@@ -26,6 +28,34 @@ func (f *fakeStore) InsertToken(_ context.Context, token domain.Token) error {
 	f.inserted = append(f.inserted, token)
 
 	return nil
+}
+
+func (f *fakeStore) TokenByID(context.Context, uuid.UUID, uuid.UUID) (domain.Token, error) {
+	return domain.Token{}, domain.ErrNotFound
+}
+
+func (f *fakeStore) ListTokens(context.Context, uuid.UUID, tokens.Filter, string, uuid.UUID, paging.Params) ([]domain.Token, error) {
+	return nil, nil
+}
+
+func (f *fakeStore) CountTokens(context.Context, uuid.UUID, tokens.Filter, string, uuid.UUID) (int, error) {
+	return 0, nil
+}
+
+func (f *fakeStore) RegenerateToken(context.Context, uuid.UUID, uuid.UUID, string, *time.Time) error {
+	return nil
+}
+
+func (f *fakeStore) DeleteToken(context.Context, uuid.UUID, uuid.UUID) error {
+	return nil
+}
+
+func (f *fakeStore) UserLicensedToProduct(context.Context, uuid.UUID, uuid.UUID, uuid.UUID) (bool, error) {
+	return false, nil
+}
+
+func (f *fakeStore) LicenseOfProduct(context.Context, uuid.UUID, uuid.UUID, uuid.UUID) (bool, error) {
+	return false, nil
 }
 
 func (f *fakeStore) BearerUser(_ context.Context, _, id uuid.UUID) (domain.User, error) {
@@ -74,7 +104,7 @@ func TestGenerateBearerOverride(t *testing.T) {
 		plain.ID: plain, adminTarget.ID: adminTarget,
 	}}
 
-	scenario := tokens.New(store, rand.Reader, time.Now)
+	scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
 	account := testAccount(t)
 
 	for _, tc := range []struct {
@@ -135,7 +165,7 @@ func TestGenerateSelf(t *testing.T) {
 		domain.RoleSupportRole, domain.RoleReadOnly, domain.RoleUser,
 	} {
 		store := &fakeStore{}
-		scenario := tokens.New(store, rand.Reader, time.Now)
+		scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
 		ctx := access.With(context.Background(), userPrincipal(role))
 
 		token, raw, err := scenario.Generate(ctx, testAccount(t), access.PrincipalOf(ctx), tokens.GenerateInput{})
@@ -157,7 +187,7 @@ func TestGenerateSelf(t *testing.T) {
 	// A product or license bearer cannot mint even for itself.
 	for _, bearer := range []string{access.BearerProduct, access.BearerLicense} {
 		store := &fakeStore{}
-		scenario := tokens.New(store, rand.Reader, time.Now)
+		scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
 
 		p := access.Principal{
 			BearerType:  bearer,
@@ -179,7 +209,7 @@ func TestGenerateExpiry(t *testing.T) {
 	t.Parallel()
 
 	store := &fakeStore{}
-	scenario := tokens.New(store, rand.Reader, time.Now)
+	scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
 	account := testAccount(t)
 
 	user := userPrincipal(domain.RoleUser)

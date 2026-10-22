@@ -19,7 +19,8 @@ func scenarios() []conformance.Scenario {
 	account := "/v1/accounts/" + conformance.AccountSlug
 	tokens := account + "/tokens"
 
-	return []conformance.Scenario{
+	//nolint:prealloc // the fixed core scenarios plus the resource groups
+	scns := []conformance.Scenario{
 		{
 			Name: "ping",
 			Steps: []conformance.Step{
@@ -101,4 +102,12 @@ func scenarios() []conformance.Scenario {
 			},
 		},
 	}
+
+	scns = append(scns, usersScenarios()...)
+	scns = append(scns, groupsScenarios()...)
+	scns = append(scns, tokensScenarios()...)
+	scns = append(scns, secondFactorsScenarios()...)
+	scns = append(scns, passwordsScenarios()...)
+
+	return scns
 }

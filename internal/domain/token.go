@@ -22,8 +22,13 @@ type Token struct {
 	// Expiry is nil for tokens that never expire.
 	Expiry      *time.Time
 	Permissions []string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	// Activation-token counters (bearer_type License); zero otherwise.
+	MaxActivations   *int
+	Activations      int
+	MaxDeactivations *int
+	Deactivations    int
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 // Expired reports whether the token's expiry lies in the past.
