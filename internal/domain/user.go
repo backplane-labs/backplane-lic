@@ -81,4 +81,6 @@ func (u User) Authenticates(password string) bool {
 type PasswordReset struct {
 	User  User
 	Token string
+	// Deliver only gates email; the webhook and event are always recorded.
+	Deliver *bool
 }

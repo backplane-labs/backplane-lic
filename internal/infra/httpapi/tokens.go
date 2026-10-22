@@ -222,7 +222,14 @@ func (a *API) RequestPasswordReset(
 		return err
 	}
 
-	return a.passwords.Request(ctx, req.account, email, nil) //nolint:wrapcheck // the scenario's own error
+	var deliver *bool
+
+	meta, _ := req.body["meta"].(map[string]any) // validated above; preserve existing input acceptance
+	if value, ok := meta["deliver"].(bool); ok {
+		deliver = &value
+	}
+
+	return a.passwords.Request(ctx, req.account, email, deliver) //nolint:wrapcheck // the scenario's own error
 }
 
 // validatePasswordResetBody decodes meta{email, deliver?}.

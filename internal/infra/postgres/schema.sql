@@ -665,3 +665,13 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER outbox_messages_notify_trg
   AFTER INSERT ON lic.outbox_messages
   FOR EACH STATEMENT EXECUTE FUNCTION lic.outbox_messages_notify();
+
+-- Activity results commit with business writes; retain them for late retries.
+CREATE TABLE lic.automation_activity_results (
+  account_id uuid NOT NULL REFERENCES lic.accounts(id) ON DELETE CASCADE,
+  execution_key text NOT NULL,
+  request_hash text NOT NULL,
+  result jsonb NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, execution_key)
+);

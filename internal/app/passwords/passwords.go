@@ -66,14 +66,10 @@ func (s Scenario) Request(ctx context.Context, account domain.Account, email str
 			return fmt.Errorf("passwords: reset fields: %w", err)
 		}
 
-		return s.events.Publish(ctx, "user.password-reset", domain.PasswordReset{User: user, Token: raw})
+		return s.events.Publish(ctx, "user.password-reset", domain.PasswordReset{User: user, Token: raw, Deliver: deliver})
 	}); err != nil {
 		return fmt.Errorf("passwords: request: %w", err)
 	}
-
-	// The email itself is out of scope (no mailer in the clone);
-	// deliver only gates it.
-	_ = deliver
 
 	return nil
 }
