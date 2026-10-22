@@ -1,0 +1,324 @@
+{
+  "scenario": "product_pagination_params",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "page1-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create page1",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "limit must be a number between 1 and 100 (got 0)",
+            "source": {
+              "parameter": "limit"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:3\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "bad limit",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "limit must be a number between 1 and 100 (got 101)",
+            "source": {
+              "parameter": "limit"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:4\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "limit above the maximum",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "order is invalid",
+            "source": {
+              "parameter": "order"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "bad order",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "page cursor must be a valid UUID (got \"notauuid\")",
+            "source": {
+              "parameter": "page[cursor]"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "bad cursor",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "page number must be a number between 1 and 100 (got 101, please use cursor-based pagination instead)",
+            "source": {
+              "parameter": "page[number]"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:7\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "page number above the maximum",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "ENVIRONMENT_NOT_SUPPORTED",
+            "detail": "is unsupported",
+            "source": {
+              "parameter": "environment"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:8\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "environment param",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "ENVIRONMENT_NOT_SUPPORTED",
+            "detail": "is unsupported",
+            "source": {
+              "header": "Keygen-Environment"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "environment header",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    }
+  ]
+}

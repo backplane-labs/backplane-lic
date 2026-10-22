@@ -1,0 +1,311 @@
+# Products: CRUD plus the policies/licenses/machines/tokens/users
+# relationship routes (releases/artifacts/platforms/channels stay link
+# stubs out of scope). Request bodies are decoded as free-form objects
+# and shape-validated by the scenarios, reproducing the reference's
+# typed-params errors.
+paths:
+  /v1/accounts/{account}/products:
+    get:
+      operationId: indexProducts
+      summary: List products
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Product collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createProduct
+      summary: Create a product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Product document.
+          headers:
+            Location:
+              description: The new product's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}:
+    get:
+      operationId: showProduct
+      summary: Retrieve a product (by id or code)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateProduct
+      summary: Update a product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyProduct
+      summary: Delete a product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/policies:
+    get:
+      operationId: indexProductPolicies
+      summary: List a product's policies
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "200":
+          description: Policy collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/policies/{policyId}:
+    get:
+      operationId: showProductPolicy
+      summary: Retrieve one of a product's policies
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/licenses:
+    get:
+      operationId: indexProductLicenses
+      summary: List a product's licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "200":
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseStubListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/licenses/{licenseId}:
+    get:
+      operationId: showProductLicense
+      summary: Retrieve one of a product's licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/machines:
+    get:
+      operationId: indexProductMachines
+      summary: List a product's machines
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "200":
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineStubListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/machines/{machineId}:
+    get:
+      operationId: showProductMachine
+      summary: Retrieve one of a product's machines
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/tokens:
+    get:
+      operationId: indexProductTokens
+      summary: List a product's tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "200":
+          description: Token collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductTokenListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createProductToken
+      summary: Generate a product token
+      description: >-
+        Answers 200 (not 201) with the token document; the raw secret
+        rides the response exactly once.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Token document (with the raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/tokens/{tokenId}:
+    get:
+      operationId: showProductToken
+      summary: Retrieve one of a product's tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+        - $ref: "#/components/parameters/TokenPath"
+      responses:
+        "200":
+          description: Token document (no raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/users:
+    get:
+      operationId: indexProductUsers
+      summary: List a product's users
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+      responses:
+        "200":
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductUserListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/products/{productId}/users/{userId}:
+    get:
+      operationId: showProductUser
+      summary: Retrieve one of a product's users
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProductPath"
+        - $ref: "#/components/parameters/UserPath"
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserDocument"
+        default:
+          $ref: "#/components/responses/Error"

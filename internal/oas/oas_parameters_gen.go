@@ -14,6 +14,1110 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
+// AttachPolicyEntitlementsParams is parameters of attachPolicyEntitlements operation.
+type AttachPolicyEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackAttachPolicyEntitlementsParams(packed middleware.Parameters) (params AttachPolicyEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeAttachPolicyEntitlementsParams(args [2]string, argsEscaped bool, r *http.Request) (params AttachPolicyEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateEntitlementParams is parameters of createEntitlement operation.
+type CreateEntitlementParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackCreateEntitlementParams(packed middleware.Parameters) (params CreateEntitlementParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateEntitlementParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateEntitlementParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateKeyParams is parameters of createKey operation.
+type CreateKeyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackCreateKeyParams(packed middleware.Parameters) (params CreateKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateKeyParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateKeyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreatePolicyParams is parameters of createPolicy operation.
+type CreatePolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackCreatePolicyParams(packed middleware.Parameters) (params CreatePolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreatePolicyParams(args [1]string, argsEscaped bool, r *http.Request) (params CreatePolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateProductParams is parameters of createProduct operation.
+type CreateProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackCreateProductParams(packed middleware.Parameters) (params CreateProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateProductParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateProductTokenParams is parameters of createProductToken operation.
+type CreateProductTokenParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackCreateProductTokenParams(packed middleware.Parameters) (params CreateProductTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateProductTokenParams(args [2]string, argsEscaped bool, r *http.Request) (params CreateProductTokenParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DestroyEntitlementParams is parameters of destroyEntitlement operation.
+type DestroyEntitlementParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Entitlement id (UUID) or code.
+	EntitlementId string
+}
+
+func unpackDestroyEntitlementParams(packed middleware.Parameters) (params DestroyEntitlementParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "entitlementId",
+			In:   "path",
+		}
+		params.EntitlementId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDestroyEntitlementParams(args [2]string, argsEscaped bool, r *http.Request) (params DestroyEntitlementParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: entitlementId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "entitlementId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EntitlementId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entitlementId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DestroyKeyParams is parameters of destroyKey operation.
+type DestroyKeyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Key id (UUID).
+	KeyId string
+}
+
+func unpackDestroyKeyParams(packed middleware.Parameters) (params DestroyKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "keyId",
+			In:   "path",
+		}
+		params.KeyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDestroyKeyParams(args [2]string, argsEscaped bool, r *http.Request) (params DestroyKeyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: keyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "keyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.KeyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DestroyPolicyParams is parameters of destroyPolicy operation.
+type DestroyPolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackDestroyPolicyParams(packed middleware.Parameters) (params DestroyPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDestroyPolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params DestroyPolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DestroyProductParams is parameters of destroyProduct operation.
+type DestroyProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackDestroyProductParams(packed middleware.Parameters) (params DestroyProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDestroyProductParams(args [2]string, argsEscaped bool, r *http.Request) (params DestroyProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DetachPolicyEntitlementsParams is parameters of detachPolicyEntitlements operation.
+type DetachPolicyEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackDetachPolicyEntitlementsParams(packed middleware.Parameters) (params DetachPolicyEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDetachPolicyEntitlementsParams(args [2]string, argsEscaped bool, r *http.Request) (params DetachPolicyEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GenerateTokenParams is parameters of generateToken operation.
 type GenerateTokenParams struct {
 	// Account id (UUID) or slug.
@@ -146,6 +1250,1230 @@ func decodeGetAccountParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// IndexEntitlementsParams is parameters of indexEntitlements operation.
+type IndexEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackIndexEntitlementsParams(packed middleware.Parameters) (params IndexEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexEntitlementsParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexKeysParams is parameters of indexKeys operation.
+type IndexKeysParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackIndexKeysParams(packed middleware.Parameters) (params IndexKeysParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexKeysParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexKeysParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexPoliciesParams is parameters of indexPolicies operation.
+type IndexPoliciesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackIndexPoliciesParams(packed middleware.Parameters) (params IndexPoliciesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexPoliciesParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexPoliciesParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexPolicyEntitlementsParams is parameters of indexPolicyEntitlements operation.
+type IndexPolicyEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackIndexPolicyEntitlementsParams(packed middleware.Parameters) (params IndexPolicyEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexPolicyEntitlementsParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexPolicyEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexPolicyLicensesParams is parameters of indexPolicyLicenses operation.
+type IndexPolicyLicensesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackIndexPolicyLicensesParams(packed middleware.Parameters) (params IndexPolicyLicensesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexPolicyLicensesParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexPolicyLicensesParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexPolicyPoolParams is parameters of indexPolicyPool operation.
+type IndexPolicyPoolParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackIndexPolicyPoolParams(packed middleware.Parameters) (params IndexPolicyPoolParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexPolicyPoolParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexPolicyPoolParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexProductLicensesParams is parameters of indexProductLicenses operation.
+type IndexProductLicensesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackIndexProductLicensesParams(packed middleware.Parameters) (params IndexProductLicensesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexProductLicensesParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexProductLicensesParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexProductMachinesParams is parameters of indexProductMachines operation.
+type IndexProductMachinesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackIndexProductMachinesParams(packed middleware.Parameters) (params IndexProductMachinesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexProductMachinesParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexProductMachinesParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexProductPoliciesParams is parameters of indexProductPolicies operation.
+type IndexProductPoliciesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackIndexProductPoliciesParams(packed middleware.Parameters) (params IndexProductPoliciesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexProductPoliciesParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexProductPoliciesParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexProductTokensParams is parameters of indexProductTokens operation.
+type IndexProductTokensParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackIndexProductTokensParams(packed middleware.Parameters) (params IndexProductTokensParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexProductTokensParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexProductTokensParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexProductUsersParams is parameters of indexProductUsers operation.
+type IndexProductUsersParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackIndexProductUsersParams(packed middleware.Parameters) (params IndexProductUsersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexProductUsersParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexProductUsersParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexProductsParams is parameters of indexProducts operation.
+type IndexProductsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackIndexProductsParams(packed middleware.Parameters) (params IndexProductsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexProductsParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexProductsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // MeParams is parameters of me operation.
 type MeParams struct {
 	// Account id (UUID) or slug.
@@ -212,6 +2540,126 @@ func decodeMeParams(args [1]string, argsEscaped bool, r *http.Request) (params M
 	return params, nil
 }
 
+// PopPolicyPoolParams is parameters of popPolicyPool operation.
+type PopPolicyPoolParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackPopPolicyPoolParams(packed middleware.Parameters) (params PopPolicyPoolParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodePopPolicyPoolParams(args [2]string, argsEscaped bool, r *http.Request) (params PopPolicyPoolParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ProfileParams is parameters of profile operation.
 type ProfileParams struct {
 	// Account id (UUID) or slug.
@@ -271,6 +2719,2718 @@ func decodeProfileParams(args [1]string, argsEscaped bool, r *http.Request) (par
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowEntitlementParams is parameters of showEntitlement operation.
+type ShowEntitlementParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Entitlement id (UUID) or code.
+	EntitlementId string
+}
+
+func unpackShowEntitlementParams(packed middleware.Parameters) (params ShowEntitlementParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "entitlementId",
+			In:   "path",
+		}
+		params.EntitlementId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowEntitlementParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowEntitlementParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: entitlementId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "entitlementId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EntitlementId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entitlementId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowKeyParams is parameters of showKey operation.
+type ShowKeyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Key id (UUID).
+	KeyId string
+}
+
+func unpackShowKeyParams(packed middleware.Parameters) (params ShowKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "keyId",
+			In:   "path",
+		}
+		params.KeyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowKeyParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowKeyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: keyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "keyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.KeyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowKeyPolicyParams is parameters of showKeyPolicy operation.
+type ShowKeyPolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Key id (UUID).
+	KeyId string
+}
+
+func unpackShowKeyPolicyParams(packed middleware.Parameters) (params ShowKeyPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "keyId",
+			In:   "path",
+		}
+		params.KeyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowKeyPolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowKeyPolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: keyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "keyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.KeyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowKeyProductParams is parameters of showKeyProduct operation.
+type ShowKeyProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Key id (UUID).
+	KeyId string
+}
+
+func unpackShowKeyProductParams(packed middleware.Parameters) (params ShowKeyProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "keyId",
+			In:   "path",
+		}
+		params.KeyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowKeyProductParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowKeyProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: keyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "keyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.KeyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowPolicyParams is parameters of showPolicy operation.
+type ShowPolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackShowPolicyParams(packed middleware.Parameters) (params ShowPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowPolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowPolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowPolicyEntitlementParams is parameters of showPolicyEntitlement operation.
+type ShowPolicyEntitlementParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+	// Entitlement id (UUID) or code.
+	EntitlementId string
+}
+
+func unpackShowPolicyEntitlementParams(packed middleware.Parameters) (params ShowPolicyEntitlementParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "entitlementId",
+			In:   "path",
+		}
+		params.EntitlementId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowPolicyEntitlementParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowPolicyEntitlementParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: entitlementId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "entitlementId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EntitlementId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entitlementId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowPolicyLicenseParams is parameters of showPolicyLicense operation.
+type ShowPolicyLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowPolicyLicenseParams(packed middleware.Parameters) (params ShowPolicyLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowPolicyLicenseParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowPolicyLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowPolicyPoolKeyParams is parameters of showPolicyPoolKey operation.
+type ShowPolicyPoolKeyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+	// Key id (UUID).
+	KeyId string
+}
+
+func unpackShowPolicyPoolKeyParams(packed middleware.Parameters) (params ShowPolicyPoolKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "keyId",
+			In:   "path",
+		}
+		params.KeyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowPolicyPoolKeyParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowPolicyPoolKeyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: keyId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "keyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.KeyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowPolicyProductParams is parameters of showPolicyProduct operation.
+type ShowPolicyProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackShowPolicyProductParams(packed middleware.Parameters) (params ShowPolicyProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowPolicyProductParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowPolicyProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowProductParams is parameters of showProduct operation.
+type ShowProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackShowProductParams(packed middleware.Parameters) (params ShowProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowProductParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowProductLicenseParams is parameters of showProductLicense operation.
+type ShowProductLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowProductLicenseParams(packed middleware.Parameters) (params ShowProductLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowProductLicenseParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowProductLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowProductMachineParams is parameters of showProductMachine operation.
+type ShowProductMachineParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+	// Machine id (UUID) or fingerprint.
+	MachineId string
+}
+
+func unpackShowProductMachineParams(packed middleware.Parameters) (params ShowProductMachineParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "machineId",
+			In:   "path",
+		}
+		params.MachineId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowProductMachineParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowProductMachineParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: machineId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "machineId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MachineId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "machineId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowProductPolicyParams is parameters of showProductPolicy operation.
+type ShowProductPolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackShowProductPolicyParams(packed middleware.Parameters) (params ShowProductPolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowProductPolicyParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowProductPolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowProductTokenParams is parameters of showProductToken operation.
+type ShowProductTokenParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+	// Token id (UUID).
+	TokenId string
+}
+
+func unpackShowProductTokenParams(packed middleware.Parameters) (params ShowProductTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tokenId",
+			In:   "path",
+		}
+		params.TokenId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowProductTokenParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowProductTokenParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: tokenId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "tokenId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TokenId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tokenId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowProductUserParams is parameters of showProductUser operation.
+type ShowProductUserParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+	// User id (UUID) or email.
+	UserId string
+}
+
+func unpackShowProductUserParams(packed middleware.Parameters) (params ShowProductUserParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "userId",
+			In:   "path",
+		}
+		params.UserId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowProductUserParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowProductUserParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: userId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "userId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "userId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateEntitlementParams is parameters of updateEntitlement operation.
+type UpdateEntitlementParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Entitlement id (UUID) or code.
+	EntitlementId string
+}
+
+func unpackUpdateEntitlementParams(packed middleware.Parameters) (params UpdateEntitlementParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "entitlementId",
+			In:   "path",
+		}
+		params.EntitlementId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateEntitlementParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateEntitlementParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: entitlementId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "entitlementId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EntitlementId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entitlementId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateKeyParams is parameters of updateKey operation.
+type UpdateKeyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Key id (UUID).
+	KeyId string
+}
+
+func unpackUpdateKeyParams(packed middleware.Parameters) (params UpdateKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "keyId",
+			In:   "path",
+		}
+		params.KeyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateKeyParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateKeyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: keyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "keyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.KeyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdatePolicyParams is parameters of updatePolicy operation.
+type UpdatePolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Policy id (UUID).
+	PolicyId string
+}
+
+func unpackUpdatePolicyParams(packed middleware.Parameters) (params UpdatePolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "policyId",
+			In:   "path",
+		}
+		params.PolicyId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdatePolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdatePolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: policyId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "policyId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.PolicyId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "policyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateProductParams is parameters of updateProduct operation.
+type UpdateProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// Product id (UUID) or code.
+	ProductId string
+}
+
+func unpackUpdateProductParams(packed middleware.Parameters) (params UpdateProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "productId",
+			In:   "path",
+		}
+		params.ProductId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateProductParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: productId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "productId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProductId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "productId",
 			In:   "path",
 			Err:  err,
 		}

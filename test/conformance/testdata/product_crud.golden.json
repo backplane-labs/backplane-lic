@@ -1,0 +1,666 @@
+{
+  "scenario": "product_crud",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "crud-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create crud",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "crud-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show crud by id",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {
+              "aB": {
+                "cD": 1
+              }
+            },
+            "name": "crud-renamed-\u003crun\u003e",
+            "platforms": [
+              "linux",
+              "macos"
+            ],
+            "updated": "\u003cts\u003e",
+            "url": "https://example.com/\u003crun\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "update name url platforms metadata",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": "crud-\u003crun\u003e",
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {
+              "aB": {
+                "cD": 1
+              }
+            },
+            "name": "crud-renamed-\u003crun\u003e",
+            "platforms": [
+              "linux",
+              "macos"
+            ],
+            "updated": "\u003cts\u003e",
+            "url": "https://example.com/\u003crun\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "update code and alias lookup",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": "crud-\u003crun\u003e",
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {
+              "aB": {
+                "cD": 1
+              }
+            },
+            "name": "crud-renamed-\u003crun\u003e",
+            "platforms": [
+              "linux",
+              "macos"
+            ],
+            "updated": "\u003cts\u003e",
+            "url": "https://example.com/\u003crun\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show by code",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": "crud-\u003crun\u003e",
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {
+              "aB": {
+                "cD": 1
+              }
+            },
+            "name": "crud-renamed-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "clear url and platforms",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested product '\u003cuuid:3\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:4\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show unknown",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "destroy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested product '\u003cuuid:1\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show after destroy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    }
+  ]
+}

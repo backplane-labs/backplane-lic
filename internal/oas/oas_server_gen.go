@@ -8,6 +8,72 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// AttachPolicyEntitlements implements attachPolicyEntitlements operation.
+	//
+	// Attach entitlements to a policy.
+	//
+	// POST /v1/accounts/{account}/policies/{policyId}/entitlements
+	AttachPolicyEntitlements(ctx context.Context, req AttachPolicyEntitlementsReq, params AttachPolicyEntitlementsParams) (*PolicyEntitlementListDocument, error)
+	// CreateEntitlement implements createEntitlement operation.
+	//
+	// Create an entitlement.
+	//
+	// POST /v1/accounts/{account}/entitlements
+	CreateEntitlement(ctx context.Context, req CreateEntitlementReq, params CreateEntitlementParams) (*EntitlementDocumentHeaders, error)
+	// CreateKey implements createKey operation.
+	//
+	// Create a key.
+	//
+	// POST /v1/accounts/{account}/keys
+	CreateKey(ctx context.Context, req CreateKeyReq, params CreateKeyParams) (*KeyDocumentHeaders, error)
+	// CreatePolicy implements createPolicy operation.
+	//
+	// Create a policy.
+	//
+	// POST /v1/accounts/{account}/policies
+	CreatePolicy(ctx context.Context, req CreatePolicyReq, params CreatePolicyParams) (*PolicyDocumentHeaders, error)
+	// CreateProduct implements createProduct operation.
+	//
+	// Create a product.
+	//
+	// POST /v1/accounts/{account}/products
+	CreateProduct(ctx context.Context, req CreateProductReq, params CreateProductParams) (*ProductDocumentHeaders, error)
+	// CreateProductToken implements createProductToken operation.
+	//
+	// Answers 200 (not 201) with the token document; the raw secret rides the response exactly once.
+	//
+	// POST /v1/accounts/{account}/products/{productId}/tokens
+	CreateProductToken(ctx context.Context, req CreateProductTokenReq, params CreateProductTokenParams) (*TokenDocument, error)
+	// DestroyEntitlement implements destroyEntitlement operation.
+	//
+	// Delete an entitlement.
+	//
+	// DELETE /v1/accounts/{account}/entitlements/{entitlementId}
+	DestroyEntitlement(ctx context.Context, params DestroyEntitlementParams) error
+	// DestroyKey implements destroyKey operation.
+	//
+	// Delete a key.
+	//
+	// DELETE /v1/accounts/{account}/keys/{keyId}
+	DestroyKey(ctx context.Context, params DestroyKeyParams) error
+	// DestroyPolicy implements destroyPolicy operation.
+	//
+	// Delete a policy.
+	//
+	// DELETE /v1/accounts/{account}/policies/{policyId}
+	DestroyPolicy(ctx context.Context, params DestroyPolicyParams) error
+	// DestroyProduct implements destroyProduct operation.
+	//
+	// Delete a product.
+	//
+	// DELETE /v1/accounts/{account}/products/{productId}
+	DestroyProduct(ctx context.Context, params DestroyProductParams) error
+	// DetachPolicyEntitlements implements detachPolicyEntitlements operation.
+	//
+	// Detach entitlements from a policy.
+	//
+	// DELETE /v1/accounts/{account}/policies/{policyId}/entitlements
+	DetachPolicyEntitlements(ctx context.Context, req DetachPolicyEntitlementsReq, params DetachPolicyEntitlementsParams) error
 	// GenerateToken implements generateToken operation.
 	//
 	// Basic email:password (with meta.otp for two-factor users) or any token authentication. The
@@ -27,6 +93,78 @@ type Handler interface {
 	//
 	// GET /v1/health
 	Health(ctx context.Context) error
+	// IndexEntitlements implements indexEntitlements operation.
+	//
+	// List entitlements.
+	//
+	// GET /v1/accounts/{account}/entitlements
+	IndexEntitlements(ctx context.Context, params IndexEntitlementsParams) (*EntitlementListDocument, error)
+	// IndexKeys implements indexKeys operation.
+	//
+	// List keys.
+	//
+	// GET /v1/accounts/{account}/keys
+	IndexKeys(ctx context.Context, params IndexKeysParams) (*KeyListDocument, error)
+	// IndexPolicies implements indexPolicies operation.
+	//
+	// List policies.
+	//
+	// GET /v1/accounts/{account}/policies
+	IndexPolicies(ctx context.Context, params IndexPoliciesParams) (*PolicyListDocument, error)
+	// IndexPolicyEntitlements implements indexPolicyEntitlements operation.
+	//
+	// List a policy's entitlements.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/entitlements
+	IndexPolicyEntitlements(ctx context.Context, params IndexPolicyEntitlementsParams) (*EntitlementListDocument, error)
+	// IndexPolicyLicenses implements indexPolicyLicenses operation.
+	//
+	// List a policy's licenses.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/licenses
+	IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseStubListDocument, error)
+	// IndexPolicyPool implements indexPolicyPool operation.
+	//
+	// List a policy's key pool.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/pool
+	IndexPolicyPool(ctx context.Context, params IndexPolicyPoolParams) (*KeyListDocument, error)
+	// IndexProductLicenses implements indexProductLicenses operation.
+	//
+	// List a product's licenses.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/licenses
+	IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseStubListDocument, error)
+	// IndexProductMachines implements indexProductMachines operation.
+	//
+	// List a product's machines.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/machines
+	IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineStubListDocument, error)
+	// IndexProductPolicies implements indexProductPolicies operation.
+	//
+	// List a product's policies.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/policies
+	IndexProductPolicies(ctx context.Context, params IndexProductPoliciesParams) (*PolicyListDocument, error)
+	// IndexProductTokens implements indexProductTokens operation.
+	//
+	// List a product's tokens.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/tokens
+	IndexProductTokens(ctx context.Context, params IndexProductTokensParams) (*ProductTokenListDocument, error)
+	// IndexProductUsers implements indexProductUsers operation.
+	//
+	// List a product's users.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/users
+	IndexProductUsers(ctx context.Context, params IndexProductUsersParams) (*ProductUserListDocument, error)
+	// IndexProducts implements indexProducts operation.
+	//
+	// List products.
+	//
+	// GET /v1/accounts/{account}/products
+	IndexProducts(ctx context.Context, params IndexProductsParams) (*ProductListDocument, error)
 	// Me implements me operation.
 	//
 	// The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -40,12 +178,132 @@ type Handler interface {
 	//
 	// GET /v1/ping
 	Ping(ctx context.Context) error
+	// PopPolicyPool implements popPolicyPool operation.
+	//
+	// Destroys the newest pooled key and answers its document.
+	//
+	// DELETE /v1/accounts/{account}/policies/{policyId}/pool
+	PopPolicyPool(ctx context.Context, params PopPolicyPoolParams) (*KeyDocument, error)
 	// Profile implements profile operation.
 	//
 	// The authenticated bearer's document with the current token id in meta.
 	//
 	// GET /v1/accounts/{account}/profile
 	Profile(ctx context.Context, params ProfileParams) (*ProfileDocument, error)
+	// ShowEntitlement implements showEntitlement operation.
+	//
+	// Retrieve an entitlement (by id or code).
+	//
+	// GET /v1/accounts/{account}/entitlements/{entitlementId}
+	ShowEntitlement(ctx context.Context, params ShowEntitlementParams) (*EntitlementDocument, error)
+	// ShowKey implements showKey operation.
+	//
+	// Retrieve a key.
+	//
+	// GET /v1/accounts/{account}/keys/{keyId}
+	ShowKey(ctx context.Context, params ShowKeyParams) (*KeyDocument, error)
+	// ShowKeyPolicy implements showKeyPolicy operation.
+	//
+	// Retrieve a key's policy.
+	//
+	// GET /v1/accounts/{account}/keys/{keyId}/policy
+	ShowKeyPolicy(ctx context.Context, params ShowKeyPolicyParams) (*PolicyDocument, error)
+	// ShowKeyProduct implements showKeyProduct operation.
+	//
+	// Retrieve a key's product (through its policy).
+	//
+	// GET /v1/accounts/{account}/keys/{keyId}/product
+	ShowKeyProduct(ctx context.Context, params ShowKeyProductParams) (*ProductDocument, error)
+	// ShowPolicy implements showPolicy operation.
+	//
+	// Retrieve a policy.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}
+	ShowPolicy(ctx context.Context, params ShowPolicyParams) (*PolicyDocument, error)
+	// ShowPolicyEntitlement implements showPolicyEntitlement operation.
+	//
+	// Retrieve one of a policy's entitlements.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/entitlements/{entitlementId}
+	ShowPolicyEntitlement(ctx context.Context, params ShowPolicyEntitlementParams) (*EntitlementDocument, error)
+	// ShowPolicyLicense implements showPolicyLicense operation.
+	//
+	// Retrieve one of a policy's licenses.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
+	ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (ShowPolicyLicenseOK, error)
+	// ShowPolicyPoolKey implements showPolicyPoolKey operation.
+	//
+	// Retrieve one of a policy's pooled keys.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/pool/{keyId}
+	ShowPolicyPoolKey(ctx context.Context, params ShowPolicyPoolKeyParams) (*KeyDocument, error)
+	// ShowPolicyProduct implements showPolicyProduct operation.
+	//
+	// Retrieve a policy's product.
+	//
+	// GET /v1/accounts/{account}/policies/{policyId}/product
+	ShowPolicyProduct(ctx context.Context, params ShowPolicyProductParams) (*ProductDocument, error)
+	// ShowProduct implements showProduct operation.
+	//
+	// Retrieve a product (by id or code).
+	//
+	// GET /v1/accounts/{account}/products/{productId}
+	ShowProduct(ctx context.Context, params ShowProductParams) (*ProductDocument, error)
+	// ShowProductLicense implements showProductLicense operation.
+	//
+	// Retrieve one of a product's licenses.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}
+	ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (ShowProductLicenseOK, error)
+	// ShowProductMachine implements showProductMachine operation.
+	//
+	// Retrieve one of a product's machines.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/machines/{machineId}
+	ShowProductMachine(ctx context.Context, params ShowProductMachineParams) (ShowProductMachineOK, error)
+	// ShowProductPolicy implements showProductPolicy operation.
+	//
+	// Retrieve one of a product's policies.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/policies/{policyId}
+	ShowProductPolicy(ctx context.Context, params ShowProductPolicyParams) (*PolicyDocument, error)
+	// ShowProductToken implements showProductToken operation.
+	//
+	// Retrieve one of a product's tokens.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/tokens/{tokenId}
+	ShowProductToken(ctx context.Context, params ShowProductTokenParams) (*TokenDocument, error)
+	// ShowProductUser implements showProductUser operation.
+	//
+	// Retrieve one of a product's users.
+	//
+	// GET /v1/accounts/{account}/products/{productId}/users/{userId}
+	ShowProductUser(ctx context.Context, params ShowProductUserParams) (*UserDocument, error)
+	// UpdateEntitlement implements updateEntitlement operation.
+	//
+	// Update an entitlement.
+	//
+	// PATCH /v1/accounts/{account}/entitlements/{entitlementId}
+	UpdateEntitlement(ctx context.Context, req UpdateEntitlementReq, params UpdateEntitlementParams) (*EntitlementDocument, error)
+	// UpdateKey implements updateKey operation.
+	//
+	// Only the key attribute may change; relationships are not accepted.
+	//
+	// PATCH /v1/accounts/{account}/keys/{keyId}
+	UpdateKey(ctx context.Context, req UpdateKeyReq, params UpdateKeyParams) (*KeyDocument, error)
+	// UpdatePolicy implements updatePolicy operation.
+	//
+	// Scheme, encrypted and usePool are immutable; relationships are not accepted.
+	//
+	// PATCH /v1/accounts/{account}/policies/{policyId}
+	UpdatePolicy(ctx context.Context, req UpdatePolicyReq, params UpdatePolicyParams) (*PolicyDocument, error)
+	// UpdateProduct implements updateProduct operation.
+	//
+	// Update a product.
+	//
+	// PATCH /v1/accounts/{account}/products/{productId}
+	UpdateProduct(ctx context.Context, req UpdateProductReq, params UpdateProductParams) (*ProductDocument, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

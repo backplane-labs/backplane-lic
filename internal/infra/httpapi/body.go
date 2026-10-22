@@ -9,6 +9,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
+	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
 )
 
 // The singular wire spellings of the bearer resource types (the
@@ -244,9 +245,11 @@ func unpermitted(obj map[string]any, prefix string, allowed ...string) error {
 	}
 
 	// Deterministic order (multiple violations are an error either way).
+	// The pointer names the parameter as the client spelled it
+	// (camelCase), not the decoder's underscored form.
 	for _, k := range sortedKeys(obj) {
 		if _, ok := set[k]; !ok {
-			return apperr.BadRequestSource("unpermitted parameter", prefix+k)
+			return apperr.BadRequestSource("unpermitted parameter", prefix+jsonapi.CamelizeKey(k))
 		}
 	}
 

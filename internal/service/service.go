@@ -19,6 +19,11 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
+	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
+	"github.com/backplane-labs/backplane-lic/internal/app/events"
+	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/policies"
+	"github.com/backplane-labs/backplane-lic/internal/app/products"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
@@ -83,6 +88,10 @@ func Handler(
 		Authn:          authn.New(store, clock),
 		Users:          users.New(store, clock),
 		Tokens:         tokens.New(store, rand.Reader, clock),
+		Products:       products.New(store.Products, store.Tokens, store.Users, events.None{}, rand.Reader, clock),
+		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, events.None{}, clock),
+		Entitlements:   entitlements.New(store.Entitlements, events.None{}, clock),
+		Keys:           keys.New(store.Keys, store.Policies, store.Products, events.None{}, clock),
 		Spec:           httpapi.Spec{ID: spec.ID, Slug: spec.Slug},
 		Revision:       revision,
 		DocsHost:       docsHost,

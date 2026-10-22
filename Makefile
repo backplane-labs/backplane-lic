@@ -29,6 +29,14 @@ COMPOSE := docker compose -f deployments/compose.yaml
 # non-system schema in it, so never point it at a real database.
 DB_DEV_URL ?= postgres://lic:lic@127.0.0.1:5440/lic_scratch?sslmode=disable
 
+# The database the conformance suite boots the server under (override
+# on the command line to isolate from the shared compose database).
+LIC_TEST_DATABASE_URL ?= postgres://lic:lic@127.0.0.1:5440/lic?sslmode=disable
+
+# The database the conformance suite boots the server under (override
+# on the command line to isolate from the shared compose database).
+LIC_TEST_DATABASE_URL ?= postgres://lic:lic@127.0.0.1:5440/lic?sslmode=disable
+
 BUILD_PKG := github.com/backplane-labs/backplane/pkg/backplane/build
 VERSION   ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.0)
 COMMIT    ?= $(shell git rev-parse --verify -q HEAD 2>/dev/null || echo unknown)
@@ -138,7 +146,7 @@ test-live: ## Tests against the compose PostgreSQL and Valkey
 
 .PHONY: conformance
 conformance: ## Diff the server (in-process over the compose PostgreSQL) against the recorded goldens
-	LIC_TEST_DATABASE_URL="postgres://lic:lic@127.0.0.1:5440/lic?sslmode=disable" \
+	LIC_TEST_DATABASE_URL="$(LIC_TEST_DATABASE_URL)" \
 	go test -count=1 ./test/conformance
 
 .PHONY: conformance-record

@@ -11,7 +11,38 @@ import (
 )
 
 var (
-	rn3AllowedHeaders = map[string]string{
+	rn7AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn16AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn8AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn18AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn9AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn4AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn5AllowedHeaders = map[string]string{
+		"DELETE": "Content-Type",
+		"POST":   "Content-Type",
+	}
+	rn11AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn13AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn14AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn19AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 )
@@ -46,7 +77,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	args := [1]string{}
+	args := [3]string{}
 
 	// Static code generated router with unwrapped path search.
 	switch {
@@ -114,6 +145,235 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
+					case 'e': // Prefix: "entitlements"
+
+						if l := len("entitlements"); len(elem) >= l && elem[0:l] == "entitlements" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleIndexEntitlementsRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleCreateEntitlementRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET,POST",
+									allowedHeaders: rn7AllowedHeaders,
+									acceptPost:     "application/json,application/vnd.api+json",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "entitlementId"
+							// Leaf parameter, slashes are prohibited
+							idx := strings.IndexByte(elem, '/')
+							if idx >= 0 {
+								break
+							}
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleDestroyEntitlementRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleShowEntitlementRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								case "PATCH":
+									s.handleUpdateEntitlementRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "DELETE,GET,PATCH",
+										allowedHeaders: rn16AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "application/json,application/vnd.api+json",
+									})
+								}
+
+								return
+							}
+
+						}
+
+					case 'k': // Prefix: "keys"
+
+						if l := len("keys"); len(elem) >= l && elem[0:l] == "keys" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleIndexKeysRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleCreateKeyRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET,POST",
+									allowedHeaders: rn8AllowedHeaders,
+									acceptPost:     "application/json,application/vnd.api+json",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "keyId"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "DELETE":
+									s.handleDestroyKeyRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleShowKeyRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								case "PATCH":
+									s.handleUpdateKeyRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "DELETE,GET,PATCH",
+										allowedHeaders: rn18AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "application/json,application/vnd.api+json",
+									})
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/p"
+
+								if l := len("/p"); len(elem) >= l && elem[0:l] == "/p" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'o': // Prefix: "olicy"
+
+									if l := len("olicy"); len(elem) >= l && elem[0:l] == "olicy" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleShowKeyPolicyRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: nil,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
+										}
+
+										return
+									}
+
+								case 'r': // Prefix: "roduct"
+
+									if l := len("roduct"); len(elem) >= l && elem[0:l] == "roduct" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleShowKeyProductRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: nil,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
+										}
+
+										return
+									}
+
+								}
+
+							}
+
+						}
+
 					case 'm': // Prefix: "me"
 
 						if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
@@ -141,31 +401,845 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 
-					case 'p': // Prefix: "profile"
+					case 'p': // Prefix: "p"
 
-						if l := len("profile"); len(elem) >= l && elem[0:l] == "profile" {
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleProfileRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, notAllowedParams{
-									allowedMethods: "GET",
-									allowedHeaders: nil,
-									acceptPost:     "",
-									acceptPatch:    "",
-								})
+							break
+						}
+						switch elem[0] {
+						case 'o': // Prefix: "olicies"
+
+							if l := len("olicies"); len(elem) >= l && elem[0:l] == "olicies" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleIndexPoliciesRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleCreatePolicyRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET,POST",
+										allowedHeaders: rn9AllowedHeaders,
+										acceptPost:     "application/json,application/vnd.api+json",
+										acceptPatch:    "",
+									})
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "policyId"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "DELETE":
+										s.handleDestroyPolicyRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleShowPolicyRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "PATCH":
+										s.handleUpdatePolicyRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "DELETE,GET,PATCH",
+											allowedHeaders: rn4AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "application/json,application/vnd.api+json",
+										})
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										break
+									}
+									switch elem[0] {
+									case 'e': // Prefix: "entitlements"
+
+										if l := len("entitlements"); len(elem) >= l && elem[0:l] == "entitlements" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch r.Method {
+											case "DELETE":
+												s.handleDetachPolicyEntitlementsRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											case "GET":
+												s.handleIndexPolicyEntitlementsRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											case "POST":
+												s.handleAttachPolicyEntitlementsRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, notAllowedParams{
+													allowedMethods: "DELETE,GET,POST",
+													allowedHeaders: rn5AllowedHeaders,
+													acceptPost:     "application/json,application/vnd.api+json",
+													acceptPatch:    "",
+												})
+											}
+
+											return
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "entitlementId"
+											// Leaf parameter, slashes are prohibited
+											idx := strings.IndexByte(elem, '/')
+											if idx >= 0 {
+												break
+											}
+											args[2] = elem
+											elem = ""
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowPolicyEntitlementRequest([3]string{
+														args[0],
+														args[1],
+														args[2],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									case 'l': // Prefix: "licenses"
+
+										if l := len("licenses"); len(elem) >= l && elem[0:l] == "licenses" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch r.Method {
+											case "GET":
+												s.handleIndexPolicyLicensesRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, notAllowedParams{
+													allowedMethods: "GET",
+													allowedHeaders: nil,
+													acceptPost:     "",
+													acceptPatch:    "",
+												})
+											}
+
+											return
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "licenseId"
+											// Leaf parameter, slashes are prohibited
+											idx := strings.IndexByte(elem, '/')
+											if idx >= 0 {
+												break
+											}
+											args[2] = elem
+											elem = ""
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowPolicyLicenseRequest([3]string{
+														args[0],
+														args[1],
+														args[2],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									case 'p': // Prefix: "p"
+
+										if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'o': // Prefix: "ool"
+
+											if l := len("ool"); len(elem) >= l && elem[0:l] == "ool" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "DELETE":
+													s.handlePopPolicyPoolRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												case "GET":
+													s.handleIndexPolicyPoolRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "DELETE,GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "keyId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowPolicyPoolKeyRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'r': // Prefix: "roduct"
+
+											if l := len("roduct"); len(elem) >= l && elem[0:l] == "roduct" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowPolicyProductRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									}
+
+								}
+
+							}
+
+						case 'r': // Prefix: "ro"
+
+							if l := len("ro"); len(elem) >= l && elem[0:l] == "ro" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'd': // Prefix: "ducts"
+
+								if l := len("ducts"); len(elem) >= l && elem[0:l] == "ducts" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleIndexProductsRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleCreateProductRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET,POST",
+											allowedHeaders: rn11AllowedHeaders,
+											acceptPost:     "application/json,application/vnd.api+json",
+											acceptPatch:    "",
+										})
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "productId"
+									// Match until "/"
+									idx := strings.IndexByte(elem, '/')
+									if idx < 0 {
+										idx = len(elem)
+									}
+									args[1] = elem[:idx]
+									elem = elem[idx:]
+
+									if len(elem) == 0 {
+										switch r.Method {
+										case "DELETE":
+											s.handleDestroyProductRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										case "GET":
+											s.handleShowProductRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										case "PATCH":
+											s.handleUpdateProductRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "DELETE,GET,PATCH",
+												allowedHeaders: rn13AllowedHeaders,
+												acceptPost:     "",
+												acceptPatch:    "application/json,application/vnd.api+json",
+											})
+										}
+
+										return
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'l': // Prefix: "licenses"
+
+											if l := len("licenses"); len(elem) >= l && elem[0:l] == "licenses" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "GET":
+													s.handleIndexProductLicensesRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "licenseId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowProductLicenseRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'm': // Prefix: "machines"
+
+											if l := len("machines"); len(elem) >= l && elem[0:l] == "machines" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "GET":
+													s.handleIndexProductMachinesRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "machineId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowProductMachineRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'p': // Prefix: "policies"
+
+											if l := len("policies"); len(elem) >= l && elem[0:l] == "policies" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "GET":
+													s.handleIndexProductPoliciesRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "policyId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowProductPolicyRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 't': // Prefix: "tokens"
+
+											if l := len("tokens"); len(elem) >= l && elem[0:l] == "tokens" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "GET":
+													s.handleIndexProductTokensRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												case "POST":
+													s.handleCreateProductTokenRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET,POST",
+														allowedHeaders: rn14AllowedHeaders,
+														acceptPost:     "application/json,application/vnd.api+json",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "tokenId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowProductTokenRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'u': // Prefix: "users"
+
+											if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "GET":
+													s.handleIndexProductUsersRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "userId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowProductUserRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										}
+
+									}
+
+								}
+
+							case 'f': // Prefix: "file"
+
+								if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleProfileRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET",
+											allowedHeaders: nil,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
+									}
+
+									return
+								}
+
+							}
+
 						}
 
 					case 't': // Prefix: "tokens"
@@ -186,7 +1260,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn3AllowedHeaders,
+									allowedHeaders: rn19AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -264,7 +1338,7 @@ type Route struct {
 	operationGroup string
 	pathPattern    string
 	count          int
-	args           [1]string
+	args           [3]string
 }
 
 // Name returns ogen operation name.
@@ -394,6 +1468,245 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
+					case 'e': // Prefix: "entitlements"
+
+						if l := len("entitlements"); len(elem) >= l && elem[0:l] == "entitlements" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = IndexEntitlementsOperation
+								r.summary = "List entitlements"
+								r.operationID = "indexEntitlements"
+								r.operationGroup = ""
+								r.pathPattern = "/v1/accounts/{account}/entitlements"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "POST":
+								r.name = CreateEntitlementOperation
+								r.summary = "Create an entitlement"
+								r.operationID = "createEntitlement"
+								r.operationGroup = ""
+								r.pathPattern = "/v1/accounts/{account}/entitlements"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "entitlementId"
+							// Leaf parameter, slashes are prohibited
+							idx := strings.IndexByte(elem, '/')
+							if idx >= 0 {
+								break
+							}
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = DestroyEntitlementOperation
+									r.summary = "Delete an entitlement"
+									r.operationID = "destroyEntitlement"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/entitlements/{entitlementId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "GET":
+									r.name = ShowEntitlementOperation
+									r.summary = "Retrieve an entitlement (by id or code)"
+									r.operationID = "showEntitlement"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/entitlements/{entitlementId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "PATCH":
+									r.name = UpdateEntitlementOperation
+									r.summary = "Update an entitlement"
+									r.operationID = "updateEntitlement"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/entitlements/{entitlementId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								default:
+									return
+								}
+							}
+
+						}
+
+					case 'k': // Prefix: "keys"
+
+						if l := len("keys"); len(elem) >= l && elem[0:l] == "keys" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = IndexKeysOperation
+								r.summary = "List keys"
+								r.operationID = "indexKeys"
+								r.operationGroup = ""
+								r.pathPattern = "/v1/accounts/{account}/keys"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "POST":
+								r.name = CreateKeyOperation
+								r.summary = "Create a key"
+								r.operationID = "createKey"
+								r.operationGroup = ""
+								r.pathPattern = "/v1/accounts/{account}/keys"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "keyId"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch method {
+								case "DELETE":
+									r.name = DestroyKeyOperation
+									r.summary = "Delete a key"
+									r.operationID = "destroyKey"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/keys/{keyId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "GET":
+									r.name = ShowKeyOperation
+									r.summary = "Retrieve a key"
+									r.operationID = "showKey"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/keys/{keyId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "PATCH":
+									r.name = UpdateKeyOperation
+									r.summary = "Update a key"
+									r.operationID = "updateKey"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/keys/{keyId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/p"
+
+								if l := len("/p"); len(elem) >= l && elem[0:l] == "/p" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'o': // Prefix: "olicy"
+
+									if l := len("olicy"); len(elem) >= l && elem[0:l] == "olicy" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = ShowKeyPolicyOperation
+											r.summary = "Retrieve a key's policy"
+											r.operationID = "showKeyPolicy"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/keys/{keyId}/policy"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+								case 'r': // Prefix: "roduct"
+
+									if l := len("roduct"); len(elem) >= l && elem[0:l] == "roduct" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = ShowKeyProductOperation
+											r.summary = "Retrieve a key's product (through its policy)"
+											r.operationID = "showKeyProduct"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/keys/{keyId}/product"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+								}
+
+							}
+
+						}
+
 					case 'm': // Prefix: "me"
 
 						if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
@@ -419,29 +1732,816 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 						}
 
-					case 'p': // Prefix: "profile"
+					case 'p': // Prefix: "p"
 
-						if l := len("profile"); len(elem) >= l && elem[0:l] == "profile" {
+						if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = ProfileOperation
-								r.summary = "The current bearer's profile"
-								r.operationID = "profile"
-								r.operationGroup = ""
-								r.pathPattern = "/v1/accounts/{account}/profile"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'o': // Prefix: "olicies"
+
+							if l := len("olicies"); len(elem) >= l && elem[0:l] == "olicies" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = IndexPoliciesOperation
+									r.summary = "List policies"
+									r.operationID = "indexPolicies"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/policies"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "POST":
+									r.name = CreatePolicyOperation
+									r.summary = "Create a policy"
+									r.operationID = "createPolicy"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/policies"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "policyId"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
+
+								if len(elem) == 0 {
+									switch method {
+									case "DELETE":
+										r.name = DestroyPolicyOperation
+										r.summary = "Delete a policy"
+										r.operationID = "destroyPolicy"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/policies/{policyId}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "GET":
+										r.name = ShowPolicyOperation
+										r.summary = "Retrieve a policy"
+										r.operationID = "showPolicy"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/policies/{policyId}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "PATCH":
+										r.name = UpdatePolicyOperation
+										r.summary = "Update a policy"
+										r.operationID = "updatePolicy"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/policies/{policyId}"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										break
+									}
+									switch elem[0] {
+									case 'e': // Prefix: "entitlements"
+
+										if l := len("entitlements"); len(elem) >= l && elem[0:l] == "entitlements" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "DELETE":
+												r.name = DetachPolicyEntitlementsOperation
+												r.summary = "Detach entitlements from a policy"
+												r.operationID = "detachPolicyEntitlements"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/entitlements"
+												r.args = args
+												r.count = 2
+												return r, true
+											case "GET":
+												r.name = IndexPolicyEntitlementsOperation
+												r.summary = "List a policy's entitlements"
+												r.operationID = "indexPolicyEntitlements"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/entitlements"
+												r.args = args
+												r.count = 2
+												return r, true
+											case "POST":
+												r.name = AttachPolicyEntitlementsOperation
+												r.summary = "Attach entitlements to a policy"
+												r.operationID = "attachPolicyEntitlements"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/entitlements"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "entitlementId"
+											// Leaf parameter, slashes are prohibited
+											idx := strings.IndexByte(elem, '/')
+											if idx >= 0 {
+												break
+											}
+											args[2] = elem
+											elem = ""
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowPolicyEntitlementOperation
+													r.summary = "Retrieve one of a policy's entitlements"
+													r.operationID = "showPolicyEntitlement"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/entitlements/{entitlementId}"
+													r.args = args
+													r.count = 3
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									case 'l': // Prefix: "licenses"
+
+										if l := len("licenses"); len(elem) >= l && elem[0:l] == "licenses" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "GET":
+												r.name = IndexPolicyLicensesOperation
+												r.summary = "List a policy's licenses"
+												r.operationID = "indexPolicyLicenses"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/licenses"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "licenseId"
+											// Leaf parameter, slashes are prohibited
+											idx := strings.IndexByte(elem, '/')
+											if idx >= 0 {
+												break
+											}
+											args[2] = elem
+											elem = ""
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowPolicyLicenseOperation
+													r.summary = "Retrieve one of a policy's licenses"
+													r.operationID = "showPolicyLicense"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}"
+													r.args = args
+													r.count = 3
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									case 'p': // Prefix: "p"
+
+										if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'o': // Prefix: "ool"
+
+											if l := len("ool"); len(elem) >= l && elem[0:l] == "ool" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "DELETE":
+													r.name = PopPolicyPoolOperation
+													r.summary = "Pop a key from a policy's pool"
+													r.operationID = "popPolicyPool"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/pool"
+													r.args = args
+													r.count = 2
+													return r, true
+												case "GET":
+													r.name = IndexPolicyPoolOperation
+													r.summary = "List a policy's key pool"
+													r.operationID = "indexPolicyPool"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/pool"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "keyId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowPolicyPoolKeyOperation
+														r.summary = "Retrieve one of a policy's pooled keys"
+														r.operationID = "showPolicyPoolKey"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/pool/{keyId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'r': // Prefix: "roduct"
+
+											if l := len("roduct"); len(elem) >= l && elem[0:l] == "roduct" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowPolicyProductOperation
+													r.summary = "Retrieve a policy's product"
+													r.operationID = "showPolicyProduct"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/policies/{policyId}/product"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									}
+
+								}
+
+							}
+
+						case 'r': // Prefix: "ro"
+
+							if l := len("ro"); len(elem) >= l && elem[0:l] == "ro" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'd': // Prefix: "ducts"
+
+								if l := len("ducts"); len(elem) >= l && elem[0:l] == "ducts" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = IndexProductsOperation
+										r.summary = "List products"
+										r.operationID = "indexProducts"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/products"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "POST":
+										r.name = CreateProductOperation
+										r.summary = "Create a product"
+										r.operationID = "createProduct"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/products"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "productId"
+									// Match until "/"
+									idx := strings.IndexByte(elem, '/')
+									if idx < 0 {
+										idx = len(elem)
+									}
+									args[1] = elem[:idx]
+									elem = elem[idx:]
+
+									if len(elem) == 0 {
+										switch method {
+										case "DELETE":
+											r.name = DestroyProductOperation
+											r.summary = "Delete a product"
+											r.operationID = "destroyProduct"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/products/{productId}"
+											r.args = args
+											r.count = 2
+											return r, true
+										case "GET":
+											r.name = ShowProductOperation
+											r.summary = "Retrieve a product (by id or code)"
+											r.operationID = "showProduct"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/products/{productId}"
+											r.args = args
+											r.count = 2
+											return r, true
+										case "PATCH":
+											r.name = UpdateProductOperation
+											r.summary = "Update a product"
+											r.operationID = "updateProduct"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/products/{productId}"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'l': // Prefix: "licenses"
+
+											if l := len("licenses"); len(elem) >= l && elem[0:l] == "licenses" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													r.name = IndexProductLicensesOperation
+													r.summary = "List a product's licenses"
+													r.operationID = "indexProductLicenses"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/products/{productId}/licenses"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "licenseId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowProductLicenseOperation
+														r.summary = "Retrieve one of a product's licenses"
+														r.operationID = "showProductLicense"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/products/{productId}/licenses/{licenseId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'm': // Prefix: "machines"
+
+											if l := len("machines"); len(elem) >= l && elem[0:l] == "machines" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													r.name = IndexProductMachinesOperation
+													r.summary = "List a product's machines"
+													r.operationID = "indexProductMachines"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/products/{productId}/machines"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "machineId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowProductMachineOperation
+														r.summary = "Retrieve one of a product's machines"
+														r.operationID = "showProductMachine"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/products/{productId}/machines/{machineId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'p': // Prefix: "policies"
+
+											if l := len("policies"); len(elem) >= l && elem[0:l] == "policies" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													r.name = IndexProductPoliciesOperation
+													r.summary = "List a product's policies"
+													r.operationID = "indexProductPolicies"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/products/{productId}/policies"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "policyId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowProductPolicyOperation
+														r.summary = "Retrieve one of a product's policies"
+														r.operationID = "showProductPolicy"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/products/{productId}/policies/{policyId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 't': // Prefix: "tokens"
+
+											if l := len("tokens"); len(elem) >= l && elem[0:l] == "tokens" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													r.name = IndexProductTokensOperation
+													r.summary = "List a product's tokens"
+													r.operationID = "indexProductTokens"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/products/{productId}/tokens"
+													r.args = args
+													r.count = 2
+													return r, true
+												case "POST":
+													r.name = CreateProductTokenOperation
+													r.summary = "Generate a product token"
+													r.operationID = "createProductToken"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/products/{productId}/tokens"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "tokenId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowProductTokenOperation
+														r.summary = "Retrieve one of a product's tokens"
+														r.operationID = "showProductToken"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/products/{productId}/tokens/{tokenId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'u': // Prefix: "users"
+
+											if l := len("users"); len(elem) >= l && elem[0:l] == "users" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													r.name = IndexProductUsersOperation
+													r.summary = "List a product's users"
+													r.operationID = "indexProductUsers"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/products/{productId}/users"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "userId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowProductUserOperation
+														r.summary = "Retrieve one of a product's users"
+														r.operationID = "showProductUser"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/products/{productId}/users/{userId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										}
+
+									}
+
+								}
+
+							case 'f': // Prefix: "file"
+
+								if l := len("file"); len(elem) >= l && elem[0:l] == "file" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "GET":
+										r.name = ProfileOperation
+										r.summary = "The current bearer's profile"
+										r.operationID = "profile"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/profile"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
+							}
+
 						}
 
 					case 't': // Prefix: "tokens"

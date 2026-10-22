@@ -467,6 +467,464 @@ func (s *AccountResourceType) UnmarshalText(data []byte) error {
 	}
 }
 
+type AttachPolicyEntitlementsReqApplicationJSON map[string]jx.Raw
+
+func (s *AttachPolicyEntitlementsReqApplicationJSON) init() AttachPolicyEntitlementsReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*AttachPolicyEntitlementsReqApplicationJSON) attachPolicyEntitlementsReq() {}
+
+type AttachPolicyEntitlementsReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *AttachPolicyEntitlementsReqApplicationVndAPIJSON) init() AttachPolicyEntitlementsReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*AttachPolicyEntitlementsReqApplicationVndAPIJSON) attachPolicyEntitlementsReq() {}
+
+type AttachPolicyEntitlementsReqEmptyBody struct{}
+
+func (*AttachPolicyEntitlementsReqEmptyBody) attachPolicyEntitlementsReq() {}
+
+type CreateEntitlementReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateEntitlementReqApplicationJSON) init() CreateEntitlementReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateEntitlementReqApplicationJSON) createEntitlementReq() {}
+
+type CreateEntitlementReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateEntitlementReqApplicationVndAPIJSON) init() CreateEntitlementReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateEntitlementReqApplicationVndAPIJSON) createEntitlementReq() {}
+
+type CreateEntitlementReqEmptyBody struct{}
+
+func (*CreateEntitlementReqEmptyBody) createEntitlementReq() {}
+
+type CreateKeyReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateKeyReqApplicationJSON) init() CreateKeyReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateKeyReqApplicationJSON) createKeyReq() {}
+
+type CreateKeyReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateKeyReqApplicationVndAPIJSON) init() CreateKeyReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateKeyReqApplicationVndAPIJSON) createKeyReq() {}
+
+type CreateKeyReqEmptyBody struct{}
+
+func (*CreateKeyReqEmptyBody) createKeyReq() {}
+
+type CreatePolicyReqApplicationJSON map[string]jx.Raw
+
+func (s *CreatePolicyReqApplicationJSON) init() CreatePolicyReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreatePolicyReqApplicationJSON) createPolicyReq() {}
+
+type CreatePolicyReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreatePolicyReqApplicationVndAPIJSON) init() CreatePolicyReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreatePolicyReqApplicationVndAPIJSON) createPolicyReq() {}
+
+type CreatePolicyReqEmptyBody struct{}
+
+func (*CreatePolicyReqEmptyBody) createPolicyReq() {}
+
+type CreateProductReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateProductReqApplicationJSON) init() CreateProductReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateProductReqApplicationJSON) createProductReq() {}
+
+type CreateProductReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateProductReqApplicationVndAPIJSON) init() CreateProductReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateProductReqApplicationVndAPIJSON) createProductReq() {}
+
+type CreateProductReqEmptyBody struct{}
+
+func (*CreateProductReqEmptyBody) createProductReq() {}
+
+type CreateProductTokenReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateProductTokenReqApplicationJSON) init() CreateProductTokenReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateProductTokenReqApplicationJSON) createProductTokenReq() {}
+
+type CreateProductTokenReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateProductTokenReqApplicationVndAPIJSON) init() CreateProductTokenReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateProductTokenReqApplicationVndAPIJSON) createProductTokenReq() {}
+
+type CreateProductTokenReqEmptyBody struct{}
+
+func (*CreateProductTokenReqEmptyBody) createProductTokenReq() {}
+
+// DestroyEntitlementNoContent is response for DestroyEntitlement operation.
+type DestroyEntitlementNoContent struct{}
+
+// DestroyKeyNoContent is response for DestroyKey operation.
+type DestroyKeyNoContent struct{}
+
+// DestroyPolicyNoContent is response for DestroyPolicy operation.
+type DestroyPolicyNoContent struct{}
+
+// DestroyProductNoContent is response for DestroyProduct operation.
+type DestroyProductNoContent struct{}
+
+// DetachPolicyEntitlementsNoContent is response for DetachPolicyEntitlements operation.
+type DetachPolicyEntitlementsNoContent struct{}
+
+type DetachPolicyEntitlementsReqApplicationJSON map[string]jx.Raw
+
+func (s *DetachPolicyEntitlementsReqApplicationJSON) init() DetachPolicyEntitlementsReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DetachPolicyEntitlementsReqApplicationJSON) detachPolicyEntitlementsReq() {}
+
+type DetachPolicyEntitlementsReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *DetachPolicyEntitlementsReqApplicationVndAPIJSON) init() DetachPolicyEntitlementsReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DetachPolicyEntitlementsReqApplicationVndAPIJSON) detachPolicyEntitlementsReq() {}
+
+type DetachPolicyEntitlementsReqEmptyBody struct{}
+
+func (*DetachPolicyEntitlementsReqEmptyBody) detachPolicyEntitlementsReq() {}
+
+// Ref: #/components/schemas/EntitlementAttributes
+type EntitlementAttributes struct {
+	Name     string    `json:"name"`
+	Code     string    `json:"code"`
+	Metadata Metadata  `json:"metadata"`
+	Created  Timestamp `json:"created"`
+	Updated  Timestamp `json:"updated"`
+}
+
+// GetName returns the value of Name.
+func (s *EntitlementAttributes) GetName() string {
+	return s.Name
+}
+
+// GetCode returns the value of Code.
+func (s *EntitlementAttributes) GetCode() string {
+	return s.Code
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *EntitlementAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *EntitlementAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *EntitlementAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetName sets the value of Name.
+func (s *EntitlementAttributes) SetName(val string) {
+	s.Name = val
+}
+
+// SetCode sets the value of Code.
+func (s *EntitlementAttributes) SetCode(val string) {
+	s.Code = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *EntitlementAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *EntitlementAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *EntitlementAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/EntitlementDocument
+type EntitlementDocument struct {
+	Data EntitlementResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *EntitlementDocument) GetData() EntitlementResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *EntitlementDocument) SetData(val EntitlementResource) {
+	s.Data = val
+}
+
+// EntitlementDocumentHeaders wraps EntitlementDocument with response headers.
+type EntitlementDocumentHeaders struct {
+	Location OptString
+	Response EntitlementDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *EntitlementDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *EntitlementDocumentHeaders) GetResponse() EntitlementDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *EntitlementDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *EntitlementDocumentHeaders) SetResponse(val EntitlementDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/EntitlementListDocument
+type EntitlementListDocument struct {
+	Data  []EntitlementResource `json:"data"`
+	Links OptListLinks          `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *EntitlementListDocument) GetData() []EntitlementResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *EntitlementListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *EntitlementListDocument) SetData(val []EntitlementResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *EntitlementListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/EntitlementResource
+type EntitlementResource struct {
+	Type          EntitlementResourceType          `json:"type"`
+	ID            string                           `json:"id"`
+	Attributes    EntitlementAttributes            `json:"attributes"`
+	Relationships EntitlementResourceRelationships `json:"relationships"`
+	Links         ResourceLinks                    `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *EntitlementResource) GetType() EntitlementResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *EntitlementResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *EntitlementResource) GetAttributes() EntitlementAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *EntitlementResource) GetRelationships() EntitlementResourceRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *EntitlementResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *EntitlementResource) SetType(val EntitlementResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *EntitlementResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *EntitlementResource) SetAttributes(val EntitlementAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *EntitlementResource) SetRelationships(val EntitlementResourceRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *EntitlementResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type EntitlementResourceRelationships struct {
+	Account ToOneRelationship `json:"account"`
+}
+
+// GetAccount returns the value of Account.
+func (s *EntitlementResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// SetAccount sets the value of Account.
+func (s *EntitlementResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+type EntitlementResourceType string
+
+const (
+	EntitlementResourceTypeEntitlements EntitlementResourceType = "entitlements"
+)
+
+// AllValues returns all EntitlementResourceType values.
+func (EntitlementResourceType) AllValues() []EntitlementResourceType {
+	return []EntitlementResourceType{
+		EntitlementResourceTypeEntitlements,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s EntitlementResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case EntitlementResourceTypeEntitlements:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *EntitlementResourceType) UnmarshalText(data []byte) error {
+	switch EntitlementResourceType(data) {
+	case EntitlementResourceTypeEntitlements:
+		*s = EntitlementResourceTypeEntitlements
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/Error
 type Error struct {
 	Title  string         `json:"title"`
@@ -677,6 +1135,366 @@ func (*GenerateTokenReqEmptyBody) generateTokenReq() {}
 // HealthNoContent is response for Health operation.
 type HealthNoContent struct{}
 
+// Ref: #/components/schemas/KeyAttributes
+type KeyAttributes struct {
+	Key     string    `json:"key"`
+	Created Timestamp `json:"created"`
+	Updated Timestamp `json:"updated"`
+}
+
+// GetKey returns the value of Key.
+func (s *KeyAttributes) GetKey() string {
+	return s.Key
+}
+
+// GetCreated returns the value of Created.
+func (s *KeyAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *KeyAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetKey sets the value of Key.
+func (s *KeyAttributes) SetKey(val string) {
+	s.Key = val
+}
+
+// SetCreated sets the value of Created.
+func (s *KeyAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *KeyAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/KeyDocument
+type KeyDocument struct {
+	Data KeyResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *KeyDocument) GetData() KeyResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *KeyDocument) SetData(val KeyResource) {
+	s.Data = val
+}
+
+// KeyDocumentHeaders wraps KeyDocument with response headers.
+type KeyDocumentHeaders struct {
+	Location OptString
+	Response KeyDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *KeyDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *KeyDocumentHeaders) GetResponse() KeyDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *KeyDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *KeyDocumentHeaders) SetResponse(val KeyDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/KeyListDocument
+type KeyListDocument struct {
+	Data  []KeyResource `json:"data"`
+	Links OptListLinks  `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *KeyListDocument) GetData() []KeyResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *KeyListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *KeyListDocument) SetData(val []KeyResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *KeyListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/KeyRelationships
+type KeyRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	Product ToOneRelationship `json:"product"`
+	Policy  ToOneRelationship `json:"policy"`
+}
+
+// GetAccount returns the value of Account.
+func (s *KeyRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *KeyRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// GetPolicy returns the value of Policy.
+func (s *KeyRelationships) GetPolicy() ToOneRelationship {
+	return s.Policy
+}
+
+// SetAccount sets the value of Account.
+func (s *KeyRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *KeyRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+// SetPolicy sets the value of Policy.
+func (s *KeyRelationships) SetPolicy(val ToOneRelationship) {
+	s.Policy = val
+}
+
+// Ref: #/components/schemas/KeyResource
+type KeyResource struct {
+	Type          KeyResourceType  `json:"type"`
+	ID            string           `json:"id"`
+	Attributes    KeyAttributes    `json:"attributes"`
+	Relationships KeyRelationships `json:"relationships"`
+	Links         ResourceLinks    `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *KeyResource) GetType() KeyResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *KeyResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *KeyResource) GetAttributes() KeyAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *KeyResource) GetRelationships() KeyRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *KeyResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *KeyResource) SetType(val KeyResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *KeyResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *KeyResource) SetAttributes(val KeyAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *KeyResource) SetRelationships(val KeyRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *KeyResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type KeyResourceType string
+
+const (
+	KeyResourceTypeKeys KeyResourceType = "keys"
+)
+
+// AllValues returns all KeyResourceType values.
+func (KeyResourceType) AllValues() []KeyResourceType {
+	return []KeyResourceType{
+		KeyResourceTypeKeys,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s KeyResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case KeyResourceTypeKeys:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *KeyResourceType) UnmarshalText(data []byte) error {
+	switch KeyResourceType(data) {
+	case KeyResourceTypeKeys:
+		*s = KeyResourceTypeKeys
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/LicenseStubListDocument
+type LicenseStubListDocument struct {
+	Data  []LicenseStubListDocumentDataItem `json:"data"`
+	Links OptListLinks                      `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseStubListDocument) GetData() []LicenseStubListDocumentDataItem {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *LicenseStubListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *LicenseStubListDocument) SetData(val []LicenseStubListDocumentDataItem) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *LicenseStubListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+type LicenseStubListDocumentDataItem struct{}
+
+// Ref: #/components/schemas/ListLinks
+type ListLinks struct {
+	Self  string            `json:"self"`
+	First OptString         `json:"first"`
+	Last  OptString         `json:"last"`
+	Prev  OptNilString      `json:"prev"`
+	Next  OptNilString      `json:"next"`
+	Meta  OptPaginationMeta `json:"meta"`
+}
+
+// GetSelf returns the value of Self.
+func (s *ListLinks) GetSelf() string {
+	return s.Self
+}
+
+// GetFirst returns the value of First.
+func (s *ListLinks) GetFirst() OptString {
+	return s.First
+}
+
+// GetLast returns the value of Last.
+func (s *ListLinks) GetLast() OptString {
+	return s.Last
+}
+
+// GetPrev returns the value of Prev.
+func (s *ListLinks) GetPrev() OptNilString {
+	return s.Prev
+}
+
+// GetNext returns the value of Next.
+func (s *ListLinks) GetNext() OptNilString {
+	return s.Next
+}
+
+// GetMeta returns the value of Meta.
+func (s *ListLinks) GetMeta() OptPaginationMeta {
+	return s.Meta
+}
+
+// SetSelf sets the value of Self.
+func (s *ListLinks) SetSelf(val string) {
+	s.Self = val
+}
+
+// SetFirst sets the value of First.
+func (s *ListLinks) SetFirst(val OptString) {
+	s.First = val
+}
+
+// SetLast sets the value of Last.
+func (s *ListLinks) SetLast(val OptString) {
+	s.Last = val
+}
+
+// SetPrev sets the value of Prev.
+func (s *ListLinks) SetPrev(val OptNilString) {
+	s.Prev = val
+}
+
+// SetNext sets the value of Next.
+func (s *ListLinks) SetNext(val OptNilString) {
+	s.Next = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *ListLinks) SetMeta(val OptPaginationMeta) {
+	s.Meta = val
+}
+
+// Ref: #/components/schemas/MachineStubListDocument
+type MachineStubListDocument struct {
+	Data  []MachineStubListDocumentDataItem `json:"data"`
+	Links OptListLinks                      `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *MachineStubListDocument) GetData() []MachineStubListDocumentDataItem {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *MachineStubListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *MachineStubListDocument) SetData(val []MachineStubListDocumentDataItem) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *MachineStubListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+type MachineStubListDocumentDataItem struct{}
+
 // Ref: #/components/schemas/MeDocument
 type MeDocument struct {
 	Data     UserResource    `json:"data"`
@@ -754,6 +1572,51 @@ func (o NilBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilInt returns new NilInt with value set to v.
+func NewNilInt(v int) NilInt {
+	return NilInt{
+		Value: v,
+	}
+}
+
+// NilInt is nullable int.
+type NilInt struct {
+	Value int
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilInt) SetTo(v int) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilInt) SetToNull() {
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -942,6 +1805,52 @@ func (o OptErrorSource) Or(d ErrorSource) ErrorSource {
 	return d
 }
 
+// NewOptListLinks returns new OptListLinks with value set to v.
+func NewOptListLinks(v ListLinks) OptListLinks {
+	return OptListLinks{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListLinks is optional ListLinks.
+type OptListLinks struct {
+	Value ListLinks
+	Set   bool
+}
+
+// IsSet returns true if OptListLinks was set.
+func (o OptListLinks) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListLinks) Reset() {
+	var v ListLinks
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListLinks) SetTo(v ListLinks) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListLinks) Get() (v ListLinks, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListLinks) Or(d ListLinks) ListLinks {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilInt returns new OptNilInt with value set to v.
 func NewOptNilInt(v int) OptNilInt {
 	return OptNilInt{
@@ -1068,6 +1977,52 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
+// NewOptPaginationMeta returns new OptPaginationMeta with value set to v.
+func NewOptPaginationMeta(v PaginationMeta) OptPaginationMeta {
+	return OptPaginationMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPaginationMeta is optional PaginationMeta.
+type OptPaginationMeta struct {
+	Value PaginationMeta
+	Set   bool
+}
+
+// IsSet returns true if OptPaginationMeta was set.
+func (o OptPaginationMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPaginationMeta) Reset() {
+	var v PaginationMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPaginationMeta) SetTo(v PaginationMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPaginationMeta) Get() (v PaginationMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPaginationMeta) Or(d PaginationMeta) PaginationMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -1160,8 +2115,1365 @@ func (o OptToManyRelationshipMeta) Or(d ToManyRelationshipMeta) ToManyRelationsh
 	return d
 }
 
+// Ref: #/components/schemas/PaginationMeta
+type PaginationMeta struct {
+	Pages int `json:"pages"`
+	Count int `json:"count"`
+}
+
+// GetPages returns the value of Pages.
+func (s *PaginationMeta) GetPages() int {
+	return s.Pages
+}
+
+// GetCount returns the value of Count.
+func (s *PaginationMeta) GetCount() int {
+	return s.Count
+}
+
+// SetPages sets the value of Pages.
+func (s *PaginationMeta) SetPages(val int) {
+	s.Pages = val
+}
+
+// SetCount sets the value of Count.
+func (s *PaginationMeta) SetCount(val int) {
+	s.Count = val
+}
+
 // PingOK is response for Ping operation.
 type PingOK struct{}
+
+// Ref: #/components/schemas/PolicyAttributes
+type PolicyAttributes struct {
+	Name                          string    `json:"name"`
+	Duration                      NilInt    `json:"duration"`
+	Strict                        bool      `json:"strict"`
+	Floating                      bool      `json:"floating"`
+	UsePool                       bool      `json:"usePool"`
+	MaxMachines                   NilInt    `json:"maxMachines"`
+	MaxProcesses                  NilInt    `json:"maxProcesses"`
+	MaxUsers                      NilInt    `json:"maxUsers"`
+	MaxCores                      NilInt    `json:"maxCores"`
+	MaxMemory                     NilInt    `json:"maxMemory"`
+	MaxDisk                       NilInt    `json:"maxDisk"`
+	MaxUses                       NilInt    `json:"maxUses"`
+	MachineUniquenessStrategy     NilString `json:"machineUniquenessStrategy"`
+	MachineMatchingStrategy       NilString `json:"machineMatchingStrategy"`
+	ComponentUniquenessStrategy   NilString `json:"componentUniquenessStrategy"`
+	ComponentMatchingStrategy     NilString `json:"componentMatchingStrategy"`
+	ExpirationStrategy            NilString `json:"expirationStrategy"`
+	ExpirationBasis               NilString `json:"expirationBasis"`
+	RenewalBasis                  NilString `json:"renewalBasis"`
+	TransferStrategy              NilString `json:"transferStrategy"`
+	AuthenticationStrategy        NilString `json:"authenticationStrategy"`
+	MachineLeasingStrategy        NilString `json:"machineLeasingStrategy"`
+	ProcessLeasingStrategy        NilString `json:"processLeasingStrategy"`
+	OverageStrategy               NilString `json:"overageStrategy"`
+	Scheme                        NilString `json:"scheme"`
+	Encrypted                     bool      `json:"encrypted"`
+	Protected                     NilBool   `json:"protected"`
+	RequireProductScope           bool      `json:"requireProductScope"`
+	RequirePolicyScope            bool      `json:"requirePolicyScope"`
+	RequireMachineScope           bool      `json:"requireMachineScope"`
+	RequireFingerprintScope       bool      `json:"requireFingerprintScope"`
+	RequireComponentsScope        bool      `json:"requireComponentsScope"`
+	RequireUserScope              bool      `json:"requireUserScope"`
+	RequireChecksumScope          bool      `json:"requireChecksumScope"`
+	RequireVersionScope           bool      `json:"requireVersionScope"`
+	RequireCheckIn                bool      `json:"requireCheckIn"`
+	CheckInInterval               NilString `json:"checkInInterval"`
+	CheckInIntervalCount          NilInt    `json:"checkInIntervalCount"`
+	HeartbeatDuration             NilInt    `json:"heartbeatDuration"`
+	HeartbeatCullStrategy         NilString `json:"heartbeatCullStrategy"`
+	HeartbeatResurrectionStrategy NilString `json:"heartbeatResurrectionStrategy"`
+	HeartbeatBasis                NilString `json:"heartbeatBasis"`
+	RequireHeartbeat              bool      `json:"requireHeartbeat"`
+	Metadata                      Metadata  `json:"metadata"`
+	Created                       Timestamp `json:"created"`
+	Updated                       Timestamp `json:"updated"`
+}
+
+// GetName returns the value of Name.
+func (s *PolicyAttributes) GetName() string {
+	return s.Name
+}
+
+// GetDuration returns the value of Duration.
+func (s *PolicyAttributes) GetDuration() NilInt {
+	return s.Duration
+}
+
+// GetStrict returns the value of Strict.
+func (s *PolicyAttributes) GetStrict() bool {
+	return s.Strict
+}
+
+// GetFloating returns the value of Floating.
+func (s *PolicyAttributes) GetFloating() bool {
+	return s.Floating
+}
+
+// GetUsePool returns the value of UsePool.
+func (s *PolicyAttributes) GetUsePool() bool {
+	return s.UsePool
+}
+
+// GetMaxMachines returns the value of MaxMachines.
+func (s *PolicyAttributes) GetMaxMachines() NilInt {
+	return s.MaxMachines
+}
+
+// GetMaxProcesses returns the value of MaxProcesses.
+func (s *PolicyAttributes) GetMaxProcesses() NilInt {
+	return s.MaxProcesses
+}
+
+// GetMaxUsers returns the value of MaxUsers.
+func (s *PolicyAttributes) GetMaxUsers() NilInt {
+	return s.MaxUsers
+}
+
+// GetMaxCores returns the value of MaxCores.
+func (s *PolicyAttributes) GetMaxCores() NilInt {
+	return s.MaxCores
+}
+
+// GetMaxMemory returns the value of MaxMemory.
+func (s *PolicyAttributes) GetMaxMemory() NilInt {
+	return s.MaxMemory
+}
+
+// GetMaxDisk returns the value of MaxDisk.
+func (s *PolicyAttributes) GetMaxDisk() NilInt {
+	return s.MaxDisk
+}
+
+// GetMaxUses returns the value of MaxUses.
+func (s *PolicyAttributes) GetMaxUses() NilInt {
+	return s.MaxUses
+}
+
+// GetMachineUniquenessStrategy returns the value of MachineUniquenessStrategy.
+func (s *PolicyAttributes) GetMachineUniquenessStrategy() NilString {
+	return s.MachineUniquenessStrategy
+}
+
+// GetMachineMatchingStrategy returns the value of MachineMatchingStrategy.
+func (s *PolicyAttributes) GetMachineMatchingStrategy() NilString {
+	return s.MachineMatchingStrategy
+}
+
+// GetComponentUniquenessStrategy returns the value of ComponentUniquenessStrategy.
+func (s *PolicyAttributes) GetComponentUniquenessStrategy() NilString {
+	return s.ComponentUniquenessStrategy
+}
+
+// GetComponentMatchingStrategy returns the value of ComponentMatchingStrategy.
+func (s *PolicyAttributes) GetComponentMatchingStrategy() NilString {
+	return s.ComponentMatchingStrategy
+}
+
+// GetExpirationStrategy returns the value of ExpirationStrategy.
+func (s *PolicyAttributes) GetExpirationStrategy() NilString {
+	return s.ExpirationStrategy
+}
+
+// GetExpirationBasis returns the value of ExpirationBasis.
+func (s *PolicyAttributes) GetExpirationBasis() NilString {
+	return s.ExpirationBasis
+}
+
+// GetRenewalBasis returns the value of RenewalBasis.
+func (s *PolicyAttributes) GetRenewalBasis() NilString {
+	return s.RenewalBasis
+}
+
+// GetTransferStrategy returns the value of TransferStrategy.
+func (s *PolicyAttributes) GetTransferStrategy() NilString {
+	return s.TransferStrategy
+}
+
+// GetAuthenticationStrategy returns the value of AuthenticationStrategy.
+func (s *PolicyAttributes) GetAuthenticationStrategy() NilString {
+	return s.AuthenticationStrategy
+}
+
+// GetMachineLeasingStrategy returns the value of MachineLeasingStrategy.
+func (s *PolicyAttributes) GetMachineLeasingStrategy() NilString {
+	return s.MachineLeasingStrategy
+}
+
+// GetProcessLeasingStrategy returns the value of ProcessLeasingStrategy.
+func (s *PolicyAttributes) GetProcessLeasingStrategy() NilString {
+	return s.ProcessLeasingStrategy
+}
+
+// GetOverageStrategy returns the value of OverageStrategy.
+func (s *PolicyAttributes) GetOverageStrategy() NilString {
+	return s.OverageStrategy
+}
+
+// GetScheme returns the value of Scheme.
+func (s *PolicyAttributes) GetScheme() NilString {
+	return s.Scheme
+}
+
+// GetEncrypted returns the value of Encrypted.
+func (s *PolicyAttributes) GetEncrypted() bool {
+	return s.Encrypted
+}
+
+// GetProtected returns the value of Protected.
+func (s *PolicyAttributes) GetProtected() NilBool {
+	return s.Protected
+}
+
+// GetRequireProductScope returns the value of RequireProductScope.
+func (s *PolicyAttributes) GetRequireProductScope() bool {
+	return s.RequireProductScope
+}
+
+// GetRequirePolicyScope returns the value of RequirePolicyScope.
+func (s *PolicyAttributes) GetRequirePolicyScope() bool {
+	return s.RequirePolicyScope
+}
+
+// GetRequireMachineScope returns the value of RequireMachineScope.
+func (s *PolicyAttributes) GetRequireMachineScope() bool {
+	return s.RequireMachineScope
+}
+
+// GetRequireFingerprintScope returns the value of RequireFingerprintScope.
+func (s *PolicyAttributes) GetRequireFingerprintScope() bool {
+	return s.RequireFingerprintScope
+}
+
+// GetRequireComponentsScope returns the value of RequireComponentsScope.
+func (s *PolicyAttributes) GetRequireComponentsScope() bool {
+	return s.RequireComponentsScope
+}
+
+// GetRequireUserScope returns the value of RequireUserScope.
+func (s *PolicyAttributes) GetRequireUserScope() bool {
+	return s.RequireUserScope
+}
+
+// GetRequireChecksumScope returns the value of RequireChecksumScope.
+func (s *PolicyAttributes) GetRequireChecksumScope() bool {
+	return s.RequireChecksumScope
+}
+
+// GetRequireVersionScope returns the value of RequireVersionScope.
+func (s *PolicyAttributes) GetRequireVersionScope() bool {
+	return s.RequireVersionScope
+}
+
+// GetRequireCheckIn returns the value of RequireCheckIn.
+func (s *PolicyAttributes) GetRequireCheckIn() bool {
+	return s.RequireCheckIn
+}
+
+// GetCheckInInterval returns the value of CheckInInterval.
+func (s *PolicyAttributes) GetCheckInInterval() NilString {
+	return s.CheckInInterval
+}
+
+// GetCheckInIntervalCount returns the value of CheckInIntervalCount.
+func (s *PolicyAttributes) GetCheckInIntervalCount() NilInt {
+	return s.CheckInIntervalCount
+}
+
+// GetHeartbeatDuration returns the value of HeartbeatDuration.
+func (s *PolicyAttributes) GetHeartbeatDuration() NilInt {
+	return s.HeartbeatDuration
+}
+
+// GetHeartbeatCullStrategy returns the value of HeartbeatCullStrategy.
+func (s *PolicyAttributes) GetHeartbeatCullStrategy() NilString {
+	return s.HeartbeatCullStrategy
+}
+
+// GetHeartbeatResurrectionStrategy returns the value of HeartbeatResurrectionStrategy.
+func (s *PolicyAttributes) GetHeartbeatResurrectionStrategy() NilString {
+	return s.HeartbeatResurrectionStrategy
+}
+
+// GetHeartbeatBasis returns the value of HeartbeatBasis.
+func (s *PolicyAttributes) GetHeartbeatBasis() NilString {
+	return s.HeartbeatBasis
+}
+
+// GetRequireHeartbeat returns the value of RequireHeartbeat.
+func (s *PolicyAttributes) GetRequireHeartbeat() bool {
+	return s.RequireHeartbeat
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *PolicyAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *PolicyAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *PolicyAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetName sets the value of Name.
+func (s *PolicyAttributes) SetName(val string) {
+	s.Name = val
+}
+
+// SetDuration sets the value of Duration.
+func (s *PolicyAttributes) SetDuration(val NilInt) {
+	s.Duration = val
+}
+
+// SetStrict sets the value of Strict.
+func (s *PolicyAttributes) SetStrict(val bool) {
+	s.Strict = val
+}
+
+// SetFloating sets the value of Floating.
+func (s *PolicyAttributes) SetFloating(val bool) {
+	s.Floating = val
+}
+
+// SetUsePool sets the value of UsePool.
+func (s *PolicyAttributes) SetUsePool(val bool) {
+	s.UsePool = val
+}
+
+// SetMaxMachines sets the value of MaxMachines.
+func (s *PolicyAttributes) SetMaxMachines(val NilInt) {
+	s.MaxMachines = val
+}
+
+// SetMaxProcesses sets the value of MaxProcesses.
+func (s *PolicyAttributes) SetMaxProcesses(val NilInt) {
+	s.MaxProcesses = val
+}
+
+// SetMaxUsers sets the value of MaxUsers.
+func (s *PolicyAttributes) SetMaxUsers(val NilInt) {
+	s.MaxUsers = val
+}
+
+// SetMaxCores sets the value of MaxCores.
+func (s *PolicyAttributes) SetMaxCores(val NilInt) {
+	s.MaxCores = val
+}
+
+// SetMaxMemory sets the value of MaxMemory.
+func (s *PolicyAttributes) SetMaxMemory(val NilInt) {
+	s.MaxMemory = val
+}
+
+// SetMaxDisk sets the value of MaxDisk.
+func (s *PolicyAttributes) SetMaxDisk(val NilInt) {
+	s.MaxDisk = val
+}
+
+// SetMaxUses sets the value of MaxUses.
+func (s *PolicyAttributes) SetMaxUses(val NilInt) {
+	s.MaxUses = val
+}
+
+// SetMachineUniquenessStrategy sets the value of MachineUniquenessStrategy.
+func (s *PolicyAttributes) SetMachineUniquenessStrategy(val NilString) {
+	s.MachineUniquenessStrategy = val
+}
+
+// SetMachineMatchingStrategy sets the value of MachineMatchingStrategy.
+func (s *PolicyAttributes) SetMachineMatchingStrategy(val NilString) {
+	s.MachineMatchingStrategy = val
+}
+
+// SetComponentUniquenessStrategy sets the value of ComponentUniquenessStrategy.
+func (s *PolicyAttributes) SetComponentUniquenessStrategy(val NilString) {
+	s.ComponentUniquenessStrategy = val
+}
+
+// SetComponentMatchingStrategy sets the value of ComponentMatchingStrategy.
+func (s *PolicyAttributes) SetComponentMatchingStrategy(val NilString) {
+	s.ComponentMatchingStrategy = val
+}
+
+// SetExpirationStrategy sets the value of ExpirationStrategy.
+func (s *PolicyAttributes) SetExpirationStrategy(val NilString) {
+	s.ExpirationStrategy = val
+}
+
+// SetExpirationBasis sets the value of ExpirationBasis.
+func (s *PolicyAttributes) SetExpirationBasis(val NilString) {
+	s.ExpirationBasis = val
+}
+
+// SetRenewalBasis sets the value of RenewalBasis.
+func (s *PolicyAttributes) SetRenewalBasis(val NilString) {
+	s.RenewalBasis = val
+}
+
+// SetTransferStrategy sets the value of TransferStrategy.
+func (s *PolicyAttributes) SetTransferStrategy(val NilString) {
+	s.TransferStrategy = val
+}
+
+// SetAuthenticationStrategy sets the value of AuthenticationStrategy.
+func (s *PolicyAttributes) SetAuthenticationStrategy(val NilString) {
+	s.AuthenticationStrategy = val
+}
+
+// SetMachineLeasingStrategy sets the value of MachineLeasingStrategy.
+func (s *PolicyAttributes) SetMachineLeasingStrategy(val NilString) {
+	s.MachineLeasingStrategy = val
+}
+
+// SetProcessLeasingStrategy sets the value of ProcessLeasingStrategy.
+func (s *PolicyAttributes) SetProcessLeasingStrategy(val NilString) {
+	s.ProcessLeasingStrategy = val
+}
+
+// SetOverageStrategy sets the value of OverageStrategy.
+func (s *PolicyAttributes) SetOverageStrategy(val NilString) {
+	s.OverageStrategy = val
+}
+
+// SetScheme sets the value of Scheme.
+func (s *PolicyAttributes) SetScheme(val NilString) {
+	s.Scheme = val
+}
+
+// SetEncrypted sets the value of Encrypted.
+func (s *PolicyAttributes) SetEncrypted(val bool) {
+	s.Encrypted = val
+}
+
+// SetProtected sets the value of Protected.
+func (s *PolicyAttributes) SetProtected(val NilBool) {
+	s.Protected = val
+}
+
+// SetRequireProductScope sets the value of RequireProductScope.
+func (s *PolicyAttributes) SetRequireProductScope(val bool) {
+	s.RequireProductScope = val
+}
+
+// SetRequirePolicyScope sets the value of RequirePolicyScope.
+func (s *PolicyAttributes) SetRequirePolicyScope(val bool) {
+	s.RequirePolicyScope = val
+}
+
+// SetRequireMachineScope sets the value of RequireMachineScope.
+func (s *PolicyAttributes) SetRequireMachineScope(val bool) {
+	s.RequireMachineScope = val
+}
+
+// SetRequireFingerprintScope sets the value of RequireFingerprintScope.
+func (s *PolicyAttributes) SetRequireFingerprintScope(val bool) {
+	s.RequireFingerprintScope = val
+}
+
+// SetRequireComponentsScope sets the value of RequireComponentsScope.
+func (s *PolicyAttributes) SetRequireComponentsScope(val bool) {
+	s.RequireComponentsScope = val
+}
+
+// SetRequireUserScope sets the value of RequireUserScope.
+func (s *PolicyAttributes) SetRequireUserScope(val bool) {
+	s.RequireUserScope = val
+}
+
+// SetRequireChecksumScope sets the value of RequireChecksumScope.
+func (s *PolicyAttributes) SetRequireChecksumScope(val bool) {
+	s.RequireChecksumScope = val
+}
+
+// SetRequireVersionScope sets the value of RequireVersionScope.
+func (s *PolicyAttributes) SetRequireVersionScope(val bool) {
+	s.RequireVersionScope = val
+}
+
+// SetRequireCheckIn sets the value of RequireCheckIn.
+func (s *PolicyAttributes) SetRequireCheckIn(val bool) {
+	s.RequireCheckIn = val
+}
+
+// SetCheckInInterval sets the value of CheckInInterval.
+func (s *PolicyAttributes) SetCheckInInterval(val NilString) {
+	s.CheckInInterval = val
+}
+
+// SetCheckInIntervalCount sets the value of CheckInIntervalCount.
+func (s *PolicyAttributes) SetCheckInIntervalCount(val NilInt) {
+	s.CheckInIntervalCount = val
+}
+
+// SetHeartbeatDuration sets the value of HeartbeatDuration.
+func (s *PolicyAttributes) SetHeartbeatDuration(val NilInt) {
+	s.HeartbeatDuration = val
+}
+
+// SetHeartbeatCullStrategy sets the value of HeartbeatCullStrategy.
+func (s *PolicyAttributes) SetHeartbeatCullStrategy(val NilString) {
+	s.HeartbeatCullStrategy = val
+}
+
+// SetHeartbeatResurrectionStrategy sets the value of HeartbeatResurrectionStrategy.
+func (s *PolicyAttributes) SetHeartbeatResurrectionStrategy(val NilString) {
+	s.HeartbeatResurrectionStrategy = val
+}
+
+// SetHeartbeatBasis sets the value of HeartbeatBasis.
+func (s *PolicyAttributes) SetHeartbeatBasis(val NilString) {
+	s.HeartbeatBasis = val
+}
+
+// SetRequireHeartbeat sets the value of RequireHeartbeat.
+func (s *PolicyAttributes) SetRequireHeartbeat(val bool) {
+	s.RequireHeartbeat = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *PolicyAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *PolicyAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *PolicyAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/PolicyDocument
+type PolicyDocument struct {
+	Data PolicyResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *PolicyDocument) GetData() PolicyResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *PolicyDocument) SetData(val PolicyResource) {
+	s.Data = val
+}
+
+// PolicyDocumentHeaders wraps PolicyDocument with response headers.
+type PolicyDocumentHeaders struct {
+	Location OptString
+	Response PolicyDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *PolicyDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *PolicyDocumentHeaders) GetResponse() PolicyDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *PolicyDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *PolicyDocumentHeaders) SetResponse(val PolicyDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/PolicyEntitlementLinks
+type PolicyEntitlementLinks struct {
+	Related string `json:"related"`
+}
+
+// GetRelated returns the value of Related.
+func (s *PolicyEntitlementLinks) GetRelated() string {
+	return s.Related
+}
+
+// SetRelated sets the value of Related.
+func (s *PolicyEntitlementLinks) SetRelated(val string) {
+	s.Related = val
+}
+
+// Ref: #/components/schemas/PolicyEntitlementListDocument
+type PolicyEntitlementListDocument struct {
+	Data []PolicyEntitlementResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *PolicyEntitlementListDocument) GetData() []PolicyEntitlementResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *PolicyEntitlementListDocument) SetData(val []PolicyEntitlementResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/PolicyEntitlementResource
+type PolicyEntitlementResource struct {
+	Type          PolicyEntitlementResourceType          `json:"type"`
+	ID            string                                 `json:"id"`
+	Attributes    PolicyEntitlementResourceAttributes    `json:"attributes"`
+	Relationships PolicyEntitlementResourceRelationships `json:"relationships"`
+	Links         PolicyEntitlementLinks                 `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *PolicyEntitlementResource) GetType() PolicyEntitlementResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *PolicyEntitlementResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *PolicyEntitlementResource) GetAttributes() PolicyEntitlementResourceAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *PolicyEntitlementResource) GetRelationships() PolicyEntitlementResourceRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *PolicyEntitlementResource) GetLinks() PolicyEntitlementLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *PolicyEntitlementResource) SetType(val PolicyEntitlementResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *PolicyEntitlementResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *PolicyEntitlementResource) SetAttributes(val PolicyEntitlementResourceAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *PolicyEntitlementResource) SetRelationships(val PolicyEntitlementResourceRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *PolicyEntitlementResource) SetLinks(val PolicyEntitlementLinks) {
+	s.Links = val
+}
+
+type PolicyEntitlementResourceAttributes struct {
+	Created Timestamp `json:"created"`
+	Updated Timestamp `json:"updated"`
+}
+
+// GetCreated returns the value of Created.
+func (s *PolicyEntitlementResourceAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *PolicyEntitlementResourceAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetCreated sets the value of Created.
+func (s *PolicyEntitlementResourceAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *PolicyEntitlementResourceAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+type PolicyEntitlementResourceRelationships struct {
+	Account     ToOneRelationship `json:"account"`
+	Entitlement ToOneRelationship `json:"entitlement"`
+	Policy      ToOneRelationship `json:"policy"`
+}
+
+// GetAccount returns the value of Account.
+func (s *PolicyEntitlementResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetEntitlement returns the value of Entitlement.
+func (s *PolicyEntitlementResourceRelationships) GetEntitlement() ToOneRelationship {
+	return s.Entitlement
+}
+
+// GetPolicy returns the value of Policy.
+func (s *PolicyEntitlementResourceRelationships) GetPolicy() ToOneRelationship {
+	return s.Policy
+}
+
+// SetAccount sets the value of Account.
+func (s *PolicyEntitlementResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetEntitlement sets the value of Entitlement.
+func (s *PolicyEntitlementResourceRelationships) SetEntitlement(val ToOneRelationship) {
+	s.Entitlement = val
+}
+
+// SetPolicy sets the value of Policy.
+func (s *PolicyEntitlementResourceRelationships) SetPolicy(val ToOneRelationship) {
+	s.Policy = val
+}
+
+type PolicyEntitlementResourceType string
+
+const (
+	PolicyEntitlementResourceTypePolicyEntitlements PolicyEntitlementResourceType = "policy-entitlements"
+)
+
+// AllValues returns all PolicyEntitlementResourceType values.
+func (PolicyEntitlementResourceType) AllValues() []PolicyEntitlementResourceType {
+	return []PolicyEntitlementResourceType{
+		PolicyEntitlementResourceTypePolicyEntitlements,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PolicyEntitlementResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case PolicyEntitlementResourceTypePolicyEntitlements:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PolicyEntitlementResourceType) UnmarshalText(data []byte) error {
+	switch PolicyEntitlementResourceType(data) {
+	case PolicyEntitlementResourceTypePolicyEntitlements:
+		*s = PolicyEntitlementResourceTypePolicyEntitlements
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/PolicyListDocument
+type PolicyListDocument struct {
+	Data  []PolicyResource `json:"data"`
+	Links OptListLinks     `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *PolicyListDocument) GetData() []PolicyResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *PolicyListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *PolicyListDocument) SetData(val []PolicyResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *PolicyListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/PolicyRelationships
+type PolicyRelationships struct {
+	Account      ToOneRelationship  `json:"account"`
+	Product      ToOneRelationship  `json:"product"`
+	Pool         ToManyRelationship `json:"pool"`
+	Licenses     ToManyRelationship `json:"licenses"`
+	Entitlements ToManyRelationship `json:"entitlements"`
+}
+
+// GetAccount returns the value of Account.
+func (s *PolicyRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *PolicyRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// GetPool returns the value of Pool.
+func (s *PolicyRelationships) GetPool() ToManyRelationship {
+	return s.Pool
+}
+
+// GetLicenses returns the value of Licenses.
+func (s *PolicyRelationships) GetLicenses() ToManyRelationship {
+	return s.Licenses
+}
+
+// GetEntitlements returns the value of Entitlements.
+func (s *PolicyRelationships) GetEntitlements() ToManyRelationship {
+	return s.Entitlements
+}
+
+// SetAccount sets the value of Account.
+func (s *PolicyRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *PolicyRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+// SetPool sets the value of Pool.
+func (s *PolicyRelationships) SetPool(val ToManyRelationship) {
+	s.Pool = val
+}
+
+// SetLicenses sets the value of Licenses.
+func (s *PolicyRelationships) SetLicenses(val ToManyRelationship) {
+	s.Licenses = val
+}
+
+// SetEntitlements sets the value of Entitlements.
+func (s *PolicyRelationships) SetEntitlements(val ToManyRelationship) {
+	s.Entitlements = val
+}
+
+// Ref: #/components/schemas/PolicyResource
+type PolicyResource struct {
+	Type          PolicyResourceType  `json:"type"`
+	ID            string              `json:"id"`
+	Attributes    PolicyAttributes    `json:"attributes"`
+	Relationships PolicyRelationships `json:"relationships"`
+	Links         ResourceLinks       `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *PolicyResource) GetType() PolicyResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *PolicyResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *PolicyResource) GetAttributes() PolicyAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *PolicyResource) GetRelationships() PolicyRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *PolicyResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *PolicyResource) SetType(val PolicyResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *PolicyResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *PolicyResource) SetAttributes(val PolicyAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *PolicyResource) SetRelationships(val PolicyRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *PolicyResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type PolicyResourceType string
+
+const (
+	PolicyResourceTypePolicies PolicyResourceType = "policies"
+)
+
+// AllValues returns all PolicyResourceType values.
+func (PolicyResourceType) AllValues() []PolicyResourceType {
+	return []PolicyResourceType{
+		PolicyResourceTypePolicies,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PolicyResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case PolicyResourceTypePolicies:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PolicyResourceType) UnmarshalText(data []byte) error {
+	switch PolicyResourceType(data) {
+	case PolicyResourceTypePolicies:
+		*s = PolicyResourceTypePolicies
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ProductAttributes
+type ProductAttributes struct {
+	Name                 string    `json:"name"`
+	Code                 NilString `json:"code"`
+	DistributionStrategy NilString `json:"distributionStrategy"`
+	URL                  NilString `json:"url"`
+	Platforms            []string  `json:"platforms"`
+	Metadata             Metadata  `json:"metadata"`
+	Created              Timestamp `json:"created"`
+	Updated              Timestamp `json:"updated"`
+}
+
+// GetName returns the value of Name.
+func (s *ProductAttributes) GetName() string {
+	return s.Name
+}
+
+// GetCode returns the value of Code.
+func (s *ProductAttributes) GetCode() NilString {
+	return s.Code
+}
+
+// GetDistributionStrategy returns the value of DistributionStrategy.
+func (s *ProductAttributes) GetDistributionStrategy() NilString {
+	return s.DistributionStrategy
+}
+
+// GetURL returns the value of URL.
+func (s *ProductAttributes) GetURL() NilString {
+	return s.URL
+}
+
+// GetPlatforms returns the value of Platforms.
+func (s *ProductAttributes) GetPlatforms() []string {
+	return s.Platforms
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *ProductAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *ProductAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *ProductAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetName sets the value of Name.
+func (s *ProductAttributes) SetName(val string) {
+	s.Name = val
+}
+
+// SetCode sets the value of Code.
+func (s *ProductAttributes) SetCode(val NilString) {
+	s.Code = val
+}
+
+// SetDistributionStrategy sets the value of DistributionStrategy.
+func (s *ProductAttributes) SetDistributionStrategy(val NilString) {
+	s.DistributionStrategy = val
+}
+
+// SetURL sets the value of URL.
+func (s *ProductAttributes) SetURL(val NilString) {
+	s.URL = val
+}
+
+// SetPlatforms sets the value of Platforms.
+func (s *ProductAttributes) SetPlatforms(val []string) {
+	s.Platforms = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *ProductAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *ProductAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *ProductAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/ProductDocument
+type ProductDocument struct {
+	Data ProductResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *ProductDocument) GetData() ProductResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *ProductDocument) SetData(val ProductResource) {
+	s.Data = val
+}
+
+// ProductDocumentHeaders wraps ProductDocument with response headers.
+type ProductDocumentHeaders struct {
+	Location OptString
+	Response ProductDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *ProductDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *ProductDocumentHeaders) GetResponse() ProductDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *ProductDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ProductDocumentHeaders) SetResponse(val ProductDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/ProductListDocument
+type ProductListDocument struct {
+	Data  []ProductResource `json:"data"`
+	Links OptListLinks      `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *ProductListDocument) GetData() []ProductResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *ProductListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *ProductListDocument) SetData(val []ProductResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ProductListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/ProductRelationships
+type ProductRelationships struct {
+	Account   ToOneRelationship  `json:"account"`
+	Policies  ToManyRelationship `json:"policies"`
+	Licenses  ToManyRelationship `json:"licenses"`
+	Machines  ToManyRelationship `json:"machines"`
+	Users     ToManyRelationship `json:"users"`
+	Tokens    ToManyRelationship `json:"tokens"`
+	Platforms ToManyRelationship `json:"platforms"`
+	Channels  ToManyRelationship `json:"channels"`
+	Releases  ToManyRelationship `json:"releases"`
+	Artifacts ToManyRelationship `json:"artifacts"`
+}
+
+// GetAccount returns the value of Account.
+func (s *ProductRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetPolicies returns the value of Policies.
+func (s *ProductRelationships) GetPolicies() ToManyRelationship {
+	return s.Policies
+}
+
+// GetLicenses returns the value of Licenses.
+func (s *ProductRelationships) GetLicenses() ToManyRelationship {
+	return s.Licenses
+}
+
+// GetMachines returns the value of Machines.
+func (s *ProductRelationships) GetMachines() ToManyRelationship {
+	return s.Machines
+}
+
+// GetUsers returns the value of Users.
+func (s *ProductRelationships) GetUsers() ToManyRelationship {
+	return s.Users
+}
+
+// GetTokens returns the value of Tokens.
+func (s *ProductRelationships) GetTokens() ToManyRelationship {
+	return s.Tokens
+}
+
+// GetPlatforms returns the value of Platforms.
+func (s *ProductRelationships) GetPlatforms() ToManyRelationship {
+	return s.Platforms
+}
+
+// GetChannels returns the value of Channels.
+func (s *ProductRelationships) GetChannels() ToManyRelationship {
+	return s.Channels
+}
+
+// GetReleases returns the value of Releases.
+func (s *ProductRelationships) GetReleases() ToManyRelationship {
+	return s.Releases
+}
+
+// GetArtifacts returns the value of Artifacts.
+func (s *ProductRelationships) GetArtifacts() ToManyRelationship {
+	return s.Artifacts
+}
+
+// SetAccount sets the value of Account.
+func (s *ProductRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetPolicies sets the value of Policies.
+func (s *ProductRelationships) SetPolicies(val ToManyRelationship) {
+	s.Policies = val
+}
+
+// SetLicenses sets the value of Licenses.
+func (s *ProductRelationships) SetLicenses(val ToManyRelationship) {
+	s.Licenses = val
+}
+
+// SetMachines sets the value of Machines.
+func (s *ProductRelationships) SetMachines(val ToManyRelationship) {
+	s.Machines = val
+}
+
+// SetUsers sets the value of Users.
+func (s *ProductRelationships) SetUsers(val ToManyRelationship) {
+	s.Users = val
+}
+
+// SetTokens sets the value of Tokens.
+func (s *ProductRelationships) SetTokens(val ToManyRelationship) {
+	s.Tokens = val
+}
+
+// SetPlatforms sets the value of Platforms.
+func (s *ProductRelationships) SetPlatforms(val ToManyRelationship) {
+	s.Platforms = val
+}
+
+// SetChannels sets the value of Channels.
+func (s *ProductRelationships) SetChannels(val ToManyRelationship) {
+	s.Channels = val
+}
+
+// SetReleases sets the value of Releases.
+func (s *ProductRelationships) SetReleases(val ToManyRelationship) {
+	s.Releases = val
+}
+
+// SetArtifacts sets the value of Artifacts.
+func (s *ProductRelationships) SetArtifacts(val ToManyRelationship) {
+	s.Artifacts = val
+}
+
+// Ref: #/components/schemas/ProductResource
+type ProductResource struct {
+	Type          ProductResourceType  `json:"type"`
+	ID            string               `json:"id"`
+	Attributes    ProductAttributes    `json:"attributes"`
+	Relationships ProductRelationships `json:"relationships"`
+	Links         ResourceLinks        `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *ProductResource) GetType() ProductResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *ProductResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *ProductResource) GetAttributes() ProductAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *ProductResource) GetRelationships() ProductRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *ProductResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *ProductResource) SetType(val ProductResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *ProductResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *ProductResource) SetAttributes(val ProductAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *ProductResource) SetRelationships(val ProductRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ProductResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type ProductResourceType string
+
+const (
+	ProductResourceTypeProducts ProductResourceType = "products"
+)
+
+// AllValues returns all ProductResourceType values.
+func (ProductResourceType) AllValues() []ProductResourceType {
+	return []ProductResourceType{
+		ProductResourceTypeProducts,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ProductResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case ProductResourceTypeProducts:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ProductResourceType) UnmarshalText(data []byte) error {
+	switch ProductResourceType(data) {
+	case ProductResourceTypeProducts:
+		*s = ProductResourceTypeProducts
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ProductTokenListDocument
+type ProductTokenListDocument struct {
+	Data  []TokenResource `json:"data"`
+	Links OptListLinks    `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *ProductTokenListDocument) GetData() []TokenResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *ProductTokenListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *ProductTokenListDocument) SetData(val []TokenResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ProductTokenListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/ProductUserListDocument
+type ProductUserListDocument struct {
+	Data  []UserResource `json:"data"`
+	Links OptListLinks   `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *ProductUserListDocument) GetData() []UserResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *ProductUserListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *ProductUserListDocument) SetData(val []UserResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ProductUserListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
 
 // Ref: #/components/schemas/ProfileDocument
 type ProfileDocument struct {
@@ -1258,6 +3570,39 @@ func (s *ResourceLinks) GetSelf() string {
 // SetSelf sets the value of Self.
 func (s *ResourceLinks) SetSelf(val string) {
 	s.Self = val
+}
+
+type ShowPolicyLicenseOK map[string]jx.Raw
+
+func (s *ShowPolicyLicenseOK) init() ShowPolicyLicenseOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ShowProductLicenseOK map[string]jx.Raw
+
+func (s *ShowProductLicenseOK) init() ShowProductLicenseOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+type ShowProductMachineOK map[string]jx.Raw
+
+func (s *ShowProductMachineOK) init() ShowProductMachineOK {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 type Timestamp string
@@ -1599,6 +3944,126 @@ func (s *TokenResourceType) UnmarshalText(data []byte) error {
 	}
 }
 
+type UpdateEntitlementReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateEntitlementReqApplicationJSON) init() UpdateEntitlementReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateEntitlementReqApplicationJSON) updateEntitlementReq() {}
+
+type UpdateEntitlementReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateEntitlementReqApplicationVndAPIJSON) init() UpdateEntitlementReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateEntitlementReqApplicationVndAPIJSON) updateEntitlementReq() {}
+
+type UpdateEntitlementReqEmptyBody struct{}
+
+func (*UpdateEntitlementReqEmptyBody) updateEntitlementReq() {}
+
+type UpdateKeyReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateKeyReqApplicationJSON) init() UpdateKeyReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateKeyReqApplicationJSON) updateKeyReq() {}
+
+type UpdateKeyReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateKeyReqApplicationVndAPIJSON) init() UpdateKeyReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateKeyReqApplicationVndAPIJSON) updateKeyReq() {}
+
+type UpdateKeyReqEmptyBody struct{}
+
+func (*UpdateKeyReqEmptyBody) updateKeyReq() {}
+
+type UpdatePolicyReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdatePolicyReqApplicationJSON) init() UpdatePolicyReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdatePolicyReqApplicationJSON) updatePolicyReq() {}
+
+type UpdatePolicyReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdatePolicyReqApplicationVndAPIJSON) init() UpdatePolicyReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdatePolicyReqApplicationVndAPIJSON) updatePolicyReq() {}
+
+type UpdatePolicyReqEmptyBody struct{}
+
+func (*UpdatePolicyReqEmptyBody) updatePolicyReq() {}
+
+type UpdateProductReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateProductReqApplicationJSON) init() UpdateProductReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateProductReqApplicationJSON) updateProductReq() {}
+
+type UpdateProductReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateProductReqApplicationVndAPIJSON) init() UpdateProductReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateProductReqApplicationVndAPIJSON) updateProductReq() {}
+
+type UpdateProductReqEmptyBody struct{}
+
+func (*UpdateProductReqEmptyBody) updateProductReq() {}
+
 // Ref: #/components/schemas/UserAttributes
 type UserAttributes struct {
 	FullName  NilString `json:"fullName"`
@@ -1700,6 +4165,21 @@ func (s *UserAttributes) SetCreated(val Timestamp) {
 // SetUpdated sets the value of Updated.
 func (s *UserAttributes) SetUpdated(val Timestamp) {
 	s.Updated = val
+}
+
+// Ref: #/components/schemas/UserDocument
+type UserDocument struct {
+	Data UserResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *UserDocument) GetData() UserResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *UserDocument) SetData(val UserResource) {
+	s.Data = val
 }
 
 // Ref: #/components/schemas/UserRelationships

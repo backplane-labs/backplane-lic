@@ -48,19 +48,22 @@ CREATE TABLE lic.products (
   -- OPEN | SECRET | CLOSED: who may see the product's licenses.
   distribution_strategy text,
   url                   text,
+  -- EE release platforms the product publishes for; rendered verbatim.
+  platforms             jsonb,
   metadata              jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at            timestamptz NOT NULL DEFAULT now(),
   updated_at            timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT products_distribution_strategy CHECK (
     distribution_strategy IS NULL
-    OR distribution_strategy IN ('OPEN', 'SECRET', 'CLOSED')
+    OR distribution_strategy IN ('LICENSED', 'OPEN', 'CLOSED')
   ),
   CONSTRAINT products_code_format CHECK (
     code IS NULL OR code ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*$'
   )
 );
 
-CREATE UNIQUE INDEX products_account_code_key ON lic.products (account_id, code);
+-- Keygen's code uniqueness is case-insensitive (citext upstream).
+CREATE UNIQUE INDEX products_account_code_key ON lic.products (account_id, lower(code));
 CREATE INDEX products_account_created_at_id_idx ON lic.products (account_id, created_at DESC, id DESC);
 CREATE INDEX products_code_idx ON lic.products (code);
 
@@ -77,7 +80,8 @@ CREATE TABLE lic.entitlements (
   CONSTRAINT entitlements_code_format CHECK (code ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*$')
 );
 
-CREATE UNIQUE INDEX entitlements_account_code_key ON lic.entitlements (account_id, code);
+-- Keygen's code uniqueness is case-insensitive (citext upstream).
+CREATE UNIQUE INDEX entitlements_account_code_key ON lic.entitlements (account_id, lower(code));
 CREATE INDEX entitlements_created_at_id_idx ON lic.entitlements (created_at DESC, id DESC);
 
 -- ---------------------------------------------------------------------------

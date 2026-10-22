@@ -8,7 +8,7 @@
             "code": "TOKEN_MISSING",
             "detail": "You must be authenticated to complete the request",
             "links": {
-              "about": "https://keygen.test/docs/api/authentication/"
+              "about": "https://\u003cdocs-host\u003e/docs/api/authentication/"
             },
             "title": "Unauthorized"
           }

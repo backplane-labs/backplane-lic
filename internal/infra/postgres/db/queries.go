@@ -5,6 +5,8 @@ package db
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -88,6 +90,831 @@ func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) er
 	return err
 }
 
+const getEntitlementByIDSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
+FROM lic.entitlements
+WHERE account_id = $1 AND id = $2;`
+
+type GetEntitlementByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetEntitlementByIDRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) GetEntitlementByID(ctx context.Context, arg GetEntitlementByIDParams) (GetEntitlementByIDRow, error) {
+	row := q.db.QueryRow(ctx, getEntitlementByIDSQL, arg.AccountID, arg.ID)
+	var i GetEntitlementByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const getEntitlementByCodeSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
+FROM lic.entitlements
+WHERE account_id = $1 AND lower(code) = lower($2);`
+
+type GetEntitlementByCodeParams struct {
+	AccountID uuid.UUID
+	Code      string
+}
+
+type GetEntitlementByCodeRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) GetEntitlementByCode(ctx context.Context, arg GetEntitlementByCodeParams) (GetEntitlementByCodeRow, error) {
+	row := q.db.QueryRow(ctx, getEntitlementByCodeSQL, arg.AccountID, arg.Code)
+	var i GetEntitlementByCodeRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertEntitlementSQL = `INSERT INTO lic.entitlements (id, account_id, name, code, metadata)
+VALUES ($1, $2, $3, $4, $5);`
+
+type InsertEntitlementParams struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+}
+
+func (q *Queries) InsertEntitlement(ctx context.Context, arg InsertEntitlementParams) error {
+	_, err := q.db.Exec(ctx, insertEntitlementSQL, arg.ID, arg.AccountID, arg.Name, arg.Code, arg.Metadata)
+	return err
+}
+
+const updateEntitlementSQL = `UPDATE lic.entitlements SET
+  name = $1,
+  code = $2,
+  metadata = $3,
+  updated_at = now()
+WHERE account_id = $4 AND id = $5;`
+
+type UpdateEntitlementParams struct {
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) UpdateEntitlement(ctx context.Context, arg UpdateEntitlementParams) error {
+	_, err := q.db.Exec(ctx, updateEntitlementSQL, arg.Name, arg.Code, arg.Metadata, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteEntitlementSQL = `DELETE FROM lic.entitlements
+WHERE account_id = $1 AND id = $2;`
+
+type DeleteEntitlementParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteEntitlement(ctx context.Context, arg DeleteEntitlementParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, deleteEntitlementSQL, arg.AccountID, arg.ID)
+	return tag.RowsAffected(), err
+}
+
+const listEntitlementsDescSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
+FROM lic.entitlements
+WHERE account_id = $1
+  AND (
+    $2::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT e2.created_at, e2.id FROM lic.entitlements e2
+      WHERE e2.account_id = $1 AND e2.id = $2
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $3 OFFSET $4;`
+
+type ListEntitlementsDescParams struct {
+	AccountID uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListEntitlementsDescRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListEntitlementsDesc(ctx context.Context, arg ListEntitlementsDescParams) ([]ListEntitlementsDescRow, error) {
+	rows, err := q.db.Query(ctx, listEntitlementsDescSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListEntitlementsDescRow
+	for rows.Next() {
+		var i ListEntitlementsDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listEntitlementsAscSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
+FROM lic.entitlements
+WHERE account_id = $1
+  AND (
+    $2::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT e2.created_at, e2.id FROM lic.entitlements e2
+      WHERE e2.account_id = $1 AND e2.id = $2
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $3 OFFSET $4;`
+
+type ListEntitlementsAscParams struct {
+	AccountID uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListEntitlementsAscRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListEntitlementsAsc(ctx context.Context, arg ListEntitlementsAscParams) ([]ListEntitlementsAscRow, error) {
+	rows, err := q.db.Query(ctx, listEntitlementsAscSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListEntitlementsAscRow
+	for rows.Next() {
+		var i ListEntitlementsAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countEntitlementsSQL = `SELECT count(*) FROM lic.entitlements WHERE account_id = $1;
+
+-- The entitlements of a user's licenses (owned or attached): the union
+-- of policy entitlements and license entitlements.`
+
+type CountEntitlementsRow struct {
+	Count int64
+}
+
+func (q *Queries) CountEntitlements(ctx context.Context, accountID uuid.UUID) (CountEntitlementsRow, error) {
+	row := q.db.QueryRow(ctx, countEntitlementsSQL, accountID)
+	var i CountEntitlementsRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const userEntitlementIdsSQL = `SELECT entitlement_id FROM (
+  SELECT pe.entitlement_id
+  FROM lic.policy_entitlements pe
+  JOIN lic.policies po ON po.id = pe.policy_id
+  JOIN lic.licenses l ON l.policy_id = po.id
+  WHERE pe.account_id = $1
+    AND (
+      l.user_id = $2
+      OR EXISTS (
+        SELECT 1 FROM lic.license_users lu
+        WHERE lu.license_id = l.id AND lu.user_id = $2
+      )
+    )
+  UNION
+  SELECT le.entitlement_id
+  FROM lic.license_entitlements le
+  JOIN lic.licenses l ON l.id = le.license_id
+  WHERE le.account_id = $1
+    AND (
+      l.user_id = $2
+      OR EXISTS (
+        SELECT 1 FROM lic.license_users lu
+        WHERE lu.license_id = l.id AND lu.user_id = $2
+      )
+    )
+) ids;
+
+-- The entitlements of one license: its policy's plus its own.`
+
+type UserEntitlementIdsParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+}
+
+type UserEntitlementIdsRow struct {
+	EntitlementID uuid.UUID
+}
+
+func (q *Queries) UserEntitlementIds(ctx context.Context, arg UserEntitlementIdsParams) ([]UserEntitlementIdsRow, error) {
+	rows, err := q.db.Query(ctx, userEntitlementIdsSQL, arg.AccountID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserEntitlementIdsRow
+	for rows.Next() {
+		var i UserEntitlementIdsRow
+		if err := rows.Scan(&i.EntitlementID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const licenseEntitlementIdsSQL = `SELECT entitlement_id FROM (
+  SELECT pe.entitlement_id
+  FROM lic.policy_entitlements pe
+  JOIN lic.policies po ON po.id = pe.policy_id
+  JOIN lic.licenses l ON l.policy_id = po.id
+  WHERE pe.account_id = $1 AND l.id = $2
+  UNION
+  SELECT le.entitlement_id
+  FROM lic.license_entitlements le
+  WHERE le.account_id = $1 AND le.license_id = $2
+) ids;
+
+-- policy_entitlements: the attach/detach join rows.`
+
+type LicenseEntitlementIdsParams struct {
+	AccountID uuid.UUID
+	LicenseID uuid.UUID
+}
+
+type LicenseEntitlementIdsRow struct {
+	EntitlementID uuid.UUID
+}
+
+func (q *Queries) LicenseEntitlementIds(ctx context.Context, arg LicenseEntitlementIdsParams) ([]LicenseEntitlementIdsRow, error) {
+	rows, err := q.db.Query(ctx, licenseEntitlementIdsSQL, arg.AccountID, arg.LicenseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LicenseEntitlementIdsRow
+	for rows.Next() {
+		var i LicenseEntitlementIdsRow
+		if err := rows.Scan(&i.EntitlementID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertPolicyEntitlementsSQL = `INSERT INTO lic.policy_entitlements (id, account_id, policy_id, entitlement_id)
+SELECT $1, $2, $3, t.entitlement_id
+FROM unnest($4::uuid[]) AS t(entitlement_id);`
+
+type InsertPolicyEntitlementsParams struct {
+	JoinID         uuid.UUID
+	AccountID      uuid.UUID
+	PolicyID       uuid.UUID
+	EntitlementIds []uuid.UUID
+}
+
+func (q *Queries) InsertPolicyEntitlements(ctx context.Context, arg InsertPolicyEntitlementsParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, insertPolicyEntitlementsSQL, arg.JoinID, arg.AccountID, arg.PolicyID, arg.EntitlementIds)
+	return tag.RowsAffected(), err
+}
+
+const listPolicyEntitlementsSQL = `SELECT pe.id, pe.account_id, pe.policy_id, pe.entitlement_id, pe.created_at, pe.updated_at
+FROM lic.policy_entitlements pe
+WHERE pe.account_id = $1 AND pe.policy_id = $2
+ORDER BY pe.created_at ASC, pe.id ASC;`
+
+type ListPolicyEntitlementsParams struct {
+	AccountID uuid.UUID
+	PolicyID  uuid.UUID
+}
+
+type ListPolicyEntitlementsRow struct {
+	ID            uuid.UUID
+	AccountID     uuid.UUID
+	PolicyID      uuid.UUID
+	EntitlementID uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+func (q *Queries) ListPolicyEntitlements(ctx context.Context, arg ListPolicyEntitlementsParams) ([]ListPolicyEntitlementsRow, error) {
+	rows, err := q.db.Query(ctx, listPolicyEntitlementsSQL, arg.AccountID, arg.PolicyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPolicyEntitlementsRow
+	for rows.Next() {
+		var i ListPolicyEntitlementsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.EntitlementID, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPolicyEntitlementSQL = `SELECT pe.id, pe.account_id, pe.policy_id, pe.entitlement_id, pe.created_at, pe.updated_at
+FROM lic.policy_entitlements pe
+WHERE pe.account_id = $1
+  AND pe.policy_id = $2
+  AND pe.entitlement_id = $3;`
+
+type GetPolicyEntitlementParams struct {
+	AccountID     uuid.UUID
+	PolicyID      uuid.UUID
+	EntitlementID uuid.UUID
+}
+
+type GetPolicyEntitlementRow struct {
+	ID            uuid.UUID
+	AccountID     uuid.UUID
+	PolicyID      uuid.UUID
+	EntitlementID uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+func (q *Queries) GetPolicyEntitlement(ctx context.Context, arg GetPolicyEntitlementParams) (GetPolicyEntitlementRow, error) {
+	row := q.db.QueryRow(ctx, getPolicyEntitlementSQL, arg.AccountID, arg.PolicyID, arg.EntitlementID)
+	var i GetPolicyEntitlementRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.EntitlementID, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const deletePolicyEntitlementsSQL = `DELETE FROM lic.policy_entitlements pe
+WHERE pe.account_id = $1 AND pe.policy_id = $2
+  AND pe.entitlement_id IN (SELECT unnest($3::uuid[]));`
+
+type DeletePolicyEntitlementsParams struct {
+	AccountID      uuid.UUID
+	PolicyID       uuid.UUID
+	EntitlementIds []uuid.UUID
+}
+
+func (q *Queries) DeletePolicyEntitlements(ctx context.Context, arg DeletePolicyEntitlementsParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, deletePolicyEntitlementsSQL, arg.AccountID, arg.PolicyID, arg.EntitlementIds)
+	return tag.RowsAffected(), err
+}
+
+const getKeyByIDSQL = `SELECT k.id, k.account_id, k.policy_id, po.product_id, k.key,
+  k.created_at, k.updated_at
+FROM lic.keys k
+JOIN lic.policies po ON po.id = k.policy_id
+WHERE k.account_id = $1 AND k.id = $2;`
+
+type GetKeyByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetKeyByIDRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	ProductID uuid.UUID
+	Key       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) GetKeyByID(ctx context.Context, arg GetKeyByIDParams) (GetKeyByIDRow, error) {
+	row := q.db.QueryRow(ctx, getKeyByIDSQL, arg.AccountID, arg.ID)
+	var i GetKeyByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.ProductID, &i.Key, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertKeySQL = `INSERT INTO lic.keys (id, account_id, policy_id, key)
+VALUES ($1, $2, $3, $4);`
+
+type InsertKeyParams struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	Key       string
+}
+
+func (q *Queries) InsertKey(ctx context.Context, arg InsertKeyParams) error {
+	_, err := q.db.Exec(ctx, insertKeySQL, arg.ID, arg.AccountID, arg.PolicyID, arg.Key)
+	return err
+}
+
+const updateKeySQL = `UPDATE lic.keys SET key = $1, updated_at = now()
+WHERE account_id = $2 AND id = $3;`
+
+type UpdateKeyParams struct {
+	Key       string
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) UpdateKey(ctx context.Context, arg UpdateKeyParams) error {
+	_, err := q.db.Exec(ctx, updateKeySQL, arg.Key, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteKeySQL = `DELETE FROM lic.keys
+WHERE account_id = $1 AND id = $2;`
+
+type DeleteKeyParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteKey(ctx context.Context, arg DeleteKeyParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, deleteKeySQL, arg.AccountID, arg.ID)
+	return tag.RowsAffected(), err
+}
+
+const listKeysDescSQL = `SELECT k.id, k.account_id, k.policy_id, po.product_id, k.key,
+  k.created_at, k.updated_at
+FROM lic.keys k
+JOIN lic.policies po ON po.id = k.policy_id
+WHERE k.account_id = $1
+  AND ($2::uuid IS NULL OR k.policy_id = $2)
+  AND ($3::uuid IS NULL OR po.product_id = $3)
+  AND (
+    $4::uuid IS NULL
+    OR (k.created_at, k.id) < (
+      SELECT k2.created_at, k2.id FROM lic.keys k2
+      WHERE k2.account_id = $1 AND k2.id = $4
+    )
+  )
+ORDER BY k.created_at DESC, k.id DESC
+LIMIT $5 OFFSET $6;`
+
+type ListKeysDescParams struct {
+	AccountID       uuid.UUID
+	FilterPolicyID  *uuid.UUID
+	FilterProductID *uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListKeysDescRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	ProductID uuid.UUID
+	Key       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListKeysDesc(ctx context.Context, arg ListKeysDescParams) ([]ListKeysDescRow, error) {
+	rows, err := q.db.Query(ctx, listKeysDescSQL, arg.AccountID, arg.FilterPolicyID, arg.FilterProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListKeysDescRow
+	for rows.Next() {
+		var i ListKeysDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.ProductID, &i.Key, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listKeysAscSQL = `SELECT k.id, k.account_id, k.policy_id, po.product_id, k.key,
+  k.created_at, k.updated_at
+FROM lic.keys k
+JOIN lic.policies po ON po.id = k.policy_id
+WHERE k.account_id = $1
+  AND ($2::uuid IS NULL OR k.policy_id = $2)
+  AND ($3::uuid IS NULL OR po.product_id = $3)
+  AND (
+    $4::uuid IS NULL
+    OR (k.created_at, k.id) > (
+      SELECT k2.created_at, k2.id FROM lic.keys k2
+      WHERE k2.account_id = $1 AND k2.id = $4
+    )
+  )
+ORDER BY k.created_at ASC, k.id ASC
+LIMIT $5 OFFSET $6;`
+
+type ListKeysAscParams struct {
+	AccountID       uuid.UUID
+	FilterPolicyID  *uuid.UUID
+	FilterProductID *uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListKeysAscRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	ProductID uuid.UUID
+	Key       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListKeysAsc(ctx context.Context, arg ListKeysAscParams) ([]ListKeysAscRow, error) {
+	rows, err := q.db.Query(ctx, listKeysAscSQL, arg.AccountID, arg.FilterPolicyID, arg.FilterProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListKeysAscRow
+	for rows.Next() {
+		var i ListKeysAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.ProductID, &i.Key, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countKeysSQL = `SELECT count(*)
+FROM lic.keys k
+JOIN lic.policies po ON po.id = k.policy_id
+WHERE k.account_id = $1
+  AND ($2::uuid IS NULL OR k.policy_id = $2)
+  AND ($3::uuid IS NULL OR po.product_id = $3);
+
+-- The pool of one policy (ordered like every list).`
+
+type CountKeysParams struct {
+	AccountID       uuid.UUID
+	FilterPolicyID  *uuid.UUID
+	FilterProductID *uuid.UUID
+}
+
+type CountKeysRow struct {
+	Count int64
+}
+
+func (q *Queries) CountKeys(ctx context.Context, arg CountKeysParams) (CountKeysRow, error) {
+	row := q.db.QueryRow(ctx, countKeysSQL, arg.AccountID, arg.FilterPolicyID, arg.FilterProductID)
+	var i CountKeysRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const listPolicyPoolDescSQL = `SELECT k.id, k.account_id, k.policy_id, po.product_id, k.key,
+  k.created_at, k.updated_at
+FROM lic.keys k
+JOIN lic.policies po ON po.id = k.policy_id
+WHERE k.account_id = $1 AND k.policy_id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (k.created_at, k.id) < (
+      SELECT k2.created_at, k2.id FROM lic.keys k2
+      WHERE k2.account_id = $1 AND k2.id = $3
+    )
+  )
+ORDER BY k.created_at DESC, k.id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListPolicyPoolDescParams struct {
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListPolicyPoolDescRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	ProductID uuid.UUID
+	Key       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListPolicyPoolDesc(ctx context.Context, arg ListPolicyPoolDescParams) ([]ListPolicyPoolDescRow, error) {
+	rows, err := q.db.Query(ctx, listPolicyPoolDescSQL, arg.AccountID, arg.PolicyID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPolicyPoolDescRow
+	for rows.Next() {
+		var i ListPolicyPoolDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.ProductID, &i.Key, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPolicyPoolAscSQL = `SELECT k.id, k.account_id, k.policy_id, po.product_id, k.key,
+  k.created_at, k.updated_at
+FROM lic.keys k
+JOIN lic.policies po ON po.id = k.policy_id
+WHERE k.account_id = $1 AND k.policy_id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (k.created_at, k.id) > (
+      SELECT k2.created_at, k2.id FROM lic.keys k2
+      WHERE k2.account_id = $1 AND k2.id = $3
+    )
+  )
+ORDER BY k.created_at ASC, k.id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListPolicyPoolAscParams struct {
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListPolicyPoolAscRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	ProductID uuid.UUID
+	Key       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListPolicyPoolAsc(ctx context.Context, arg ListPolicyPoolAscParams) ([]ListPolicyPoolAscRow, error) {
+	rows, err := q.db.Query(ctx, listPolicyPoolAscSQL, arg.AccountID, arg.PolicyID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPolicyPoolAscRow
+	for rows.Next() {
+		var i ListPolicyPoolAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.ProductID, &i.Key, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countPolicyPoolSQL = `SELECT count(*) FROM lic.keys
+WHERE account_id = $1 AND policy_id = $2;
+
+-- Pop: destroy the newest pooled key and answer it.`
+
+type CountPolicyPoolParams struct {
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+}
+
+type CountPolicyPoolRow struct {
+	Count int64
+}
+
+func (q *Queries) CountPolicyPool(ctx context.Context, arg CountPolicyPoolParams) (CountPolicyPoolRow, error) {
+	row := q.db.QueryRow(ctx, countPolicyPoolSQL, arg.AccountID, arg.PolicyID)
+	var i CountPolicyPoolRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const popPolicyKeySQL = `DELETE FROM lic.keys
+WHERE id = (
+  SELECT id FROM lic.keys
+  WHERE account_id = $1 AND policy_id = $2
+  ORDER BY created_at DESC, id DESC
+  LIMIT 1
+)
+RETURNING id, account_id, policy_id, key, created_at, updated_at;
+
+-- Key conflicts with license identifiers (Key#validate_key_conflicts).`
+
+type PopPolicyKeyParams struct {
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+}
+
+type PopPolicyKeyRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	PolicyID  *uuid.UUID
+	Key       string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) PopPolicyKey(ctx context.Context, arg PopPolicyKeyParams) (PopPolicyKeyRow, error) {
+	row := q.db.QueryRow(ctx, popPolicyKeySQL, arg.AccountID, arg.PolicyID)
+	var i PopPolicyKeyRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.PolicyID, &i.Key, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const keyIsLicenseIDSQL = `SELECT EXISTS (
+  SELECT 1 FROM lic.licenses l
+  WHERE l.account_id = $1 AND l.id::text = $2
+);`
+
+type KeyIsLicenseIDParams struct {
+	AccountID uuid.UUID
+	Key       string
+}
+
+type KeyIsLicenseIDRow struct {
+	Column bool
+}
+
+func (q *Queries) KeyIsLicenseID(ctx context.Context, arg KeyIsLicenseIDParams) (KeyIsLicenseIDRow, error) {
+	row := q.db.QueryRow(ctx, keyIsLicenseIDSQL, arg.AccountID, arg.Key)
+	var i KeyIsLicenseIDRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const keyIsLicenseKeySQL = `SELECT EXISTS (
+  SELECT 1 FROM lic.licenses l
+  WHERE l.account_id = $1 AND l.key = $2
+);`
+
+type KeyIsLicenseKeyParams struct {
+	AccountID uuid.UUID
+	Key       string
+}
+
+type KeyIsLicenseKeyRow struct {
+	Column bool
+}
+
+func (q *Queries) KeyIsLicenseKey(ctx context.Context, arg KeyIsLicenseKeyParams) (KeyIsLicenseKeyRow, error) {
+	row := q.db.QueryRow(ctx, keyIsLicenseKeySQL, arg.AccountID, arg.Key)
+	var i KeyIsLicenseKeyRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
 const getLicenseAuthByKeySQL = `SELECT l.id, l.account_id, l.key, l.suspended, l.expiry,
   (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,
   p.authentication_strategy, p.expiration_strategy
@@ -147,6 +974,1801 @@ func (q *Queries) GetLicenseAuthByID(ctx context.Context, arg GetLicenseAuthByID
 	row := q.db.QueryRow(ctx, getLicenseAuthByIDSQL, arg.AccountID, arg.ID)
 	var i GetLicenseAuthByIDRow
 	err := row.Scan(&i.ID, &i.AccountID, &i.Key, &i.Suspended, &i.Expiry, &i.OwnerBanned, &i.AuthenticationStrategy, &i.ExpirationStrategy)
+	return i, err
+}
+
+const getPolicyByIDSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
+  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
+  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
+  component_uniqueness_strategy, component_matching_strategy,
+  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
+  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
+  overage_strategy, scheme, encrypted, protected, require_product_scope,
+  require_policy_scope, require_machine_scope, require_fingerprint_scope,
+  require_components_scope, require_user_scope, require_checksum_scope,
+  require_version_scope, require_check_in, check_in_interval,
+  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
+  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
+  metadata, created_at, updated_at
+FROM lic.policies
+WHERE account_id = $1 AND id = $2;`
+
+type GetPolicyByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetPolicyByIDRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) GetPolicyByID(ctx context.Context, arg GetPolicyByIDParams) (GetPolicyByIDRow, error) {
+	row := q.db.QueryRow(ctx, getPolicyByIDSQL, arg.AccountID, arg.ID)
+	var i GetPolicyByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertPolicySQL = `INSERT INTO lic.policies (
+  id, account_id, product_id, name, duration, strict, floating, use_pool,
+  max_machines, max_processes, max_users, max_cores, max_memory, max_disk,
+  max_uses, machine_uniqueness_strategy, machine_matching_strategy,
+  component_uniqueness_strategy, component_matching_strategy,
+  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
+  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
+  overage_strategy, scheme, encrypted, protected, require_product_scope,
+  require_policy_scope, require_machine_scope, require_fingerprint_scope,
+  require_components_scope, require_user_scope, require_checksum_scope,
+  require_version_scope, require_check_in, check_in_interval,
+  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
+  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat, metadata
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8,
+  $9, $10, $11, $12, $13, $14,
+  $15, $16, $17,
+  $18, $19,
+  $20, $21, $22, $23,
+  $24, $25, $26,
+  $27, $28, $29, $30, $31,
+  $32, $33, $34,
+  $35, $36, $37,
+  $38, $39, $40,
+  $41, $42, $43,
+  $44, $45, $46, $47
+);`
+
+type InsertPolicyParams struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+}
+
+func (q *Queries) InsertPolicy(ctx context.Context, arg InsertPolicyParams) error {
+	_, err := q.db.Exec(ctx, insertPolicySQL, arg.ID, arg.AccountID, arg.ProductID, arg.Name, arg.Duration, arg.Strict, arg.Floating, arg.UsePool, arg.MaxMachines, arg.MaxProcesses, arg.MaxUsers, arg.MaxCores, arg.MaxMemory, arg.MaxDisk, arg.MaxUses, arg.MachineUniquenessStrategy, arg.MachineMatchingStrategy, arg.ComponentUniquenessStrategy, arg.ComponentMatchingStrategy, arg.ExpirationStrategy, arg.ExpirationBasis, arg.RenewalBasis, arg.TransferStrategy, arg.AuthenticationStrategy, arg.MachineLeasingStrategy, arg.ProcessLeasingStrategy, arg.OverageStrategy, arg.Scheme, arg.Encrypted, arg.Protected, arg.RequireProductScope, arg.RequirePolicyScope, arg.RequireMachineScope, arg.RequireFingerprintScope, arg.RequireComponentsScope, arg.RequireUserScope, arg.RequireChecksumScope, arg.RequireVersionScope, arg.RequireCheckIn, arg.CheckInInterval, arg.CheckInIntervalCount, arg.HeartbeatDuration, arg.HeartbeatCullStrategy, arg.HeartbeatResurrectionStrategy, arg.HeartbeatBasis, arg.RequireHeartbeat, arg.Metadata)
+	return err
+}
+
+const updatePolicySQL = `UPDATE lic.policies SET
+  name = $1,
+  duration = $2,
+  strict = $3,
+  floating = $4,
+  max_machines = $5,
+  max_processes = $6,
+  max_users = $7,
+  max_cores = $8,
+  max_memory = $9,
+  max_disk = $10,
+  max_uses = $11,
+  machine_uniqueness_strategy = $12,
+  machine_matching_strategy = $13,
+  component_uniqueness_strategy = $14,
+  component_matching_strategy = $15,
+  expiration_strategy = $16,
+  expiration_basis = $17,
+  renewal_basis = $18,
+  transfer_strategy = $19,
+  authentication_strategy = $20,
+  machine_leasing_strategy = $21,
+  process_leasing_strategy = $22,
+  overage_strategy = $23,
+  protected = $24,
+  require_product_scope = $25,
+  require_policy_scope = $26,
+  require_machine_scope = $27,
+  require_fingerprint_scope = $28,
+  require_components_scope = $29,
+  require_user_scope = $30,
+  require_checksum_scope = $31,
+  require_version_scope = $32,
+  require_check_in = $33,
+  check_in_interval = $34,
+  check_in_interval_count = $35,
+  heartbeat_duration = $36,
+  heartbeat_cull_strategy = $37,
+  heartbeat_resurrection_strategy = $38,
+  heartbeat_basis = $39,
+  require_heartbeat = $40,
+  metadata = $41,
+  updated_at = now()
+WHERE account_id = $42 AND id = $43;`
+
+type UpdatePolicyParams struct {
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	AccountID                     uuid.UUID
+	ID                            uuid.UUID
+}
+
+func (q *Queries) UpdatePolicy(ctx context.Context, arg UpdatePolicyParams) error {
+	_, err := q.db.Exec(ctx, updatePolicySQL, arg.Name, arg.Duration, arg.Strict, arg.Floating, arg.MaxMachines, arg.MaxProcesses, arg.MaxUsers, arg.MaxCores, arg.MaxMemory, arg.MaxDisk, arg.MaxUses, arg.MachineUniquenessStrategy, arg.MachineMatchingStrategy, arg.ComponentUniquenessStrategy, arg.ComponentMatchingStrategy, arg.ExpirationStrategy, arg.ExpirationBasis, arg.RenewalBasis, arg.TransferStrategy, arg.AuthenticationStrategy, arg.MachineLeasingStrategy, arg.ProcessLeasingStrategy, arg.OverageStrategy, arg.Protected, arg.RequireProductScope, arg.RequirePolicyScope, arg.RequireMachineScope, arg.RequireFingerprintScope, arg.RequireComponentsScope, arg.RequireUserScope, arg.RequireChecksumScope, arg.RequireVersionScope, arg.RequireCheckIn, arg.CheckInInterval, arg.CheckInIntervalCount, arg.HeartbeatDuration, arg.HeartbeatCullStrategy, arg.HeartbeatResurrectionStrategy, arg.HeartbeatBasis, arg.RequireHeartbeat, arg.Metadata, arg.AccountID, arg.ID)
+	return err
+}
+
+const deletePolicySQL = `DELETE FROM lic.policies
+WHERE account_id = $1 AND id = $2;
+
+-- The admin-side list (user and license bearers load the same page and
+-- fail the post-pagination check). @product_id filters by product.`
+
+type DeletePolicyParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeletePolicy(ctx context.Context, arg DeletePolicyParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, deletePolicySQL, arg.AccountID, arg.ID)
+	return tag.RowsAffected(), err
+}
+
+const listPoliciesDescSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
+  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
+  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
+  component_uniqueness_strategy, component_matching_strategy,
+  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
+  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
+  overage_strategy, scheme, encrypted, protected, require_product_scope,
+  require_policy_scope, require_machine_scope, require_fingerprint_scope,
+  require_components_scope, require_user_scope, require_checksum_scope,
+  require_version_scope, require_check_in, check_in_interval,
+  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
+  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
+  metadata, created_at, updated_at
+FROM lic.policies
+WHERE account_id = $1
+  AND ($2::uuid IS NULL OR product_id = $2)
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT p2.created_at, p2.id FROM lic.policies p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListPoliciesDescParams struct {
+	AccountID       uuid.UUID
+	FilterProductID *uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListPoliciesDescRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) ListPoliciesDesc(ctx context.Context, arg ListPoliciesDescParams) ([]ListPoliciesDescRow, error) {
+	rows, err := q.db.Query(ctx, listPoliciesDescSQL, arg.AccountID, arg.FilterProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPoliciesDescRow
+	for rows.Next() {
+		var i ListPoliciesDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPoliciesAscSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
+  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
+  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
+  component_uniqueness_strategy, component_matching_strategy,
+  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
+  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
+  overage_strategy, scheme, encrypted, protected, require_product_scope,
+  require_policy_scope, require_machine_scope, require_fingerprint_scope,
+  require_components_scope, require_user_scope, require_checksum_scope,
+  require_version_scope, require_check_in, check_in_interval,
+  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
+  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
+  metadata, created_at, updated_at
+FROM lic.policies
+WHERE account_id = $1
+  AND ($2::uuid IS NULL OR product_id = $2)
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT p2.created_at, p2.id FROM lic.policies p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListPoliciesAscParams struct {
+	AccountID       uuid.UUID
+	FilterProductID *uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListPoliciesAscRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) ListPoliciesAsc(ctx context.Context, arg ListPoliciesAscParams) ([]ListPoliciesAscRow, error) {
+	rows, err := q.db.Query(ctx, listPoliciesAscSQL, arg.AccountID, arg.FilterProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPoliciesAscRow
+	for rows.Next() {
+		var i ListPoliciesAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countPoliciesSQL = `SELECT count(*) FROM lic.policies
+WHERE account_id = $1
+  AND ($2::uuid IS NULL OR product_id = $2);
+
+-- The product-bearer scope (Policy.for_product): the product's policies.`
+
+type CountPoliciesParams struct {
+	AccountID       uuid.UUID
+	FilterProductID *uuid.UUID
+}
+
+type CountPoliciesRow struct {
+	Count int64
+}
+
+func (q *Queries) CountPolicies(ctx context.Context, arg CountPoliciesParams) (CountPoliciesRow, error) {
+	row := q.db.QueryRow(ctx, countPoliciesSQL, arg.AccountID, arg.FilterProductID)
+	var i CountPoliciesRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const listPoliciesForProductDescSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
+  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
+  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
+  component_uniqueness_strategy, component_matching_strategy,
+  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
+  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
+  overage_strategy, scheme, encrypted, protected, require_product_scope,
+  require_policy_scope, require_machine_scope, require_fingerprint_scope,
+  require_components_scope, require_user_scope, require_checksum_scope,
+  require_version_scope, require_check_in, check_in_interval,
+  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
+  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
+  metadata, created_at, updated_at
+FROM lic.policies
+WHERE account_id = $1 AND product_id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT p2.created_at, p2.id FROM lic.policies p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListPoliciesForProductDescParams struct {
+	AccountID       uuid.UUID
+	BearerProductID uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListPoliciesForProductDescRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) ListPoliciesForProductDesc(ctx context.Context, arg ListPoliciesForProductDescParams) ([]ListPoliciesForProductDescRow, error) {
+	rows, err := q.db.Query(ctx, listPoliciesForProductDescSQL, arg.AccountID, arg.BearerProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPoliciesForProductDescRow
+	for rows.Next() {
+		var i ListPoliciesForProductDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPoliciesForProductAscSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
+  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
+  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
+  component_uniqueness_strategy, component_matching_strategy,
+  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
+  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
+  overage_strategy, scheme, encrypted, protected, require_product_scope,
+  require_policy_scope, require_machine_scope, require_fingerprint_scope,
+  require_components_scope, require_user_scope, require_checksum_scope,
+  require_version_scope, require_check_in, check_in_interval,
+  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
+  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
+  metadata, created_at, updated_at
+FROM lic.policies
+WHERE account_id = $1 AND product_id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT p2.created_at, p2.id FROM lic.policies p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListPoliciesForProductAscParams struct {
+	AccountID       uuid.UUID
+	BearerProductID uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListPoliciesForProductAscRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) ListPoliciesForProductAsc(ctx context.Context, arg ListPoliciesForProductAscParams) ([]ListPoliciesForProductAscRow, error) {
+	rows, err := q.db.Query(ctx, listPoliciesForProductAscSQL, arg.AccountID, arg.BearerProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPoliciesForProductAscRow
+	for rows.Next() {
+		var i ListPoliciesForProductAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countPoliciesForProductSQL = `SELECT count(*) FROM lic.policies
+WHERE account_id = $1 AND product_id = $2;
+
+-- The policies of a user's licenses (the policies-index post-check and
+-- the user show check).`
+
+type CountPoliciesForProductParams struct {
+	AccountID       uuid.UUID
+	BearerProductID uuid.UUID
+}
+
+type CountPoliciesForProductRow struct {
+	Count int64
+}
+
+func (q *Queries) CountPoliciesForProduct(ctx context.Context, arg CountPoliciesForProductParams) (CountPoliciesForProductRow, error) {
+	row := q.db.QueryRow(ctx, countPoliciesForProductSQL, arg.AccountID, arg.BearerProductID)
+	var i CountPoliciesForProductRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const userPolicyIdsSQL = `SELECT DISTINCT po.id
+FROM lic.policies po
+JOIN lic.licenses l ON l.policy_id = po.id
+WHERE l.account_id = $1
+  AND (
+    l.user_id = $2
+    OR EXISTS (
+      SELECT 1 FROM lic.license_users lu
+      WHERE lu.license_id = l.id AND lu.user_id = $2
+    )
+  );
+
+-- The license bearer's own policy (License#policy): the policies-index
+-- post-check and the show check.`
+
+type UserPolicyIdsParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+}
+
+type UserPolicyIdsRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) UserPolicyIds(ctx context.Context, arg UserPolicyIdsParams) ([]UserPolicyIdsRow, error) {
+	rows, err := q.db.Query(ctx, userPolicyIdsSQL, arg.AccountID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserPolicyIdsRow
+	for rows.Next() {
+		var i UserPolicyIdsRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPolicyByLicenseSQL = `SELECT po.id, po.account_id, po.product_id, po.name, po.duration, po.strict,
+  po.floating, po.use_pool, po.max_machines, po.max_processes, po.max_users,
+  po.max_cores, po.max_memory, po.max_disk, po.max_uses,
+  po.machine_uniqueness_strategy, po.machine_matching_strategy,
+  po.component_uniqueness_strategy, po.component_matching_strategy,
+  po.expiration_strategy, po.expiration_basis, po.renewal_basis,
+  po.transfer_strategy, po.authentication_strategy, po.machine_leasing_strategy,
+  po.process_leasing_strategy, po.overage_strategy, po.scheme, po.encrypted,
+  po.protected, po.require_product_scope, po.require_policy_scope,
+  po.require_machine_scope, po.require_fingerprint_scope,
+  po.require_components_scope, po.require_user_scope, po.require_checksum_scope,
+  po.require_version_scope, po.require_check_in, po.check_in_interval,
+  po.check_in_interval_count, po.heartbeat_duration, po.heartbeat_cull_strategy,
+  po.heartbeat_resurrection_strategy, po.heartbeat_basis, po.require_heartbeat,
+  po.metadata, po.created_at, po.updated_at
+FROM lic.policies po
+JOIN lic.licenses l ON l.policy_id = po.id
+WHERE l.account_id = $1 AND l.id = $2;`
+
+type GetPolicyByLicenseParams struct {
+	AccountID uuid.UUID
+	LicenseID uuid.UUID
+}
+
+type GetPolicyByLicenseRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) GetPolicyByLicense(ctx context.Context, arg GetPolicyByLicenseParams) (GetPolicyByLicenseRow, error) {
+	row := q.db.QueryRow(ctx, getPolicyByLicenseSQL, arg.AccountID, arg.LicenseID)
+	var i GetPolicyByLicenseRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const getProductByIDSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1 AND id = $2;`
+
+type GetProductByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetProductByIDRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) GetProductByID(ctx context.Context, arg GetProductByIDParams) (GetProductByIDRow, error) {
+	row := q.db.QueryRow(ctx, getProductByIDSQL, arg.AccountID, arg.ID)
+	var i GetProductByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const getProductByCodeSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1 AND lower(code) = lower($2);`
+
+type GetProductByCodeParams struct {
+	AccountID uuid.UUID
+	Code      *string
+}
+
+type GetProductByCodeRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) GetProductByCode(ctx context.Context, arg GetProductByCodeParams) (GetProductByCodeRow, error) {
+	row := q.db.QueryRow(ctx, getProductByCodeSQL, arg.AccountID, arg.Code)
+	var i GetProductByCodeRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertProductSQL = `INSERT INTO lic.products (
+  id, account_id, name, code, distribution_strategy, url, platforms, metadata
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8
+);`
+
+type InsertProductParams struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+}
+
+func (q *Queries) InsertProduct(ctx context.Context, arg InsertProductParams) error {
+	_, err := q.db.Exec(ctx, insertProductSQL, arg.ID, arg.AccountID, arg.Name, arg.Code, arg.DistributionStrategy, arg.URL, arg.Platforms, arg.Metadata)
+	return err
+}
+
+const updateProductSQL = `UPDATE lic.products SET
+  name = $1,
+  code = $2,
+  distribution_strategy = $3,
+  url = $4,
+  platforms = $5,
+  metadata = $6,
+  updated_at = now()
+WHERE account_id = $7 AND id = $8;`
+
+type UpdateProductParams struct {
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	AccountID            uuid.UUID
+	ID                   uuid.UUID
+}
+
+func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
+	_, err := q.db.Exec(ctx, updateProductSQL, arg.Name, arg.Code, arg.DistributionStrategy, arg.URL, arg.Platforms, arg.Metadata, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteProductSQL = `DELETE FROM lic.products
+WHERE account_id = $1 AND id = $2;
+
+-- The admin-side scope: every product of the account.`
+
+type DeleteProductParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, deleteProductSQL, arg.AccountID, arg.ID)
+	return tag.RowsAffected(), err
+}
+
+const listProductsDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1
+  AND (
+    $2::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $2
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $3 OFFSET $4;`
+
+type ListProductsDescParams struct {
+	AccountID uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsDescRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsDesc(ctx context.Context, arg ListProductsDescParams) ([]ListProductsDescRow, error) {
+	rows, err := q.db.Query(ctx, listProductsDescSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsDescRow
+	for rows.Next() {
+		var i ListProductsDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductsAscSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1
+  AND (
+    $2::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $2
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $3 OFFSET $4;`
+
+type ListProductsAscParams struct {
+	AccountID uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsAscRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsAsc(ctx context.Context, arg ListProductsAscParams) ([]ListProductsAscRow, error) {
+	rows, err := q.db.Query(ctx, listProductsAscSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsAscRow
+	for rows.Next() {
+		var i ListProductsAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countProductsSQL = `SELECT count(*) FROM lic.products WHERE account_id = $1;
+
+-- The user scope (Product.for_user): open products UNION the products of
+-- the user's licenses (owned or attached).`
+
+type CountProductsRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProducts(ctx context.Context, accountID uuid.UUID) (CountProductsRow, error) {
+	row := q.db.QueryRow(ctx, countProductsSQL, accountID)
+	var i CountProductsRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const listProductsForUserDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1
+  AND (
+    distribution_strategy = 'OPEN'
+    OR id IN (
+      SELECT p3.id FROM lic.products p3
+      JOIN lic.policies po ON po.product_id = p3.id
+      JOIN lic.licenses l ON l.policy_id = po.id
+      WHERE l.account_id = $1
+        AND (
+          l.user_id = $2
+          OR EXISTS (
+            SELECT 1 FROM lic.license_users lu
+            WHERE lu.license_id = l.id AND lu.user_id = $2
+          )
+        )
+    )
+  )
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListProductsForUserDescParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsForUserDescRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsForUserDesc(ctx context.Context, arg ListProductsForUserDescParams) ([]ListProductsForUserDescRow, error) {
+	rows, err := q.db.Query(ctx, listProductsForUserDescSQL, arg.AccountID, arg.UserID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsForUserDescRow
+	for rows.Next() {
+		var i ListProductsForUserDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductsForUserAscSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1
+  AND (
+    distribution_strategy = 'OPEN'
+    OR id IN (
+      SELECT p3.id FROM lic.products p3
+      JOIN lic.policies po ON po.product_id = p3.id
+      JOIN lic.licenses l ON l.policy_id = po.id
+      WHERE l.account_id = $1
+        AND (
+          l.user_id = $2
+          OR EXISTS (
+            SELECT 1 FROM lic.license_users lu
+            WHERE lu.license_id = l.id AND lu.user_id = $2
+          )
+        )
+    )
+  )
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListProductsForUserAscParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsForUserAscRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsForUserAsc(ctx context.Context, arg ListProductsForUserAscParams) ([]ListProductsForUserAscRow, error) {
+	rows, err := q.db.Query(ctx, listProductsForUserAscSQL, arg.AccountID, arg.UserID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsForUserAscRow
+	for rows.Next() {
+		var i ListProductsForUserAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countProductsForUserSQL = `SELECT count(*) FROM lic.products
+WHERE account_id = $1
+  AND (
+    distribution_strategy = 'OPEN'
+    OR id IN (
+      SELECT p3.id FROM lic.products p3
+      JOIN lic.policies po ON po.product_id = p3.id
+      JOIN lic.licenses l ON l.policy_id = po.id
+      WHERE l.account_id = $1
+        AND (
+          l.user_id = $2
+          OR EXISTS (
+            SELECT 1 FROM lic.license_users lu
+            WHERE lu.license_id = l.id AND lu.user_id = $2
+          )
+        )
+    )
+  );
+
+-- The license scope (Product.for_license): open products UNION the
+-- license's own product.`
+
+type CountProductsForUserParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+}
+
+type CountProductsForUserRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProductsForUser(ctx context.Context, arg CountProductsForUserParams) (CountProductsForUserRow, error) {
+	row := q.db.QueryRow(ctx, countProductsForUserSQL, arg.AccountID, arg.UserID)
+	var i CountProductsForUserRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const listProductsForLicenseDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1
+  AND (distribution_strategy = 'OPEN' OR id = $2)
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListProductsForLicenseDescParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsForLicenseDescRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsForLicenseDesc(ctx context.Context, arg ListProductsForLicenseDescParams) ([]ListProductsForLicenseDescRow, error) {
+	rows, err := q.db.Query(ctx, listProductsForLicenseDescSQL, arg.AccountID, arg.ProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsForLicenseDescRow
+	for rows.Next() {
+		var i ListProductsForLicenseDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductsForLicenseAscSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1
+  AND (distribution_strategy = 'OPEN' OR id = $2)
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListProductsForLicenseAscParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsForLicenseAscRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsForLicenseAsc(ctx context.Context, arg ListProductsForLicenseAscParams) ([]ListProductsForLicenseAscRow, error) {
+	rows, err := q.db.Query(ctx, listProductsForLicenseAscSQL, arg.AccountID, arg.ProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsForLicenseAscRow
+	for rows.Next() {
+		var i ListProductsForLicenseAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countProductsForLicenseSQL = `SELECT count(*) FROM lic.products
+WHERE account_id = $1
+  AND (distribution_strategy = 'OPEN' OR id = $2);
+
+-- The product-bearer scope (Product.for_product): itself.`
+
+type CountProductsForLicenseParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+}
+
+type CountProductsForLicenseRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProductsForLicense(ctx context.Context, arg CountProductsForLicenseParams) (CountProductsForLicenseRow, error) {
+	row := q.db.QueryRow(ctx, countProductsForLicenseSQL, arg.AccountID, arg.ProductID)
+	var i CountProductsForLicenseRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const listProductsForProductDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1 AND id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) < (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListProductsForProductDescParams struct {
+	AccountID uuid.UUID
+	BearerID  uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsForProductDescRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsForProductDesc(ctx context.Context, arg ListProductsForProductDescParams) ([]ListProductsForProductDescRow, error) {
+	rows, err := q.db.Query(ctx, listProductsForProductDescSQL, arg.AccountID, arg.BearerID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsForProductDescRow
+	for rows.Next() {
+		var i ListProductsForProductDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductsForProductAscSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
+  metadata, created_at, updated_at
+FROM lic.products
+WHERE account_id = $1 AND id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (created_at, id) > (
+      SELECT p2.created_at, p2.id FROM lic.products p2
+      WHERE p2.account_id = $1 AND p2.id = $3
+    )
+  )
+ORDER BY created_at ASC, id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListProductsForProductAscParams struct {
+	AccountID uuid.UUID
+	BearerID  uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsForProductAscRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsForProductAsc(ctx context.Context, arg ListProductsForProductAscParams) ([]ListProductsForProductAscRow, error) {
+	rows, err := q.db.Query(ctx, listProductsForProductAscSQL, arg.AccountID, arg.BearerID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsForProductAscRow
+	for rows.Next() {
+		var i ListProductsForProductAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countProductsForProductSQL = `SELECT count(*) FROM lic.products
+WHERE account_id = $1 AND id = $2;
+
+-- A user's licensed products (the products-index post-check input).`
+
+type CountProductsForProductParams struct {
+	AccountID uuid.UUID
+	BearerID  uuid.UUID
+}
+
+type CountProductsForProductRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProductsForProduct(ctx context.Context, arg CountProductsForProductParams) (CountProductsForProductRow, error) {
+	row := q.db.QueryRow(ctx, countProductsForProductSQL, arg.AccountID, arg.BearerID)
+	var i CountProductsForProductRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const userProductIdsSQL = `SELECT DISTINCT p3.id
+FROM lic.products p3
+JOIN lic.policies po ON po.product_id = p3.id
+JOIN lic.licenses l ON l.policy_id = po.id
+WHERE l.account_id = $1
+  AND (
+    l.user_id = $2
+    OR EXISTS (
+      SELECT 1 FROM lic.license_users lu
+      WHERE lu.license_id = l.id AND lu.user_id = $2
+    )
+  );
+
+-- The license bearer's own product (through its policy).`
+
+type UserProductIdsParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+}
+
+type UserProductIdsRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) UserProductIds(ctx context.Context, arg UserProductIdsParams) ([]UserProductIdsRow, error) {
+	rows, err := q.db.Query(ctx, userProductIdsSQL, arg.AccountID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UserProductIdsRow
+	for rows.Next() {
+		var i UserProductIdsRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLicenseProductIDSQL = `SELECT po.product_id
+FROM lic.policies po
+JOIN lic.licenses l ON l.policy_id = po.id
+WHERE l.account_id = $1 AND l.id = $2;`
+
+type GetLicenseProductIDParams struct {
+	AccountID uuid.UUID
+	LicenseID uuid.UUID
+}
+
+type GetLicenseProductIDRow struct {
+	ProductID uuid.UUID
+}
+
+func (q *Queries) GetLicenseProductID(ctx context.Context, arg GetLicenseProductIDParams) (GetLicenseProductIDRow, error) {
+	row := q.db.QueryRow(ctx, getLicenseProductIDSQL, arg.AccountID, arg.LicenseID)
+	var i GetLicenseProductIDRow
+	err := row.Scan(&i.ProductID)
+	return i, err
+}
+
+const listProductTokensDescSQL = `SELECT t.id, t.account_id, t.digest, t.bearer_id, t.bearer_type, t.bearer_role,
+  t.kind, t.name, t.expiry, t.permissions, t.created_at, t.updated_at
+FROM lic.tokens t
+WHERE t.account_id = $1
+  AND t.bearer_type = 'Product' AND t.bearer_id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (t.created_at, t.id) < (
+      SELECT t2.created_at, t2.id FROM lic.tokens t2
+      WHERE t2.account_id = $1 AND t2.id = $3
+    )
+  )
+ORDER BY t.created_at DESC, t.id DESC
+LIMIT $4 OFFSET $5;`
+
+type ListProductTokensDescParams struct {
+	AccountID uuid.UUID
+	ProductID *uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductTokensDescRow struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	Digest      string
+	BearerID    *uuid.UUID
+	BearerType  *string
+	BearerRole  *string
+	Kind        *string
+	Name        *string
+	Expiry      *time.Time
+	Permissions json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (q *Queries) ListProductTokensDesc(ctx context.Context, arg ListProductTokensDescParams) ([]ListProductTokensDescRow, error) {
+	rows, err := q.db.Query(ctx, listProductTokensDescSQL, arg.AccountID, arg.ProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductTokensDescRow
+	for rows.Next() {
+		var i ListProductTokensDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Digest, &i.BearerID, &i.BearerType, &i.BearerRole, &i.Kind, &i.Name, &i.Expiry, &i.Permissions, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductTokensAscSQL = `SELECT t.id, t.account_id, t.digest, t.bearer_id, t.bearer_type, t.bearer_role,
+  t.kind, t.name, t.expiry, t.permissions, t.created_at, t.updated_at
+FROM lic.tokens t
+WHERE t.account_id = $1
+  AND t.bearer_type = 'Product' AND t.bearer_id = $2
+  AND (
+    $3::uuid IS NULL
+    OR (t.created_at, t.id) > (
+      SELECT t2.created_at, t2.id FROM lic.tokens t2
+      WHERE t2.account_id = $1 AND t2.id = $3
+    )
+  )
+ORDER BY t.created_at ASC, t.id ASC
+LIMIT $4 OFFSET $5;`
+
+type ListProductTokensAscParams struct {
+	AccountID uuid.UUID
+	ProductID *uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductTokensAscRow struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	Digest      string
+	BearerID    *uuid.UUID
+	BearerType  *string
+	BearerRole  *string
+	Kind        *string
+	Name        *string
+	Expiry      *time.Time
+	Permissions json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (q *Queries) ListProductTokensAsc(ctx context.Context, arg ListProductTokensAscParams) ([]ListProductTokensAscRow, error) {
+	rows, err := q.db.Query(ctx, listProductTokensAscSQL, arg.AccountID, arg.ProductID, arg.CursorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductTokensAscRow
+	for rows.Next() {
+		var i ListProductTokensAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Digest, &i.BearerID, &i.BearerType, &i.BearerRole, &i.Kind, &i.Name, &i.Expiry, &i.Permissions, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countProductTokensSQL = `SELECT count(*) FROM lic.tokens
+WHERE account_id = $1 AND bearer_type = 'Product' AND bearer_id = $2;`
+
+type CountProductTokensParams struct {
+	AccountID uuid.UUID
+	ProductID *uuid.UUID
+}
+
+type CountProductTokensRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProductTokens(ctx context.Context, arg CountProductTokensParams) (CountProductTokensRow, error) {
+	row := q.db.QueryRow(ctx, countProductTokensSQL, arg.AccountID, arg.ProductID)
+	var i CountProductTokensRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+const getProductTokenSQL = `SELECT t.id, t.account_id, t.digest, t.bearer_id, t.bearer_type, t.bearer_role,
+  t.kind, t.name, t.expiry, t.permissions, t.created_at, t.updated_at
+FROM lic.tokens t
+WHERE t.account_id = $1
+  AND t.bearer_type = 'Product' AND t.bearer_id = $2
+  AND t.id = $3;`
+
+type GetProductTokenParams struct {
+	AccountID uuid.UUID
+	ProductID *uuid.UUID
+	TokenID   uuid.UUID
+}
+
+type GetProductTokenRow struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	Digest      string
+	BearerID    *uuid.UUID
+	BearerType  *string
+	BearerRole  *string
+	Kind        *string
+	Name        *string
+	Expiry      *time.Time
+	Permissions json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (q *Queries) GetProductToken(ctx context.Context, arg GetProductTokenParams) (GetProductTokenRow, error) {
+	row := q.db.QueryRow(ctx, getProductTokenSQL, arg.AccountID, arg.ProductID, arg.TokenID)
+	var i GetProductTokenRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Digest, &i.BearerID, &i.BearerType, &i.BearerRole, &i.Kind, &i.Name, &i.Expiry, &i.Permissions, &i.CreatedAt, &i.UpdatedAt)
 	return i, err
 }
 
@@ -348,5 +2970,278 @@ func (q *Queries) GetEnabledSecondFactorSecret(ctx context.Context, userID uuid.
 	row := q.db.QueryRow(ctx, getEnabledSecondFactorSecretSQL, userID)
 	var i GetEnabledSecondFactorSecretRow
 	err := row.Scan(&i.Secret)
+	return i, err
+}
+
+type ListProductUsersDescParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	Roles     []string
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductUsersDescRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	GroupID        *uuid.UUID
+	Metadata       json.RawMessage
+	BannedAt       *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) ListProductUsersDesc(ctx context.Context, arg ListProductUsersDescParams) ([]ListProductUsersDescRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.ProductID)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.Roles)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.CursorID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Limit)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.Offset)
+		positions[6] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT DISTINCT u.id, u.account_id, u.first_name, u.last_name, u.email,\n  u.password_digest, u.role, u.permissions, u.group_id, u.metadata,\n  u.banned_at, u.created_at, u.updated_at\nFROM lic.users u\nJOIN lic.licenses l ON l.account_id = $%d AND (\n  l.user_id = u.id\n  OR EXISTS (\n    SELECT 1 FROM lic.license_users lu\n    WHERE lu.license_id = l.id AND lu.user_id = u.id\n  )\n)\nJOIN lic.policies po ON po.account_id = $%d AND po.id = l.policy_id\nWHERE u.account_id = $%d\n  AND po.product_id = $%d\n  AND u.role = ANY($%d::text[])\n  AND (\n    $%d::uuid IS NULL\n    OR (u.created_at, u.id) < (\n      SELECT u2.created_at, u2.id FROM lic.users u2\n      WHERE u2.account_id = $%d AND u2.id = $%d\n    )\n  )\nORDER BY u.created_at DESC, u.id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[1], positions[1], positions[2], positions[3], positions[4], positions[1], positions[4], positions[5], positions[6]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductUsersDescRow
+	for rows.Next() {
+		var i ListProductUsersDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type ListProductUsersAscParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	Roles     []string
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductUsersAscRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	GroupID        *uuid.UUID
+	Metadata       json.RawMessage
+	BannedAt       *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) ListProductUsersAsc(ctx context.Context, arg ListProductUsersAscParams) ([]ListProductUsersAscRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.ProductID)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.Roles)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.CursorID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Limit)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.Offset)
+		positions[6] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT DISTINCT u.id, u.account_id, u.first_name, u.last_name, u.email,\n  u.password_digest, u.role, u.permissions, u.group_id, u.metadata,\n  u.banned_at, u.created_at, u.updated_at\nFROM lic.users u\nJOIN lic.licenses l ON l.account_id = $%d AND (\n  l.user_id = u.id\n  OR EXISTS (\n    SELECT 1 FROM lic.license_users lu\n    WHERE lu.license_id = l.id AND lu.user_id = u.id\n  )\n)\nJOIN lic.policies po ON po.account_id = $%d AND po.id = l.policy_id\nWHERE u.account_id = $%d\n  AND po.product_id = $%d\n  AND u.role = ANY($%d::text[])\n  AND (\n    $%d::uuid IS NULL\n    OR (u.created_at, u.id) > (\n      SELECT u2.created_at, u2.id FROM lic.users u2\n      WHERE u2.account_id = $%d AND u2.id = $%d\n    )\n  )\nORDER BY u.created_at ASC, u.id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[1], positions[1], positions[2], positions[3], positions[4], positions[1], positions[4], positions[5], positions[6]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductUsersAscRow
+	for rows.Next() {
+		var i ListProductUsersAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type CountProductUsersParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	Roles     []string
+}
+
+type CountProductUsersRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProductUsers(ctx context.Context, arg CountProductUsersParams) (CountProductUsersRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.ProductID)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.Roles)
+		positions[3] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(DISTINCT u.id)\nFROM lic.users u\nJOIN lic.licenses l ON l.account_id = $%d AND (\n  l.user_id = u.id\n  OR EXISTS (\n    SELECT 1 FROM lic.license_users lu\n    WHERE lu.license_id = l.id AND lu.user_id = u.id\n  )\n)\nJOIN lic.policies po ON po.account_id = $%d AND po.id = l.policy_id\nWHERE u.account_id = $%d\n  AND po.product_id = $%d\n  AND u.role = ANY($%d::text[]);", positions[1], positions[1], positions[1], positions[2], positions[3]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountProductUsersRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+type GetProductUserByIDParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	Roles     []string
+	UserID    uuid.UUID
+}
+
+type GetProductUserByIDRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	GroupID        *uuid.UUID
+	Metadata       json.RawMessage
+	BannedAt       *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetProductUserByID(ctx context.Context, arg GetProductUserByIDParams) (GetProductUserByIDRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.ProductID)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.Roles)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.UserID)
+		positions[4] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT DISTINCT u.id, u.account_id, u.first_name, u.last_name, u.email,\n  u.password_digest, u.role, u.permissions, u.group_id, u.metadata,\n  u.banned_at, u.created_at, u.updated_at\nFROM lic.users u\nJOIN lic.licenses l ON l.account_id = $%d AND (\n  l.user_id = u.id\n  OR EXISTS (\n    SELECT 1 FROM lic.license_users lu\n    WHERE lu.license_id = l.id AND lu.user_id = u.id\n  )\n)\nJOIN lic.policies po ON po.account_id = $%d AND po.id = l.policy_id\nWHERE u.account_id = $%d\n  AND po.product_id = $%d\n  AND u.role = ANY($%d::text[])\n  AND u.id = $%d;", positions[1], positions[1], positions[1], positions[2], positions[3], positions[4]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i GetProductUserByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+type GetProductUserByEmailParams struct {
+	AccountID uuid.UUID
+	ProductID uuid.UUID
+	Roles     []string
+	Email     *string
+}
+
+type GetProductUserByEmailRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	GroupID        *uuid.UUID
+	Metadata       json.RawMessage
+	BannedAt       *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetProductUserByEmail(ctx context.Context, arg GetProductUserByEmailParams) (GetProductUserByEmailRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.ProductID)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.Roles)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.Email)
+		positions[4] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT DISTINCT u.id, u.account_id, u.first_name, u.last_name, u.email,\n  u.password_digest, u.role, u.permissions, u.group_id, u.metadata,\n  u.banned_at, u.created_at, u.updated_at\nFROM lic.users u\nJOIN lic.licenses l ON l.account_id = $%d AND (\n  l.user_id = u.id\n  OR EXISTS (\n    SELECT 1 FROM lic.license_users lu\n    WHERE lu.license_id = l.id AND lu.user_id = u.id\n  )\n)\nJOIN lic.policies po ON po.account_id = $%d AND po.id = l.policy_id\nWHERE u.account_id = $%d\n  AND po.product_id = $%d\n  AND u.role = ANY($%d::text[])\n  AND lower(u.email) = lower($%d);", positions[1], positions[1], positions[1], positions[2], positions[3], positions[4]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i GetProductUserByEmailRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt)
 	return i, err
 }

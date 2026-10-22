@@ -67,15 +67,47 @@ func PrincipalOf(ctx context.Context) Principal {
 }
 
 // Require authorizes the permission for the context's principal. The
-// returned error is the 403 document (with the missing-permission
-// reason); resource-specific ownership rules build on top of this.
+// returned error is the 403 document with the reference's reason: the
+// bearer's role lacking the permission ("<role> lacks permission to
+// perform action"), or — for token authentication whose restrictions
+// removed it — "token lacks permission to perform action".
 func Require(ctx context.Context, permission string) error {
 	p := PrincipalOf(ctx)
 	if p.Allows(permission) {
 		return nil
 	}
 
-	return apperr.ForbiddenReason(ReasonAllResources)
+	if _, held := RolePermissions(p.Role)[permission]; !held {
+		return apperr.ForbiddenReason(ReasonLacksPermission(p.Role))
+	}
+
+	return apperr.ForbiddenReason(ReasonTokenLacksPermission)
+}
+
+// ReasonLacksPermission is the verify_permissions! reason when the
+// bearer's role itself does not hold the permission.
+func ReasonLacksPermission(role domain.Role) string {
+	return " (" + roleWhatami(role) + " lacks permission to perform action)"
+}
+
+// ReasonTokenLacksPermission is the verify_permissions! reason when the
+// bearer's role holds the permission but the token's restrictions
+// removed it.
+const ReasonTokenLacksPermission = " (token lacks permission to perform action)" //nolint:gosec,lll // a policy reason, not a credential
+
+// roleWhatami names the role like the reference's whatami (underscore,
+// humanized): "read only", "sales agent", "support agent".
+func roleWhatami(role domain.Role) string {
+	switch role {
+	case domain.RoleReadOnly:
+		return "read only"
+	case domain.RoleSalesAgent:
+		return "sales agent"
+	case domain.RoleSupportRole:
+		return "support agent"
+	default:
+		return string(role)
+	}
 }
 
 // RequireBearerKind authorizes the bearer kinds (any of kinds).

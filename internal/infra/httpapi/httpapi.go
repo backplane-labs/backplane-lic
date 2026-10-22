@@ -17,6 +17,10 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
+	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
+	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/policies"
+	"github.com/backplane-labs/backplane-lic/internal/app/products"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -40,11 +44,15 @@ type Spec struct {
 
 // Deps is everything the HTTP face is built from.
 type Deps struct {
-	Accounts Accounts
-	Authn    authn.Scenario
-	Users    users.Scenario
-	Tokens   tokens.Scenario
-	Spec     Spec
+	Accounts     Accounts
+	Authn        authn.Scenario
+	Users        users.Scenario
+	Tokens       tokens.Scenario
+	Products     products.Scenario
+	Policies     policies.Scenario
+	Entitlements entitlements.Scenario
+	Keys         keys.Scenario
+	Spec         Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
 	// DocsHost overrides the docs origin of error links; when empty it
@@ -58,12 +66,19 @@ type Deps struct {
 	Clock          func() time.Time
 }
 
-// API implements the ogen handler over the app's scenarios.
+// API implements the ogen handler over the app's scenarios. The
+// unimplemented base answers the routes whose groups have not landed.
 type API struct {
-	accounts Accounts
-	users    users.Scenario
-	tokens   tokens.Scenario
-	spec     Spec
+	oas.UnimplementedHandler
+
+	accounts     Accounts
+	users        users.Scenario
+	tokens       tokens.Scenario
+	products     products.Scenario
+	policies     policies.Scenario
+	entitlements entitlements.Scenario
+	keys         keys.Scenario
+	spec         Spec
 }
 
 // New builds the service's HTTP handler: the ogen server wrapped in the
@@ -71,10 +86,14 @@ type API struct {
 // routing and the platform's HTTP mounting.
 func New(deps Deps) http.Handler {
 	api := &API{
-		accounts: deps.Accounts,
-		users:    deps.Users,
-		tokens:   deps.Tokens,
-		spec:     deps.Spec,
+		accounts:     deps.Accounts,
+		users:        deps.Users,
+		tokens:       deps.Tokens,
+		products:     deps.Products,
+		policies:     deps.Policies,
+		entitlements: deps.Entitlements,
+		keys:         deps.Keys,
+		spec:         deps.Spec,
 	}
 
 	server, err := oas.NewServer(api)

@@ -32,6 +32,7 @@ type LicProducts struct {
 	Code                 *string
 	DistributionStrategy *string
 	URL                  *string
+	Platforms            json.RawMessage
 	Metadata             json.RawMessage
 	CreatedAt            time.Time
 	UpdatedAt            time.Time

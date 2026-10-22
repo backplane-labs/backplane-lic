@@ -70,6 +70,8 @@ func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		id:          newRequestID(),
 		challenge:   "Bearer",
 		method:      r.Method,
+		query:       r.URL.Query(),
+		headers:     r.Header,
 		originalURI: r.URL.RequestURI(),
 		host:        hostWithoutPort(r.Host),
 		scheme:      requestScheme(r),
@@ -155,7 +157,7 @@ func (p *pipeline) serveAccountScoped(
 
 	otp := ""
 
-	if mode == authn.ModePasswordOrToken {
+	if r.Method == http.MethodPost || r.Method == http.MethodPatch || r.Method == http.MethodDelete {
 		body, err := decodeBody(r)
 		if err != nil {
 			p.middlewareError(w, req.id, errJSONInvalid)
@@ -164,7 +166,10 @@ func (p *pipeline) serveAccountScoped(
 		}
 
 		req.body = body
-		otp = bodyOTP(body)
+
+		if mode == authn.ModePasswordOrToken {
+			otp = bodyOTP(body)
+		}
 	}
 
 	principal, result, err := p.authn.Authenticate(r.Context(), account, cred, mode, otp)
@@ -476,6 +481,10 @@ func (p *pipeline) docsBase(r *http.Request) string {
 // decodeBody reads, decodes and key-underscored-transforms the request
 // body (any non-empty body is JSON, whatever its content type).
 func decodeBody(r *http.Request) (map[string]any, error) {
+	if r.Body == nil {
+		return map[string]any{}, nil
+	}
+
 	raw, err := io.ReadAll(io.LimitReader(r.Body, maxBodyBytes))
 	if err != nil {
 		return nil, err //nolint:wrapcheck // read failures are the transport's
