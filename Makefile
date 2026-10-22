@@ -176,8 +176,17 @@ conformance: ## Diff the server (in-process over the compose PostgreSQL) against
 conformance-record: ## Record Keygen CE (:3900); LIC_CONFORMANCE_REFERENCE_TOKEN skips password login
 	go test -count=1 ./test/conformance -record
 
+.PHONY: portal
+portal: ## Build the standalone customer portal for embedding
+	cd "$(CURDIR)/portal"
+	env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn install --frozen-lockfile
+	env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn build
+	rm -rf "$(CURDIR)/internal/infra/portal/dist"
+	mkdir -p "$(CURDIR)/internal/infra/portal/dist"
+	cp -r dist/. "$(CURDIR)/internal/infra/portal/dist/"
+
 .PHONY: build
-build: ## Build the service into ./bin/lic
+build: portal ## Build the portal and service into ./bin/lic
 	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o "$(BIN)/lic" ./cmd/lic
 
 .PHONY: release

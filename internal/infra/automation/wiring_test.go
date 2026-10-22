@@ -14,6 +14,8 @@ import (
 	"github.com/google/cel-go/cel"
 	"go.yaml.in/yaml/v3"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/backplane-labs/backplane-lic/internal/app/port"
 )
 
 // The platform's wiring compiler lives under backplane/internal and is not
@@ -145,12 +147,35 @@ func TestShippedTemplates(t *testing.T) {
 					t.Fatalf("%s: %v", path, err)
 				}
 
+				// The real payload, with every optional brand field empty,
+				// must render too: a key the sample has but the payload
+				// lacks fails here, not in production.
+				if err := compiled.Execute(io.Discard, deliveryPayload(t)); err != nil {
+					t.Fatalf("%s with the delivery payload: %v", path, err)
+				}
+
 				if rendered.Len() == 0 {
 					t.Fatalf("empty template %s", path)
 				}
 			}
 		}
 	}
+}
+
+func deliveryPayload(t *testing.T) map[string]any {
+	t.Helper()
+
+	encoded, err := json.Marshal(port.DeliveryData{BrandName: "Acme"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(encoded, &payload); err != nil {
+		t.Fatal(err)
+	}
+
+	return payload
 }
 
 type templateExecutor interface {

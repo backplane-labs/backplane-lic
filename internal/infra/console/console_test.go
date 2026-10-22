@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/backplane-labs/backplane/pkg/backplane"
@@ -222,6 +223,9 @@ func testAdminToken(ctx context.Context, t *testing.T, srv *console.Server, id u
 	}
 }
 
+// openMu serializes schema migration across parallel tests.
+var openMu sync.Mutex
+
 func openStore(t *testing.T) (*postgres.Store, uuid.UUID) {
 	t.Helper()
 
@@ -230,7 +234,12 @@ func openStore(t *testing.T) (*postgres.Store, uuid.UUID) {
 		t.Skip("LIC_TEST_DATABASE_URL not set")
 	}
 
+	// Open migrates the schema; parallel tests on a fresh database would
+	// race on CREATE SCHEMA, so the first open is serialized.
+	openMu.Lock()
 	store, err := postgres.Open(t.Context(), xlog.NewJSON(xlog.WithWriter(io.Discard)), sdkpg.Config{DSN: config.Secret(dsn)})
+	openMu.Unlock()
+
 	if err != nil {
 		t.Fatal(err)
 	}

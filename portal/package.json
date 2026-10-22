@@ -1,0 +1,34 @@
+{
+  "name": "@backplane-labs/lic-portal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@backplane-labs/backplane-theme": "0.6.12",
+    "@backplane-labs/backplane-ui": "0.6.12",
+    "i18next": "26.4.2",
+    "qrcode": "1.5.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-i18next": "17.0.15",
+    "react-router-dom": "7.13.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "22.19.15",
+    "@types/qrcode": "1.5.6",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "jsdom": "26.1.0",
+    "typescript": "5.9.3",
+    "vite": "6.3.6",
+    "vitest": "3.2.4"
+  }
+}

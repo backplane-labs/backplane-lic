@@ -28,6 +28,14 @@ type DeliveryData struct {
 	LicenseKey    string    `json:"license_key"    schemapb:"secret=true"`
 	LicenseExpiry string    `json:"license_expiry"`
 	ProductName   string    `json:"product_name"`
+	// Brand identifies the vendor in every message; PortalURL links to the
+	// customer portal when one is configured.
+	BrandName    string `json:"brand_name"`
+	BrandLogo    string `json:"brand_logo_url"`
+	BrandColor   string `json:"brand_accent_color"`
+	SupportEmail string `json:"support_email"`
+	SupportURL   string `json:"support_url"`
+	PortalURL    string `json:"portal_url"`
 }
 
 type DeliverOut struct{}

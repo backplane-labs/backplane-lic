@@ -1,9 +1,19 @@
-# Self-contained release image: static Go binary on distroless.
+# syntax=docker/dockerfile:1
+# Self-contained release image: the portal is embedded in the static binary.
+FROM node:22-alpine AS portal
+WORKDIR /src/portal
+COPY portal/package.json portal/yarn.lock portal/.npmrc ./
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
+    env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn install --frozen-lockfile
+COPY portal/ ./
+RUN env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn build
+
 FROM golang:1.26.8-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+COPY --from=portal /src/portal/dist/ ./internal/infra/portal/dist/
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG DATE=1970-01-01T00:00:00Z

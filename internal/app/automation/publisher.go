@@ -33,16 +33,29 @@ type Publisher struct {
 	delivery   port.Delivery
 	portalBase string
 	locale     string
+	brand      domain.Brand
 	clock      func() time.Time
 }
 
 func NewPublisher(store port.AutomationStore, webhooks events.Publisher, queue port.WebhookQueue,
-	delivery port.Delivery, portalBase, locale string, clock func() time.Time,
+	delivery port.Delivery, portalBase, locale string, brand domain.Brand, clock func() time.Time,
 ) Publisher {
 	return Publisher{
 		store: store, webhooks: webhooks, queue: queue, delivery: delivery,
-		portalBase: portalBase, locale: locale, clock: clock,
+		portalBase: portalBase, locale: locale, brand: brand, clock: clock,
 	}
+}
+
+// branded fills the vendor identity every message template receives.
+func (p Publisher) branded(data port.DeliveryData) port.DeliveryData {
+	data.BrandName = p.brand.Name
+	data.BrandLogo = p.brand.LogoURL
+	data.BrandColor = p.brand.AccentColor
+	data.SupportEmail = p.brand.SupportEmail
+	data.SupportURL = p.brand.SupportURL
+	data.PortalURL = strings.TrimRight(p.portalBase, "/")
+
+	return data
 }
 
 func (p Publisher) Publish(ctx context.Context, name string, resource any) error {
@@ -105,10 +118,10 @@ func (p Publisher) passwordReset(reset domain.PasswordReset) port.DeliverIn {
 	return port.DeliverIn{
 		AccountID: reset.User.AccountID,
 		Template:  "lic.password-reset", Recipient: reset.User.Email, Locale: p.locale,
-		Data: port.DeliveryData{
+		Data: p.branded(port.DeliveryData{
 			UserID: reset.User.ID, UserName: strings.TrimSpace(reset.User.FirstName + " " + reset.User.LastName),
 			UserEmail: reset.User.Email, ResetURL: strings.TrimRight(p.portalBase, "/") + "/reset#" + fragment.Encode(),
-		},
+		}),
 	}
 }
 

@@ -14,6 +14,12 @@ openapi/.build/
 internal/ui/dist/*
 !internal/ui/dist/.keep
 
+# Customer portal build products (index.html is a tracked clean-build placeholder)
+/portal/node_modules
+/portal/dist/
+/internal/infra/portal/dist/*
+!/internal/infra/portal/dist/index.html
+
 # local scratch state
 /.dev/
 .claude/

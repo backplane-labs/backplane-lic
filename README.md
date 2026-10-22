@@ -15,6 +15,8 @@ internal/domain/         pure rules: entities, crypto helpers (account keys)
 internal/app/            scenarios (accounts bootstrap today)
 internal/infra/postgres/ schema.sql, sqld queries, generated db, repositories
 internal/infra/httpapi/  ogen handler: JSON:API rendering, error mapping
+internal/infra/portal/   embedded customer SPA and HTTP mount
+portal/                  standalone React + Vite customer portal
 internal/oas/            ogen output (generated — never edit)
 internal/service/        composition root + Config
 openapi/src/             OpenAPI 3.1 fragments (source of truth)
@@ -34,7 +36,8 @@ make gen-api     # … and generate the ogen server into internal/oas
 make lint        # golangci-lint
 make test        # unit tests (DB tests skip without LIC_TEST_DATABASE_URL)
 make test-live   # unit tests against the compose PostgreSQL/Valkey
-make build       # ./bin/lic
+make portal      # install and build the customer SPA into the embed directory
+make build       # build the portal first, then ./bin/lic
 ```
 
 `make down` stops the dev dependencies. The `keygen` profile reproduces the
@@ -69,10 +72,114 @@ File (`BACKPLANE_CONFIG_FILE`) < env `LIC_*` (the SDK block reads
 | `account.id` | `LIC_ACCOUNT_ID` | the single account's UUID, created at startup if missing |
 | `account.slug` | `LIC_ACCOUNT_SLUG` | the account's slug (also its API address) |
 | `account.name` | `LIC_ACCOUNT_NAME` | display name |
+| `http.portal.enabled` | `LIC_HTTP_PORTAL_ENABLED` | serve the customer portal; defaults to `false` |
+| `http.portal.basePath` | `LIC_HTTP_PORTAL_BASE_PATH` | mount path; defaults to `/portal`, cannot be `/` or under `/v1` |
+| `brand.name` | `LIC_BRAND_NAME` | vendor name in the portal and messages; defaults to `Licenses` |
+| `brand.tagline` | `LIC_BRAND_TAGLINE` | headline on the portal sign-in page |
+| `brand.logoUrl` | `LIC_BRAND_LOGO_URL` | https logo shown in the portal header and messages |
+| `brand.faviconUrl` | `LIC_BRAND_FAVICON_URL` | https favicon of the portal |
+| `brand.accentColor` | `LIC_BRAND_ACCENT_COLOR` | `#RRGGBB` accent for buttons, links and focus rings |
+| `brand.supportEmail` | `LIC_BRAND_SUPPORT_EMAIL` | support address in the portal footer and messages |
+| `brand.supportUrl` | `LIC_BRAND_SUPPORT_URL` | https support page |
+| `brand.termsUrl` | `LIC_BRAND_TERMS_URL` | https terms of service, linked from the portal footer |
+| `brand.privacyUrl` | `LIC_BRAND_PRIVACY_URL` | https privacy policy, linked from the portal footer |
 
 The account row is created at startup with generated keys (secret key,
 RSA-2048, ed25519, ECDSA P-256) that anchor token digests and response
 signatures.
+
+## Customer portal
+
+Enable the portal on the same HTTP listener as the public API:
+
+```yaml
+http:
+  portal:
+    enabled: true
+    basePath: /portal
+brand:
+  name: Acme Software
+  tagline: All your Acme licenses in one place.
+  logoUrl: https://acme.example/logo.svg
+  accentColor: "#3366ff"
+  supportEmail: support@acme.example
+  termsUrl: https://acme.example/terms
+  privacyUrl: https://acme.example/privacy
+```
+
+Nothing in the portal or the shipped messages names a particular vendor:
+`brand` is the installation's identity. Startup fails on a non-https URL,
+a color other than `#RRGGBB` or a malformed support address. Logo and
+favicon hosts are added to the portal's Content-Security-Policy `img-src`;
+everything else stays `'self'`. Messages receive the same identity as
+`brand_name`, `brand_logo_url`, `brand_accent_color`, `support_email`,
+`support_url` and `portal_url`.
+
+Customers with role `user` sign in at `/portal`; operators use the separate
+Backplane console. The portal has no admin controls and calls only
+`/v1/accounts/{configured-account-id}/...`, using the customer's own token.
+It supports English and Russian, light/dark themes, password recovery,
+password changes, TOTP setup, customer licenses, and personal API tokens.
+The shared ui-kit provides standalone controls without the Backplane shell.
+
+Session tokens stay in `sessionStorage`, not `localStorage`, so closing the
+tab ends the browser's stored session. Logout first revokes the token through
+the public API. Deploy over HTTPS; the portal itself doesn't implement a
+second authentication backend.
+
+Password reset links must point to
+`/portal/reset#account=<account-id>&user=<user-id>&token=<reset-token>` (replace `/portal` if you
+configure a different base path). Parameters belong in the URL fragment so
+HTTP requests and access logs never contain the reset token. The page clears
+the fragment immediately after loading. Query-string reset credentials are
+not accepted. The reset form uses the public
+`POST /users/{user-id}/actions/reset-password` action with the reset token
+and new password. The `lic.Deliver` automation (below) produces these links from
+`automation.portalBase`; serving the SPA adds no email endpoint.
+
+License downloads use the public check-out action and save its certificate
+as a `.lic` file. Keygen allows a user to check out only their own unprotected
+licenses; the portal displays permission and API errors rather than bypassing
+those restrictions. Legacy-encrypted keys that the public API omits cannot
+be recovered by the portal; it shows an unavailable value and no copy action.
+
+Default customer permissions also omit `product.read` and `policy.read`.
+Product and plan names therefore aren't available through the direct resource
+or license-relationship read endpoints; `include=product,policy` on a license
+read doesn't provide them either. The portal keeps the license list and detail
+usable, uses the license's own name as the heading, and omits inaccessible
+product and plan fields. Keys, status, expiry, usage and entitlements remain visible. If the public
+API permits those relationship reads, the portal displays the names normally.
+
+`make build` installs frontend dependencies with the frozen Yarn lockfile,
+builds the SPA, copies it into `internal/infra/portal/dist`, then compiles Go.
+The release Dockerfile performs the same build in a Node stage before the Go
+stage. Like backplane-templates, the repository includes a minimal embed
+placeholder so plain `go build ./...` works without Node; this placeholder
+isn't a usable portal. Run `make portal` before a manual Go release build.
+Don't commit generated bundles over the placeholder. If GitHub Packages
+requires authentication in your build environment, pass an npmrc as a
+BuildKit secret instead of copying credentials into the image:
+
+```sh
+docker build --secret id=npmrc,src="$HOME/.npmrc" -f deployments/Dockerfile .
+```
+
+The server serves deep links with the SPA index and injects the configured
+base path, title, and public account id; it never injects credentials. Index
+responses use `Cache-Control: no-store`; hashed Vite assets use
+`public, max-age=31536000, immutable`. Missing assets return 404, not HTML.
+The portal sets a same-origin content security policy and `no-referrer` so
+reset-link tokens don't leak through the Referer header.
+
+To run frontend checks:
+
+```sh
+cd portal
+env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn typecheck
+env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn test
+env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn build
+```
 
 ## Installation automation
 

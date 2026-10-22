@@ -1,6 +1,12 @@
 Hello {{.user_name}},
 
-Reset your password using this link:
+We received a request to reset the password of your {{.brand_name}} account.
+Reset it using this link:
 {{.reset_url}}
 
 This link expires after 24 hours. If you didn't request a reset, ignore this message.
+
+--
+{{.brand_name}}{{if .support_email}}
+Questions: {{.support_email}}{{end}}{{if .support_url}}
+Support: {{.support_url}}{{end}}

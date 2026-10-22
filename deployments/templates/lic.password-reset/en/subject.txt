@@ -1,1 +1,1 @@
-Reset your password
+Reset your {{.brand_name}} password

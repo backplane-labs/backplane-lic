@@ -4,3 +4,9 @@ sample:
   user_name: Alex
   user_email: alex@example.com
   reset_url: https://licenses.example.com/portal/reset#account=example&user=example&token=sample
+  brand_name: Acme Software
+  brand_logo_url: https://acme.example/logo.png
+  brand_accent_color: '#3366ff'
+  support_email: support@acme.example
+  support_url: https://acme.example/support
+  portal_url: https://licenses.acme.example/portal

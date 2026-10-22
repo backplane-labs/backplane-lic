@@ -4,6 +4,9 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/config"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/valkey"
+
+	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/infra/portal"
 )
 
 // Config is the whole configuration: file (BACKPLANE_CONFIG_FILE) < env
@@ -23,6 +26,10 @@ type Config struct {
 
 	Automation Automation `json:"automation"`
 
+	// Brand is the vendor identity customers see: the portal's header,
+	// accent color and footer links, and the brand_* data of every message.
+	Brand domain.Brand `json:"brand"`
+
 	// DocsHost overrides the docs origin of error links (the reference
 	// derives it from its configured host); empty derives it from the
 	// request host.
@@ -31,6 +38,8 @@ type Config struct {
 
 // HTTP holds the public API's runtime settings.
 type HTTP struct {
+	// Portal serves the standalone customer SPA on the public HTTP listener.
+	Portal portal.Config `json:"portal,omitempty"`
 	// TrustedProxies lists the proxy CIDRs (or single IPs) whose
 	// X-Forwarded-For is honored when resolving the client address;
 	// empty means every request is keyed by its remote address.
@@ -42,7 +51,7 @@ type HTTP struct {
 	WebhookAllowPrivate []string `json:"webhookAllowPrivate" schemapb:"description=Private webhook CIDRs"` //nolint:tagliatelle,lll // camelCase
 }
 
-// Automation configures links and language, not mail transport or branding.
+// Automation configures links and language, not mail transport.
 type Automation struct {
 	PortalBase string `json:"portalBase" schemapb:"description=Public portal base URL"` //nolint:tagliatelle,lll // config is camelCase
 	Locale     string `json:"locale"     schemapb:"description=Default message language (en or ru)"`
