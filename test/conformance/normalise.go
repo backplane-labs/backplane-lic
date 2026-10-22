@@ -89,6 +89,13 @@ func (n *normaliser) string(value string) string {
 		return "<ts>"
 	}
 
+	// The docs origin of error links is instance configuration (the
+	// reference renders keygen.sh, this server its configured host):
+	// mask it so both sides compare equal.
+	if index := strings.Index(value, "/docs/api/"); index >= 0 && strings.HasPrefix(value, "https://") {
+		return "https://<docs-host>" + value[index:]
+	}
+
 	value = n.replaceUUIDs(value)
 	if n.run != "" {
 		value = strings.ReplaceAll(value, n.run, "<run>")

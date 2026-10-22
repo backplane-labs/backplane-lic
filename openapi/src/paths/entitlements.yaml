@@ -1,0 +1,101 @@
+# Entitlements: account-level CRUD; policies and licenses attach them.
+paths:
+  /v1/accounts/{account}/entitlements:
+    get:
+      operationId: indexEntitlements
+      summary: List entitlements
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createEntitlement
+      summary: Create an entitlement
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Entitlement document.
+          headers:
+            Location:
+              description: The new entitlement's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/entitlements/{entitlementId}:
+    get:
+      operationId: showEntitlement
+      summary: Retrieve an entitlement (by id or code)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/EntitlementPath"
+      responses:
+        "200":
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateEntitlement
+      summary: Update an entitlement
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/EntitlementPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyEntitlement
+      summary: Delete an entitlement
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/EntitlementPath"
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"

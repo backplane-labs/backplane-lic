@@ -48,6 +48,68 @@ components:
         type: ["string", "null"]
         enum: [asc, desc, null]
 
+
+    ProductPath:
+      name: productId
+      in: path
+      required: true
+      description: Product id (UUID) or code.
+      schema:
+        type: string
+    PolicyPath:
+      name: policyId
+      in: path
+      required: true
+      description: Policy id (UUID).
+      schema:
+        type: string
+    EntitlementPath:
+      name: entitlementId
+      in: path
+      required: true
+      description: Entitlement id (UUID) or code.
+      schema:
+        type: string
+    KeyPath:
+      name: keyId
+      in: path
+      required: true
+      description: Key id (UUID).
+      schema:
+        type: string
+    LicensePath:
+      name: licenseId
+      in: path
+      required: true
+      description: License id (UUID) or key.
+      schema:
+        type: string
+    MachinePath:
+      name: machineId
+      in: path
+      required: true
+      description: Machine id (UUID) or fingerprint.
+      schema:
+        type: string
+    TokenPath:
+      name: tokenId
+      in: path
+      required: true
+      description: Token id (UUID).
+      schema:
+        type: string
+    UserPath:
+      name: userId
+      in: path
+      required: true
+      description: User id (UUID) or email.
+      schema:
+        type: string
+
+    # ListLinks is the links object of a collection response: the
+    # offset mode's full set (first/last always, prev/next null at the
+    # ends, pagination meta nested inside), the keyset mode's self/next
+    # pair, and nothing at all in the default limit mode.
   schemas:
     Timestamp:
       # RFC3339 with exactly 3 fractional digits and a Z suffix,
@@ -336,6 +398,467 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TokenResource"
+
+
+# --- products/policies/entitlements/keys (B1) ---
+    ListLinks:
+      type: object
+      required: [self]
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        last:
+          type: string
+        prev:
+          type: ["string", "null"]
+        next:
+          type: ["string", "null"]
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    ProductAttributes:
+      type: object
+      required: [name, code, distributionStrategy, url, platforms, metadata, created, updated]
+      properties:
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+        distributionStrategy:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        platforms:
+          type: ["array", "null"]
+          items:
+            type: string
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    ProductRelationships:
+      type: object
+      required: [account, policies, licenses, machines, users, tokens, platforms, channels, releases, artifacts]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        policies:
+          $ref: "#/components/schemas/ToManyRelationship"
+        licenses:
+          $ref: "#/components/schemas/ToManyRelationship"
+        machines:
+          $ref: "#/components/schemas/ToManyRelationship"
+        users:
+          $ref: "#/components/schemas/ToManyRelationship"
+        tokens:
+          $ref: "#/components/schemas/ToManyRelationship"
+        platforms:
+          $ref: "#/components/schemas/ToManyRelationship"
+        channels:
+          $ref: "#/components/schemas/ToManyRelationship"
+        releases:
+          $ref: "#/components/schemas/ToManyRelationship"
+        artifacts:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    ProductResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [products]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/ProductAttributes"
+        relationships:
+          $ref: "#/components/schemas/ProductRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    ProductDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/ProductResource"
+
+    ProductListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    PolicyAttributes:
+      type: object
+      required:
+        [name, duration, strict, floating, usePool, maxMachines, maxProcesses, maxUsers,
+         maxCores, maxMemory, maxDisk, maxUses, machineUniquenessStrategy,
+         machineMatchingStrategy, componentUniquenessStrategy, componentMatchingStrategy,
+         expirationStrategy, expirationBasis, renewalBasis, transferStrategy,
+         authenticationStrategy, machineLeasingStrategy, processLeasingStrategy,
+         overageStrategy, scheme, encrypted, protected, requireProductScope,
+         requirePolicyScope, requireMachineScope, requireFingerprintScope,
+         requireComponentsScope, requireUserScope, requireChecksumScope,
+         requireVersionScope, requireCheckIn, checkInInterval, checkInIntervalCount,
+         heartbeatDuration, heartbeatCullStrategy, heartbeatResurrectionStrategy,
+         heartbeatBasis, requireHeartbeat, metadata, created, updated]
+      properties:
+        name:
+          type: string
+        duration:
+          type: ["integer", "null"]
+        strict:
+          type: boolean
+        floating:
+          type: boolean
+        usePool:
+          type: boolean
+        maxMachines:
+          type: ["integer", "null"]
+        maxProcesses:
+          type: ["integer", "null"]
+        maxUsers:
+          type: ["integer", "null"]
+        maxCores:
+          type: ["integer", "null"]
+        maxMemory:
+          type: ["integer", "null"]
+        maxDisk:
+          type: ["integer", "null"]
+        maxUses:
+          type: ["integer", "null"]
+        machineUniquenessStrategy:
+          type: ["string", "null"]
+        machineMatchingStrategy:
+          type: ["string", "null"]
+        componentUniquenessStrategy:
+          type: ["string", "null"]
+        componentMatchingStrategy:
+          type: ["string", "null"]
+        expirationStrategy:
+          type: ["string", "null"]
+        expirationBasis:
+          type: ["string", "null"]
+        renewalBasis:
+          type: ["string", "null"]
+        transferStrategy:
+          type: ["string", "null"]
+        authenticationStrategy:
+          type: ["string", "null"]
+        machineLeasingStrategy:
+          type: ["string", "null"]
+        processLeasingStrategy:
+          type: ["string", "null"]
+        overageStrategy:
+          type: ["string", "null"]
+        scheme:
+          type: ["string", "null"]
+        encrypted:
+          type: boolean
+        protected:
+          type: ["boolean", "null"]
+        requireProductScope:
+          type: boolean
+        requirePolicyScope:
+          type: boolean
+        requireMachineScope:
+          type: boolean
+        requireFingerprintScope:
+          type: boolean
+        requireComponentsScope:
+          type: boolean
+        requireUserScope:
+          type: boolean
+        requireChecksumScope:
+          type: boolean
+        requireVersionScope:
+          type: boolean
+        requireCheckIn:
+          type: boolean
+        checkInInterval:
+          type: ["string", "null"]
+        checkInIntervalCount:
+          type: ["integer", "null"]
+        heartbeatDuration:
+          type: ["integer", "null"]
+        heartbeatCullStrategy:
+          type: ["string", "null"]
+        heartbeatResurrectionStrategy:
+          type: ["string", "null"]
+        heartbeatBasis:
+          type: ["string", "null"]
+        requireHeartbeat:
+          type: boolean
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    PolicyRelationships:
+      type: object
+      required: [account, product, pool, licenses, entitlements]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        product:
+          $ref: "#/components/schemas/ToOneRelationship"
+        pool:
+          $ref: "#/components/schemas/ToManyRelationship"
+        licenses:
+          $ref: "#/components/schemas/ToManyRelationship"
+        entitlements:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    PolicyResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [policies]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/PolicyAttributes"
+        relationships:
+          $ref: "#/components/schemas/PolicyRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    PolicyDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PolicyResource"
+
+    PolicyListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PolicyResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    EntitlementAttributes:
+      type: object
+      required: [name, code, metadata, created, updated]
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    EntitlementResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [entitlements]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/EntitlementAttributes"
+        relationships:
+          type: object
+          required: [account]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    EntitlementDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/EntitlementResource"
+
+    EntitlementListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EntitlementResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    KeyAttributes:
+      type: object
+      required: [key, created, updated]
+      properties:
+        key:
+          type: string
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    KeyRelationships:
+      type: object
+      required: [account, product, policy]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        product:
+          $ref: "#/components/schemas/ToOneRelationship"
+        policy:
+          $ref: "#/components/schemas/ToOneRelationship"
+
+    KeyResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [keys]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/KeyAttributes"
+        relationships:
+          $ref: "#/components/schemas/KeyRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    KeyDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/KeyResource"
+
+    KeyListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/KeyResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    # The policy_entitlements join resource the attach route answers.
+    PolicyEntitlementLinks:
+      type: object
+      required: [related]
+      properties:
+        related:
+          type: string
+
+    PolicyEntitlementResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [policy-entitlements]
+        id:
+          type: string
+        attributes:
+          type: object
+          required: [created, updated]
+          properties:
+            created:
+              $ref: "#/components/schemas/Timestamp"
+            updated:
+              $ref: "#/components/schemas/Timestamp"
+        relationships:
+          type: object
+          required: [account, entitlement, policy]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            entitlement:
+              $ref: "#/components/schemas/ToOneRelationship"
+            policy:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/PolicyEntitlementLinks"
+
+    PolicyEntitlementListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PolicyEntitlementResource"
+
+    # Licenses/machines relationship collections: right shape (empty
+    # data array + links) until the licenses/machines groups land; the
+    # item schema stays opaque.
+    LicenseStubListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    MachineStubListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    ProductUserListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    ProductTokenListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TokenResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
 
   responses:
     Error:

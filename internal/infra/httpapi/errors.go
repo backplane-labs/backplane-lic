@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/google/uuid"
 
@@ -29,6 +30,12 @@ type request struct {
 	challenge string
 	// body is the decoded, key-underscored request body (POST only).
 	body map[string]any
+	// query is the request's parsed query string (filters,
+	// pagination, the environment parameter).
+	query url.Values
+	// headers carries the request headers the handlers consult (the
+	// EE-only Keygen-Environment selector).
+	headers http.Header
 	// method is the request method (the signature's request-target).
 	method string
 	// originalURI is the path (with query) exactly as the client sent
@@ -75,13 +82,24 @@ func apperrFrom(err error) *apperr.T {
 // errorStatus renders a typed app error as the ogen error wrapper.
 func errorStatus(t *apperr.T, req *request) *oas.ErrorStatusCode {
 	doc := oas.ErrorDocument{Meta: oas.ErrorDocumentMeta{ID: req.id.String()}}
+
+	first := errorOf(t, req)
+	doc.Errors = append(doc.Errors, first)
+
+	for _, sibling := range t.Siblings() {
+		doc.Errors = append(doc.Errors, errorOf(sibling, req))
+	}
+
+	return &oas.ErrorStatusCode{StatusCode: t.Status, Response: doc}
+}
+
+func errorOf(t *apperr.T, req *request) oas.Error {
 	e := oas.Error{Title: t.Title, Detail: t.Detail}
 
 	if t.Code != "" {
+		// The reference omits the key on code-less errors (the typed
+		// params 400s); the zero value omits it.
 		e.Code = oas.NewOptNilString(t.Code)
-	} else {
-		e.Code = oas.NewOptNilString("")
-		e.Code.SetToNull()
 	}
 
 	if t.Source.Pointer != "" {
@@ -108,9 +126,7 @@ func errorStatus(t *apperr.T, req *request) *oas.ErrorStatusCode {
 		)
 	}
 
-	doc.Errors = []oas.Error{e}
-
-	return &oas.ErrorStatusCode{StatusCode: t.Status, Response: doc}
+	return e
 }
 
 // writeJSON writes a pre-rendered JSON:API document with the given

@@ -1,0 +1,293 @@
+# Policies: CRUD with the full attribute surface, the product/license
+# relationship routes, the key pool (index/show/pop) and entitlement
+# attach/detach.
+paths:
+  /v1/accounts/{account}/policies:
+    get:
+      operationId: indexPolicies
+      summary: List policies
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Policy collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createPolicy
+      summary: Create a policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Policy document.
+          headers:
+            Location:
+              description: The new policy's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}:
+    get:
+      operationId: showPolicy
+      summary: Retrieve a policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updatePolicy
+      summary: Update a policy
+      description: >-
+        scheme, encrypted and usePool are immutable; relationships are
+        not accepted.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyPolicy
+      summary: Delete a policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/product:
+    get:
+      operationId: showPolicyProduct
+      summary: Retrieve a policy's product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/licenses:
+    get:
+      operationId: indexPolicyLicenses
+      summary: List a policy's licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseStubListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}:
+    get:
+      operationId: showPolicyLicense
+      summary: Retrieve one of a policy's licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/pool:
+    get:
+      operationId: indexPolicyPool
+      summary: List a policy's key pool
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: Key collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: popPolicyPool
+      summary: Pop a key from a policy's pool
+      description: Destroys the newest pooled key and answers its document.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: The popped key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/pool/{keyId}:
+    get:
+      operationId: showPolicyPoolKey
+      summary: Retrieve one of a policy's pooled keys
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+        - $ref: "#/components/parameters/KeyPath"
+      responses:
+        "200":
+          description: Key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/entitlements:
+    get:
+      operationId: indexPolicyEntitlements
+      summary: List a policy's entitlements
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      responses:
+        "200":
+          description: Entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: attachPolicyEntitlements
+      summary: Attach entitlements to a policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Policy-entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyEntitlementListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: detachPolicyEntitlements
+      summary: Detach entitlements from a policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/policies/{policyId}/entitlements/{entitlementId}:
+    get:
+      operationId: showPolicyEntitlement
+      summary: Retrieve one of a policy's entitlements
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/PolicyPath"
+        - $ref: "#/components/parameters/EntitlementPath"
+      responses:
+        "200":
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementDocument"
+        default:
+          $ref: "#/components/responses/Error"

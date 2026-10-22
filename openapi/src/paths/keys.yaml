@@ -1,0 +1,137 @@
+# Keys: the policy key pool's members (create requires a pooled
+# policy; the pool itself lives under /policies/{id}/pool).
+paths:
+  /v1/accounts/{account}/keys:
+    get:
+      operationId: indexKeys
+      summary: List keys
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Key collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createKey
+      summary: Create a key
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Key document.
+          headers:
+            Location:
+              description: The new key's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/keys/{keyId}:
+    get:
+      operationId: showKey
+      summary: Retrieve a key
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/KeyPath"
+      responses:
+        "200":
+          description: Key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateKey
+      summary: Update a key
+      description: Only the key attribute may change; relationships are not accepted.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/KeyPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/KeyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyKey
+      summary: Delete a key
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/KeyPath"
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/keys/{keyId}/product:
+    get:
+      operationId: showKeyProduct
+      summary: Retrieve a key's product (through its policy)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/KeyPath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/keys/{keyId}/policy:
+    get:
+      operationId: showKeyPolicy
+      summary: Retrieve a key's policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/KeyPath"
+      responses:
+        "200":
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyDocument"
+        default:
+          $ref: "#/components/responses/Error"

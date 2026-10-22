@@ -229,6 +229,7 @@ CREATE TABLE "lic"."products" (
   "code" text,
   "distribution_strategy" text,
   "url" text,
+  "platforms" jsonb,
   "metadata" jsonb NOT NULL DEFAULT '{}'::jsonb,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
@@ -348,7 +349,7 @@ ALTER TABLE "lic"."policies" ADD CONSTRAINT "policies_renewal_basis_allowed" CHE
 ALTER TABLE "lic"."policies" ADD CONSTRAINT "policies_scheme_allowed" CHECK (scheme IS NULL OR (scheme = ANY (ARRAY['LEGACY_ENCRYPT'::text, 'RSA_2048_PKCS1_ENCRYPT'::text, 'RSA_2048_PKCS1_SIGN'::text, 'RSA_2048_PKCS1_PSS_SIGN'::text, 'RSA_2048_JWT_RS256'::text, 'RSA_2048_PKCS1_SIGN_V2'::text, 'RSA_2048_PKCS1_PSS_SIGN_V2'::text, 'ED25519_SIGN'::text, 'ECDSA_P256_SIGN'::text])));
 ALTER TABLE "lic"."policies" ADD CONSTRAINT "policies_transfer_strategy_allowed" CHECK (transfer_strategy IS NULL OR (transfer_strategy = ANY (ARRAY['RESET_EXPIRY'::text, 'KEEP_EXPIRY'::text])));
 ALTER TABLE "lic"."products" ADD CONSTRAINT "products_code_format" CHECK (code IS NULL OR code ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*$'::text);
-ALTER TABLE "lic"."products" ADD CONSTRAINT "products_distribution_strategy" CHECK (distribution_strategy IS NULL OR (distribution_strategy = ANY (ARRAY['OPEN'::text, 'SECRET'::text, 'CLOSED'::text])));
+ALTER TABLE "lic"."products" ADD CONSTRAINT "products_distribution_strategy" CHECK (distribution_strategy IS NULL OR (distribution_strategy = ANY (ARRAY['LICENSED'::text, 'OPEN'::text, 'CLOSED'::text])));
 ALTER TABLE "lic"."tokens" ADD CONSTRAINT "tokens_activations_range" CHECK ((max_activations IS NULL OR max_activations >= 0) AND (max_deactivations IS NULL OR max_deactivations >= 0) AND activations >= 0 AND deactivations >= 0);
 ALTER TABLE "lic"."tokens" ADD CONSTRAINT "tokens_bearer_type_allowed" CHECK (bearer_type IS NULL OR (bearer_type = ANY (ARRAY['User'::text, 'Product'::text, 'License'::text])));
 ALTER TABLE "lic"."tokens" ADD CONSTRAINT "tokens_digest_nonempty" CHECK (length(btrim(digest)) > 0);
@@ -361,7 +362,7 @@ ALTER TABLE "lic"."webhook_events" ADD CONSTRAINT "webhook_events_attempts_nonne
 ALTER TABLE "lic"."webhook_events" ADD CONSTRAINT "webhook_events_status_allowed" CHECK (status = ANY (ARRAY['DELIVERING'::text, 'DELIVERED'::text, 'FAILING'::text, 'FAILED'::text]));
 CREATE INDEX "accounts_created_at_id_idx" ON "lic"."accounts" ("created_at" DESC, "id" DESC);
 CREATE UNIQUE INDEX "accounts_slug_key" ON "lic"."accounts" ("slug");
-CREATE UNIQUE INDEX "entitlements_account_code_key" ON "lic"."entitlements" ("account_id", "code");
+CREATE UNIQUE INDEX "entitlements_account_code_key" ON "lic"."entitlements" ("account_id", (lower("code")));
 CREATE INDEX "entitlements_created_at_id_idx" ON "lic"."entitlements" ("created_at" DESC, "id" DESC);
 CREATE INDEX "group_owners_account_idx" ON "lic"."group_owners" ("account_id");
 CREATE UNIQUE INDEX "group_owners_group_user_key" ON "lic"."group_owners" ("group_id", "user_id");
@@ -403,7 +404,7 @@ CREATE INDEX "policies_require_heartbeat_idx" ON "lic"."policies" ("require_hear
 CREATE INDEX "policy_entitlements_entitlement_idx" ON "lic"."policy_entitlements" ("entitlement_id");
 CREATE UNIQUE INDEX "policy_entitlements_ids_key" ON "lic"."policy_entitlements" ("account_id", "policy_id", "entitlement_id");
 CREATE INDEX "policy_entitlements_policy_idx" ON "lic"."policy_entitlements" ("policy_id");
-CREATE UNIQUE INDEX "products_account_code_key" ON "lic"."products" ("account_id", "code");
+CREATE UNIQUE INDEX "products_account_code_key" ON "lic"."products" ("account_id", (lower("code")));
 CREATE INDEX "products_account_created_at_id_idx" ON "lic"."products" ("account_id", "created_at" DESC, "id" DESC);
 CREATE INDEX "products_code_idx" ON "lic"."products" ("code");
 CREATE UNIQUE INDEX "second_factors_secret_key" ON "lic"."second_factors" ("secret");

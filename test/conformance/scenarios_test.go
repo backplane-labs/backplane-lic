@@ -2,6 +2,7 @@ package conformance_test
 
 import (
 	"net/http"
+	"slices"
 
 	conformance "github.com/backplane-labs/backplane-lic/test/conformance"
 )
@@ -19,7 +20,7 @@ func scenarios() []conformance.Scenario {
 	account := "/v1/accounts/" + conformance.AccountSlug
 	tokens := account + "/tokens"
 
-	return []conformance.Scenario{
+	base := []conformance.Scenario{
 		{
 			Name: "ping",
 			Steps: []conformance.Step{
@@ -101,4 +102,8 @@ func scenarios() []conformance.Scenario {
 			},
 		},
 	}
+
+	scenarios := slices.Concat(base, productScenarios(), policyScenarios(), entitlementScenarios(), keyScenarios())
+
+	return scenarios
 }

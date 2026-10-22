@@ -84,6 +84,807 @@ paths:
                 $ref: '#/components/schemas/ProfileDocument'
         default:
           $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/entitlements:
+    get:
+      operationId: indexEntitlements
+      summary: List entitlements
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EntitlementListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createEntitlement
+      summary: Create an entitlement
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Entitlement document.
+          headers:
+            Location:
+              description: The new entitlement's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EntitlementDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/entitlements/{entitlementId}:
+    get:
+      operationId: showEntitlement
+      summary: Retrieve an entitlement (by id or code)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/EntitlementPath'
+      responses:
+        '200':
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EntitlementDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateEntitlement
+      summary: Update an entitlement
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/EntitlementPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EntitlementDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: destroyEntitlement
+      summary: Delete an entitlement
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/EntitlementPath'
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/keys:
+    get:
+      operationId: indexKeys
+      summary: List keys
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Key collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createKey
+      summary: Create a key
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Key document.
+          headers:
+            Location:
+              description: The new key's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/keys/{keyId}:
+    get:
+      operationId: showKey
+      summary: Retrieve a key
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/KeyPath'
+      responses:
+        '200':
+          description: Key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateKey
+      summary: Update a key
+      description: Only the key attribute may change; relationships are not accepted.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/KeyPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: destroyKey
+      summary: Delete a key
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/KeyPath'
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/keys/{keyId}/product:
+    get:
+      operationId: showKeyProduct
+      summary: Retrieve a key's product (through its policy)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/KeyPath'
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/keys/{keyId}/policy:
+    get:
+      operationId: showKeyPolicy
+      summary: Retrieve a key's policy
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/KeyPath'
+      responses:
+        '200':
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies:
+    get:
+      operationId: indexPolicies
+      summary: List policies
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Policy collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createPolicy
+      summary: Create a policy
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Policy document.
+          headers:
+            Location:
+              description: The new policy's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}:
+    get:
+      operationId: showPolicy
+      summary: Retrieve a policy
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updatePolicy
+      summary: Update a policy
+      description: scheme, encrypted and usePool are immutable; relationships are not accepted.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: destroyPolicy
+      summary: Delete a policy
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/product:
+    get:
+      operationId: showPolicyProduct
+      summary: Retrieve a policy's product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/licenses:
+    get:
+      operationId: indexPolicyLicenses
+      summary: List a policy's licenses
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseStubListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}:
+    get:
+      operationId: showPolicyLicense
+      summary: Retrieve one of a policy's licenses
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      - $ref: '#/components/parameters/LicensePath'
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/pool:
+    get:
+      operationId: indexPolicyPool
+      summary: List a policy's key pool
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: Key collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: popPolicyPool
+      summary: Pop a key from a policy's pool
+      description: Destroys the newest pooled key and answers its document.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: The popped key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/pool/{keyId}:
+    get:
+      operationId: showPolicyPoolKey
+      summary: Retrieve one of a policy's pooled keys
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      - $ref: '#/components/parameters/KeyPath'
+      responses:
+        '200':
+          description: Key document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/KeyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/entitlements:
+    get:
+      operationId: indexPolicyEntitlements
+      summary: List a policy's entitlements
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: Entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EntitlementListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: attachPolicyEntitlements
+      summary: Attach entitlements to a policy
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Policy-entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyEntitlementListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: detachPolicyEntitlements
+      summary: Detach entitlements from a policy
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/policies/{policyId}/entitlements/{entitlementId}:
+    get:
+      operationId: showPolicyEntitlement
+      summary: Retrieve one of a policy's entitlements
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      - $ref: '#/components/parameters/EntitlementPath'
+      responses:
+        '200':
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EntitlementDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products:
+    get:
+      operationId: indexProducts
+      summary: List products
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Product collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createProduct
+      summary: Create a product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Product document.
+          headers:
+            Location:
+              description: The new product's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}:
+    get:
+      operationId: showProduct
+      summary: Retrieve a product (by id or code)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateProduct
+      summary: Update a product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: destroyProduct
+      summary: Delete a product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/policies:
+    get:
+      operationId: indexProductPolicies
+      summary: List a product's policies
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '200':
+          description: Policy collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/policies/{policyId}:
+    get:
+      operationId: showProductPolicy
+      summary: Retrieve one of a product's policies
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      - $ref: '#/components/parameters/PolicyPath'
+      responses:
+        '200':
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PolicyDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/licenses:
+    get:
+      operationId: indexProductLicenses
+      summary: List a product's licenses
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '200':
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseStubListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/licenses/{licenseId}:
+    get:
+      operationId: showProductLicense
+      summary: Retrieve one of a product's licenses
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      - $ref: '#/components/parameters/LicensePath'
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/machines:
+    get:
+      operationId: indexProductMachines
+      summary: List a product's machines
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '200':
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineStubListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/machines/{machineId}:
+    get:
+      operationId: showProductMachine
+      summary: Retrieve one of a product's machines
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/tokens:
+    get:
+      operationId: indexProductTokens
+      summary: List a product's tokens
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '200':
+          description: Token collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductTokenListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createProductToken
+      summary: Generate a product token
+      description: Answers 200 (not 201) with the token document; the raw secret rides the response exactly
+        once.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Token document (with the raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/tokens/{tokenId}:
+    get:
+      operationId: showProductToken
+      summary: Retrieve one of a product's tokens
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      - $ref: '#/components/parameters/TokenPath'
+      responses:
+        '200':
+          description: Token document (no raw secret).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/TokenDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/users:
+    get:
+      operationId: indexProductUsers
+      summary: List a product's users
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      responses:
+        '200':
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductUserListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/products/{productId}/users/{userId}:
+    get:
+      operationId: showProductUser
+      summary: Retrieve one of a product's users
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProductPath'
+      - $ref: '#/components/parameters/UserPath'
+      responses:
+        '200':
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserDocument'
+        default:
+          $ref: '#/components/responses/Error'
   /v1/accounts/{account}/tokens:
     post:
       operationId: generateToken
@@ -176,6 +977,62 @@ components:
         - asc
         - desc
         - null
+    ProductPath:
+      name: productId
+      in: path
+      required: true
+      description: Product id (UUID) or code.
+      schema:
+        type: string
+    PolicyPath:
+      name: policyId
+      in: path
+      required: true
+      description: Policy id (UUID).
+      schema:
+        type: string
+    EntitlementPath:
+      name: entitlementId
+      in: path
+      required: true
+      description: Entitlement id (UUID) or code.
+      schema:
+        type: string
+    KeyPath:
+      name: keyId
+      in: path
+      required: true
+      description: Key id (UUID).
+      schema:
+        type: string
+    LicensePath:
+      name: licenseId
+      in: path
+      required: true
+      description: License id (UUID) or key.
+      schema:
+        type: string
+    MachinePath:
+      name: machineId
+      in: path
+      required: true
+      description: Machine id (UUID) or fingerprint.
+      schema:
+        type: string
+    TokenPath:
+      name: tokenId
+      in: path
+      required: true
+      description: Token id (UUID).
+      schema:
+        type: string
+    UserPath:
+      name: userId
+      in: path
+      required: true
+      description: User id (UUID) or email.
+      schema:
+        type: string
   schemas:
     Timestamp:
       type: string
@@ -518,6 +1375,622 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TokenResource'
+    ListLinks:
+      type: object
+      required:
+      - self
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        last:
+          type: string
+        prev:
+          type:
+          - string
+          - 'null'
+        next:
+          type:
+          - string
+          - 'null'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    ProductAttributes:
+      type: object
+      required:
+      - name
+      - code
+      - distributionStrategy
+      - url
+      - platforms
+      - metadata
+      - created
+      - updated
+      properties:
+        name:
+          type: string
+        code:
+          type:
+          - string
+          - 'null'
+        distributionStrategy:
+          type:
+          - string
+          - 'null'
+        url:
+          type:
+          - string
+          - 'null'
+        platforms:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    ProductRelationships:
+      type: object
+      required:
+      - account
+      - policies
+      - licenses
+      - machines
+      - users
+      - tokens
+      - platforms
+      - channels
+      - releases
+      - artifacts
+      properties:
+        account:
+          $ref: '#/components/schemas/ToOneRelationship'
+        policies:
+          $ref: '#/components/schemas/ToManyRelationship'
+        licenses:
+          $ref: '#/components/schemas/ToManyRelationship'
+        machines:
+          $ref: '#/components/schemas/ToManyRelationship'
+        users:
+          $ref: '#/components/schemas/ToManyRelationship'
+        tokens:
+          $ref: '#/components/schemas/ToManyRelationship'
+        platforms:
+          $ref: '#/components/schemas/ToManyRelationship'
+        channels:
+          $ref: '#/components/schemas/ToManyRelationship'
+        releases:
+          $ref: '#/components/schemas/ToManyRelationship'
+        artifacts:
+          $ref: '#/components/schemas/ToManyRelationship'
+    ProductResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - products
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/ProductAttributes'
+        relationships:
+          $ref: '#/components/schemas/ProductRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    ProductDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/ProductResource'
+    ProductListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    PolicyAttributes:
+      type: object
+      required:
+      - name
+      - duration
+      - strict
+      - floating
+      - usePool
+      - maxMachines
+      - maxProcesses
+      - maxUsers
+      - maxCores
+      - maxMemory
+      - maxDisk
+      - maxUses
+      - machineUniquenessStrategy
+      - machineMatchingStrategy
+      - componentUniquenessStrategy
+      - componentMatchingStrategy
+      - expirationStrategy
+      - expirationBasis
+      - renewalBasis
+      - transferStrategy
+      - authenticationStrategy
+      - machineLeasingStrategy
+      - processLeasingStrategy
+      - overageStrategy
+      - scheme
+      - encrypted
+      - protected
+      - requireProductScope
+      - requirePolicyScope
+      - requireMachineScope
+      - requireFingerprintScope
+      - requireComponentsScope
+      - requireUserScope
+      - requireChecksumScope
+      - requireVersionScope
+      - requireCheckIn
+      - checkInInterval
+      - checkInIntervalCount
+      - heartbeatDuration
+      - heartbeatCullStrategy
+      - heartbeatResurrectionStrategy
+      - heartbeatBasis
+      - requireHeartbeat
+      - metadata
+      - created
+      - updated
+      properties:
+        name:
+          type: string
+        duration:
+          type:
+          - integer
+          - 'null'
+        strict:
+          type: boolean
+        floating:
+          type: boolean
+        usePool:
+          type: boolean
+        maxMachines:
+          type:
+          - integer
+          - 'null'
+        maxProcesses:
+          type:
+          - integer
+          - 'null'
+        maxUsers:
+          type:
+          - integer
+          - 'null'
+        maxCores:
+          type:
+          - integer
+          - 'null'
+        maxMemory:
+          type:
+          - integer
+          - 'null'
+        maxDisk:
+          type:
+          - integer
+          - 'null'
+        maxUses:
+          type:
+          - integer
+          - 'null'
+        machineUniquenessStrategy:
+          type:
+          - string
+          - 'null'
+        machineMatchingStrategy:
+          type:
+          - string
+          - 'null'
+        componentUniquenessStrategy:
+          type:
+          - string
+          - 'null'
+        componentMatchingStrategy:
+          type:
+          - string
+          - 'null'
+        expirationStrategy:
+          type:
+          - string
+          - 'null'
+        expirationBasis:
+          type:
+          - string
+          - 'null'
+        renewalBasis:
+          type:
+          - string
+          - 'null'
+        transferStrategy:
+          type:
+          - string
+          - 'null'
+        authenticationStrategy:
+          type:
+          - string
+          - 'null'
+        machineLeasingStrategy:
+          type:
+          - string
+          - 'null'
+        processLeasingStrategy:
+          type:
+          - string
+          - 'null'
+        overageStrategy:
+          type:
+          - string
+          - 'null'
+        scheme:
+          type:
+          - string
+          - 'null'
+        encrypted:
+          type: boolean
+        protected:
+          type:
+          - boolean
+          - 'null'
+        requireProductScope:
+          type: boolean
+        requirePolicyScope:
+          type: boolean
+        requireMachineScope:
+          type: boolean
+        requireFingerprintScope:
+          type: boolean
+        requireComponentsScope:
+          type: boolean
+        requireUserScope:
+          type: boolean
+        requireChecksumScope:
+          type: boolean
+        requireVersionScope:
+          type: boolean
+        requireCheckIn:
+          type: boolean
+        checkInInterval:
+          type:
+          - string
+          - 'null'
+        checkInIntervalCount:
+          type:
+          - integer
+          - 'null'
+        heartbeatDuration:
+          type:
+          - integer
+          - 'null'
+        heartbeatCullStrategy:
+          type:
+          - string
+          - 'null'
+        heartbeatResurrectionStrategy:
+          type:
+          - string
+          - 'null'
+        heartbeatBasis:
+          type:
+          - string
+          - 'null'
+        requireHeartbeat:
+          type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    PolicyRelationships:
+      type: object
+      required:
+      - account
+      - product
+      - pool
+      - licenses
+      - entitlements
+      properties:
+        account:
+          $ref: '#/components/schemas/ToOneRelationship'
+        product:
+          $ref: '#/components/schemas/ToOneRelationship'
+        pool:
+          $ref: '#/components/schemas/ToManyRelationship'
+        licenses:
+          $ref: '#/components/schemas/ToManyRelationship'
+        entitlements:
+          $ref: '#/components/schemas/ToManyRelationship'
+    PolicyResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - policies
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/PolicyAttributes'
+        relationships:
+          $ref: '#/components/schemas/PolicyRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    PolicyDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/PolicyResource'
+    PolicyListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    EntitlementAttributes:
+      type: object
+      required:
+      - name
+      - code
+      - metadata
+      - created
+      - updated
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    EntitlementResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - entitlements
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/EntitlementAttributes'
+        relationships:
+          type: object
+          required:
+          - account
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    EntitlementDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/EntitlementResource'
+    EntitlementListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    KeyAttributes:
+      type: object
+      required:
+      - key
+      - created
+      - updated
+      properties:
+        key:
+          type: string
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    KeyRelationships:
+      type: object
+      required:
+      - account
+      - product
+      - policy
+      properties:
+        account:
+          $ref: '#/components/schemas/ToOneRelationship'
+        product:
+          $ref: '#/components/schemas/ToOneRelationship'
+        policy:
+          $ref: '#/components/schemas/ToOneRelationship'
+    KeyResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - keys
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/KeyAttributes'
+        relationships:
+          $ref: '#/components/schemas/KeyRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    KeyDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/KeyResource'
+    KeyListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    PolicyEntitlementLinks:
+      type: object
+      required:
+      - related
+      properties:
+        related:
+          type: string
+    PolicyEntitlementResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - policy-entitlements
+        id:
+          type: string
+        attributes:
+          type: object
+          required:
+          - created
+          - updated
+          properties:
+            created:
+              $ref: '#/components/schemas/Timestamp'
+            updated:
+              $ref: '#/components/schemas/Timestamp'
+        relationships:
+          type: object
+          required:
+          - account
+          - entitlement
+          - policy
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+            entitlement:
+              $ref: '#/components/schemas/ToOneRelationship'
+            policy:
+              $ref: '#/components/schemas/ToOneRelationship'
+        links:
+          $ref: '#/components/schemas/PolicyEntitlementLinks'
+    PolicyEntitlementListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyEntitlementResource'
+    LicenseStubListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    MachineStubListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    ProductUserListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    ProductTokenListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
     AccountAttributes:
       type: object
       required:

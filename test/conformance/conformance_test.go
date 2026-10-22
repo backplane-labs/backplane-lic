@@ -35,12 +35,12 @@ func TestConformance(t *testing.T) {
 		reference := conformance.NewReferenceTarget(referenceURL())
 		key := conformance.Ed25519Key(t, reference)
 
-		for _, sc := range scns {
-			t.Run(sc.Name, func(t *testing.T) {
+		for _, scenario := range scns {
+			t.Run(scenario.Name, func(t *testing.T) {
 				t.Parallel()
 
-				transcript := conformance.Run(t, reference, sc, key)
-				golden := filepath.Join("testdata", sc.Name+".golden.json")
+				transcript := conformance.Run(t, reference, scenario, key)
+				golden := filepath.Join("testdata", scenario.Name+".golden.json")
 
 				if err := os.MkdirAll(filepath.Dir(golden), 0o755); err != nil {
 					t.Fatalf("conformance: create testdata: %v", err)
@@ -60,12 +60,19 @@ func TestConformance(t *testing.T) {
 	target := serverUnderTest(t)
 	key := conformance.Ed25519Key(t, target)
 
-	for _, sc := range scns {
-		t.Run(sc.Name, func(t *testing.T) {
+	for _, scenario := range scns {
+		t.Run(scenario.Name, func(t *testing.T) {
 			t.Parallel()
 
-			golden := loadGolden(t, sc.Name)
-			live := conformance.Run(t, target, sc, key)
+			golden := loadGolden(t, scenario.Name)
+			live := conformance.Run(t, target, scenario, key)
+
+			if dir := os.Getenv("LIC_DEBUG_LIVE"); dir != "" {
+				dump := filepath.Join(dir, scenario.Name+".live.json")
+
+				_ = os.WriteFile(dump, []byte(normalisedStep(t, live, -1)), 0o600)
+			}
+
 			compare(t, golden, live)
 		})
 	}
@@ -145,6 +152,19 @@ func compare(t *testing.T, golden, live conformance.Transcript) {
 
 	// Placeholders number by first appearance across the whole transcript,
 	// as recorded, so both sides are normalised whole.
+
+	// Debug aid: name the first differing step.
+	for i := range golden.Steps {
+		same := normalisedStep(t, golden, i) == normalisedStep(t, live, i)
+
+		if !same {
+			t.Logf("conformance: first differing step %d %q (golden %d, live %d)",
+				i, golden.Steps[i].Name, golden.Steps[i].Status, live.Steps[i].Status)
+
+			break
+		}
+	}
+
 	want := normalisedStep(t, golden, -1)
 	got := normalisedStep(t, live, -1)
 

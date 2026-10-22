@@ -13,6 +13,105 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// AttachPolicyEntitlements implements attachPolicyEntitlements operation.
+//
+// Attach entitlements to a policy.
+//
+// POST /v1/accounts/{account}/policies/{policyId}/entitlements
+func (UnimplementedHandler) AttachPolicyEntitlements(ctx context.Context, req AttachPolicyEntitlementsReq, params AttachPolicyEntitlementsParams) (r *PolicyEntitlementListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateEntitlement implements createEntitlement operation.
+//
+// Create an entitlement.
+//
+// POST /v1/accounts/{account}/entitlements
+func (UnimplementedHandler) CreateEntitlement(ctx context.Context, req CreateEntitlementReq, params CreateEntitlementParams) (r *EntitlementDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateKey implements createKey operation.
+//
+// Create a key.
+//
+// POST /v1/accounts/{account}/keys
+func (UnimplementedHandler) CreateKey(ctx context.Context, req CreateKeyReq, params CreateKeyParams) (r *KeyDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreatePolicy implements createPolicy operation.
+//
+// Create a policy.
+//
+// POST /v1/accounts/{account}/policies
+func (UnimplementedHandler) CreatePolicy(ctx context.Context, req CreatePolicyReq, params CreatePolicyParams) (r *PolicyDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateProduct implements createProduct operation.
+//
+// Create a product.
+//
+// POST /v1/accounts/{account}/products
+func (UnimplementedHandler) CreateProduct(ctx context.Context, req CreateProductReq, params CreateProductParams) (r *ProductDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateProductToken implements createProductToken operation.
+//
+// Answers 200 (not 201) with the token document; the raw secret rides the response exactly once.
+//
+// POST /v1/accounts/{account}/products/{productId}/tokens
+func (UnimplementedHandler) CreateProductToken(ctx context.Context, req CreateProductTokenReq, params CreateProductTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DestroyEntitlement implements destroyEntitlement operation.
+//
+// Delete an entitlement.
+//
+// DELETE /v1/accounts/{account}/entitlements/{entitlementId}
+func (UnimplementedHandler) DestroyEntitlement(ctx context.Context, params DestroyEntitlementParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DestroyKey implements destroyKey operation.
+//
+// Delete a key.
+//
+// DELETE /v1/accounts/{account}/keys/{keyId}
+func (UnimplementedHandler) DestroyKey(ctx context.Context, params DestroyKeyParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DestroyPolicy implements destroyPolicy operation.
+//
+// Delete a policy.
+//
+// DELETE /v1/accounts/{account}/policies/{policyId}
+func (UnimplementedHandler) DestroyPolicy(ctx context.Context, params DestroyPolicyParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DestroyProduct implements destroyProduct operation.
+//
+// Delete a product.
+//
+// DELETE /v1/accounts/{account}/products/{productId}
+func (UnimplementedHandler) DestroyProduct(ctx context.Context, params DestroyProductParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DetachPolicyEntitlements implements detachPolicyEntitlements operation.
+//
+// Detach entitlements from a policy.
+//
+// DELETE /v1/accounts/{account}/policies/{policyId}/entitlements
+func (UnimplementedHandler) DetachPolicyEntitlements(ctx context.Context, req DetachPolicyEntitlementsReq, params DetachPolicyEntitlementsParams) error {
+	return ht.ErrNotImplemented
+}
+
 // GenerateToken implements generateToken operation.
 //
 // Basic email:password (with meta.otp for two-factor users) or any token authentication. The
@@ -41,6 +140,114 @@ func (UnimplementedHandler) Health(ctx context.Context) error {
 	return ht.ErrNotImplemented
 }
 
+// IndexEntitlements implements indexEntitlements operation.
+//
+// List entitlements.
+//
+// GET /v1/accounts/{account}/entitlements
+func (UnimplementedHandler) IndexEntitlements(ctx context.Context, params IndexEntitlementsParams) (r *EntitlementListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexKeys implements indexKeys operation.
+//
+// List keys.
+//
+// GET /v1/accounts/{account}/keys
+func (UnimplementedHandler) IndexKeys(ctx context.Context, params IndexKeysParams) (r *KeyListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexPolicies implements indexPolicies operation.
+//
+// List policies.
+//
+// GET /v1/accounts/{account}/policies
+func (UnimplementedHandler) IndexPolicies(ctx context.Context, params IndexPoliciesParams) (r *PolicyListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexPolicyEntitlements implements indexPolicyEntitlements operation.
+//
+// List a policy's entitlements.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/entitlements
+func (UnimplementedHandler) IndexPolicyEntitlements(ctx context.Context, params IndexPolicyEntitlementsParams) (r *EntitlementListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexPolicyLicenses implements indexPolicyLicenses operation.
+//
+// List a policy's licenses.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/licenses
+func (UnimplementedHandler) IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (r *LicenseStubListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexPolicyPool implements indexPolicyPool operation.
+//
+// List a policy's key pool.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/pool
+func (UnimplementedHandler) IndexPolicyPool(ctx context.Context, params IndexPolicyPoolParams) (r *KeyListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexProductLicenses implements indexProductLicenses operation.
+//
+// List a product's licenses.
+//
+// GET /v1/accounts/{account}/products/{productId}/licenses
+func (UnimplementedHandler) IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (r *LicenseStubListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexProductMachines implements indexProductMachines operation.
+//
+// List a product's machines.
+//
+// GET /v1/accounts/{account}/products/{productId}/machines
+func (UnimplementedHandler) IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (r *MachineStubListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexProductPolicies implements indexProductPolicies operation.
+//
+// List a product's policies.
+//
+// GET /v1/accounts/{account}/products/{productId}/policies
+func (UnimplementedHandler) IndexProductPolicies(ctx context.Context, params IndexProductPoliciesParams) (r *PolicyListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexProductTokens implements indexProductTokens operation.
+//
+// List a product's tokens.
+//
+// GET /v1/accounts/{account}/products/{productId}/tokens
+func (UnimplementedHandler) IndexProductTokens(ctx context.Context, params IndexProductTokensParams) (r *ProductTokenListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexProductUsers implements indexProductUsers operation.
+//
+// List a product's users.
+//
+// GET /v1/accounts/{account}/products/{productId}/users
+func (UnimplementedHandler) IndexProductUsers(ctx context.Context, params IndexProductUsersParams) (r *ProductUserListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexProducts implements indexProducts operation.
+//
+// List products.
+//
+// GET /v1/accounts/{account}/products
+func (UnimplementedHandler) IndexProducts(ctx context.Context, params IndexProductsParams) (r *ProductListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Me implements me operation.
 //
 // The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -60,12 +267,192 @@ func (UnimplementedHandler) Ping(ctx context.Context) error {
 	return ht.ErrNotImplemented
 }
 
+// PopPolicyPool implements popPolicyPool operation.
+//
+// Destroys the newest pooled key and answers its document.
+//
+// DELETE /v1/accounts/{account}/policies/{policyId}/pool
+func (UnimplementedHandler) PopPolicyPool(ctx context.Context, params PopPolicyPoolParams) (r *KeyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Profile implements profile operation.
 //
 // The authenticated bearer's document with the current token id in meta.
 //
 // GET /v1/accounts/{account}/profile
 func (UnimplementedHandler) Profile(ctx context.Context, params ProfileParams) (r *ProfileDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowEntitlement implements showEntitlement operation.
+//
+// Retrieve an entitlement (by id or code).
+//
+// GET /v1/accounts/{account}/entitlements/{entitlementId}
+func (UnimplementedHandler) ShowEntitlement(ctx context.Context, params ShowEntitlementParams) (r *EntitlementDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowKey implements showKey operation.
+//
+// Retrieve a key.
+//
+// GET /v1/accounts/{account}/keys/{keyId}
+func (UnimplementedHandler) ShowKey(ctx context.Context, params ShowKeyParams) (r *KeyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowKeyPolicy implements showKeyPolicy operation.
+//
+// Retrieve a key's policy.
+//
+// GET /v1/accounts/{account}/keys/{keyId}/policy
+func (UnimplementedHandler) ShowKeyPolicy(ctx context.Context, params ShowKeyPolicyParams) (r *PolicyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowKeyProduct implements showKeyProduct operation.
+//
+// Retrieve a key's product (through its policy).
+//
+// GET /v1/accounts/{account}/keys/{keyId}/product
+func (UnimplementedHandler) ShowKeyProduct(ctx context.Context, params ShowKeyProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowPolicy implements showPolicy operation.
+//
+// Retrieve a policy.
+//
+// GET /v1/accounts/{account}/policies/{policyId}
+func (UnimplementedHandler) ShowPolicy(ctx context.Context, params ShowPolicyParams) (r *PolicyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowPolicyEntitlement implements showPolicyEntitlement operation.
+//
+// Retrieve one of a policy's entitlements.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/entitlements/{entitlementId}
+func (UnimplementedHandler) ShowPolicyEntitlement(ctx context.Context, params ShowPolicyEntitlementParams) (r *EntitlementDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowPolicyLicense implements showPolicyLicense operation.
+//
+// Retrieve one of a policy's licenses.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
+func (UnimplementedHandler) ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (r ShowPolicyLicenseOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowPolicyPoolKey implements showPolicyPoolKey operation.
+//
+// Retrieve one of a policy's pooled keys.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/pool/{keyId}
+func (UnimplementedHandler) ShowPolicyPoolKey(ctx context.Context, params ShowPolicyPoolKeyParams) (r *KeyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowPolicyProduct implements showPolicyProduct operation.
+//
+// Retrieve a policy's product.
+//
+// GET /v1/accounts/{account}/policies/{policyId}/product
+func (UnimplementedHandler) ShowPolicyProduct(ctx context.Context, params ShowPolicyProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProduct implements showProduct operation.
+//
+// Retrieve a product (by id or code).
+//
+// GET /v1/accounts/{account}/products/{productId}
+func (UnimplementedHandler) ShowProduct(ctx context.Context, params ShowProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProductLicense implements showProductLicense operation.
+//
+// Retrieve one of a product's licenses.
+//
+// GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}
+func (UnimplementedHandler) ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (r ShowProductLicenseOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProductMachine implements showProductMachine operation.
+//
+// Retrieve one of a product's machines.
+//
+// GET /v1/accounts/{account}/products/{productId}/machines/{machineId}
+func (UnimplementedHandler) ShowProductMachine(ctx context.Context, params ShowProductMachineParams) (r ShowProductMachineOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProductPolicy implements showProductPolicy operation.
+//
+// Retrieve one of a product's policies.
+//
+// GET /v1/accounts/{account}/products/{productId}/policies/{policyId}
+func (UnimplementedHandler) ShowProductPolicy(ctx context.Context, params ShowProductPolicyParams) (r *PolicyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProductToken implements showProductToken operation.
+//
+// Retrieve one of a product's tokens.
+//
+// GET /v1/accounts/{account}/products/{productId}/tokens/{tokenId}
+func (UnimplementedHandler) ShowProductToken(ctx context.Context, params ShowProductTokenParams) (r *TokenDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProductUser implements showProductUser operation.
+//
+// Retrieve one of a product's users.
+//
+// GET /v1/accounts/{account}/products/{productId}/users/{userId}
+func (UnimplementedHandler) ShowProductUser(ctx context.Context, params ShowProductUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateEntitlement implements updateEntitlement operation.
+//
+// Update an entitlement.
+//
+// PATCH /v1/accounts/{account}/entitlements/{entitlementId}
+func (UnimplementedHandler) UpdateEntitlement(ctx context.Context, req UpdateEntitlementReq, params UpdateEntitlementParams) (r *EntitlementDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateKey implements updateKey operation.
+//
+// Only the key attribute may change; relationships are not accepted.
+//
+// PATCH /v1/accounts/{account}/keys/{keyId}
+func (UnimplementedHandler) UpdateKey(ctx context.Context, req UpdateKeyReq, params UpdateKeyParams) (r *KeyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdatePolicy implements updatePolicy operation.
+//
+// Scheme, encrypted and usePool are immutable; relationships are not accepted.
+//
+// PATCH /v1/accounts/{account}/policies/{policyId}
+func (UnimplementedHandler) UpdatePolicy(ctx context.Context, req UpdatePolicyReq, params UpdatePolicyParams) (r *PolicyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateProduct implements updateProduct operation.
+//
+// Update a product.
+//
+// PATCH /v1/accounts/{account}/products/{productId}
+func (UnimplementedHandler) UpdateProduct(ctx context.Context, req UpdateProductReq, params UpdateProductParams) (r *ProductDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

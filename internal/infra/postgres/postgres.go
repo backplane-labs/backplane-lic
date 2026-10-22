@@ -39,6 +39,14 @@ type Store struct {
 	Tokens TokensRepo
 	// Licenses is the license-auth repository.
 	Licenses LicensesRepo
+	// Products is the products repository.
+	Products ProductsRepo
+	// Policies is the policies repository.
+	Policies PoliciesRepo
+	// Entitlements is the entitlements and policy_entitlements repository.
+	Entitlements EntitlementsRepo
+	// Keys is the keys repository.
+	Keys KeysRepo
 }
 
 // New is the provider: the postgres driver with the schema and the
@@ -78,12 +86,16 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 	queries := db.New(pg.DB)
 
 	return &Store{
-		DB:       pg,
-		Q:        queries,
-		Accounts: AccountsRepo{q: queries},
-		Users:    UsersRepo{q: queries},
-		Tokens:   TokensRepo{q: queries},
-		Licenses: LicensesRepo{q: queries},
+		DB:           pg,
+		Q:            queries,
+		Accounts:     AccountsRepo{q: queries},
+		Users:        UsersRepo{q: queries},
+		Tokens:       TokensRepo{q: queries},
+		Licenses:     LicensesRepo{q: queries},
+		Products:     ProductsRepo{q: queries},
+		Policies:     PoliciesRepo{q: queries},
+		Entitlements: EntitlementsRepo{q: queries},
+		Keys:         KeysRepo{q: queries},
 	}, nil
 }
 

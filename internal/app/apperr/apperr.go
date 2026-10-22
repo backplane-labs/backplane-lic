@@ -10,14 +10,17 @@ import (
 
 // The canonical titles.
 const (
-	TitleBadRequest          = "Bad request"
-	TitleUnauthorized        = "Unauthorized"
-	TitleForbidden           = "Access denied"
-	TitleNotFound            = "Not found"
-	TitleConflict            = "Conflict"
-	TitleUnprocessable       = "Unprocessable entity"
-	TitleTooManyRequests     = "Too many requests"
-	TitleInternalServerError = "Internal server error"
+	TitleBadRequest    = "Bad request"
+	TitleUnauthorized  = "Unauthorized"
+	TitleForbidden     = "Access denied"
+	TitleNotFound      = "Not found"
+	TitleConflict      = "Conflict"
+	TitleUnprocessable = "Unprocessable entity"
+	// TitleUnprocessableResource is the model-validation 422 title
+	// ("Unprocessable resource", with code and pointer).
+	TitleUnprocessableResource = "Unprocessable resource"
+	TitleTooManyRequests       = "Too many requests"
+	TitleInternalServerError   = "Internal server error"
 )
 
 // The canonical default details.
@@ -52,7 +55,13 @@ type T struct {
 	// About is the docs topic after "/docs/api/", e.g.
 	// "authentication/#token-authentication"; empty for none.
 	About string
+	// siblings are the remaining errors of a multi-error document
+	// (MultiOf); nil for a single one.
+	siblings []*T
 }
+
+// Siblings answers the additional errors carried alongside this one.
+func (t *T) Siblings() []*T { return t.siblings }
 
 // Error implements error.
 func (t *T) Error() string {
@@ -169,4 +178,33 @@ func From(err error) *T {
 	}
 
 	return Internal()
+}
+
+// Validation builds a model-validation 422 ("Unprocessable resource",
+// with code, pointer and the docs link of the attribute or
+// relationship the violation points at).
+func Validation(code, detail, pointer, about string) *T {
+	return &T{
+		Status: http.StatusUnprocessableEntity,
+		Title:  TitleUnprocessableResource,
+		Detail: detail,
+		Code:   code,
+		Source: Source{Pointer: pointer},
+		About:  about,
+	}
+}
+
+// MultiOf carries several typed errors in one document (the reference's
+// multi-violation 422s, e.g. KEY_NOT_ALLOWED and KEY_TOO_SHORT side by
+// side): the first error, with the rest riding as siblings. Every
+// carried error shares the first one's status and title.
+func MultiOf(errs ...*T) error {
+	if len(errs) == 0 {
+		return nil
+	}
+
+	first := *errs[0]
+	first.siblings = errs[1:]
+
+	return &first
 }
