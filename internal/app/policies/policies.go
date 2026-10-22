@@ -27,7 +27,10 @@ var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
 var ErrEntitlementTaken = errors.New("policies: entitlement taken")
 
 // Store is the scenario's consumer-side storage port.
-type Store interface {
+type Store interface { //nolint:interfacebloat // one port per scenario is the architecture's shape
+	// Do runs fn in one transaction; the writes and the webhook
+	// events of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// PolicyByID loads a policy; ErrNotFound when none.
 	PolicyByID(ctx context.Context, accountID, id uuid.UUID) (domain.Policy, error)
 	// PolicyByLicense loads the license bearer's own policy.
@@ -377,11 +380,17 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 		return domain.Policy{}, err
 	}
 
-	if err := s.store.InsertPolicy(ctx, policy); err != nil {
-		return domain.Policy{}, fmt.Errorf("policies: create: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertPolicy(ctx, policy); err != nil {
+			return fmt.Errorf("policies: create: %w", err)
+		}
 
-	s.publish(ctx, "policy.created", policy)
+		s.publish(ctx, "policy.created", policy)
+
+		return nil
+	}); err != nil {
+		return domain.Policy{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return policy, nil
 }
@@ -415,11 +424,17 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 		return domain.Policy{}, err
 	}
 
-	if err := s.store.UpdatePolicy(ctx, policy); err != nil {
-		return domain.Policy{}, fmt.Errorf("policies: update: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdatePolicy(ctx, policy); err != nil {
+			return fmt.Errorf("policies: update: %w", err)
+		}
 
-	s.publish(ctx, "policy.updated", policy)
+		s.publish(ctx, "policy.updated", policy)
+
+		return nil
+	}); err != nil {
+		return domain.Policy{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return policy, nil
 }
@@ -439,11 +454,17 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, id uuid.U
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
-	if _, err := s.store.DeletePolicy(ctx, account.ID, id); err != nil {
-		return fmt.Errorf("policies: destroy: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if _, err := s.store.DeletePolicy(ctx, account.ID, id); err != nil {
+			return fmt.Errorf("policies: destroy: %w", err)
+		}
 
-	s.publish(ctx, "policy.deleted", policy)
+		s.publish(ctx, "policy.deleted", policy)
+
+		return nil
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return nil
 }

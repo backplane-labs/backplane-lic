@@ -8,7 +8,6 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
-	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -193,42 +192,6 @@ func (s *Store) DeleteGroupOwnersByUsers(
 	return s.Groups.DeleteGroupOwnersByUsers(ctx, accountID, groupID, userIDs)
 }
 
-// --- second factors scenario ---
-
-// SecondFactorByID loads the user's factor.
-func (s *Store) SecondFactorByID(
-	ctx context.Context, accountID, userID, id uuid.UUID,
-) (domain.SecondFactor, error) {
-	return s.SecondFactors.SecondFactorByID(ctx, accountID, userID, id)
-}
-
-// AnySecondFactor loads the user's (only) factor.
-func (s *Store) AnySecondFactor(ctx context.Context, userID uuid.UUID) (domain.SecondFactor, error) {
-	return s.SecondFactors.AnySecondFactor(ctx, userID)
-}
-
-// InsertSecondFactor writes the factor.
-func (s *Store) InsertSecondFactor(ctx context.Context, factor domain.SecondFactor) error {
-	return s.SecondFactors.InsertSecondFactor(ctx, factor)
-}
-
-// UpdateSecondFactor writes enabled and the replay guard.
-func (s *Store) UpdateSecondFactor(ctx context.Context, factor domain.SecondFactor) error {
-	return s.SecondFactors.UpdateSecondFactor(ctx, factor)
-}
-
-// DeleteSecondFactor removes the factor.
-func (s *Store) DeleteSecondFactor(ctx context.Context, accountID, userID, id uuid.UUID) error {
-	return s.SecondFactors.DeleteSecondFactor(ctx, accountID, userID, id)
-}
-
-// ListSecondFactors answers the user's factors.
-func (s *Store) ListSecondFactors(
-	ctx context.Context, accountID, userID uuid.UUID, limit int,
-) ([]domain.SecondFactor, error) {
-	return s.SecondFactors.ListSecondFactors(ctx, accountID, userID, limit)
-}
-
 // --- tokens scenario (management face) ---
 
 // TokenByID loads a token by its id.
@@ -276,10 +239,14 @@ func (s *Store) LicenseOfProduct(
 	return s.Tokens.LicenseOfProduct(ctx, accountID, licenseID, productID)
 }
 
+// PolicyByID loads a policy; ErrNotFound.
+func (s *Store) PolicyByID(ctx context.Context, accountID, id uuid.UUID) (domain.Policy, error) {
+	return s.Policies.PolicyByID(ctx, accountID, id)
+}
+
 // Compile-time proofs that the Store satisfies the scenarios' ports.
 var (
-	_ users.Store         = (*Store)(nil)
-	_ groups.Store        = (*Store)(nil)
-	_ secondfactors.Store = (*Store)(nil)
-	_ tokens.Store        = (*Store)(nil)
+	_ users.Store  = (*Store)(nil)
+	_ groups.Store = (*Store)(nil)
+	_ tokens.Store = (*Store)(nil)
 )

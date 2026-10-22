@@ -18,12 +18,11 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
-	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
-	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
+	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
@@ -45,25 +44,22 @@ type Spec struct {
 
 // Deps is everything the HTTP face is built from.
 type Deps struct {
-	Accounts      Accounts
-	Authn         authn.Scenario
-	Users         users.Scenario
-	Tokens        tokens.Scenario
-	Groups        groups.Scenario
-	SecondFactors secondfactors.Scenario
-	Passwords     passwords.Scenario
-	Products      products.Scenario
-	Policies      policies.Scenario
-	Entitlements  entitlements.Scenario
-	Keys          keys.Scenario
-	Spec          Spec
+	Accounts     Accounts
+	Authn        authn.Scenario
+	Users        users.Scenario
+	Tokens       tokens.Scenario
+	Groups       groups.Scenario
+	Products     products.Scenario
+	Policies     policies.Scenario
+	Entitlements entitlements.Scenario
+	Keys         keys.Scenario
+	Webhooks     webhooks.Scenario
+	Spec         Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
 	// DocsHost overrides the docs origin of error links; when empty it
 	// is derived from the request host (its last two labels).
 	DocsHost string
-	// Throttle counts password attempts; nil disables the limiter.
-	Throttle Throttler
 	// TrustedProxies lists the proxy CIDRs whose X-Forwarded-For is
 	// honored when resolving the client IP (empty: RemoteAddr always).
 	TrustedProxies []string
@@ -75,17 +71,16 @@ type Deps struct {
 type API struct {
 	oas.UnimplementedHandler
 
-	accounts      Accounts
-	users         users.Scenario
-	tokens        tokens.Scenario
-	groups        groups.Scenario
-	secondFactors secondfactors.Scenario
-	passwords     passwords.Scenario
-	products      products.Scenario
-	policies      policies.Scenario
-	entitlements  entitlements.Scenario
-	keys          keys.Scenario
-	spec          Spec
+	accounts     Accounts
+	users        users.Scenario
+	tokens       tokens.Scenario
+	groups       groups.Scenario
+	products     products.Scenario
+	policies     policies.Scenario
+	entitlements entitlements.Scenario
+	keys         keys.Scenario
+	webhooks     webhooks.Scenario
+	spec         Spec
 }
 
 // New builds the service's HTTP handler: the ogen server wrapped in the
@@ -93,17 +88,16 @@ type API struct {
 // routing and the platform's HTTP mounting.
 func New(deps Deps) http.Handler {
 	api := &API{
-		accounts:      deps.Accounts,
-		users:         deps.Users,
-		tokens:        deps.Tokens,
-		groups:        deps.Groups,
-		secondFactors: deps.SecondFactors,
-		passwords:     deps.Passwords,
-		products:      deps.Products,
-		policies:      deps.Policies,
-		entitlements:  deps.Entitlements,
-		keys:          deps.Keys,
-		spec:          deps.Spec,
+		accounts:     deps.Accounts,
+		users:        deps.Users,
+		tokens:       deps.Tokens,
+		groups:       deps.Groups,
+		products:     deps.Products,
+		policies:     deps.Policies,
+		entitlements: deps.Entitlements,
+		keys:         deps.Keys,
+		webhooks:     deps.Webhooks,
+		spec:         deps.Spec,
 	}
 
 	server, err := oas.NewServer(api)
@@ -118,15 +112,13 @@ func New(deps Deps) http.Handler {
 	}
 
 	return &pipeline{
-		server:         server,
-		accounts:       deps.Accounts,
-		authn:          deps.Authn,
-		spec:           deps.Spec,
-		revision:       deps.Revision,
-		docsHost:       deps.DocsHost,
-		throttle:       deps.Throttle,
-		trustedProxies: parseCIDRs(deps.TrustedProxies),
-		clock:          clock,
+		server:   server,
+		accounts: deps.Accounts,
+		authn:    deps.Authn,
+		spec:     deps.Spec,
+		revision: deps.Revision,
+		docsHost: deps.DocsHost,
+		clock:    clock,
 	}
 }
 

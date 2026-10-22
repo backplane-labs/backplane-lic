@@ -3,7 +3,6 @@ package tokens_test
 import (
 	"context"
 	"crypto/rand"
-	"strings"
 	"testing"
 	"time"
 
@@ -22,6 +21,10 @@ import (
 type fakeStore struct {
 	users    map[uuid.UUID]domain.User
 	inserted []domain.Token
+}
+
+func (f *fakeStore) Do(ctx context.Context, fn func(context.Context) error) error {
+	return fn(ctx)
 }
 
 func (f *fakeStore) InsertToken(_ context.Context, token domain.Token) error {
@@ -91,104 +94,51 @@ func targetUser(role domain.Role) domain.User {
 	return domain.User{ID: uuid.Must(uuid.NewV7()), Role: role}
 }
 
-// TestGenerateBearerOverride mirrors the reference's TokenPolicy#generate?:
-// only admin and developer may mint for another bearer, and only when
-// that bearer is a plain user. Everyone else's override is a 403.
-func TestGenerateBearerOverride(t *testing.T) {
+// TestGenerateUserBearerRetired pins the retired end-user
+// authentication: no token may carry a user bearer — minting one's own
+// or overriding to a user answers the 501, whatever the caller's role.
+func TestGenerateUserBearerRetired(t *testing.T) {
 	t.Parallel()
 
 	plain := targetUser(domain.RoleUser)
-	adminTarget := targetUser(domain.RoleAdmin)
 
-	store := &fakeStore{users: map[uuid.UUID]domain.User{
-		plain.ID: plain, adminTarget.ID: adminTarget,
-	}}
-
+	store := &fakeStore{users: map[uuid.UUID]domain.User{plain.ID: plain}}
 	scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
 	account := testAccount(t)
-
-	for _, tc := range []struct {
-		name     string
-		caller   domain.Role
-		target   *domain.User
-		kind     string // "" means 403
-		bearerOf string
-	}{
-		{"admin for plain user", domain.RoleAdmin, &plain, "user", plain.ID.String()},
-		{"developer for plain user", domain.RoleDeveloper, &plain, "user", plain.ID.String()},
-		{"admin for admin", domain.RoleAdmin, &adminTarget, "", ""},
-		{"sales agent for plain user", domain.RoleSalesAgent, &plain, "", ""},
-		{"support agent for plain user", domain.RoleSupportRole, &plain, "", ""},
-		{"read-only for plain user", domain.RoleReadOnly, &plain, "", ""},
-		{"plain user for plain user", domain.RoleUser, &plain, "", ""},
-	} {
-		ctx := access.With(context.Background(), userPrincipal(tc.caller))
-
-		in := tokens.GenerateInput{
-			BearerType: access.BearerUser,
-			BearerID:   tc.target.ID,
-		}
-
-		token, _, err := scenario.Generate(ctx, account, access.PrincipalOf(ctx), in)
-		if tc.kind == "" {
-			e := apperr.From(err)
-			if err == nil || e.Status != 403 {
-				t.Errorf("%s: want 403, got err=%v status=%d", tc.name, err, e.Status)
-			}
-
-			continue
-		}
-
-		if err != nil {
-			t.Errorf("%s: %v", tc.name, err)
-
-			continue
-		}
-
-		if got := string(token.BearerRole); got != tc.kind {
-			t.Errorf("%s: bearer role %q want %q", tc.name, got, tc.kind)
-		}
-
-		if token.BearerID != tc.target.ID {
-			t.Errorf("%s: bearer id %s want %s", tc.name, token.BearerID, tc.target.ID)
-		}
-	}
-}
-
-// TestGenerateSelf covers the self clause: every user role may mint its
-// own token; product and license bearers may not mint at all.
-func TestGenerateSelf(t *testing.T) {
-	t.Parallel()
 
 	for _, role := range []domain.Role{
 		domain.RoleAdmin, domain.RoleDeveloper, domain.RoleSalesAgent,
 		domain.RoleSupportRole, domain.RoleReadOnly, domain.RoleUser,
 	} {
-		store := &fakeStore{}
-		scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
-		ctx := access.With(context.Background(), userPrincipal(role))
+		principal := userPrincipal(role)
+		ctx := access.With(context.Background(), principal)
 
-		token, raw, err := scenario.Generate(ctx, testAccount(t), access.PrincipalOf(ctx), tokens.GenerateInput{})
-		if err != nil {
-			t.Errorf("%s: %v", role, err)
-
-			continue
+		// Minting for oneself.
+		_, _, err := scenario.Generate(ctx, account, principal, tokens.GenerateInput{})
+		if e := apperr.From(err); err == nil || e.Status != 501 {
+			t.Errorf("%s self: want 501, got err=%v status=%d", role, err, e.Status)
 		}
 
-		if prefix := crypto.TokenPrefix(string(role)); !strings.HasPrefix(raw, prefix+"-") {
-			t.Errorf("%s: secret %q lacks prefix %q", role, raw, prefix)
-		}
+		// Minting for another user.
+		in := tokens.GenerateInput{BearerType: access.BearerUser, BearerID: plain.ID}
 
-		if token.Kind != crypto.TokenKind(string(role)) {
-			t.Errorf("%s: kind %q", role, token.Kind)
+		_, _, err = scenario.Generate(ctx, account, principal, in)
+		if e := apperr.From(err); err == nil || e.Status != 501 {
+			t.Errorf("%s override: want 501, got err=%v status=%d", role, err, e.Status)
 		}
+	}
+
+	// A product override stays the plain policy deny.
+	admin := userPrincipal(domain.RoleAdmin)
+	in := tokens.GenerateInput{BearerType: access.BearerProduct, BearerID: uuid.Must(uuid.NewV7())}
+
+	_, _, err := scenario.Generate(access.With(context.Background(), admin), account, admin, in)
+	if e := apperr.From(err); err == nil || e.Status != 403 {
+		t.Errorf("product override: want 403, got err=%v status=%d", err, e.Status)
 	}
 
 	// A product or license bearer cannot mint even for itself.
 	for _, bearer := range []string{access.BearerProduct, access.BearerLicense} {
-		store := &fakeStore{}
-		scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
-
 		p := access.Principal{
 			BearerType:  bearer,
 			BearerID:    uuid.Must(uuid.NewV7()),
@@ -196,63 +146,9 @@ func TestGenerateSelf(t *testing.T) {
 			Permissions: access.RolePermissions(domain.RoleLicense),
 		}
 
-		_, _, err := scenario.Generate(access.With(context.Background(), p), testAccount(t), p, tokens.GenerateInput{})
+		_, _, err := scenario.Generate(access.With(context.Background(), p), account, p, tokens.GenerateInput{})
 		if e := apperr.From(err); err == nil || e.Status != 403 {
 			t.Errorf("%s self: want 403, got err=%v status=%d", bearer, err, e.Status)
 		}
-	}
-}
-
-// TestGenerateExpiry pins the defaults: user tokens expire in 14 days,
-// every other kind never expires; an explicit expiry always wins.
-func TestGenerateExpiry(t *testing.T) {
-	t.Parallel()
-
-	store := &fakeStore{}
-	scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
-	account := testAccount(t)
-
-	user := userPrincipal(domain.RoleUser)
-
-	token, _, err := scenario.Generate(
-		access.With(context.Background(), user), account, user, tokens.GenerateInput{},
-	)
-	if err != nil {
-		t.Fatalf("user: %v", err)
-	}
-
-	if token.Expiry == nil {
-		t.Fatal("user token: no expiry")
-	}
-
-	if got := token.Expiry.Sub(token.CreatedAt); got != tokens.UserDuration {
-		t.Errorf("user token: expiry %v want %v", got, tokens.UserDuration)
-	}
-
-	admin := userPrincipal(domain.RoleAdmin)
-
-	token, _, err = scenario.Generate(
-		access.With(context.Background(), admin), account, admin, tokens.GenerateInput{},
-	)
-	if err != nil {
-		t.Fatalf("admin: %v", err)
-	}
-
-	if token.Expiry != nil {
-		t.Errorf("admin token: expiry %v want none", token.Expiry)
-	}
-
-	explicit := time.Now().Add(24 * time.Hour)
-
-	token, _, err = scenario.Generate(
-		access.With(context.Background(), admin), account, admin,
-		tokens.GenerateInput{Expiry: &explicit},
-	)
-	if err != nil {
-		t.Fatalf("explicit: %v", err)
-	}
-
-	if token.Expiry == nil || !token.Expiry.Equal(explicit) {
-		t.Errorf("explicit expiry: %v want %v", token.Expiry, explicit)
 	}
 }

@@ -80,6 +80,13 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/tokens
 	CreateUserToken(ctx context.Context, req CreateUserTokenReq, params CreateUserTokenParams) (*TokenDocument, error)
+	// CreateWebhookEndpoint implements createWebhookEndpoint operation.
+	//
+	// A product bearer scopes the endpoint to its own product even without the product relationship (the
+	// reference's Zapier workaround).
+	//
+	// POST /v1/accounts/{account}/webhook-endpoints
+	CreateWebhookEndpoint(ctx context.Context, req CreateWebhookEndpointReq, params CreateWebhookEndpointParams) (*WebhookEndpointDocumentHeaders, error)
 	// DeleteGroup implements deleteGroup operation.
 	//
 	// Delete a group (members keep existing, group nulled).
@@ -122,6 +129,18 @@ type Handler interface {
 	//
 	// DELETE /v1/accounts/{account}/products/{productId}
 	DestroyProduct(ctx context.Context, params DestroyProductParams) error
+	// DestroyWebhookEndpoint implements destroyWebhookEndpoint operation.
+	//
+	// Delete a webhook endpoint.
+	//
+	// DELETE /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+	DestroyWebhookEndpoint(ctx context.Context, params DestroyWebhookEndpointParams) error
+	// DestroyWebhookEvent implements destroyWebhookEvent operation.
+	//
+	// Delete a webhook event.
+	//
+	// DELETE /v1/accounts/{account}/webhook-events/{webhookEventId}
+	DestroyWebhookEvent(ctx context.Context, params DestroyWebhookEventParams) error
 	// DetachGroupOwners implements detachGroupOwners operation.
 	//
 	// Detach group owners.
@@ -297,6 +316,19 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/users
 	ListUsers(ctx context.Context, params ListUsersParams) (*UserCollectionDocument, error)
+	// ListWebhookEndpoints implements listWebhookEndpoints operation.
+	//
+	// List webhook endpoints.
+	//
+	// GET /v1/accounts/{account}/webhook-endpoints
+	ListWebhookEndpoints(ctx context.Context, params ListWebhookEndpointsParams) (*WebhookEndpointListDocument, error)
+	// ListWebhookEvents implements listWebhookEvents operation.
+	//
+	// Supports the events[] filter (exact event names; an unknown name matches nothing) and the shared
+	// pagination parameters.
+	//
+	// GET /v1/accounts/{account}/webhook-events
+	ListWebhookEvents(ctx context.Context, params ListWebhookEventsParams) (*WebhookEventListDocument, error)
 	// Me implements me operation.
 	//
 	// The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -346,6 +378,13 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/reset-password
 	ResetUserPassword(ctx context.Context, req ResetUserPasswordReq, params ResetUserPasswordParams) (*UserDocument, error)
+	// RetryWebhookEvent implements retryWebhookEvent operation.
+	//
+	// Enqueues a fresh delivery: a NEW webhook event copying the payload, api version and idempotency
+	// token of the original.
+	//
+	// POST /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry
+	RetryWebhookEvent(ctx context.Context, req RetryWebhookEventReq, params RetryWebhookEventParams) (*WebhookEventDocumentHeaders, error)
 	// RevokeToken implements revokeToken operation.
 	//
 	// Revoke a token.
@@ -520,6 +559,18 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/users/{userId}/tokens/{tokenId}
 	ShowUserToken(ctx context.Context, params ShowUserTokenParams) (*TokenDocument, error)
+	// ShowWebhookEndpoint implements showWebhookEndpoint operation.
+	//
+	// Show a webhook endpoint.
+	//
+	// GET /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+	ShowWebhookEndpoint(ctx context.Context, params ShowWebhookEndpointParams) (*WebhookEndpointDocument, error)
+	// ShowWebhookEvent implements showWebhookEvent operation.
+	//
+	// Show a webhook event.
+	//
+	// GET /v1/accounts/{account}/webhook-events/{webhookEventId}
+	ShowWebhookEvent(ctx context.Context, params ShowWebhookEventParams) (*WebhookEventDocument, error)
 	// UnbanUser implements unbanUser operation.
 	//
 	// Unban a user.
@@ -580,6 +631,12 @@ type Handler interface {
 	//
 	// PATCH /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
 	UpdateUserSecondFactor(ctx context.Context, req UpdateUserSecondFactorReq, params UpdateUserSecondFactorParams) (*SecondFactorDocument, error)
+	// UpdateWebhookEndpoint implements updateWebhookEndpoint operation.
+	//
+	// Update a webhook endpoint.
+	//
+	// PATCH /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+	UpdateWebhookEndpoint(ctx context.Context, req UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (*WebhookEndpointDocument, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

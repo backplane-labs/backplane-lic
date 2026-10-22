@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/url"
 	"strings"
 	"time"
 
@@ -31,6 +30,9 @@ var ErrCodeTaken = errors.New("products: code taken")
 
 // Store is the scenario's consumer-side storage port.
 type Store interface { //nolint:interfacebloat // the scenario's full storage port
+	// Do runs fn in one transaction; the writes and the webhook
+	// events of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// ProductByID loads a product; ErrNotFound when none.
 	ProductByID(ctx context.Context, accountID, id uuid.UUID) (domain.Product, error)
 	// ProductByCode loads a product by downcased code.
@@ -115,21 +117,27 @@ type TokenInput struct {
 
 // Scenario runs the product reads and writes.
 type Scenario struct {
-	store  Store
-	tokens TokenStore
-	users  UserStore
-	events events.Publisher
-	rng    io.Reader
-	clock  func() time.Time
+	store    Store
+	tokens   TokenStore
+	users    UserStore
+	events   events.Publisher
+	resolver domain.Resolver
+	allowed  []*net.IPNet
+	rng      io.Reader
+	clock    func() time.Time
 }
 
 // New builds the scenario over the products, tokens and users
 // repositories.
 func New(
 	store Store, tokens TokenStore, users UserStore, publisher events.Publisher,
+	resolver domain.Resolver, allowedPrivate []*net.IPNet,
 	rng io.Reader, clock func() time.Time,
 ) Scenario {
-	return Scenario{store: store, tokens: tokens, users: users, events: publisher, rng: rng, clock: clock}
+	return Scenario{
+		store: store, tokens: tokens, users: users, events: publisher,
+		resolver: resolver, allowed: allowedPrivate, rng: rng, clock: clock,
+	}
 }
 
 // List is one index page.
@@ -270,11 +278,17 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 		return domain.Product{}, err
 	}
 
-	if err := s.store.InsertProduct(ctx, product); err != nil {
-		return domain.Product{}, mapWrite(err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertProduct(ctx, product); err != nil {
+			return mapWrite(err)
+		}
 
-	s.publish(ctx, "product.created", product)
+		s.publish(ctx, "product.created", product)
+
+		return nil
+	}); err != nil {
+		return domain.Product{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return product, nil
 }
@@ -337,11 +351,17 @@ func (s Scenario) Update(
 		return domain.Product{}, err
 	}
 
-	if err := s.store.UpdateProduct(ctx, product); err != nil {
-		return domain.Product{}, mapWrite(err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateProduct(ctx, product); err != nil {
+			return mapWrite(err)
+		}
 
-	s.publish(ctx, "product.updated", product)
+		s.publish(ctx, "product.updated", product)
+
+		return nil
+	}); err != nil {
+		return domain.Product{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return product, nil
 }
@@ -361,11 +381,17 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
-	if _, err := s.store.DeleteProduct(ctx, account.ID, product.ID); err != nil {
-		return fmt.Errorf("products: destroy: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if _, err := s.store.DeleteProduct(ctx, account.ID, product.ID); err != nil {
+			return fmt.Errorf("products: destroy: %w", err)
+		}
 
-	s.publish(ctx, "product.deleted", product)
+		s.publish(ctx, "product.deleted", product)
+
+		return nil
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return nil
 }
@@ -409,11 +435,17 @@ func (s Scenario) GenerateProductToken(
 		UpdatedAt:   now,
 	}
 
-	if err := s.tokens.InsertToken(ctx, token); err != nil {
-		return domain.Token{}, "", fmt.Errorf("products: token insert: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.tokens.InsertToken(ctx, token); err != nil {
+			return fmt.Errorf("products: token insert: %w", err)
+		}
 
-	_ = s.events.Publish(ctx, "token.generated", token)
+		_ = s.events.Publish(ctx, "token.generated", token)
+
+		return nil
+	}); err != nil {
+		return domain.Token{}, "", err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return token, raw, nil
 }
@@ -564,8 +596,10 @@ func (s Scenario) validate(product domain.Product) error {
 		attr("DISTRIBUTION_STRATEGY_NOT_ALLOWED", "unsupported distribution strategy", "distributionStrategy")
 	}
 
-	if detail, code, bad := validateURL(product.URL); bad {
-		attr(code, detail, "url")
+	if product.URL != "" {
+		for _, violation := range domain.ValidateURL(product.URL, productURLProtocols, s.resolver, s.allowed) {
+			attr(violation.Code, violation.Detail, "url")
+		}
 	}
 
 	if err := apperr.MultiOf(errs...); err != nil {
@@ -575,35 +609,9 @@ func (s Scenario) validate(product domain.Product) error {
 	return nil
 }
 
-// validateURL mirrors Product's URL validations: parse, protocol
-// allowlist, host blacklist and DNS resolution. Resolution failures
-// are skipped (the reference resolves at validation time; we keep the
-// parse/protocol/host shape checks exact and treat unresolvable hosts
-// as valid addresses).
-func validateURL(raw string) (detail, code string, bad bool) { //nolint:nonamedreturns,lll // documented in the signature comment
-	if raw == "" {
-		return "", "", false
-	}
-
-	parsed, err := url.Parse(raw)
-	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
-		return "must be a valid URL", "URL_INVALID", true
-	}
-
-	switch parsed.Scheme {
-	case "https", "http":
-	default:
-		return "must be a valid URL using one of the following protocols: https, http", "URL_PROTOCOL_INVALID", true
-	}
-
-	host := parsed.Hostname()
-
-	if strings.HasSuffix(host, ".keygen.sh") || host == "keygen.sh" || host == "localhost" || net.ParseIP(host) != nil {
-		return "must be a URL with a valid host", "URL_HOST_INVALID", true
-	}
-
-	return "", "", false
-}
+// productURLProtocols is the product's protocol set (the endpoint's
+// is https only).
+var productURLProtocols = []string{"https", "http"} //nolint:gochecknoglobals // typed-params data
 
 // mapWrite renders the write's index violation as the CODE_TAKEN 422.
 func mapWrite(err error) error {

@@ -29,6 +29,9 @@ var ErrPoolEmpty = errors.New("keys: pool empty")
 
 // Store is the scenario's consumer-side storage port.
 type Store interface {
+	// Do runs fn in one transaction; the writes and the webhook
+	// events of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// KeyByID loads a key (with its policy's product); ErrNotFound.
 	KeyByID(ctx context.Context, accountID, id uuid.UUID) (domain.Key, error)
 	// InsertKey writes a new row; ErrTaken on a collision.
@@ -207,11 +210,17 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 	key.CreatedAt = now
 	key.UpdatedAt = now
 
-	if err := s.store.InsertKey(ctx, key); err != nil {
-		return domain.Key{}, mapWrite(err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertKey(ctx, key); err != nil {
+			return mapWrite(err)
+		}
 
-	s.publish(ctx, "key.created", key)
+		s.publish(ctx, "key.created", key)
+
+		return nil
+	}); err != nil {
+		return domain.Key{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return key, nil
 }
@@ -248,11 +257,17 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 
 	key.UpdatedAt = s.clock()
 
-	if err := s.store.UpdateKey(ctx, account.ID, id, key.Key); err != nil {
-		return domain.Key{}, mapWrite(err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateKey(ctx, account.ID, id, key.Key); err != nil {
+			return mapWrite(err)
+		}
 
-	s.publish(ctx, "key.updated", key)
+		s.publish(ctx, "key.updated", key)
+
+		return nil
+	}); err != nil {
+		return domain.Key{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return key, nil
 }
@@ -272,11 +287,17 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, id uuid.U
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
-	if _, err := s.store.DeleteKey(ctx, account.ID, id); err != nil {
-		return fmt.Errorf("keys: destroy: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if _, err := s.store.DeleteKey(ctx, account.ID, id); err != nil {
+			return fmt.Errorf("keys: destroy: %w", err)
+		}
 
-	s.publish(ctx, "key.deleted", key)
+		s.publish(ctx, "key.deleted", key)
+
+		return nil
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return nil
 }

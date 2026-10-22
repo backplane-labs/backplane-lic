@@ -19,6 +19,7 @@ import (
 // storage ports.
 type KeysRepo struct {
 	q *db.Queries
+	txRunner
 }
 
 // KeyByID loads a key (with its policy's product) by id.

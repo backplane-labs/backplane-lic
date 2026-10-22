@@ -5,19 +5,18 @@
       "body": {
         "data": {
           "attributes": {
+            "code": null,
             "created": "\u003cts\u003e",
-            "email": "tok-\u003crun\u003e@example.com",
-            "firstName": null,
-            "fullName": null,
-            "lastName": null,
+            "distributionStrategy": "LICENSED",
             "metadata": {},
-            "role": "user",
-            "status": "ACTIVE",
-            "updated": "\u003cts\u003e"
+            "name": "Tokens tok \u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
           },
           "id": "\u003cuuid:1\u003e",
           "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
           },
           "relationships": {
             "account": {
@@ -29,39 +28,53 @@
                 "related": "/v1/accounts/\u003cuuid:2\u003e"
               }
             },
-            "group": {
-              "data": null,
+            "artifacts": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/group"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
               }
             },
             "licenses": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/licenses"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
               }
             },
             "machines": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/machines"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
               }
             },
-            "products": {
+            "platforms": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/products"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
               }
             },
-            "secondFactors": {
+            "policies": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/second-factors"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
               }
             },
             "tokens": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/tokens"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
               }
             }
           },
-          "type": "users"
+          "type": "products"
         }
       },
       "headers": {
@@ -70,7 +83,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "create user",
+      "name": "create tok",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -86,8 +99,8 @@
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "expiry": "\u003cts\u003e",
-            "kind": "user-token",
+            "expiry": null,
+            "kind": "product-token",
             "name": "scenario",
             "token": "\u003ctoken:1\u003e",
             "updated": "\u003cts\u003e"
@@ -109,10 +122,10 @@
             "bearer": {
               "data": {
                 "id": "\u003cuuid:1\u003e",
-                "type": "users"
+                "type": "products"
               },
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
               }
             }
           },
@@ -125,7 +138,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "mint token for user",
+      "name": "mint tok token",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -142,8 +155,8 @@
           {
             "attributes": {
               "created": "\u003cts\u003e",
-              "expiry": "\u003cts\u003e",
-              "kind": "user-token",
+              "expiry": null,
+              "kind": "product-token",
               "name": "scenario",
               "updated": "\u003cts\u003e"
             },
@@ -164,10 +177,10 @@
               "bearer": {
                 "data": {
                   "id": "\u003cuuid:1\u003e",
-                  "type": "users"
+                  "type": "products"
                 },
                 "links": {
-                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
                 }
               }
             },
@@ -198,8 +211,8 @@
           {
             "attributes": {
               "created": "\u003cts\u003e",
-              "expiry": "\u003cts\u003e",
-              "kind": "user-token",
+              "expiry": null,
+              "kind": "product-token",
               "name": "scenario",
               "updated": "\u003cts\u003e"
             },
@@ -220,10 +233,10 @@
               "bearer": {
                 "data": {
                   "id": "\u003cuuid:1\u003e",
-                  "type": "users"
+                  "type": "products"
                 },
                 "links": {
-                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
                 }
               }
             },
@@ -253,8 +266,8 @@
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "expiry": "\u003cts\u003e",
-            "kind": "user-token",
+            "expiry": null,
+            "kind": "product-token",
             "name": "scenario",
             "updated": "\u003cts\u003e"
           },
@@ -275,10 +288,10 @@
             "bearer": {
               "data": {
                 "id": "\u003cuuid:1\u003e",
-                "type": "users"
+                "type": "products"
               },
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
               }
             }
           },
@@ -307,8 +320,8 @@
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "expiry": "\u003cts\u003e",
-            "kind": "user-token",
+            "expiry": null,
+            "kind": "product-token",
             "name": "scenario",
             "token": "\u003ctoken:2\u003e",
             "updated": "\u003cts\u003e"
@@ -330,10 +343,10 @@
             "bearer": {
               "data": {
                 "id": "\u003cuuid:1\u003e",
-                "type": "users"
+                "type": "products"
               },
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
               }
             }
           },
@@ -362,8 +375,8 @@
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "expiry": "\u003cts\u003e",
-            "kind": "user-token",
+            "expiry": null,
+            "kind": "product-token",
             "name": "scenario",
             "updated": "\u003cts\u003e"
           },
@@ -384,10 +397,10 @@
             "bearer": {
               "data": {
                 "id": "\u003cuuid:1\u003e",
-                "type": "users"
+                "type": "products"
               },
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
               }
             }
           },

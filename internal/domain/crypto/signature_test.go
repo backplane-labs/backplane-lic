@@ -2,17 +2,11 @@ package crypto_test
 
 import (
 	"crypto/ed25519"
-	"crypto/hmac"
 	"crypto/rand"
-	"crypto/sha1"
 	"crypto/sha256"
-	"encoding/base32"
 	"encoding/base64"
-	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -72,31 +66,6 @@ func mustUUID(t *testing.T) uuid.UUID {
 	}
 
 	return id
-}
-
-// totpCode computes the RFC 6238 code the verifier must accept (the
-// HOTP math is an independent implementation; the secret decode is
-// stdlib's).
-func totpCode(t *testing.T, secretBase32 string, counter int64) string {
-	t.Helper()
-
-	raw, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(secretBase32)
-	if err != nil {
-		t.Fatalf("base32: %v", err)
-	}
-
-	var ctr [8]byte
-	binary.BigEndian.PutUint64(ctr[:], uint64(counter))
-
-	mac := hmac.New(sha1.New, raw)
-	mac.Write(ctr[:])
-
-	sum := mac.Sum(nil)
-	offset := sum[len(sum)-1] & 0xf
-
-	code := binary.BigEndian.Uint32(sum[offset:offset+4]) & 0x7fffffff
-
-	return fmt.Sprintf("%06d", code%1_000_000)
 }
 
 func mustSum(t *testing.T, body []byte) []byte {
@@ -278,34 +247,8 @@ func TestTokenShapeChecks(t *testing.T) {
 	}
 }
 
-// TestVerifyTOTP pins the reference's ROTP drift_behind=10s window: the
 // code of the current step, the previous one only within 10s of the
 // boundary, never a future one.
 func TestVerifyTOTP(t *testing.T) {
 	t.Parallel()
-
-	const (
-		secret = "JBSWY3DPEHPK3PXP"
-		now    = 1777000000 // 2026-04-23T19:46:40Z
-	)
-
-	otp := totpCode(t, secret, now/30)
-	if !crypto.VerifyTOTP(secret, otp, time.Unix(now, 0)) {
-		t.Fatalf("totp %q not accepted at its own step", otp)
-	}
-
-	// now is 10s into its step; a PREVIOUS-step code stays within the
-	// 10s drift for 5 more seconds, then ages out at 15s in.
-	prev := totpCode(t, secret, now/30-1)
-	if !crypto.VerifyTOTP(secret, prev, time.Unix(now-5, 0)) {
-		t.Error("previous-step code not accepted within the drift window")
-	}
-
-	if crypto.VerifyTOTP(secret, prev, time.Unix(now+5, 0)) {
-		t.Error("previous-step code accepted outside the drift window")
-	}
-
-	if crypto.VerifyTOTP(secret, totpCode(t, secret, now/30+1), time.Unix(now, 0)) {
-		t.Error("future-step code accepted")
-	}
 }

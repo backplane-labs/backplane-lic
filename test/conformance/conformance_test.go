@@ -15,7 +15,6 @@ import (
 	"github.com/gopherex/xlog"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
-	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	"github.com/backplane-labs/backplane-lic/internal/service"
 	"github.com/backplane-labs/backplane-lic/internal/testkit"
@@ -109,13 +108,14 @@ func serverUnderTest(t *testing.T) conformance.Target {
 		t.Fatalf("conformance: bootstrap: %v", err)
 	}
 
-	if err := testkit.SeedAdmin(ctx, store, spec.ID, conformance.AdminEmail, conformance.AdminPass); err != nil {
+	adminToken, err := testkit.SeedAdmin(ctx, store, spec.ID, conformance.AdminEmail)
+	if err != nil {
 		t.Fatalf("conformance: seed admin: %v", err)
 	}
 
-	handler := service.Handler(store, httpapi.NewMemoryThrottler(), spec, service.HTTP{}, "keygen.test", "conformance")
+	handler := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")
 
-	return &conformance.HandlerTarget{Handler: handler}
+	return &conformance.HandlerTarget{Handler: handler, AdminToken: adminToken}
 }
 
 func referenceURL() string {

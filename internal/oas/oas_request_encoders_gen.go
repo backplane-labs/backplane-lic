@@ -352,6 +352,37 @@ func encodeCreateUserTokenRequest(
 	}
 }
 
+func encodeCreateWebhookEndpointRequest(
+	req CreateWebhookEndpointReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *CreateWebhookEndpointReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *CreateWebhookEndpointReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *CreateWebhookEndpointReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeDeleteUserSecondFactorRequest(
 	req DeleteUserSecondFactorReq,
 	r *http.Request,
@@ -525,6 +556,37 @@ func encodeResetUserPasswordRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *ResetUserPasswordReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeRetryWebhookEventRequest(
+	req RetryWebhookEventReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *RetryWebhookEventReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *RetryWebhookEventReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *RetryWebhookEventReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{
@@ -804,6 +866,37 @@ func encodeUpdateUserSecondFactorRequest(
 		ht.SetBody(r, bytes.NewReader(encoded), contentType)
 		return nil
 	case *UpdateUserSecondFactorReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
+func encodeUpdateWebhookEndpointRequest(
+	req UpdateWebhookEndpointReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *UpdateWebhookEndpointReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *UpdateWebhookEndpointReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *UpdateWebhookEndpointReqApplicationVndAPIJSON:
 		const contentType = "application/vnd.api+json"
 		e := new(jx.Encoder)
 		{

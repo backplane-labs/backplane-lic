@@ -1,23 +1,22 @@
 {
-  "scenario": "second_factor_authz",
+  "scenario": "webhook_endpoints_product_bearer",
   "steps": [
     {
       "body": {
         "data": {
           "attributes": {
+            "code": null,
             "created": "\u003cts\u003e",
-            "email": "ro-\u003crun\u003e@example.com",
-            "firstName": null,
-            "fullName": null,
-            "lastName": null,
+            "distributionStrategy": "LICENSED",
             "metadata": {},
-            "role": "read-only",
-            "status": "ACTIVE",
-            "updated": "\u003cts\u003e"
+            "name": "Webhook Product \u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
           },
           "id": "\u003cuuid:1\u003e",
           "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
           },
           "relationships": {
             "account": {
@@ -29,39 +28,53 @@
                 "related": "/v1/accounts/\u003cuuid:2\u003e"
               }
             },
-            "group": {
-              "data": null,
+            "artifacts": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/group"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
               }
             },
             "licenses": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/licenses"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
               }
             },
             "machines": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/machines"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
               }
             },
-            "products": {
+            "platforms": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/products"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
               }
             },
-            "secondFactors": {
+            "policies": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/second-factors"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
               }
             },
             "tokens": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/tokens"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
               }
             }
           },
-          "type": "users"
+          "type": "products"
         }
       },
       "headers": {
@@ -70,7 +83,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "create read-only user",
+      "name": "create product",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -85,19 +98,18 @@
       "body": {
         "data": {
           "attributes": {
+            "code": null,
             "created": "\u003cts\u003e",
-            "email": "sfz-\u003crun\u003e@example.com",
-            "firstName": null,
-            "fullName": null,
-            "lastName": null,
+            "distributionStrategy": "LICENSED",
             "metadata": {},
-            "role": "user",
-            "status": "ACTIVE",
-            "updated": "\u003cts\u003e"
+            "name": "Webhook Other \u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
           },
           "id": "\u003cuuid:3\u003e",
           "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e"
           },
           "relationships": {
             "account": {
@@ -109,39 +121,53 @@
                 "related": "/v1/accounts/\u003cuuid:2\u003e"
               }
             },
-            "group": {
-              "data": null,
+            "artifacts": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/group"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/channels"
               }
             },
             "licenses": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/licenses"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/licenses"
               }
             },
             "machines": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/machines"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/machines"
               }
             },
-            "products": {
+            "platforms": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/products"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/platforms"
               }
             },
-            "secondFactors": {
+            "policies": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/releases"
               }
             },
             "tokens": {
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/tokens"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:3\u003e/users"
               }
             }
           },
-          "type": "users"
+          "type": "products"
         }
       },
       "headers": {
@@ -150,7 +176,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "create plain user",
+      "name": "create another product",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -167,8 +193,8 @@
           "attributes": {
             "created": "\u003cts\u003e",
             "expiry": null,
-            "kind": "read-only-token",
-            "name": null,
+            "kind": "product-token",
+            "name": "webhooks",
             "token": "\u003ctoken:1\u003e",
             "updated": "\u003cts\u003e"
           },
@@ -189,10 +215,10 @@
             "bearer": {
               "data": {
                 "id": "\u003cuuid:1\u003e",
-                "type": "users"
+                "type": "products"
               },
               "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
               }
             }
           },
@@ -205,7 +231,64 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "mint read-only token",
+      "name": "mint the product's token",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "apiVersion": "1.8",
+            "created": "\u003cts\u003e",
+            "signatureAlgorithm": "ed25519",
+            "subscriptions": [
+              "*"
+            ],
+            "updated": "\u003cts\u003e",
+            "url": "https://example.com/hook?product=\u003crun\u003e"
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/webhook-endpoints/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+              }
+            }
+          },
+          "type": "webhook-endpoints"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "product token scopes its own endpoint",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -218,40 +301,14 @@
     },
     {
       "body": {
-        "data": {
-          "attributes": {
-            "created": "\u003cts\u003e",
-            "expiry": "\u003cts\u003e",
-            "kind": "user-token",
-            "name": null,
-            "token": "\u003ctoken:2\u003e",
-            "updated": "\u003cts\u003e"
-          },
-          "id": "\u003cuuid:5\u003e",
-          "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/tokens/\u003cuuid:5\u003e"
-          },
-          "relationships": {
-            "account": {
-              "data": {
-                "id": "\u003cuuid:2\u003e",
-                "type": "accounts"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e"
-              }
-            },
-            "bearer": {
-              "data": {
-                "id": "\u003cuuid:3\u003e",
-                "type": "users"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
-              }
-            }
-          },
-          "type": "tokens"
+        "errors": [
+          {
+            "detail": "You do not have permission to complete the request (ensure the token or license is allowed to access all resources)",
+            "title": "Access denied"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
         }
       },
       "headers": {
@@ -260,7 +317,28 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "mint plain token",
+      "name": "product token cannot scope another product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 403
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "product token indexes its endpoints",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -275,37 +353,8 @@
       "body": {
         "errors": [
           {
-            "detail": "You do not have permission to complete the request (read only lacks permission to perform action)",
-            "title": "Access denied"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:6\u003e"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "read-only cannot create a factor",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 403
-    },
-    {
-      "body": {
-        "errors": [
-          {
             "code": "NOT_FOUND",
-            "detail": "The requested user '\u003cuuid:1\u003e' was not found",
+            "detail": "The requested webhook endpoint '\u003cuuid:5\u003e' was not found",
             "title": "Not found"
           }
         ],
@@ -319,7 +368,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "plain user cannot create another's factor",
+      "name": "destroy as the product bearer",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -329,60 +378,6 @@
         "X-Request-Id"
       ],
       "status": 404
-    },
-    {
-      "body": {
-        "data": {
-          "attributes": {
-            "created": "\u003cts\u003e",
-            "enabled": false,
-            "secret": "\u003cb32:1\u003e",
-            "updated": "\u003cts\u003e",
-            "uri": "otpauth://totp/Keygen:sfz-\u003crun\u003e%40example.com?secret=\u003cb32:1\u003e\u0026image=https%3A%2F%2Fkeygen.sh%2Fimages%2Flogomark.png\u0026issuer=Keygen"
-          },
-          "id": "\u003cuuid:8\u003e",
-          "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e/second-factors/\u003cuuid:8\u003e"
-          },
-          "relationships": {
-            "account": {
-              "data": {
-                "id": "\u003cuuid:2\u003e",
-                "type": "accounts"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e"
-              }
-            },
-            "user": {
-              "data": {
-                "id": "\u003cuuid:3\u003e",
-                "type": "users"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:3\u003e"
-              }
-            }
-          },
-          "type": "second-factors"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "own factor creation succeeds",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 201
     }
   ]
 }

@@ -1,0 +1,217 @@
+# Webhooks: endpoint CRUD and the webhook-events routes (index with the
+# events[] filter, show, destroy and the retry action). The delivery
+# itself is background work against the outbox rows.
+paths:
+  /v1/accounts/{account}/webhook-endpoints:
+    get:
+      operationId: listWebhookEndpoints
+      summary: List webhook endpoints
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Webhook endpoint collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpointListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createWebhookEndpoint
+      summary: Create a webhook endpoint
+      description: >-
+        A product bearer scopes the endpoint to its own product even
+        without the product relationship (the reference's Zapier
+        workaround).
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              # Free-form on the wire: the handler reproduces the
+              # reference's typed-params errors, the scenario the
+              # model's 422s (URL_*, SUBSCRIPTIONS_*, ...).
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Webhook endpoint document.
+          headers:
+            Location:
+              description: The new endpoint's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpointDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}:
+    get:
+      operationId: showWebhookEndpoint
+      summary: Show a webhook endpoint
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: webhookEndpointId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webhook endpoint document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpointDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateWebhookEndpoint
+      summary: Update a webhook endpoint
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: webhookEndpointId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Webhook endpoint document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpointDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyWebhookEndpoint
+      summary: Delete a webhook endpoint
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: webhookEndpointId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/webhook-events:
+    get:
+      operationId: listWebhookEvents
+      summary: List webhook events
+      description: >-
+        Supports the events[] filter (exact event names; an unknown
+        name matches nothing) and the shared pagination parameters.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Webhook event collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEventListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/webhook-events/{webhookEventId}:
+    get:
+      operationId: showWebhookEvent
+      summary: Show a webhook event
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: webhookEventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webhook event document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEventDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyWebhookEvent
+      summary: Delete a webhook event
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: webhookEventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry:
+    post:
+      operationId: retryWebhookEvent
+      summary: Retry a webhook event
+      description: >-
+        Enqueues a fresh delivery: a NEW webhook event copying the
+        payload, api version and idempotency token of the original.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - name: webhookEventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: The new webhook event document.
+          headers:
+            Location:
+              description: The new event's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/WebhookEventDocument"
+        default:
+          $ref: "#/components/responses/Error"

@@ -139,7 +139,8 @@ func validateRelationships(rels any, in *tokens.GenerateInput) error {
 	return nil
 }
 
-// validateMeta checks the top-level meta: only otp, required string.
+// validateMeta checks the body's meta: with second factors retired it
+// permits nothing.
 func validateMeta(body map[string]any) error {
 	raw, ok := body["meta"]
 	if !ok {
@@ -151,20 +152,9 @@ func validateMeta(body map[string]any) error {
 		return err
 	}
 
-	if err := unpermitted(obj, "/meta/", "otp"); err != nil {
-		return err
-	}
-
-	if _, present := obj["otp"]; !present {
-		return apperr.BadRequestSource("is missing", "/meta/otp")
-	}
-
-	_, err = str(obj["otp"], "/meta/otp")
-
-	return err
+	return unpermitted(obj, "/meta/")
 }
 
-// validateBearer checks relationships.bearer: a required data object of
 // {type, id} where type is one of the bearer resource types and id a
 // UUID.
 func validateBearer(raw any) (string, uuid.UUID, error) {

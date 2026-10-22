@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
@@ -33,9 +32,6 @@ type Store interface {
 	LicenseByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error)
 	// LicenseByID loads the license-auth slice by id; ErrNotFound.
 	LicenseByID(ctx context.Context, accountID uuid.UUID, id uuid.UUID) (domain.LicenseAuth, error)
-	// EnabledSecondFactorSecret loads the user's enabled TOTP secret;
-	// ok is false when the user has none.
-	EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (secret string, ok bool, err error)
 }
 
 // Scenario authenticates requests against an account.
@@ -63,13 +59,13 @@ type Result struct {
 }
 
 // Authenticate resolves the credential to a principal, in the reference's
-// exact error order. A FlowNone credential yields the TOKEN_MISSING 401.
+// exact error order. A FlowNone credential yields the TOKEN_MISSING 401;
+// the Basic email:password flow is retired (the 501).
 func (s Scenario) Authenticate(
 	ctx context.Context,
 	account domain.Account,
 	cred Credentials,
 	mode Mode,
-	otp string,
 ) (access.Principal, Result, error) {
 	r := cred.Resolve(mode)
 	result := Result{ChallengeScheme: r.ChallengeScheme()}
@@ -92,12 +88,10 @@ func (s Scenario) Authenticate(
 		return p, res, nil
 
 	case FlowPassword:
-		p, res, err := s.password(ctx, account, r.Email, r.Password, otp)
-		if err != nil {
-			return access.Principal{}, result, err
-		}
-
-		return p, res, nil
+		// End-user authentication is out of scope: the Basic
+		// email:password credential answers the 501 wherever it
+		// appears.
+		return access.Principal{}, result, apperr.NotImplemented()
 
 	case FlowNone:
 		return access.Principal{}, result, apperr.TokenUnauthorized("TOKEN_MISSING", "")
@@ -298,81 +292,6 @@ func (s Scenario) licenseByID(ctx context.Context, account domain.Account, id uu
 	}
 
 	return lic, nil
-}
-
-// password runs the Basic email:password flow in the reference's error
-// order (email, user, password support, blank, OTP, password), then the
-// banned check.
-func (s Scenario) password(
-	ctx context.Context,
-	account domain.Account,
-	email, password, otp string,
-) (access.Principal, Result, error) {
-	result := Result{ChallengeScheme: "Basic"}
-
-	if !emailRe.MatchString(email) {
-		return access.Principal{}, result, unauthorizedHeader("EMAIL_REQUIRED", "email is required")
-	}
-
-	user, err := s.store.UserByEmail(ctx, account.ID, email)
-	if errors.Is(err, ErrNotFound) {
-		return access.Principal{}, result, unauthorizedHeader("EMAIL_INVALID", "email must be valid")
-	}
-
-	if err != nil {
-		return access.Principal{}, result, fmt.Errorf("authn: user by email: %w", err)
-	}
-
-	if !user.HasPassword() {
-		return access.Principal{}, result, unauthorizedHeader("PASSWORD_NOT_SUPPORTED", "password is unsupported")
-	}
-
-	if password == "" {
-		return access.Principal{}, result, unauthorizedHeader("PASSWORD_REQUIRED", "password is required")
-	}
-
-	secret, enabled, err := s.store.EnabledSecondFactorSecret(ctx, user.ID)
-	if err != nil {
-		return access.Principal{}, result, fmt.Errorf("authn: second factor: %w", err)
-	}
-
-	if enabled {
-		if otp == "" {
-			return access.Principal{}, result, otpError("OTP_REQUIRED", "second factor is required")
-		}
-
-		if !crypto.VerifyTOTP(secret, otp, s.clock()) {
-			return access.Principal{}, result, otpError("OTP_INVALID", "second factor must be valid")
-		}
-	}
-
-	if bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(password)) != nil {
-		return access.Principal{}, result, unauthorizedHeader("PASSWORD_INVALID", "password must be valid")
-	}
-
-	if user.Banned() {
-		return access.Principal{}, result, apperr.Forbidden("USER_BANNED", "User is banned")
-	}
-
-	result.User = &user
-
-	return access.Principal{
-		BearerType:  access.BearerUser,
-		BearerID:    user.ID,
-		Role:        user.Role,
-		Permissions: access.RolePermissions(user.Role),
-	}, result, nil
-}
-
-// unauthorizedHeader builds a password-flow 401 pointing at the
-// Authorization header.
-func unauthorizedHeader(code, detail string) error {
-	return apperr.UnauthorizedSource(code, detail, "Authorization", "")
-}
-
-// otpError builds the OTP 401 pointing at the body's /meta/otp.
-func otpError(code, detail string) error {
-	return apperr.UnauthorizedSource(code, detail, "", "/meta/otp")
 }
 
 // version returns the trailing v<digits> marker of a versioned value.

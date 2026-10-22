@@ -7,7 +7,9 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"net"
 	"net/http"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -22,15 +24,17 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
+	"github.com/backplane-labs/backplane-lic/internal/app/jobs"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
-	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
-	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
+	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
+	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
+	whwebhook "github.com/backplane-labs/backplane-lic/internal/infra/webhook"
 )
 
 // Service is the built tree plus what main declares on the platform.
@@ -66,43 +70,91 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			return fmt.Errorf("bootstrap: %w", err)
 		}
 
-		throttler := httpapi.Throttler(httpapi.NewMemoryThrottler())
-		if client, ok := cache.Get(); ok {
-			throttler = httpapi.NewValkeyThrottler(client.Client())
-		}
-
-		late.set(Handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit))
+		late.set(Handler(store.Get(), spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit))
 
 		return nil
+	})
+
+	// Background work: the webhook delivery worker and the periodic
+	// jobs runner (both multi-replica safe: SKIP LOCKED claims, the
+	// jobs advisory lock).
+	allow := allowPrivate(cfg.HTTP.WebhookAllowPrivate)
+
+	delivery := deps.NewComponent(root, "webhook-delivery")
+	delivery.Go(func(ctx context.Context) error {
+		worker := whwebhook.NewWorker(store.Get(), spec.ID, domain.NetResolver{}, allow, time.Now)
+
+		return loop(ctx, 5*time.Second, worker.DeliverDue) //nolint:mnd // the poll cadence
+	})
+
+	runner := deps.NewComponent(root, "jobs")
+	runner.Go(func(ctx context.Context) error {
+		jobsRunner := jobs.NewRunner(store.Get(), time.Now)
+
+		return loop(ctx, time.Minute, jobsRunner.Tick)
 	})
 
 	return &Service{Store: store, Cache: cache, HTTP: late}, nil
 }
 
+// loop runs a periodic pass until the context ends.
+func loop(ctx context.Context, every time.Duration, pass func(context.Context) error) error {
+	ticker := time.NewTicker(every)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			if err := pass(ctx); err != nil {
+				return fmt.Errorf("background: %w", err)
+			}
+		}
+	}
+}
+
+// allowPrivate parses the configured private-address allowlist (bad
+// entries are skipped, like the reference's filter_map).
+func allowPrivate(cidrs []string) []*net.IPNet {
+	out := make([]*net.IPNet, 0, len(cidrs))
+	for _, cidr := range cidrs {
+		_, network, err := net.ParseCIDR(strings.TrimSpace(cidr))
+		if err != nil {
+			continue
+		}
+
+		out = append(out, network)
+	}
+
+	return out
+}
+
 // Handler builds the public API over an opened store: the production tree
 // calls it at start, tests call it directly.
 func Handler(
-	store *postgres.Store, throttler httpapi.Throttler, spec accounts.Spec, cfg HTTP, docsHost, revision string,
+	store *postgres.Store, spec accounts.Spec, cfg HTTP, docsHost, revision string,
 ) http.Handler {
 	clock := time.Now
-	publisher := events.Publisher(events.None{})
+	publisher := events.Publisher(webhooks.NewPublisher(store, spec.ID, rand.Reader, clock))
+	resolver := domain.Resolver(domain.NetResolver{})
+	allow := allowPrivate(cfg.WebhookAllowPrivate)
 
 	return httpapi.New(httpapi.Deps{
-		Accounts:       store.Accounts,
-		Authn:          authn.New(store, clock),
-		Users:          users.New(store, publisher, clock),
-		Tokens:         tokens.New(store, publisher, rand.Reader, clock),
-		Groups:         groups.New(store, publisher, clock),
-		SecondFactors:  secondfactors.New(store, publisher, rand.Reader, clock),
-		Passwords:      passwords.New(store, publisher, rand.Reader, clock),
-		Products:       products.New(store.Products, store.Tokens, store.Users, publisher, rand.Reader, clock),
+		Webhooks: webhooks.New(store, resolver, allow, rand.Reader, clock),
+		Accounts: store.Accounts,
+		Authn:    authn.New(store, clock),
+		Users:    users.New(store, publisher, clock),
+		Tokens:   tokens.New(store, publisher, rand.Reader, clock),
+		Groups:   groups.New(store, publisher, clock),
+		Products: products.New(store.Products, store.Tokens, store.Users,
+			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),
 		Entitlements:   entitlements.New(store.Entitlements, publisher, clock),
 		Keys:           keys.New(store.Keys, store.Policies, store.Products, publisher, clock),
 		Spec:           httpapi.Spec{ID: spec.ID, Slug: spec.Slug},
 		Revision:       revision,
 		DocsHost:       docsHost,
-		Throttle:       throttler,
 		TrustedProxies: cfg.TrustedProxies,
 		Clock:          clock,
 	})

@@ -567,7 +567,9 @@ CREATE UNIQUE INDEX second_factors_secret_key ON lic.second_factors (secret);
 CREATE TABLE lic.webhook_endpoints (
   id                   uuid PRIMARY KEY,
   account_id           uuid NOT NULL REFERENCES lic.accounts (id) ON DELETE CASCADE,
-  product_id           uuid REFERENCES lic.products (id) ON DELETE CASCADE,
+  -- No FK: the reference stores the relationship id verbatim (a
+  -- nonexistent product is accepted on create).
+  product_id           uuid,
   url                  text NOT NULL,
   subscriptions        jsonb NOT NULL DEFAULT '["*"]'::jsonb,
   signature_algorithm  text NOT NULL DEFAULT 'ed25519',
@@ -595,7 +597,9 @@ CREATE INDEX webhook_endpoints_product_idx ON lic.webhook_endpoints (product_id)
 CREATE TABLE lic.webhook_events (
   id                  uuid PRIMARY KEY,
   account_id          uuid NOT NULL REFERENCES lic.accounts (id) ON DELETE CASCADE,
-  webhook_endpoint_id uuid REFERENCES lic.webhook_endpoints (id) ON DELETE SET NULL,
+  -- No FK: the endpoint row may be destroyed between the broadcast and
+  -- the outbox write (the reference's association is optional).
+  webhook_endpoint_id uuid,
   -- URL snapshot copied from the endpoint at creation time.
   endpoint            text NOT NULL,
   event               text NOT NULL,

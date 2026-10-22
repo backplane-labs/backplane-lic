@@ -26,6 +26,9 @@ var ErrCodeTaken = errors.New("entitlements: code taken")
 
 // Store is the scenario's consumer-side storage port.
 type Store interface {
+	// Do runs fn in one transaction; the writes and the webhook
+	// events of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// EntitlementByID loads an entitlement; ErrNotFound when none.
 	EntitlementByID(ctx context.Context, accountID, id uuid.UUID) (domain.Entitlement, error)
 	// EntitlementByCode loads an entitlement by downcased code.
@@ -208,11 +211,17 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 		return domain.Entitlement{}, err
 	}
 
-	if err := s.store.InsertEntitlement(ctx, entitlement); err != nil {
-		return domain.Entitlement{}, mapWrite(err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertEntitlement(ctx, entitlement); err != nil {
+			return mapWrite(err)
+		}
 
-	s.publish(ctx, "entitlement.created", entitlement)
+		s.publish(ctx, "entitlement.created", entitlement)
+
+		return nil
+	}); err != nil {
+		return domain.Entitlement{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return entitlement, nil
 }
@@ -252,11 +261,17 @@ func (s Scenario) Update(
 		return domain.Entitlement{}, err
 	}
 
-	if err := s.store.UpdateEntitlement(ctx, entitlement); err != nil {
-		return domain.Entitlement{}, mapWrite(err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateEntitlement(ctx, entitlement); err != nil {
+			return mapWrite(err)
+		}
 
-	s.publish(ctx, "entitlement.updated", entitlement)
+		s.publish(ctx, "entitlement.updated", entitlement)
+
+		return nil
+	}); err != nil {
+		return domain.Entitlement{}, err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return entitlement, nil
 }
@@ -276,11 +291,17 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
-	if _, err := s.store.DeleteEntitlement(ctx, account.ID, entitlement.ID); err != nil {
-		return fmt.Errorf("entitlements: destroy: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if _, err := s.store.DeleteEntitlement(ctx, account.ID, entitlement.ID); err != nil {
+			return fmt.Errorf("entitlements: destroy: %w", err)
+		}
 
-	s.publish(ctx, "entitlement.deleted", entitlement)
+		s.publish(ctx, "entitlement.deleted", entitlement)
+
+		return nil
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
+	}
 
 	return nil
 }

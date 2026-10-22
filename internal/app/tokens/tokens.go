@@ -4,7 +4,6 @@ package tokens
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -112,11 +111,17 @@ func (s Scenario) Generate(
 // selected (mirroring the reference's TokenPolicy#generate? — only
 // admin/developer may mint for a plain user) or the principal itself.
 func (s Scenario) resolveBearer(
-	ctx context.Context,
-	account domain.Account,
+	_ context.Context,
+	_ domain.Account,
 	principal access.Principal,
 	in GenerateInput,
 ) (uuid.UUID, domain.Role, string, error) {
+	if in.BearerType == access.BearerUser || (in.BearerType == "" && principal.BearerType == access.BearerUser) {
+		// User-bearer tokens are retired with end-user authentication:
+		// bearers are admin, product and license only.
+		return uuid.Nil, "", "", apperr.NotImplemented()
+	}
+
 	if in.BearerType == "" {
 		if !allowsGenerateSelf(principal) {
 			// The policy admits no self-token for this bearer kind (a
@@ -127,31 +132,10 @@ func (s Scenario) resolveBearer(
 		return principal.BearerID, principal.Role, storedBearerType(principal.BearerType), nil
 	}
 
-	if in.BearerType != access.BearerUser {
-		// The typed shape allows product/license bearers, but the
-		// token policy never admits them (their sub-routes arrive
-		// with their own scenarios).
-		return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
-	}
-
-	user, err := s.store.BearerUser(ctx, account.ID, in.BearerID)
-	if errors.Is(err, ErrNotFound) {
-		return uuid.Nil, "", "", apperr.NotFound("user", in.BearerID.String())
-	}
-
-	if err != nil {
-		return uuid.Nil, "", "", fmt.Errorf("tokens: bearer user: %w", err)
-	}
-
-	// The caller's own bearer always passes the first clause; an
-	// override to another bearer only the admin/developer-for-user
-	// clause.
-	self := principal.BearerType == access.BearerUser && user.ID == principal.BearerID
-	if !self && !allowsGenerateFor(principal, user.Role) {
-		return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
-	}
-
-	return user.ID, user.Role, storedBearerTypeUser, nil
+	// The typed shape allows product/license bearers, but the token
+	// policy never admits them (their sub-routes arrive with their own
+	// scenarios).
+	return uuid.Nil, "", "", apperr.ForbiddenReason(access.ReasonAllResources)
 }
 
 func expiry(explicit *time.Time, role domain.Role, now time.Time) *time.Time {
@@ -190,19 +174,6 @@ func allowsGenerateSelf(p access.Principal) bool {
 	case domain.RoleAdmin, domain.RoleDeveloper, domain.RoleSalesAgent,
 		domain.RoleSupportRole, domain.RoleReadOnly, domain.RoleUser:
 		return p.BearerType == access.BearerUser
-	default:
-		return false
-	}
-}
-
-// allowsGenerateFor mirrors the override clauses of TokenPolicy#generate?:
-// an admin or developer may mint tokens for plain users (and for
-// themselves); sales/support/read-only and everyone else may not mint
-// for anyone but themselves (the self case never reaches an override).
-func allowsGenerateFor(p access.Principal, target domain.Role) bool {
-	switch p.Role {
-	case domain.RoleAdmin, domain.RoleDeveloper:
-		return target == domain.RoleUser
 	default:
 		return false
 	}

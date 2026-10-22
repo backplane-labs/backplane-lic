@@ -1,0 +1,328 @@
+{
+  "scenario": "webhook_endpoints_validation",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "URL_PROTOCOL_INVALID",
+            "detail": "must be a valid URL using one of the following protocols: https",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-url"
+            },
+            "source": {
+              "pointer": "/data/attributes/url"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:1\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "http is refused",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "URL_HOST_INVALID",
+            "detail": "must be a URL with a valid host",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-url"
+            },
+            "source": {
+              "pointer": "/data/attributes/url"
+            },
+            "title": "Unprocessable resource"
+          },
+          {
+            "code": "URL_ADDRESS_INVALID",
+            "detail": "must resolve to a valid address",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-url"
+            },
+            "source": {
+              "pointer": "/data/attributes/url"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:2\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "localhost is a bad host and address",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "URL_ADDRESS_INVALID",
+            "detail": "must resolve to a valid address",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-url"
+            },
+            "source": {
+              "pointer": "/data/attributes/url"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:3\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unresolvable host",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "SUBSCRIPTIONS_TOO_SHORT",
+            "detail": "must have at least 1 webhook event subscription",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-subscriptions"
+            },
+            "source": {
+              "pointer": "/data/attributes/subscriptions"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:4\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "empty subscriptions",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "SUBSCRIPTIONS_NOT_ALLOWED",
+            "detail": "unsupported webhook event type for subscription",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-subscriptions"
+            },
+            "source": {
+              "pointer": "/data/attributes/subscriptions"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unknown subscription",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "SIGNATURE_ALGORITHM_NOT_ALLOWED",
+            "detail": "unsupported signature algorithm",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/webhook-endpoints/#webhook-endpoints-object-attrs-signatureAlgorithm"
+            },
+            "source": {
+              "pointer": "/data/attributes/signatureAlgorithm"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unknown signature algorithm",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is invalid",
+            "source": {
+              "pointer": "/data/attributes/apiVersion"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:7\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unsupported api version",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/data/attributes/url"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:8\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "missing url",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is invalid",
+            "source": {
+              "pointer": "/data/relationships/product/data/type"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "wrong product relationship type",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    }
+  ]
+}

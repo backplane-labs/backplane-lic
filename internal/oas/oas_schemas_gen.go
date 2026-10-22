@@ -797,6 +797,36 @@ type CreateUserTokenReqEmptyBody struct{}
 
 func (*CreateUserTokenReqEmptyBody) createUserTokenReq() {}
 
+type CreateWebhookEndpointReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateWebhookEndpointReqApplicationJSON) init() CreateWebhookEndpointReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateWebhookEndpointReqApplicationJSON) createWebhookEndpointReq() {}
+
+type CreateWebhookEndpointReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateWebhookEndpointReqApplicationVndAPIJSON) init() CreateWebhookEndpointReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateWebhookEndpointReqApplicationVndAPIJSON) createWebhookEndpointReq() {}
+
+type CreateWebhookEndpointReqEmptyBody struct{}
+
+func (*CreateWebhookEndpointReqEmptyBody) createWebhookEndpointReq() {}
+
 // DeleteGroupNoContent is response for DeleteGroup operation.
 type DeleteGroupNoContent struct{}
 
@@ -847,6 +877,12 @@ type DestroyPolicyNoContent struct{}
 
 // DestroyProductNoContent is response for DestroyProduct operation.
 type DestroyProductNoContent struct{}
+
+// DestroyWebhookEndpointNoContent is response for DestroyWebhookEndpoint operation.
+type DestroyWebhookEndpointNoContent struct{}
+
+// DestroyWebhookEventNoContent is response for DestroyWebhookEvent operation.
+type DestroyWebhookEventNoContent struct{}
 
 // DetachGroupOwnersNoContent is response for DetachGroupOwners operation.
 type DetachGroupOwnersNoContent struct{}
@@ -4724,6 +4760,36 @@ func (s *ResourceLinks) SetSelf(val string) {
 	s.Self = val
 }
 
+type RetryWebhookEventReqApplicationJSON map[string]jx.Raw
+
+func (s *RetryWebhookEventReqApplicationJSON) init() RetryWebhookEventReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*RetryWebhookEventReqApplicationJSON) retryWebhookEventReq() {}
+
+type RetryWebhookEventReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *RetryWebhookEventReqApplicationVndAPIJSON) init() RetryWebhookEventReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*RetryWebhookEventReqApplicationVndAPIJSON) retryWebhookEventReq() {}
+
+type RetryWebhookEventReqEmptyBody struct{}
+
+func (*RetryWebhookEventReqEmptyBody) retryWebhookEventReq() {}
+
 // RevokeTokenNoContent is response for RevokeToken operation.
 type RevokeTokenNoContent struct{}
 
@@ -5639,6 +5705,36 @@ type UpdateUserSecondFactorReqEmptyBody struct{}
 
 func (*UpdateUserSecondFactorReqEmptyBody) updateUserSecondFactorReq() {}
 
+type UpdateWebhookEndpointReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateWebhookEndpointReqApplicationJSON) init() UpdateWebhookEndpointReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateWebhookEndpointReqApplicationJSON) updateWebhookEndpointReq() {}
+
+type UpdateWebhookEndpointReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateWebhookEndpointReqApplicationVndAPIJSON) init() UpdateWebhookEndpointReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateWebhookEndpointReqApplicationVndAPIJSON) updateWebhookEndpointReq() {}
+
+type UpdateWebhookEndpointReqEmptyBody struct{}
+
+func (*UpdateWebhookEndpointReqEmptyBody) updateWebhookEndpointReq() {}
+
 // Ref: #/components/schemas/UserAttributes
 type UserAttributes struct {
 	FullName  NilString `json:"fullName"`
@@ -6445,6 +6541,619 @@ func (s *UserResourceType) UnmarshalText(data []byte) error {
 	switch UserResourceType(data) {
 	case UserResourceTypeUsers:
 		*s = UserResourceTypeUsers
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/WebhookEndpointAttributes
+type WebhookEndpointAttributes struct {
+	URL                string    `json:"url"`
+	Subscriptions      []string  `json:"subscriptions"`
+	SignatureAlgorithm string    `json:"signatureAlgorithm"`
+	ApiVersion         string    `json:"apiVersion"`
+	Created            Timestamp `json:"created"`
+	Updated            Timestamp `json:"updated"`
+}
+
+// GetURL returns the value of URL.
+func (s *WebhookEndpointAttributes) GetURL() string {
+	return s.URL
+}
+
+// GetSubscriptions returns the value of Subscriptions.
+func (s *WebhookEndpointAttributes) GetSubscriptions() []string {
+	return s.Subscriptions
+}
+
+// GetSignatureAlgorithm returns the value of SignatureAlgorithm.
+func (s *WebhookEndpointAttributes) GetSignatureAlgorithm() string {
+	return s.SignatureAlgorithm
+}
+
+// GetApiVersion returns the value of ApiVersion.
+func (s *WebhookEndpointAttributes) GetApiVersion() string {
+	return s.ApiVersion
+}
+
+// GetCreated returns the value of Created.
+func (s *WebhookEndpointAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *WebhookEndpointAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetURL sets the value of URL.
+func (s *WebhookEndpointAttributes) SetURL(val string) {
+	s.URL = val
+}
+
+// SetSubscriptions sets the value of Subscriptions.
+func (s *WebhookEndpointAttributes) SetSubscriptions(val []string) {
+	s.Subscriptions = val
+}
+
+// SetSignatureAlgorithm sets the value of SignatureAlgorithm.
+func (s *WebhookEndpointAttributes) SetSignatureAlgorithm(val string) {
+	s.SignatureAlgorithm = val
+}
+
+// SetApiVersion sets the value of ApiVersion.
+func (s *WebhookEndpointAttributes) SetApiVersion(val string) {
+	s.ApiVersion = val
+}
+
+// SetCreated sets the value of Created.
+func (s *WebhookEndpointAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *WebhookEndpointAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/WebhookEndpointDocument
+type WebhookEndpointDocument struct {
+	Data WebhookEndpointResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *WebhookEndpointDocument) GetData() WebhookEndpointResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *WebhookEndpointDocument) SetData(val WebhookEndpointResource) {
+	s.Data = val
+}
+
+// WebhookEndpointDocumentHeaders wraps WebhookEndpointDocument with response headers.
+type WebhookEndpointDocumentHeaders struct {
+	Location OptString
+	Response WebhookEndpointDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *WebhookEndpointDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *WebhookEndpointDocumentHeaders) GetResponse() WebhookEndpointDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *WebhookEndpointDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *WebhookEndpointDocumentHeaders) SetResponse(val WebhookEndpointDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/WebhookEndpointListDocument
+type WebhookEndpointListDocument struct {
+	Data  []WebhookEndpointResource `json:"data"`
+	Links OptListLinks              `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *WebhookEndpointListDocument) GetData() []WebhookEndpointResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *WebhookEndpointListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *WebhookEndpointListDocument) SetData(val []WebhookEndpointResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *WebhookEndpointListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/WebhookEndpointResource
+type WebhookEndpointResource struct {
+	Type          WebhookEndpointResourceType          `json:"type"`
+	ID            string                               `json:"id"`
+	Attributes    WebhookEndpointAttributes            `json:"attributes"`
+	Relationships WebhookEndpointResourceRelationships `json:"relationships"`
+	Links         ResourceLinks                        `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *WebhookEndpointResource) GetType() WebhookEndpointResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *WebhookEndpointResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *WebhookEndpointResource) GetAttributes() WebhookEndpointAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *WebhookEndpointResource) GetRelationships() WebhookEndpointResourceRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *WebhookEndpointResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *WebhookEndpointResource) SetType(val WebhookEndpointResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *WebhookEndpointResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *WebhookEndpointResource) SetAttributes(val WebhookEndpointAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *WebhookEndpointResource) SetRelationships(val WebhookEndpointResourceRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *WebhookEndpointResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type WebhookEndpointResourceRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	Product ToOneRelationship `json:"product"`
+}
+
+// GetAccount returns the value of Account.
+func (s *WebhookEndpointResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *WebhookEndpointResourceRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// SetAccount sets the value of Account.
+func (s *WebhookEndpointResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *WebhookEndpointResourceRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+type WebhookEndpointResourceType string
+
+const (
+	WebhookEndpointResourceTypeWebhookEndpoints WebhookEndpointResourceType = "webhook-endpoints"
+)
+
+// AllValues returns all WebhookEndpointResourceType values.
+func (WebhookEndpointResourceType) AllValues() []WebhookEndpointResourceType {
+	return []WebhookEndpointResourceType{
+		WebhookEndpointResourceTypeWebhookEndpoints,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookEndpointResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookEndpointResourceTypeWebhookEndpoints:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookEndpointResourceType) UnmarshalText(data []byte) error {
+	switch WebhookEndpointResourceType(data) {
+	case WebhookEndpointResourceTypeWebhookEndpoints:
+		*s = WebhookEndpointResourceTypeWebhookEndpoints
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/WebhookEventAttributes
+type WebhookEventAttributes struct {
+	Endpoint         string                       `json:"endpoint"`
+	Payload          string                       `json:"payload"`
+	Event            string                       `json:"event"`
+	Status           WebhookEventAttributesStatus `json:"status"`
+	LastResponseCode NilInt                       `json:"lastResponseCode"`
+	LastResponseBody NilString                    `json:"lastResponseBody"`
+	ApiVersion       string                       `json:"apiVersion"`
+	Created          Timestamp                    `json:"created"`
+	Updated          Timestamp                    `json:"updated"`
+}
+
+// GetEndpoint returns the value of Endpoint.
+func (s *WebhookEventAttributes) GetEndpoint() string {
+	return s.Endpoint
+}
+
+// GetPayload returns the value of Payload.
+func (s *WebhookEventAttributes) GetPayload() string {
+	return s.Payload
+}
+
+// GetEvent returns the value of Event.
+func (s *WebhookEventAttributes) GetEvent() string {
+	return s.Event
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookEventAttributes) GetStatus() WebhookEventAttributesStatus {
+	return s.Status
+}
+
+// GetLastResponseCode returns the value of LastResponseCode.
+func (s *WebhookEventAttributes) GetLastResponseCode() NilInt {
+	return s.LastResponseCode
+}
+
+// GetLastResponseBody returns the value of LastResponseBody.
+func (s *WebhookEventAttributes) GetLastResponseBody() NilString {
+	return s.LastResponseBody
+}
+
+// GetApiVersion returns the value of ApiVersion.
+func (s *WebhookEventAttributes) GetApiVersion() string {
+	return s.ApiVersion
+}
+
+// GetCreated returns the value of Created.
+func (s *WebhookEventAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *WebhookEventAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetEndpoint sets the value of Endpoint.
+func (s *WebhookEventAttributes) SetEndpoint(val string) {
+	s.Endpoint = val
+}
+
+// SetPayload sets the value of Payload.
+func (s *WebhookEventAttributes) SetPayload(val string) {
+	s.Payload = val
+}
+
+// SetEvent sets the value of Event.
+func (s *WebhookEventAttributes) SetEvent(val string) {
+	s.Event = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookEventAttributes) SetStatus(val WebhookEventAttributesStatus) {
+	s.Status = val
+}
+
+// SetLastResponseCode sets the value of LastResponseCode.
+func (s *WebhookEventAttributes) SetLastResponseCode(val NilInt) {
+	s.LastResponseCode = val
+}
+
+// SetLastResponseBody sets the value of LastResponseBody.
+func (s *WebhookEventAttributes) SetLastResponseBody(val NilString) {
+	s.LastResponseBody = val
+}
+
+// SetApiVersion sets the value of ApiVersion.
+func (s *WebhookEventAttributes) SetApiVersion(val string) {
+	s.ApiVersion = val
+}
+
+// SetCreated sets the value of Created.
+func (s *WebhookEventAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *WebhookEventAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+type WebhookEventAttributesStatus string
+
+const (
+	WebhookEventAttributesStatusDELIVERING WebhookEventAttributesStatus = "DELIVERING"
+	WebhookEventAttributesStatusDELIVERED  WebhookEventAttributesStatus = "DELIVERED"
+	WebhookEventAttributesStatusFAILING    WebhookEventAttributesStatus = "FAILING"
+	WebhookEventAttributesStatusFAILED     WebhookEventAttributesStatus = "FAILED"
+)
+
+// AllValues returns all WebhookEventAttributesStatus values.
+func (WebhookEventAttributesStatus) AllValues() []WebhookEventAttributesStatus {
+	return []WebhookEventAttributesStatus{
+		WebhookEventAttributesStatusDELIVERING,
+		WebhookEventAttributesStatusDELIVERED,
+		WebhookEventAttributesStatusFAILING,
+		WebhookEventAttributesStatusFAILED,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookEventAttributesStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookEventAttributesStatusDELIVERING:
+		return []byte(s), nil
+	case WebhookEventAttributesStatusDELIVERED:
+		return []byte(s), nil
+	case WebhookEventAttributesStatusFAILING:
+		return []byte(s), nil
+	case WebhookEventAttributesStatusFAILED:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookEventAttributesStatus) UnmarshalText(data []byte) error {
+	switch WebhookEventAttributesStatus(data) {
+	case WebhookEventAttributesStatusDELIVERING:
+		*s = WebhookEventAttributesStatusDELIVERING
+		return nil
+	case WebhookEventAttributesStatusDELIVERED:
+		*s = WebhookEventAttributesStatusDELIVERED
+		return nil
+	case WebhookEventAttributesStatusFAILING:
+		*s = WebhookEventAttributesStatusFAILING
+		return nil
+	case WebhookEventAttributesStatusFAILED:
+		*s = WebhookEventAttributesStatusFAILED
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/WebhookEventDocument
+type WebhookEventDocument struct {
+	Data WebhookEventResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *WebhookEventDocument) GetData() WebhookEventResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *WebhookEventDocument) SetData(val WebhookEventResource) {
+	s.Data = val
+}
+
+// WebhookEventDocumentHeaders wraps WebhookEventDocument with response headers.
+type WebhookEventDocumentHeaders struct {
+	Location OptString
+	Response WebhookEventDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *WebhookEventDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *WebhookEventDocumentHeaders) GetResponse() WebhookEventDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *WebhookEventDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *WebhookEventDocumentHeaders) SetResponse(val WebhookEventDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/WebhookEventListDocument
+type WebhookEventListDocument struct {
+	Data  []WebhookEventResource `json:"data"`
+	Links OptListLinks           `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *WebhookEventListDocument) GetData() []WebhookEventResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *WebhookEventListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *WebhookEventListDocument) SetData(val []WebhookEventResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *WebhookEventListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/WebhookEventMeta
+type WebhookEventMeta struct {
+	IdempotencyToken string `json:"idempotencyToken"`
+}
+
+// GetIdempotencyToken returns the value of IdempotencyToken.
+func (s *WebhookEventMeta) GetIdempotencyToken() string {
+	return s.IdempotencyToken
+}
+
+// SetIdempotencyToken sets the value of IdempotencyToken.
+func (s *WebhookEventMeta) SetIdempotencyToken(val string) {
+	s.IdempotencyToken = val
+}
+
+// Ref: #/components/schemas/WebhookEventResource
+type WebhookEventResource struct {
+	Type          WebhookEventResourceType          `json:"type"`
+	ID            string                            `json:"id"`
+	Attributes    WebhookEventAttributes            `json:"attributes"`
+	Relationships WebhookEventResourceRelationships `json:"relationships"`
+	Links         ResourceLinks                     `json:"links"`
+	Meta          WebhookEventMeta                  `json:"meta"`
+}
+
+// GetType returns the value of Type.
+func (s *WebhookEventResource) GetType() WebhookEventResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *WebhookEventResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *WebhookEventResource) GetAttributes() WebhookEventAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *WebhookEventResource) GetRelationships() WebhookEventResourceRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *WebhookEventResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// GetMeta returns the value of Meta.
+func (s *WebhookEventResource) GetMeta() WebhookEventMeta {
+	return s.Meta
+}
+
+// SetType sets the value of Type.
+func (s *WebhookEventResource) SetType(val WebhookEventResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *WebhookEventResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *WebhookEventResource) SetAttributes(val WebhookEventAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *WebhookEventResource) SetRelationships(val WebhookEventResourceRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *WebhookEventResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *WebhookEventResource) SetMeta(val WebhookEventMeta) {
+	s.Meta = val
+}
+
+type WebhookEventResourceRelationships struct {
+	Account ToOneRelationship `json:"account"`
+}
+
+// GetAccount returns the value of Account.
+func (s *WebhookEventResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// SetAccount sets the value of Account.
+func (s *WebhookEventResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+type WebhookEventResourceType string
+
+const (
+	WebhookEventResourceTypeWebhookEvents WebhookEventResourceType = "webhook-events"
+)
+
+// AllValues returns all WebhookEventResourceType values.
+func (WebhookEventResourceType) AllValues() []WebhookEventResourceType {
+	return []WebhookEventResourceType{
+		WebhookEventResourceTypeWebhookEvents,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookEventResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookEventResourceTypeWebhookEvents:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookEventResourceType) UnmarshalText(data []byte) error {
+	switch WebhookEventResourceType(data) {
+	case WebhookEventResourceTypeWebhookEvents:
+		*s = WebhookEventResourceTypeWebhookEvents
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

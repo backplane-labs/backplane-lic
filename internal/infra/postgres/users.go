@@ -125,20 +125,6 @@ func (r UsersRepo) UserHasActiveLicense(ctx context.Context, accountID, id uuid.
 	return row.Active, nil
 }
 
-// EnabledSecondFactorSecret loads the user's enabled TOTP secret.
-func (r UsersRepo) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (string, bool, error) {
-	row, err := r.q.GetEnabledSecondFactorSecret(ctx, userID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return "", false, nil
-	}
-
-	if err != nil {
-		return "", false, fmt.Errorf("postgres: second factor of %s: %w", userID, err)
-	}
-
-	return row.Secret, true, nil
-}
-
 // ListUsers answers the filtered, paginated page with each row's
 // computed status.
 func (r UsersRepo) ListUsers(

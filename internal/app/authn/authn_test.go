@@ -210,7 +210,7 @@ func TestDemotedUserLosesAccess(t *testing.T) {
 	}
 
 	principal, result, err := scenario.Authenticate(
-		ctx, account, authn.Parse("Bearer "+raw, ""), authn.ModeToken, "",
+		ctx, account, authn.Parse("Bearer "+raw, ""), authn.ModeToken,
 	)
 	if err != nil {
 		t.Fatalf("authenticate: %v", err)
@@ -260,7 +260,7 @@ func TestTokenShapeErrors(t *testing.T) {
 		{"Bearer admin-nonexistent", "TOKEN_INVALID"},
 	} {
 		_, _, err := scenario.Authenticate(
-			ctx, account, authn.Parse(tc.header, ""), authn.ModeToken, "",
+			ctx, account, authn.Parse(tc.header, ""), authn.ModeToken,
 		)
 		if err == nil {
 			t.Errorf("%q: expected an error", tc.header)

@@ -33,6 +33,11 @@ type HTTP struct {
 	// X-Forwarded-For is honored when resolving the client address;
 	// empty means every request is keyed by its remote address.
 	TrustedProxies []string `json:"trustedProxies" schemapb:"description=Proxies"` //nolint:tagliatelle // camelCase
+	// WebhookAllowPrivate lists the otherwise-private CIDRs webhook
+	// endpoint URLs may resolve to (the self-hosted escape hatch for
+	// internal receivers; the reference's
+	// KEYGEN_ALLOWED_PRIVATE_ADDRESSES).
+	WebhookAllowPrivate []string `json:"webhookAllowPrivate" schemapb:"description=Private webhook CIDRs"` //nolint:tagliatelle,lll // camelCase
 }
 
 // Account identifies the configured account; both its id and its slug

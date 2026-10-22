@@ -76,12 +76,14 @@ func (s Scenario) SetGroup(
 		}
 	}
 
-	if err := s.store.UpdateUser(ctx, user); err != nil {
-		return Listed{}, fmt.Errorf("users: set group: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateUser(ctx, user); err != nil {
+			return fmt.Errorf("users: set group: %w", err)
+		}
 
-	if err := s.events.Publish(ctx, "user.group.updated", user); err != nil {
-		return Listed{}, fmt.Errorf("users: set group: %w", err)
+		return s.events.Publish(ctx, "user.group.updated", user)
+	}); err != nil {
+		return Listed{}, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	status, err := s.status(ctx, user)

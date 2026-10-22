@@ -12,11 +12,6 @@ import (
 // which the normaliser masks) and never depends on global resource counts.
 func scenarios() []conformance.Scenario {
 	admin := conformance.Auth{Kind: conformance.AuthAdmin}
-	basic := conformance.Auth{
-		Kind:      conformance.AuthBasic,
-		BasicUser: conformance.AdminEmail,
-		BasicPass: conformance.AdminPass,
-	}
 	account := "/v1/accounts/" + conformance.AccountSlug
 	tokens := account + "/tokens"
 
@@ -40,38 +35,6 @@ func scenarios() []conformance.Scenario {
 			},
 		},
 		{
-			Name: "token_generate_basic",
-			Steps: []conformance.Step{
-				{
-					Name:   "generate with password",
-					Method: http.MethodPost,
-					Path:   tokens,
-					Auth:   basic,
-					Body:   `{"data":{"type":"tokens","attributes":{"name":"conformance-{{run}}"}}}`,
-					Capture: map[string]string{
-						"token": "data.attributes.token",
-					},
-				},
-				{
-					Name:   "use the generated token",
-					Method: http.MethodGet,
-					Path:   account,
-					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "token"},
-				},
-				{
-					Name:   "wrong password",
-					Method: http.MethodPost,
-					Path:   tokens,
-					Auth: conformance.Auth{
-						Kind:      conformance.AuthBasic,
-						BasicUser: conformance.AdminEmail,
-						BasicPass: "wrong-password-{{run}}",
-					},
-					Body: `{"data":{"type":"tokens"}}`,
-				},
-			},
-		},
-		{
 			Name: "not_found_route",
 			Steps: []conformance.Step{
 				{Name: "unknown path", Method: http.MethodGet, Path: "/v1/definitely-not-a-route", Auth: admin},
@@ -92,7 +55,7 @@ func scenarios() []conformance.Scenario {
 		{
 			Name: "invalid_json",
 			Steps: []conformance.Step{
-				{Name: "broken body", Method: http.MethodPost, Path: tokens, Auth: basic, Body: `{"broken`},
+				{Name: "broken body", Method: http.MethodPost, Path: tokens, Auth: admin, Body: `{"broken`},
 			},
 		},
 		{
@@ -108,12 +71,12 @@ func scenarios() []conformance.Scenario {
 		usersScenarios(),
 		groupsScenarios(),
 		tokensScenarios(),
-		secondFactorsScenarios(),
-		passwordsScenarios(),
 		productScenarios(),
 		policyScenarios(),
 		entitlementScenarios(),
 		keyScenarios(),
+		webhookScenarios(),
+		notImplementedScenarios(),
 	)
 
 	return scenarios
