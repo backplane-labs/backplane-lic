@@ -12,3 +12,4 @@ openapi/.build/
 
 # local scratch state
 /.dev/
+.claude/
