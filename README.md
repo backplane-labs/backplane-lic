@@ -88,6 +88,24 @@ The account row is created at startup with generated keys (secret key,
 RSA-2048, ed25519, ECDSA P-256) that anchor token digests and response
 signatures.
 
+With `cache.addr` set, token lookups are cached in Valkey under the
+account's token generation. Regenerating or revoking a token, and the bulk
+revocation of password changes, start a new generation, so a changed token
+is never served from the cache; entries otherwise expire after 30 seconds.
+Bearers are always read live. Account rows hold the private signing keys
+and are never cached. Valkey also shares the password-attempt windows
+between replicas.
+
+## Search
+
+`POST /v1/accounts/{account}/search` follows Keygen: licenses, users,
+products, policies, groups and entitlements by their searchable
+attributes, AND or OR combined, answered as the type's list document.
+Machines are accepted and answer nothing while devices are deferred. Where
+Keygen fails with a server error (an unknown `op`, a non-string term for a
+text attribute, `meta` of the wrong kind, the EE request-log search), lic
+answers a 400 in Keygen's error style instead.
+
 ## Customer portal
 
 Enable the portal on the same HTTP listener as the public API:
