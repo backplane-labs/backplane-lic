@@ -33,7 +33,7 @@ func tokenFilter(req *request) tokens.Filter {
 
 func bearerTypeFilter(value string) string {
 	switch value {
-	case "user", "users":
+	case typeUserSingular, typeUserPlural:
 		return storedBearerUser
 	case "product", "products":
 		return "Product"

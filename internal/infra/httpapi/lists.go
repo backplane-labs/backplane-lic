@@ -302,14 +302,15 @@ func boolAttr(attrs map[string]any, name string) (*bool, bool, error) {
 	return &value, true, nil
 }
 
-// metadataAttr reads the metadata hash (nil allowed: clearing).
+// metadataAttr reads the metadata hash (nil allowed: clearing) with
+// the request-layer depth rule.
 func metadataAttr(attrs map[string]any) (map[string]any, bool, error) {
 	raw, ok := attrs["metadata"]
 	if !ok || raw == nil {
 		return nil, ok, nil
 	}
 
-	meta, err := hash(raw, "/data/attributes/metadata")
+	meta, err := metadataOf(raw, "/data/attributes/metadata")
 
 	return meta, true, err
 }

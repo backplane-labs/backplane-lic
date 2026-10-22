@@ -214,6 +214,10 @@ func (s Scenario) Create(
 		UpdatedAt:   now,
 	}
 
+	if detail := domain.MetadataViolation(group.Metadata); detail != "" {
+		return domain.Group{}, apperr.Unprocessable("METADATA_TOO_LONG", detail, "/data/attributes/metadata")
+	}
+
 	if err := s.store.InsertGroup(ctx, group); err != nil {
 		return domain.Group{}, fmt.Errorf("groups: create: %w", err)
 	}
@@ -270,6 +274,12 @@ func (s Scenario) Update(
 
 	if attrs.Metadata != nil {
 		group.Metadata = attrs.Metadata
+
+		if detail := domain.MetadataViolation(group.Metadata); detail != "" {
+			return domain.Group{}, apperr.Unprocessable(
+				"METADATA_TOO_LONG", detail, "/data/attributes/metadata",
+			)
+		}
 	}
 
 	if err := s.store.UpdateGroup(ctx, group); err != nil {
@@ -574,4 +584,12 @@ func (s Scenario) readRelationshipGroup(
 	}
 
 	return s.load(ctx, account, principal, id)
+}
+
+// LicenseGroup resolves and authorizes the group of the license
+// relationship routes.
+func (s Scenario) LicenseGroup(
+	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
+) (domain.Group, error) {
+	return s.readRelationshipGroup(ctx, account, principal, id, "group.licenses.read")
 }

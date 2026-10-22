@@ -150,12 +150,12 @@ func (s *Store) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID)
 
 // LicenseByKey loads the license-auth slice by key.
 func (s *Store) LicenseByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error) {
-	return s.Licenses.LicenseByKey(ctx, accountID, key)
+	return s.Licenses.AuthByKey(ctx, accountID, key)
 }
 
 // LicenseByID loads the license-auth slice by id.
 func (s *Store) LicenseByID(ctx context.Context, accountID, id uuid.UUID) (domain.LicenseAuth, error) {
-	return s.Licenses.LicenseByID(ctx, accountID, id)
+	return s.Licenses.AuthByID(ctx, accountID, id)
 }
 
 // Account loads the account by id.

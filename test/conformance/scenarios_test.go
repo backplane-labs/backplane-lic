@@ -114,6 +114,7 @@ func scenarios() []conformance.Scenario {
 		policyScenarios(),
 		entitlementScenarios(),
 		keyScenarios(),
+		licensesScenarios(),
 	)
 
 	return scenarios

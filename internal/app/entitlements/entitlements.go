@@ -329,6 +329,10 @@ func (s Scenario) validate(
 		add("NAME_TOO_LONG", "is too long (maximum is 255 characters)", "name")
 	}
 
+	if detail := domain.MetadataViolation(e.Metadata); detail != "" {
+		add("METADATA_TOO_LONG", detail, "metadata")
+	}
+
 	switch {
 	case e.Code == "":
 		add("CODE_MISSING", "can't be blank", "code")

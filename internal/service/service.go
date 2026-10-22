@@ -17,12 +17,15 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/valkey"
 	"github.com/google/uuid"
 
+	"github.com/gopherex/pgtx/pkg/tx"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
@@ -87,11 +90,18 @@ func Handler(
 	clock := time.Now
 	publisher := events.Publisher(events.None{})
 
+	tokenManager := tokens.Manager{Scenario: tokens.New(store, publisher, rand.Reader, clock)}
+
 	return httpapi.New(httpapi.Deps{
-		Accounts:       store.Accounts,
-		Authn:          authn.New(store, clock),
-		Users:          users.New(store, publisher, clock),
-		Tokens:         tokens.New(store, publisher, rand.Reader, clock),
+		Accounts: store.Accounts,
+		Authn:    authn.New(store, clock),
+		Users:    users.New(store, publisher, clock),
+		Tokens:   tokenManager.Scenario,
+		Licenses: licenses.New(
+			store.Licenses, store.Licenses, store.Policies, store.Products, store,
+			store, store.Entitlements, store.Keys, tokenManager, publisher, rand.Reader, clock,
+			txDo(store),
+		),
 		Groups:         groups.New(store, publisher, clock),
 		SecondFactors:  secondfactors.New(store, publisher, rand.Reader, clock),
 		Passwords:      passwords.New(store, publisher, rand.Reader, clock),
@@ -106,6 +116,13 @@ func Handler(
 		TrustedProxies: cfg.TrustedProxies,
 		Clock:          clock,
 	})
+}
+
+// txDo wraps pgtx's serializable boundary for the scenarios' writes.
+func txDo(store *postgres.Store) func(context.Context, func(context.Context) error) error {
+	return func(ctx context.Context, fn func(context.Context) error) error {
+		return tx.DoSerializable(ctx, store.Trm, fn)
+	}
 }
 
 // lateHandler serves the handler built at start; before that, 503.

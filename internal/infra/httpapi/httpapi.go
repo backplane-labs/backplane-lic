@@ -18,6 +18,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
@@ -56,6 +57,7 @@ type Deps struct {
 	Policies      policies.Scenario
 	Entitlements  entitlements.Scenario
 	Keys          keys.Scenario
+	Licenses      licenses.Scenario
 	Spec          Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
@@ -85,6 +87,8 @@ type API struct {
 	policies      policies.Scenario
 	entitlements  entitlements.Scenario
 	keys          keys.Scenario
+	licenses      licenses.Scenario
+	clock         func() time.Time
 	spec          Spec
 }
 
@@ -92,6 +96,11 @@ type API struct {
 // architecture contract's middleware pipeline. It is the seam between
 // routing and the platform's HTTP mounting.
 func New(deps Deps) http.Handler {
+	clock := deps.Clock
+	if clock == nil {
+		clock = time.Now
+	}
+
 	api := &API{
 		accounts:      deps.Accounts,
 		users:         deps.Users,
@@ -103,6 +112,8 @@ func New(deps Deps) http.Handler {
 		policies:      deps.Policies,
 		entitlements:  deps.Entitlements,
 		keys:          deps.Keys,
+		licenses:      deps.Licenses,
+		clock:         clock,
 		spec:          deps.Spec,
 	}
 
@@ -110,11 +121,6 @@ func New(deps Deps) http.Handler {
 	if err != nil {
 		// A static spec cannot fail to build a server.
 		panic("httpapi: ogen server: " + err.Error())
-	}
-
-	clock := deps.Clock
-	if clock == nil {
-		clock = time.Now
 	}
 
 	return &pipeline{
@@ -188,6 +194,14 @@ func (a *API) GenerateToken(
 func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 	req := requestOf(ctx)
 
+	if req.principal.IsLicense() {
+		return a.meLicense(ctx, req)
+	}
+
+	if req.principal.IsProduct() {
+		return a.meProduct(ctx, req)
+	}
+
 	if !req.principal.IsUser() {
 		return nil, errNotUserBearer
 	}
@@ -197,7 +211,10 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := &oas.MeDocument{Data: render.User(req.account.ID, user, status)}
+	doc := &oas.MeDocument{Data: oas.MeDocumentData{
+		Type:         oas.UserResourceMeDocumentData,
+		UserResource: render.User(req.account.ID, user, status),
+	}}
 	if req.token != nil {
 		doc.Included = []oas.TokenResource{
 			render.Token(req.account.ID, *req.token, req.principal.Role, ""),
@@ -211,6 +228,14 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 // authenticated user with the current token's id in meta.
 func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDocument, error) {
 	req := requestOf(ctx)
+
+	if req.principal.IsLicense() {
+		return a.profileLicense(ctx, req)
+	}
+
+	if req.principal.IsProduct() {
+		return a.profileProduct(ctx, req)
+	}
 
 	if !req.principal.IsUser() {
 		return nil, errNotUserBearer
@@ -227,7 +252,10 @@ func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDoc
 	}
 
 	return &oas.ProfileDocument{
-		Data: render.User(req.account.ID, user, status),
+		Data: oas.ProfileDocumentData{
+			Type:         oas.UserResourceProfileDocumentData,
+			UserResource: render.User(req.account.ID, user, status),
+		},
 		Meta: oas.ProfileMeta{TokenId: tokenID},
 	}, nil
 }
@@ -321,4 +349,89 @@ func nilString(s string) oas.NilString {
 	}
 
 	return oas.NewNilString(s)
+}
+
+// meLicense serves /me for a license bearer: the license itself (and
+// the current token for token authentication).
+func (a *API) meLicense(ctx context.Context, req *request) (*oas.MeDocument, error) {
+	license, err := a.licenses.Show(ctx, req.account, req.principal.BearerID.String())
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	doc := &oas.MeDocument{Data: oas.MeDocumentData{
+		Type:            oas.LicenseResourceMeDocumentData,
+		LicenseResource: render.License(req.account.ID, license, a.licenseNow(), nil),
+	}}
+
+	if req.token != nil {
+		doc.Included = []oas.TokenResource{
+			render.Token(req.account.ID, *req.token, req.principal.Role, ""),
+		}
+	}
+
+	return doc, nil
+}
+
+// profileLicense serves /profile for a license bearer.
+func (a *API) profileLicense(ctx context.Context, req *request) (*oas.ProfileDocument, error) {
+	license, err := a.licenses.Show(ctx, req.account, req.principal.BearerID.String())
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	tokenID := oas.NilString{Null: true}
+	if req.token != nil {
+		tokenID = oas.NewNilString(req.token.ID.String())
+	}
+
+	return &oas.ProfileDocument{
+		Data: oas.ProfileDocumentData{
+			Type:            oas.LicenseResourceProfileDocumentData,
+			LicenseResource: render.License(req.account.ID, license, a.licenseNow(), nil),
+		},
+		Meta: oas.ProfileMeta{TokenId: tokenID},
+	}, nil
+}
+
+// meProduct serves /me for a product bearer: the product itself.
+func (a *API) meProduct(ctx context.Context, req *request) (*oas.MeDocument, error) {
+	product, err := a.products.Show(ctx, req.account, req.principal.BearerID.String())
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	doc := &oas.MeDocument{Data: oas.MeDocumentData{
+		Type:            oas.ProductResourceMeDocumentData,
+		ProductResource: render.ProductResource(req.account.ID, product),
+	}}
+
+	if req.token != nil {
+		doc.Included = []oas.TokenResource{
+			render.Token(req.account.ID, *req.token, req.principal.Role, ""),
+		}
+	}
+
+	return doc, nil
+}
+
+// profileProduct serves /profile for a product bearer.
+func (a *API) profileProduct(ctx context.Context, req *request) (*oas.ProfileDocument, error) {
+	product, err := a.products.Show(ctx, req.account, req.principal.BearerID.String())
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	tokenID := oas.NilString{Null: true}
+	if req.token != nil {
+		tokenID = oas.NewNilString(req.token.ID.String())
+	}
+
+	return &oas.ProfileDocument{
+		Data: oas.ProfileDocumentData{
+			Type:            oas.ProductResourceProfileDocumentData,
+			ProductResource: render.ProductResource(req.account.ID, product),
+		},
+		Meta: oas.ProfileMeta{TokenId: tokenID},
+	}, nil
 }

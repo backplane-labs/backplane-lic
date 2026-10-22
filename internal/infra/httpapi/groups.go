@@ -200,50 +200,62 @@ func (a *API) ShowGroupUser(ctx context.Context, params oas.ShowGroupUserParams)
 // ListGroupLicenses implements GET /groups/{groupId}/licenses.
 func (a *API) ListGroupLicenses(
 	ctx context.Context, params oas.ListGroupLicensesParams,
-) (*oas.UserLicenseCollectionDocument, error) {
+) (*oas.LicenseListDocument, error) {
 	req := requestOf(ctx)
+
+	if err := checkEnvironment(req); err != nil {
+		return nil, err
+	}
+
+	listParams, err := listParams(req)
+	if err != nil {
+		return nil, err
+	}
 
 	id, err := uuid.Parse(params.GroupId)
 	if err != nil {
 		return nil, apperr.NotFound("group", params.GroupId)
 	}
 
-	ids, err := a.groups.LicenseIDs(ctx, req.account, req.principal, id, limitOf(req))
+	group, err := a.groups.LicenseGroup(ctx, req.account, req.principal, id)
 	if err != nil {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := &oas.UserLicenseCollectionDocument{Data: make([]oas.UserLicenseResource, 0, len(ids))}
-	for _, licenseID := range ids {
-		doc.Data = append(doc.Data, render.LicenseStub(req.account.ID, licenseID))
+	page, err := a.licenses.OfGroup(ctx, req.account, group, licenseFilter(req.query), listParams)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	return doc, nil
+	return a.licenseListDocument(req, page, listParams), nil
 }
 
 // ShowGroupLicense implements GET /groups/{groupId}/licenses/{licenseId}.
 func (a *API) ShowGroupLicense(
 	ctx context.Context, params oas.ShowGroupLicenseParams,
-) (*oas.UserLicenseDocument, error) {
+) (*oas.LicenseDocument, error) {
 	req := requestOf(ctx)
 
-	groupID, err := uuid.Parse(params.GroupId)
+	if err := checkEnvironment(req); err != nil {
+		return nil, err
+	}
+
+	id, err := uuid.Parse(params.GroupId)
 	if err != nil {
 		return nil, apperr.NotFound("group", params.GroupId)
 	}
 
-	ids, err := a.groups.LicenseIDs(ctx, req.account, req.principal, groupID, maxSubIndex)
+	group, err := a.groups.LicenseGroup(ctx, req.account, req.principal, id)
 	if err != nil {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	for _, licenseID := range ids {
-		if licenseID.String() == params.LicenseId {
-			return &oas.UserLicenseDocument{Data: render.LicenseStub(req.account.ID, licenseID)}, nil
-		}
+	license, err := a.licenses.OfGroupShow(ctx, req.account, group, params.LicenseId)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	return nil, apperr.NotFound("license", params.LicenseId)
+	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
 }
 
 // ListGroupMachines implements GET /groups/{groupId}/machines.
@@ -542,7 +554,7 @@ func optionalMetadataAttr(obj map[string]any) (map[string]any, error) {
 		return map[string]any{}, nil
 	}
 
-	return hash(raw, pointerOf("data", "attributes", "metadata"))
+	return metadataOf(raw, pointerOf("data", "attributes", "metadata"))
 }
 
 // optionalIntAttr decodes an optional nullable integer attribute.
@@ -608,7 +620,7 @@ func validateOwnerList(req *request) ([]uuid.UUID, error) {
 			return nil, err
 		}
 
-		if typeStr != "user" && typeStr != "users" {
+		if typeStr != typeUserSingular && typeStr != typeUserPlural {
 			return nil, apperr.BadRequestSource("is invalid", "/data/"+strconv.Itoa(index)+"/type")
 		}
 

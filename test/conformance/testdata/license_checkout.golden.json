@@ -1,0 +1,666 @@
+{
+  "scenario": "license_checkout",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "lic-probe-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "create product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": null,
+            "checkInIntervalCount": null,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": 86400,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": false,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": null,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "lic-policy-\u003crun\u003e",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_MACHINE",
+            "protected": true,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": false,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "create policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": "\u003cts\u003e",
+            "floating": false,
+            "key": "\u003clicense-key:2\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {
+              "edition": "pro"
+            },
+            "name": null,
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "EXPIRING",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "create license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "algorithm": "base64+ed25519",
+            "certificate": "-----BEGIN LICENSE FILE-----\neyJlbmMiOiJleUprWVhSaElqcDdJbWxrSWpvaU16SmxZVEEyWVRJdE5XTmxO\naTAwWldFd0xXRTBNR1V0WmpWalpXUTRNakl6Tm1abElpd2lkSGx3WlNJNklt\neHBZMlZ1YzJWeklpd2lZWFIwY21saWRYUmxjeUk2ZXlKdVlXMWxJanB1ZFd4\nc0xDSnJaWGtpT2lJM09VTXlNamd0TmtORFJVSkNMVFZHTnpKRk5TMUVSRUUy\nUXprdFJEUXdORFZCTFZZeklpd2laWGh3YVhKNUlqb2lNakF5TmkweE1DMHlN\nMVF4TmpvME9EbzBOeTQ0TVRaYUlpd2ljM1JoZEhWeklqb2lSVmhRU1ZKSlRr\nY2lMQ0oxYzJWeklqb3dMQ0p6ZFhOd1pXNWtaV1FpT21aaGJITmxMQ0p6WTJo\nbGJXVWlPbTUxYkd3c0ltVnVZM0o1Y0hSbFpDSTZabUZzYzJVc0luTjBjbWxq\nZENJNlptRnNjMlVzSW1ac2IyRjBhVzVuSWpwbVlXeHpaU3dpY0hKdmRHVmpk\nR1ZrSWpwMGNuVmxMQ0oyWlhKemFXOXVJanB1ZFd4c0xDSnRZWGhOWVdOb2FX\nNWxjeUk2TVN3aWJXRjRVSEp2WTJWemMyVnpJanB1ZFd4c0xDSnRZWGhWYzJW\neWN5STZiblZzYkN3aWJXRjRRMjl5WlhNaU9tNTFiR3dzSW0xaGVFMWxiVzl5\nZVNJNmJuVnNiQ3dpYldGNFJHbHpheUk2Ym5Wc2JDd2liV0Y0VlhObGN5STZi\nblZzYkN3aWNtVnhkV2x5WlVobFlYSjBZbVZoZENJNlptRnNjMlVzSW5KbGNY\nVnBjbVZEYUdWamEwbHVJanBtWVd4elpTd2liR0Z6ZEZaaGJHbGtZWFJsWkNJ\nNmJuVnNiQ3dpYkdGemRFTm9aV05yU1c0aU9tNTFiR3dzSW01bGVIUkRhR1Zq\nYTBsdUlqcHVkV3hzTENKc1lYTjBRMmhsWTJ0UGRYUWlPbTUxYkd3c0ltMWxk\nR0ZrWVhSaElqcDdJbVZrYVhScGIyNGlPaUp3Y204aWZTd2lZM0psWVhSbFpD\nSTZJakl3TWpZdE1UQXRNakpVTVRZNk5EZzZORGN1T0RFMVdpSXNJblZ3WkdG\nMFpXUWlPaUl5TURJMkxURXdMVEl5VkRFMk9qUTRPalEzTGpneE5Wb2lmU3dp\nY21Wc1lYUnBiMjV6YUdsd2N5STZleUpoWTJOdmRXNTBJanA3SW14cGJtdHpJ\nanA3SW5KbGJHRjBaV1FpT2lJdmRqRXZZV05qYjNWdWRITXZNbU14WkRSbU1t\nVXRPV0V6WWkwMFl6VmtMVGhsTjJZdE1HRXhZakpqTTJRMFpUVm1JbjBzSW1S\naGRHRWlPbnNpZEhsd1pTSTZJbUZqWTI5MWJuUnpJaXdpYVdRaU9pSXlZekZr\nTkdZeVpTMDVZVE5pTFRSak5XUXRPR1UzWmkwd1lURmlNbU16WkRSbE5XWWlm\nWDBzSW5CeWIyUjFZM1FpT25zaWJHbHVhM01pT25zaWNtVnNZWFJsWkNJNklp\nOTJNUzloWTJOdmRXNTBjeTh5WXpGa05HWXlaUzA1WVROaUxUUmpOV1F0T0dV\nM1ppMHdZVEZpTW1NelpEUmxOV1l2YkdsalpXNXpaWE12TXpKbFlUQTJZVEl0\nTldObE5pMDBaV0V3TFdFME1HVXRaalZqWldRNE1qSXpObVpsTDNCeWIyUjFZ\nM1FpZlN3aVpHRjBZU0k2ZXlKMGVYQmxJam9pY0hKdlpIVmpkSE1pTENKcFpD\nSTZJamxpTlRrMVpEUmhMV1ZpWkRVdE5EZ3laUzA0TXpBeUxUUTJPVGhsTVRr\neFltWmxZU0o5ZlN3aWNHOXNhV041SWpwN0lteHBibXR6SWpwN0luSmxiR0Yw\nWldRaU9pSXZkakV2WVdOamIzVnVkSE12TW1NeFpEUm1NbVV0T1dFellpMDBZ\nelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZtTDJ4cFkyVnVjMlZ6THpNeVpX\nRXdObUV5TFRWalpUWXROR1ZoTUMxaE5EQmxMV1kxWTJWa09ESXlNelptWlM5\nd2IyeHBZM2tpZlN3aVpHRjBZU0k2ZXlKMGVYQmxJam9pY0c5c2FXTnBaWE1p\nTENKcFpDSTZJamxpWXpFME1HTmtMV0UyT0RJdE5HWTJZeTA0T0dGbUxXSmtO\nMk0xWXpBellXVTJZU0o5ZlN3aVozSnZkWEFpT25zaWJHbHVhM01pT25zaWNt\nVnNZWFJsWkNJNklpOTJNUzloWTJOdmRXNTBjeTh5WXpGa05HWXlaUzA1WVRO\naUxUUmpOV1F0T0dVM1ppMHdZVEZpTW1NelpEUmxOV1l2YkdsalpXNXpaWE12\nTXpKbFlUQTJZVEl0TldObE5pMDBaV0V3TFdFME1HVXRaalZqWldRNE1qSXpO\nbVpsTDJkeWIzVndJbjBzSW1SaGRHRWlPbTUxYkd4OUxDSnZkMjVsY2lJNmV5\nSnNhVzVyY3lJNmV5SnlaV3hoZEdWa0lqb2lMM1l4TDJGalkyOTFiblJ6THpK\nak1XUTBaakpsTFRsaE0ySXROR00xWkMwNFpUZG1MVEJoTVdJeVl6TmtOR1Ux\nWmk5c2FXTmxibk5sY3k4ek1tVmhNRFpoTWkwMVkyVTJMVFJsWVRBdFlUUXda\nUzFtTldObFpEZ3lNak0yWm1VdmIzZHVaWElpZlN3aVpHRjBZU0k2Ym5Wc2JI\nMHNJblZ6WlhKeklqcDdJbXhwYm10eklqcDdJbkpsYkdGMFpXUWlPaUl2ZGpF\ndllXTmpiM1Z1ZEhNdk1tTXhaRFJtTW1VdE9XRXpZaTAwWXpWa0xUaGxOMll0\nTUdFeFlqSmpNMlEwWlRWbUwyeHBZMlZ1YzJWekx6TXlaV0V3Tm1FeUxUVmpa\nVFl0TkdWaE1DMWhOREJsTFdZMVkyVmtPREl5TXpabVpTOTFjMlZ5Y3lKOUxD\nSnRaWFJoSWpwN0ltTnZkVzUwSWpvd2ZYMHNJbTFoWTJocGJtVnpJanA3SW14\ncGJtdHpJanA3SW5KbGJHRjBaV1FpT2lJdmRqRXZZV05qYjNWdWRITXZNbU14\nWkRSbU1tVXRPV0V6WWkwMFl6VmtMVGhsTjJZdE1HRXhZakpqTTJRMFpUVm1M\nMnhwWTJWdWMyVnpMek15WldFd05tRXlMVFZqWlRZdE5HVmhNQzFoTkRCbExX\nWTFZMlZrT0RJeU16Wm1aUzl0WVdOb2FXNWxjeUo5TENKdFpYUmhJanA3SW1O\ndmNtVnpJam93TENKdFpXMXZjbmtpT2pBc0ltUnBjMnNpT2pBc0ltTnZkVzUw\nSWpvd2ZYMHNJblJ2YTJWdWN5STZleUpzYVc1cmN5STZleUp5Wld4aGRHVmtJ\nam9pTDNZeEwyRmpZMjkxYm5Sekx6SmpNV1EwWmpKbExUbGhNMkl0TkdNMVpD\nMDRaVGRtTFRCaE1XSXlZek5rTkdVMVppOXNhV05sYm5ObGN5OHpNbVZoTURa\naE1pMDFZMlUyTFRSbFlUQXRZVFF3WlMxbU5XTmxaRGd5TWpNMlptVXZkRzly\nWlc1ekluMTlMQ0psYm5ScGRHeGxiV1Z1ZEhNaU9uc2liR2x1YTNNaU9uc2lj\nbVZzWVhSbFpDSTZJaTkyTVM5aFkyTnZkVzUwY3k4eVl6RmtOR1l5WlMwNVlU\nTmlMVFJqTldRdE9HVTNaaTB3WVRGaU1tTXpaRFJsTldZdmJHbGpaVzV6WlhN\ndk16SmxZVEEyWVRJdE5XTmxOaTAwWldFd0xXRTBNR1V0WmpWalpXUTRNakl6\nTm1abEwyVnVkR2wwYkdWdFpXNTBjeUo5Zlgwc0lteHBibXR6SWpwN0luTmxi\nR1lpT2lJdmRqRXZZV05qYjNWdWRITXZNbU14WkRSbU1tVXRPV0V6WWkwMFl6\nVmtMVGhsTjJZdE1HRXhZakpqTTJRMFpUVm1MMnhwWTJWdWMyVnpMek15WldF\nd05tRXlMVFZqWlRZdE5HVmhNQzFoTkRCbExXWTFZMlZrT0RJeU16Wm1aU0o5\nZlN3aWFXNWpiSFZrWldRaU9sdDdJbWxrSWpvaU9XSTFPVFZrTkdFdFpXSmtO\nUzAwT0RKbExUZ3pNREl0TkRZNU9HVXhPVEZpWm1WaElpd2lkSGx3WlNJNklu\nQnliMlIxWTNSeklpd2lZWFIwY21saWRYUmxjeUk2ZXlKdVlXMWxJam9pYkds\nakxYQnliMkpsTFRFNVlUbGhOREJqSWl3aVkyOWtaU0k2Ym5Wc2JDd2laR2x6\nZEhKcFluVjBhVzl1VTNSeVlYUmxaM2tpT2lKTVNVTkZUbE5GUkNJc0luVnli\nQ0k2Ym5Wc2JDd2ljR3hoZEdadmNtMXpJanB1ZFd4c0xDSnRaWFJoWkdGMFlT\nSTZlMzBzSW1OeVpXRjBaV1FpT2lJeU1ESTJMVEV3TFRJeVZERTJPalE0T2pR\nM0xqUTVNVm9pTENKMWNHUmhkR1ZrSWpvaU1qQXlOaTB4TUMweU1sUXhOam8w\nT0RvME55NDBPVEZhSW4wc0luSmxiR0YwYVc5dWMyaHBjSE1pT25zaVlXTmpi\nM1Z1ZENJNmV5SnNhVzVyY3lJNmV5SnlaV3hoZEdWa0lqb2lMM1l4TDJGalky\nOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXROR00xWkMwNFpUZG1MVEJoTVdJ\neVl6TmtOR1UxWmlKOUxDSmtZWFJoSWpwN0luUjVjR1VpT2lKaFkyTnZkVzUw\nY3lJc0ltbGtJam9pTW1NeFpEUm1NbVV0T1dFellpMDBZelZrTFRobE4yWXRN\nR0V4WWpKak0yUTBaVFZtSW4xOUxDSndiMnhwWTJsbGN5STZleUpzYVc1cmN5\nSTZleUp5Wld4aGRHVmtJam9pTDNZeEwyRmpZMjkxYm5Sekx6SmpNV1EwWmpK\nbExUbGhNMkl0TkdNMVpDMDRaVGRtTFRCaE1XSXlZek5rTkdVMVppOXdjbTlr\nZFdOMGN5ODVZalU1TldRMFlTMWxZbVExTFRRNE1tVXRPRE13TWkwME5qazRa\nVEU1TVdKbVpXRXZjRzlzYVdOcFpYTWlmWDBzSW14cFkyVnVjMlZ6SWpwN0lt\neHBibXR6SWpwN0luSmxiR0YwWldRaU9pSXZkakV2WVdOamIzVnVkSE12TW1N\neFpEUm1NbVV0T1dFellpMDBZelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZt\nTDNCeWIyUjFZM1J6THpsaU5UazFaRFJoTFdWaVpEVXRORGd5WlMwNE16QXlM\nVFEyT1RobE1Ua3hZbVpsWVM5c2FXTmxibk5sY3lKOWZTd2liV0ZqYUdsdVpY\nTWlPbnNpYkdsdWEzTWlPbnNpY21Wc1lYUmxaQ0k2SWk5Mk1TOWhZMk52ZFc1\nMGN5OHlZekZrTkdZeVpTMDVZVE5pTFRSak5XUXRPR1UzWmkwd1lURmlNbU16\nWkRSbE5XWXZjSEp2WkhWamRITXZPV0kxT1RWa05HRXRaV0prTlMwME9ESmxM\nVGd6TURJdE5EWTVPR1V4T1RGaVptVmhMMjFoWTJocGJtVnpJbjE5TENKMWMy\nVnljeUk2ZXlKc2FXNXJjeUk2ZXlKeVpXeGhkR1ZrSWpvaUwzWXhMMkZqWTI5\nMWJuUnpMekpqTVdRMFpqSmxMVGxoTTJJdE5HTTFaQzA0WlRkbUxUQmhNV0l5\nWXpOa05HVTFaaTl3Y205a2RXTjBjeTg1WWpVNU5XUTBZUzFsWW1RMUxUUTRN\nbVV0T0RNd01pMDBOams0WlRFNU1XSm1aV0V2ZFhObGNuTWlmWDBzSW5SdmEy\nVnVjeUk2ZXlKc2FXNXJjeUk2ZXlKeVpXeGhkR1ZrSWpvaUwzWXhMMkZqWTI5\nMWJuUnpMekpqTVdRMFpqSmxMVGxoTTJJdE5HTTFaQzA0WlRkbUxUQmhNV0l5\nWXpOa05HVTFaaTl3Y205a2RXTjBjeTg1WWpVNU5XUTBZUzFsWW1RMUxUUTRN\nbVV0T0RNd01pMDBOams0WlRFNU1XSm1aV0V2ZEc5clpXNXpJbjE5TENKd2JH\nRjBabTl5YlhNaU9uc2liR2x1YTNNaU9uc2ljbVZzWVhSbFpDSTZJaTkyTVM5\naFkyTnZkVzUwY3k4eVl6RmtOR1l5WlMwNVlUTmlMVFJqTldRdE9HVTNaaTB3\nWVRGaU1tTXpaRFJsTldZdmNISnZaSFZqZEhNdk9XSTFPVFZrTkdFdFpXSmtO\nUzAwT0RKbExUZ3pNREl0TkRZNU9HVXhPVEZpWm1WaEwzQnNZWFJtYjNKdGN5\nSjlmU3dpWTJoaGJtNWxiSE1pT25zaWJHbHVhM01pT25zaWNtVnNZWFJsWkNJ\nNklpOTJNUzloWTJOdmRXNTBjeTh5WXpGa05HWXlaUzA1WVROaUxUUmpOV1F0\nT0dVM1ppMHdZVEZpTW1NelpEUmxOV1l2Y0hKdlpIVmpkSE12T1dJMU9UVmtO\nR0V0WldKa05TMDBPREpsTFRnek1ESXRORFk1T0dVeE9URmlabVZoTDJOb1lX\nNXVaV3h6SW4xOUxDSnlaV3hsWVhObGN5STZleUpzYVc1cmN5STZleUp5Wld4\naGRHVmtJam9pTDNZeEwyRmpZMjkxYm5Sekx6SmpNV1EwWmpKbExUbGhNMkl0\nTkdNMVpDMDRaVGRtTFRCaE1XSXlZek5rTkdVMVppOXdjbTlrZFdOMGN5ODVZ\nalU1TldRMFlTMWxZbVExTFRRNE1tVXRPRE13TWkwME5qazRaVEU1TVdKbVpX\nRXZjbVZzWldGelpYTWlmWDBzSW1GeWRHbG1ZV04wY3lJNmV5SnNhVzVyY3lJ\nNmV5SnlaV3hoZEdWa0lqb2lMM1l4TDJGalkyOTFiblJ6THpKak1XUTBaakps\nTFRsaE0ySXROR00xWkMwNFpUZG1MVEJoTVdJeVl6TmtOR1UxWmk5d2NtOWtk\nV04wY3k4NVlqVTVOV1EwWVMxbFltUTFMVFE0TW1VdE9ETXdNaTAwTmprNFpU\nRTVNV0ptWldFdllYSjBhV1poWTNSekluMTlmU3dpYkdsdWEzTWlPbnNpYzJW\nc1ppSTZJaTkyTVM5aFkyTnZkVzUwY3k4eVl6RmtOR1l5WlMwNVlUTmlMVFJq\nTldRdE9HVTNaaTB3WVRGaU1tTXpaRFJsTldZdmNISnZaSFZqZEhNdk9XSTFP\nVFZrTkdFdFpXSmtOUzAwT0RKbExUZ3pNREl0TkRZNU9HVXhPVEZpWm1WaElu\nMTlMSHNpYVdRaU9pSTVZbU14TkRCalpDMWhOamd5TFRSbU5tTXRPRGhoWmkx\naVpEZGpOV013TTJGbE5tRWlMQ0owZVhCbElqb2ljRzlzYVdOcFpYTWlMQ0po\nZEhSeWFXSjFkR1Z6SWpwN0ltNWhiV1VpT2lKc2FXTXRjRzlzYVdONUxURTVZ\nVGxoTkRCaklpd2laSFZ5WVhScGIyNGlPamcyTkRBd0xDSnpkSEpwWTNRaU9t\nWmhiSE5sTENKbWJHOWhkR2x1WnlJNlptRnNjMlVzSW5WelpWQnZiMndpT21a\naGJITmxMQ0p0WVhoTllXTm9hVzVsY3lJNk1Td2liV0Y0VUhKdlkyVnpjMlZ6\nSWpwdWRXeHNMQ0p0WVhoVmMyVnljeUk2Ym5Wc2JDd2liV0Y0UTI5eVpYTWlP\nbTUxYkd3c0ltMWhlRTFsYlc5eWVTSTZiblZzYkN3aWJXRjRSR2x6YXlJNmJu\nVnNiQ3dpYldGNFZYTmxjeUk2Ym5Wc2JDd2liV0ZqYUdsdVpWVnVhWEYxWlc1\nbGMzTlRkSEpoZEdWbmVTSTZJbFZPU1ZGVlJWOVFSVkpmVEVsRFJVNVRSU0lz\nSW0xaFkyaHBibVZOWVhSamFHbHVaMU4wY21GMFpXZDVJam9pVFVGVVEwaGZR\nVTVaSWl3aVkyOXRjRzl1Wlc1MFZXNXBjWFZsYm1WemMxTjBjbUYwWldkNUlq\nb2lWVTVKVVZWRlgxQkZVbDlOUVVOSVNVNUZJaXdpWTI5dGNHOXVaVzUwVFdG\nMFkyaHBibWRUZEhKaGRHVm5lU0k2SWsxQlZFTklYMEZPV1NJc0ltVjRjR2x5\nWVhScGIyNVRkSEpoZEdWbmVTSTZJbEpGVTFSU1NVTlVYMEZEUTBWVFV5SXNJ\nbVY0Y0dseVlYUnBiMjVDWVhOcGN5STZJa1pTVDAxZlExSkZRVlJKVDA0aUxD\nSnlaVzVsZDJGc1FtRnphWE1pT2lKR1VrOU5YMFZZVUVsU1dTSXNJblJ5WVc1\nelptVnlVM1J5WVhSbFoza2lPaUpMUlVWUVgwVllVRWxTV1NJc0ltRjFkR2hs\nYm5ScFkyRjBhVzl1VTNSeVlYUmxaM2tpT2lKVVQwdEZUaUlzSW0xaFkyaHBi\nbVZNWldGemFXNW5VM1J5WVhSbFoza2lPaUpRUlZKZlRFbERSVTVUUlNJc0lu\nQnliMk5sYzNOTVpXRnphVzVuVTNSeVlYUmxaM2tpT2lKUVJWSmZUVUZEU0Vs\nT1JTSXNJbTkyWlhKaFoyVlRkSEpoZEdWbmVTSTZJazVQWDA5V1JWSkJSMFVp\nTENKelkyaGxiV1VpT201MWJHd3NJbVZ1WTNKNWNIUmxaQ0k2Wm1Gc2MyVXNJ\nbkJ5YjNSbFkzUmxaQ0k2ZEhKMVpTd2ljbVZ4ZFdseVpWQnliMlIxWTNSVFky\nOXdaU0k2Wm1Gc2MyVXNJbkpsY1hWcGNtVlFiMnhwWTNsVFkyOXdaU0k2Wm1G\nc2MyVXNJbkpsY1hWcGNtVk5ZV05vYVc1bFUyTnZjR1VpT21aaGJITmxMQ0p5\nWlhGMWFYSmxSbWx1WjJWeWNISnBiblJUWTI5d1pTSTZabUZzYzJVc0luSmxj\nWFZwY21WRGIyMXdiMjVsYm5SelUyTnZjR1VpT21aaGJITmxMQ0p5WlhGMWFY\nSmxWWE5sY2xOamIzQmxJanBtWVd4elpTd2ljbVZ4ZFdseVpVTm9aV05yYzNW\ndFUyTnZjR1VpT21aaGJITmxMQ0p5WlhGMWFYSmxWbVZ5YzJsdmJsTmpiM0Js\nSWpwbVlXeHpaU3dpY21WeGRXbHlaVU5vWldOclNXNGlPbVpoYkhObExDSmph\nR1ZqYTBsdVNXNTBaWEoyWVd3aU9tNTFiR3dzSW1Ob1pXTnJTVzVKYm5SbGNu\nWmhiRU52ZFc1MElqcHVkV3hzTENKb1pXRnlkR0psWVhSRWRYSmhkR2x2YmlJ\nNmJuVnNiQ3dpYUdWaGNuUmlaV0YwUTNWc2JGTjBjbUYwWldkNUlqb2lSRVZC\nUTFSSlZrRlVSVjlFUlVGRUlpd2lhR1ZoY25SaVpXRjBVbVZ6ZFhKeVpXTjBh\nVzl1VTNSeVlYUmxaM2tpT2lKT1QxOVNSVlpKVmtVaUxDSm9aV0Z5ZEdKbFlY\nUkNZWE5wY3lJNklrWlNUMDFmUmtsU1UxUmZVRWxPUnlJc0luSmxjWFZwY21W\nSVpXRnlkR0psWVhRaU9tWmhiSE5sTENKdFpYUmhaR0YwWVNJNmUzMHNJbU55\nWldGMFpXUWlPaUl5TURJMkxURXdMVEl5VkRFMk9qUTRPalEzTGpZMk5sb2lM\nQ0oxY0dSaGRHVmtJam9pTWpBeU5pMHhNQzB5TWxReE5qbzBPRG8wTnk0Mk5q\nWmFJbjBzSW5KbGJHRjBhVzl1YzJocGNITWlPbnNpWVdOamIzVnVkQ0k2ZXlK\nc2FXNXJjeUk2ZXlKeVpXeGhkR1ZrSWpvaUwzWXhMMkZqWTI5MWJuUnpMekpq\nTVdRMFpqSmxMVGxoTTJJdE5HTTFaQzA0WlRkbUxUQmhNV0l5WXpOa05HVTFa\naUo5TENKa1lYUmhJanA3SW5SNWNHVWlPaUpoWTJOdmRXNTBjeUlzSW1sa0lq\nb2lNbU14WkRSbU1tVXRPV0V6WWkwMFl6VmtMVGhsTjJZdE1HRXhZakpqTTJR\nMFpUVm1JbjE5TENKd2NtOWtkV04wSWpwN0lteHBibXR6SWpwN0luSmxiR0Yw\nWldRaU9pSXZkakV2WVdOamIzVnVkSE12TW1NeFpEUm1NbVV0T1dFellpMDBZ\nelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZtTDNCdmJHbGphV1Z6THpsaVl6\nRTBNR05rTFdFMk9ESXROR1kyWXkwNE9HRm1MV0prTjJNMVl6QXpZV1UyWVM5\nd2NtOWtkV04wSW4wc0ltUmhkR0VpT25zaWRIbHdaU0k2SW5CeWIyUjFZM1J6\nSWl3aWFXUWlPaUk1WWpVNU5XUTBZUzFsWW1RMUxUUTRNbVV0T0RNd01pMDBO\nams0WlRFNU1XSm1aV0VpZlgwc0luQnZiMndpT25zaWJHbHVhM01pT25zaWNt\nVnNZWFJsWkNJNklpOTJNUzloWTJOdmRXNTBjeTh5WXpGa05HWXlaUzA1WVRO\naUxUUmpOV1F0T0dVM1ppMHdZVEZpTW1NelpEUmxOV1l2Y0c5c2FXTnBaWE12\nT1dKak1UUXdZMlF0WVRZNE1pMDBaalpqTFRnNFlXWXRZbVEzWXpWak1ETmha\nVFpoTDNCdmIyd2lmWDBzSW14cFkyVnVjMlZ6SWpwN0lteHBibXR6SWpwN0lu\nSmxiR0YwWldRaU9pSXZkakV2WVdOamIzVnVkSE12TW1NeFpEUm1NbVV0T1dF\nellpMDBZelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZtTDNCdmJHbGphV1Z6\nTHpsaVl6RTBNR05rTFdFMk9ESXROR1kyWXkwNE9HRm1MV0prTjJNMVl6QXpZ\nV1UyWVM5c2FXTmxibk5sY3lKOWZTd2laVzUwYVhSc1pXMWxiblJ6SWpwN0lt\neHBibXR6SWpwN0luSmxiR0YwWldRaU9pSXZkakV2WVdOamIzVnVkSE12TW1N\neFpEUm1NbVV0T1dFellpMDBZelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZt\nTDNCdmJHbGphV1Z6THpsaVl6RTBNR05rTFdFMk9ESXROR1kyWXkwNE9HRm1M\nV0prTjJNMVl6QXpZV1UyWVM5bGJuUnBkR3hsYldWdWRITWlmWDE5TENKc2FX\nNXJjeUk2ZXlKelpXeG1Jam9pTDNZeEwyRmpZMjkxYm5Sekx6SmpNV1EwWmpK\nbExUbGhNMkl0TkdNMVpDMDRaVGRtTFRCaE1XSXlZek5rTkdVMVppOXdiMnhw\nWTJsbGN5ODVZbU14TkRCalpDMWhOamd5TFRSbU5tTXRPRGhoWmkxaVpEZGpO\nV013TTJGbE5tRWlmWDFkTENKdFpYUmhJanA3SW1semMzVmxaQ0k2SWpJd01q\nWXRNVEF0TWpKVU1UWTZORGc2TkRjdU9Ua3hXaUlzSW1WNGNHbHllU0k2SWpJ\nd01qWXRNVEF0TWpKVU1UYzZORGc2TkRjdU9Ua3hXaUlzSW5SMGJDSTZNell3\nTUgxOSIsInNpZyI6IkpPVE1XZzJmZHM2QU5mMUdObHNQZkFqOGc5NkNhSk9x\nbU1Ud3BqZGVkbjBIQTQyZzNVSUlNVit4cmNVbXAxRnVQeXZpK2k0QTZ5RXV1\nVmhoZU9KTkN3PT0iLCJhbGciOiJiYXNlNjQrZWQyNTUxOSJ9\n-----END LICENSE FILE-----\n",
+            "expiry": "\u003cts\u003e",
+            "includes": [
+              "product",
+              "policy"
+            ],
+            "issued": "\u003cts\u003e",
+            "ttl": 3600
+          },
+          "id": "\u003cuuid:5\u003e",
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e"
+              }
+            }
+          },
+          "type": "license-files"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout with includes",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "algorithm": "base64+ed25519",
+            "certificate": "-----BEGIN LICENSE FILE-----\neyJlbmMiOiJleUprWVhSaElqcDdJbWxrSWpvaU16SmxZVEEyWVRJdE5XTmxO\naTAwWldFd0xXRTBNR1V0WmpWalpXUTRNakl6Tm1abElpd2lkSGx3WlNJNklt\neHBZMlZ1YzJWeklpd2lZWFIwY21saWRYUmxjeUk2ZXlKdVlXMWxJanB1ZFd4\nc0xDSnJaWGtpT2lJM09VTXlNamd0TmtORFJVSkNMVFZHTnpKRk5TMUVSRUUy\nUXprdFJEUXdORFZCTFZZeklpd2laWGh3YVhKNUlqb2lNakF5TmkweE1DMHlN\nMVF4TmpvME9EbzBOeTQ0TVRaYUlpd2ljM1JoZEhWeklqb2lSVmhRU1ZKSlRr\nY2lMQ0oxYzJWeklqb3dMQ0p6ZFhOd1pXNWtaV1FpT21aaGJITmxMQ0p6WTJo\nbGJXVWlPbTUxYkd3c0ltVnVZM0o1Y0hSbFpDSTZabUZzYzJVc0luTjBjbWxq\nZENJNlptRnNjMlVzSW1ac2IyRjBhVzVuSWpwbVlXeHpaU3dpY0hKdmRHVmpk\nR1ZrSWpwMGNuVmxMQ0oyWlhKemFXOXVJanB1ZFd4c0xDSnRZWGhOWVdOb2FX\nNWxjeUk2TVN3aWJXRjRVSEp2WTJWemMyVnpJanB1ZFd4c0xDSnRZWGhWYzJW\neWN5STZiblZzYkN3aWJXRjRRMjl5WlhNaU9tNTFiR3dzSW0xaGVFMWxiVzl5\nZVNJNmJuVnNiQ3dpYldGNFJHbHpheUk2Ym5Wc2JDd2liV0Y0VlhObGN5STZi\nblZzYkN3aWNtVnhkV2x5WlVobFlYSjBZbVZoZENJNlptRnNjMlVzSW5KbGNY\nVnBjbVZEYUdWamEwbHVJanBtWVd4elpTd2liR0Z6ZEZaaGJHbGtZWFJsWkNJ\nNmJuVnNiQ3dpYkdGemRFTm9aV05yU1c0aU9tNTFiR3dzSW01bGVIUkRhR1Zq\nYTBsdUlqcHVkV3hzTENKc1lYTjBRMmhsWTJ0UGRYUWlPaUl5TURJMkxURXdM\nVEl5VkRFMk9qUTRPalEzTGprNU5sb2lMQ0p0WlhSaFpHRjBZU0k2ZXlKbFpH\nbDBhVzl1SWpvaWNISnZJbjBzSW1OeVpXRjBaV1FpT2lJeU1ESTJMVEV3TFRJ\neVZERTJPalE0T2pRM0xqZ3hOVm9pTENKMWNHUmhkR1ZrSWpvaU1qQXlOaTB4\nTUMweU1sUXhOam8wT0RvME55NDVPVFphSW4wc0luSmxiR0YwYVc5dWMyaHBj\nSE1pT25zaVlXTmpiM1Z1ZENJNmV5SnNhVzVyY3lJNmV5SnlaV3hoZEdWa0lq\nb2lMM1l4TDJGalkyOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXROR00xWkMw\nNFpUZG1MVEJoTVdJeVl6TmtOR1UxWmlKOUxDSmtZWFJoSWpwN0luUjVjR1Vp\nT2lKaFkyTnZkVzUwY3lJc0ltbGtJam9pTW1NeFpEUm1NbVV0T1dFellpMDBZ\nelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZtSW4xOUxDSndjbTlrZFdOMElq\ncDdJbXhwYm10eklqcDdJbkpsYkdGMFpXUWlPaUl2ZGpFdllXTmpiM1Z1ZEhN\ndk1tTXhaRFJtTW1VdE9XRXpZaTAwWXpWa0xUaGxOMll0TUdFeFlqSmpNMlEw\nWlRWbUwyeHBZMlZ1YzJWekx6TXlaV0V3Tm1FeUxUVmpaVFl0TkdWaE1DMWhO\nREJsTFdZMVkyVmtPREl5TXpabVpTOXdjbTlrZFdOMEluMHNJbVJoZEdFaU9u\nc2lkSGx3WlNJNkluQnliMlIxWTNSeklpd2lhV1FpT2lJNVlqVTVOV1EwWVMx\nbFltUTFMVFE0TW1VdE9ETXdNaTAwTmprNFpURTVNV0ptWldFaWZYMHNJbkJ2\nYkdsamVTSTZleUpzYVc1cmN5STZleUp5Wld4aGRHVmtJam9pTDNZeEwyRmpZ\nMjkxYm5Sekx6SmpNV1EwWmpKbExUbGhNMkl0TkdNMVpDMDRaVGRtTFRCaE1X\nSXlZek5rTkdVMVppOXNhV05sYm5ObGN5OHpNbVZoTURaaE1pMDFZMlUyTFRS\nbFlUQXRZVFF3WlMxbU5XTmxaRGd5TWpNMlptVXZjRzlzYVdONUluMHNJbVJo\nZEdFaU9uc2lkSGx3WlNJNkluQnZiR2xqYVdWeklpd2lhV1FpT2lJNVltTXhO\nREJqWkMxaE5qZ3lMVFJtTm1NdE9EaGhaaTFpWkRkak5XTXdNMkZsTm1FaWZY\nMHNJbWR5YjNWd0lqcDdJbXhwYm10eklqcDdJbkpsYkdGMFpXUWlPaUl2ZGpF\ndllXTmpiM1Z1ZEhNdk1tTXhaRFJtTW1VdE9XRXpZaTAwWXpWa0xUaGxOMll0\nTUdFeFlqSmpNMlEwWlRWbUwyeHBZMlZ1YzJWekx6TXlaV0V3Tm1FeUxUVmpa\nVFl0TkdWaE1DMWhOREJsTFdZMVkyVmtPREl5TXpabVpTOW5jbTkxY0NKOUxD\nSmtZWFJoSWpwdWRXeHNmU3dpYjNkdVpYSWlPbnNpYkdsdWEzTWlPbnNpY21W\nc1lYUmxaQ0k2SWk5Mk1TOWhZMk52ZFc1MGN5OHlZekZrTkdZeVpTMDVZVE5p\nTFRSak5XUXRPR1UzWmkwd1lURmlNbU16WkRSbE5XWXZiR2xqWlc1elpYTXZN\nekpsWVRBMllUSXROV05sTmkwMFpXRXdMV0UwTUdVdFpqVmpaV1E0TWpJek5t\nWmxMMjkzYm1WeUluMHNJbVJoZEdFaU9tNTFiR3g5TENKMWMyVnljeUk2ZXlK\nc2FXNXJjeUk2ZXlKeVpXeGhkR1ZrSWpvaUwzWXhMMkZqWTI5MWJuUnpMekpq\nTVdRMFpqSmxMVGxoTTJJdE5HTTFaQzA0WlRkbUxUQmhNV0l5WXpOa05HVTFa\naTlzYVdObGJuTmxjeTh6TW1WaE1EWmhNaTAxWTJVMkxUUmxZVEF0WVRRd1pT\nMW1OV05sWkRneU1qTTJabVV2ZFhObGNuTWlmU3dpYldWMFlTSTZleUpqYjNW\ndWRDSTZNSDE5TENKdFlXTm9hVzVsY3lJNmV5SnNhVzVyY3lJNmV5SnlaV3ho\nZEdWa0lqb2lMM1l4TDJGalkyOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXRO\nR00xWkMwNFpUZG1MVEJoTVdJeVl6TmtOR1UxWmk5c2FXTmxibk5sY3k4ek1t\nVmhNRFpoTWkwMVkyVTJMVFJsWVRBdFlUUXdaUzFtTldObFpEZ3lNak0yWm1V\ndmJXRmphR2x1WlhNaWZTd2liV1YwWVNJNmV5SmpiM0psY3lJNk1Dd2liV1Z0\nYjNKNUlqb3dMQ0prYVhOcklqb3dMQ0pqYjNWdWRDSTZNSDE5TENKMGIydGxi\nbk1pT25zaWJHbHVhM01pT25zaWNtVnNZWFJsWkNJNklpOTJNUzloWTJOdmRX\nNTBjeTh5WXpGa05HWXlaUzA1WVROaUxUUmpOV1F0T0dVM1ppMHdZVEZpTW1N\nelpEUmxOV1l2YkdsalpXNXpaWE12TXpKbFlUQTJZVEl0TldObE5pMDBaV0V3\nTFdFME1HVXRaalZqWldRNE1qSXpObVpsTDNSdmEyVnVjeUo5ZlN3aVpXNTBh\nWFJzWlcxbGJuUnpJanA3SW14cGJtdHpJanA3SW5KbGJHRjBaV1FpT2lJdmRq\nRXZZV05qYjNWdWRITXZNbU14WkRSbU1tVXRPV0V6WWkwMFl6VmtMVGhsTjJZ\ndE1HRXhZakpqTTJRMFpUVm1MMnhwWTJWdWMyVnpMek15WldFd05tRXlMVFZq\nWlRZdE5HVmhNQzFoTkRCbExXWTFZMlZrT0RJeU16Wm1aUzlsYm5ScGRHeGxi\nV1Z1ZEhNaWZYMTlMQ0pzYVc1cmN5STZleUp6Wld4bUlqb2lMM1l4TDJGalky\nOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXROR00xWkMwNFpUZG1MVEJoTVdJ\neVl6TmtOR1UxWmk5c2FXTmxibk5sY3k4ek1tVmhNRFpoTWkwMVkyVTJMVFJs\nWVRBdFlUUXdaUzFtTldObFpEZ3lNak0yWm1VaWZYMHNJbTFsZEdFaU9uc2lh\nWE56ZFdWa0lqb2lNakF5TmkweE1DMHlNbFF4TmpvME9EbzBPQzR4TXpOYUlp\nd2laWGh3YVhKNUlqb2lNakF5TmkweE1TMHlNbFF4TmpvME9EbzBPQzR4TXpO\nYUlpd2lkSFJzSWpveU5qSTVOelEyZlgwPSIsInNpZyI6IlhydFFVTS9NZG12\nNDZ6NEJyTklDSW82S1U5VkFkMjUvbGtQNzN1eU4vVTRrUnBIR1dFbDMzSU1J\naUJRWUxxWnRNZGU3eHFrVzVwQVk4WGFqVWFvZENRPT0iLCJhbGciOiJiYXNl\nNjQrZWQyNTUxOSJ9\n-----END LICENSE FILE-----\n",
+            "expiry": "\u003cts\u003e",
+            "includes": [],
+            "issued": "\u003cts\u003e",
+            "ttl": 2629746
+          },
+          "id": "\u003cuuid:6\u003e",
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e"
+              }
+            }
+          },
+          "type": "license-files"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout defaults",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "algorithm": "aes-256-gcm+ed25519",
+            "certificate": "-----BEGIN LICENSE FILE-----\neyJlbmMiOiJLeDV5OTRWcWMxODIwdTlkTXRjdUF3Slc1cjhFWm1KRTRBTDlK\nTXVIUVV6c0w0eUtOMUtlVkVtbzNNcStiZGg5ZVV0ZC9yY1RPaVZ6L1hmM1RW\nVC9ra1c4SDMzQmQrVys4Mis0cUJ4Wjd6ZHhXQ2lrS2FxazRqVUtpVk8wT0Rz\ncnc1QW5aV1pPSXdZall0cVkzbTUvdGpnVWtDVnVmdnQ1cDRnVlJMbm5wb2V5\nZk5kMTNxNHFhSC9LeitoT3dNNlhJdzd3bUJObENRcUs0Z29NV0JkclJPU29q\nTkFBaU1oYXZpejQ5K0pCZ2FTdDRhQktxQjM5QTR6dTNUbUtYNGF3QTBXNktI\nSzNualJtSjFJNFFhQ3pVR0VtQ01KM240dFlhK2tyVnRYYlpEMUpKcXpmcDY5\neU9INlhIN0hNNCt5OEVFZ0dhVTZTS3pYSVdHZURycFh6eU9IN3pVSGl6Sm0x\neEE2QlgxNlVWK3JoNldsRXBrcWZPVFJscTBhRTQ3V3ZHemROb2dXd1Y5enZ1\nSmpkc0FOS3RrUU5kbW9HY2k0RTFqZzNzd1BBZmFIZ2FEaFBtY0NBeTlhTW4w\nMzM1RXpBVGpwWGRnQ3BaQ2w2VnRhR0VpSDFDMGtKNmtLZUQ2WERZMm9OZWFN\nNi9vQVRjMHUwSVB6UVhwWFFZWWJmR3RVQnVmem1mR3pYK0Z0bGtYQUVweGZJ\nREtsbnlwcURyZXMxTW5pZ0tPZldpemptbGpLeVMrOTlnRVJ0blA1cXF2Z0Nn\nTmkvbGFUUCtjYWZseXBxTk5aOUZNRm40MzY3RzYvTVFzUW5CYlhNcm1GVnZu\nSlZZcXRLS1p3UlhqODZIMjNQUzNaSThuL1VueWJxR2dRWVFQditxUWMzaVFy\nNkQ4YVR3dDNiR1haWDFCQ1ptdlpnUm9RZFd4OUtxVFFCQUFoUzFtYWYyOXlx\nbVQvZXd4WmNFTjRneUpjQmxORWcyM3VQLzJxUUVmM3R3Y1pVSEFCeVVleEMz\nVWJMcEplT1JiTFJ6NkE3WmZvOVpEeGFrTjhkYW94bWNIN0R1L2tUaXBOSFJR\nbUFIelplQnVaYjlFc0pCYW1FWVR5Qi96KzhyaTVURUZEeUtOMnBKTExmcmlC\nOEVLemR5aWZWMGZYQUxWQXl0TkErY0JUMEpFWFRuTHAvODJnSXN3YzVTVi9j\ndGF1TTZBYWszZ2s5WDhQL0NaeVVIamdlcWo5OEhPZTBpM3JNa3R2S3VRVXR3\ncVpUUzBWSFJqaWJEeDlnaFJpQUZnRExnaXJuYWs4WnFPNXdQdUZuaWZsdk04\nZExpZEZ1NnVLaFkyOGt6aWJZU1UvM0U2ZCtnZ01QOEhDUkMvQ2JIZFFQNTRs\ncHQ5eG1TdVpQdzFMRHFlbnFjb3NoZzhWSkZjVlo0L0h3UGVmM0phK3dkUVZ6\na2hCZEVjSlZXdExrN3BDekpLcUhBQTQ3K0NiVzlPQlBFK05rS2RTcm9qMm0x\na2poZWM5d1NaZDI2T2UrUWlnSytLWGI5ckVIMkl1SGh6bEdta1NNbzN0S1hn\nRUVxUFlaWEUyK2hTNmcyMUZZSzBiQ3hBRklRZUFiRVgvQUJtNFRoSEpKWW4y\nUDlORGVkNXVSZjVKL0xkTkxJQzQvdWJDMmtGb09Zdk85TGFEajkzbllrMk1y\na3hiZlZpWkcvV1BEZk5wZXQwUThhdktYSmxSNkd1Yktvd3J0MklIRHp6d2FM\nYVN4NHRWamlleG9pd2JiRFp6Sk0xaTRTaytOU1NXeWpBa2FuMDh0NDcxK3pN\nOVBIZVYzOXBDUDlEL1I5QzFLNzRqcmZKV25qZlBCYXkwZEdjNjUxTlhoOUdB\nMFF5QmI4dk00V0dzTUVWc3NRWkZYWU1TWmNuN2ZzcFpzRkM3dzdJL3FMbHk3\nbHNzNlVIWGJoVDRiNXdMb2dDSUNPelQxbHlaTTh0NTV2ZUxYaHBrVjBVamhh\neWdRTys1ZTBWbUI1Zno3VkFYbm85UFJTZmdQWHJ4OFA4N0p2blQ0SjJTbnNW\nL20xcWJOSitWOVY2MUZkQXltMnZNUmMzMmNqSnp2Tyt4UEVRak1xM29KVHlF\nOVhWd01rS1lqWUo2K1k4ZkFXV3pZbU00Ym5tdWhPbTlNWVBORTlXWk94UmVa\nSUYvQ283TmJBUjE3WUNLa3V6YTVDNCsySzcwY3htampIeXhxWlpuZUtHUzVv\nT2R1OTFWUDNDNWdJYlJHa0hRQktlVEN2dmJjWVhrbnMyNEVORTYyVkV5R296\nd2FibWZGZVJqalhxVDZQOWFXYXFvRHk1azdzQ2JjNFVJSXBQRG5PV0t0emhT\nSStjZlpmcXFwOFdFZW8zSWpxb3JaUjBKRHJlOW95RFRQcGZMZGkrSC8xekRl\nVEMxOTlaZ1o4NjNGaUtIekhubGFsK0g4Q2IyOHl4T1FUajJia1VOc2xlSnY0\nSy8yeDR6bWJvc2VOY1crTDgrbi9jZEcyRGRBbFUvNG1IMWs1VGQyVDZBUVZr\ncGlJYTI2NGIzTzhKUVB0VVdEWVdwU0I3UnJrcklON1V2MUFYaTBhY1RLZ052\nYVpRWUcvU0VUeUptRVZtYytRQ2IvTldFNUZpd1ovOW1TREtTRVQ2aGZsQlhK\nczNCV0RLUWFCTnFFZFYwOUE4bmdydEIwZ1U0dUpERXpQVm5LNkFDMVlIYy9x\nRzR4bkR2eSszekdFWXRPaS9XZVZHazJjbjZQZlNOY21seEp1Y3QwTGJGR2lo\nc3hwM2Z6SzN0a0FwQkxSb283aG4yNGZUeEo5R3RBNnkzTjVzeFVDRlRyZjdE\nMDc4WUdOUE5UMXdtaUszYWNBMHVsNVJhc296bWlHbWQ3bFQyY1IzaUJWUUxm\nVHBFcWFSM0V4bVIzM3FaZXZkRVFhbXpybEVVSnlBTUlxMnVoQmpIL3crdUVs\nWjZxMnpNcnJFWlNDUjhvQm5BY3hKOEJDemFMNVk2cGpSYU1tdm9odVNCK1kv\ndE01aTBxTkFJR3M1bytRUmZnQXJVd1IzMktldTVRZFRDOEpqZnBrdzMzaEE0\nSlpZL2U5eFE2TlZ6ZmZsWlVvNFQxRVJCOEtmbG1UK2ZlQlZXYU40aVBlQUt0\nQmlKcVVaaitpaFdRLzdONmZRYWFvM3QvclFSd1drcjlwSnd6Zzl3WW5jVHdo\neEpHbG5EbUM2b0hiT1paZ25TY1pqcTFTd09wOVZtMTkwNlZlQzRxeENjQkJT\nek5EbjZMVWd0aC9IcmdRY0Fyd0VSSnQ5ekVnSnJWb1E4WmhSVUhhM29wQUpx\nUTFnaE16Y3ROU3lPekhDcC94R0QwNXVXS0N2ZVk1VUdJeXJEOVFiM0pHSHVr\nNnNrVnpIbzJ1Q2VqK0J6LytsdWlLVzFDZDVmRXYxbnkwamhsU1pZQ3lGTG4z\nUjlndHhBWGRUS2o0Uy9WV0t6U2tMUXVRdnZLTnYrNEZvcklCUjVIU2orOGtX\nNXMrODJ0aEF0MG1XVEUzNnUxNnVvRW9Wd3JlQmhOanA5cEF2ejlMWDJGZzBU\nL1ZxMHNRTHJIMnN1RngvSkVES3lPSms2UHhvSlZtQk9NbzFrOWdGNzdWUkJi\naDBLb2F5RmJXWkRsZ21QRUxGSHNnbWNES1VicjdLbXFEcFU3akYyZGhqdmZh\nZnJySUViWlkvdGV5UndoenVOaEVvQ25XYlAwOW1DT3BVUTJoL2toakNBLzBi\nMzBBTS9ISkZmNGpzQUJwQ1I5SnBwcHZCRDc1alZLSVl1am5xZXRlMHRYTUdh\nVDMzZndza043VElLRUJXakIxbVN3bHlIYlNNV2R6RldKQyt2OG4yUDFGY1R0\naERHZDc4Rm8rZi91UlpuZ1BmYW1ibW5oUXJDZVU2TGY3aWFvTElHSXVpWnpm\nazY1b3ovSjJZUUlVQStmN0hmckJJc1Z6cTAwN1pRVk1CRExrUEZqQ3B5bHJz\nTzIwczNxSEZIbWNGL3Y4MGd3bWlhcFdHSkVMd0Ixb1N6aDIyMThvQ0NJMGE2\nbnpET2FSdUpsb1VxSkxRak15amNXWmxRSUd5VkhuYVVnendoRVZKamtpVDV5\nSjFndHBSRHowZm1IMWlyTXp2YWdTTUo0WklaZ1IvN0xEcTVmeWZubzdZQ0pB\nR05hM2hiR3h2SzlRZ2htd0l6NWFhdWROQVFsUzJsZGNlODRvVHd1My8xcVo4\nV2c0eExzMkNVN0pwd0hiK3I3a3FZWUEvWUpyWU5VL1hKckNQUGp3d0ZxOGNZ\nTlVjVmpKY1JFdkZpZmJLN3BUcm89LmF2Q3VVbGw2OUlOU2tRRFEuUDFSUjZK\nOUV4dC8rSk9JOHNPL0ZiZz09Iiwic2lnIjoibHI2dHdjSGhweWJqOHNXOUhK\nUEJaNlpPeFdIWG91b3lzdXUxNFljZndtTVZUNUlZSmRHQWkvMWt0dlM1Tzdi\nNUdZa1dmK2hhOFltTkhPRWVzbkYrRHc9PSIsImFsZyI6ImFlcy0yNTYtZ2Nt\nK2VkMjU1MTkifQ==\n-----END LICENSE FILE-----\n",
+            "expiry": "\u003cts\u003e",
+            "includes": [],
+            "issued": "\u003cts\u003e",
+            "ttl": 7200
+          },
+          "id": "\u003cuuid:7\u003e",
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e"
+              }
+            }
+          },
+          "type": "license-files"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout encrypted",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "algorithm": "base64+rsa-sha256",
+            "certificate": "-----BEGIN LICENSE FILE-----\neyJlbmMiOiJleUprWVhSaElqcDdJbWxrSWpvaU16SmxZVEEyWVRJdE5XTmxO\naTAwWldFd0xXRTBNR1V0WmpWalpXUTRNakl6Tm1abElpd2lkSGx3WlNJNklt\neHBZMlZ1YzJWeklpd2lZWFIwY21saWRYUmxjeUk2ZXlKdVlXMWxJanB1ZFd4\nc0xDSnJaWGtpT2lJM09VTXlNamd0TmtORFJVSkNMVFZHTnpKRk5TMUVSRUUy\nUXprdFJEUXdORFZCTFZZeklpd2laWGh3YVhKNUlqb2lNakF5TmkweE1DMHlN\nMVF4TmpvME9EbzBOeTQ0TVRaYUlpd2ljM1JoZEhWeklqb2lSVmhRU1ZKSlRr\nY2lMQ0oxYzJWeklqb3dMQ0p6ZFhOd1pXNWtaV1FpT21aaGJITmxMQ0p6WTJo\nbGJXVWlPbTUxYkd3c0ltVnVZM0o1Y0hSbFpDSTZabUZzYzJVc0luTjBjbWxq\nZENJNlptRnNjMlVzSW1ac2IyRjBhVzVuSWpwbVlXeHpaU3dpY0hKdmRHVmpk\nR1ZrSWpwMGNuVmxMQ0oyWlhKemFXOXVJanB1ZFd4c0xDSnRZWGhOWVdOb2FX\nNWxjeUk2TVN3aWJXRjRVSEp2WTJWemMyVnpJanB1ZFd4c0xDSnRZWGhWYzJW\neWN5STZiblZzYkN3aWJXRjRRMjl5WlhNaU9tNTFiR3dzSW0xaGVFMWxiVzl5\nZVNJNmJuVnNiQ3dpYldGNFJHbHpheUk2Ym5Wc2JDd2liV0Y0VlhObGN5STZi\nblZzYkN3aWNtVnhkV2x5WlVobFlYSjBZbVZoZENJNlptRnNjMlVzSW5KbGNY\nVnBjbVZEYUdWamEwbHVJanBtWVd4elpTd2liR0Z6ZEZaaGJHbGtZWFJsWkNJ\nNmJuVnNiQ3dpYkdGemRFTm9aV05yU1c0aU9tNTFiR3dzSW01bGVIUkRhR1Zq\nYTBsdUlqcHVkV3hzTENKc1lYTjBRMmhsWTJ0UGRYUWlPaUl5TURJMkxURXdM\nVEl5VkRFMk9qUTRPalE0TGpJM01Wb2lMQ0p0WlhSaFpHRjBZU0k2ZXlKbFpH\nbDBhVzl1SWpvaWNISnZJbjBzSW1OeVpXRjBaV1FpT2lJeU1ESTJMVEV3TFRJ\neVZERTJPalE0T2pRM0xqZ3hOVm9pTENKMWNHUmhkR1ZrSWpvaU1qQXlOaTB4\nTUMweU1sUXhOam8wT0RvME9DNHlOekZhSW4wc0luSmxiR0YwYVc5dWMyaHBj\nSE1pT25zaVlXTmpiM1Z1ZENJNmV5SnNhVzVyY3lJNmV5SnlaV3hoZEdWa0lq\nb2lMM1l4TDJGalkyOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXROR00xWkMw\nNFpUZG1MVEJoTVdJeVl6TmtOR1UxWmlKOUxDSmtZWFJoSWpwN0luUjVjR1Vp\nT2lKaFkyTnZkVzUwY3lJc0ltbGtJam9pTW1NeFpEUm1NbVV0T1dFellpMDBZ\nelZrTFRobE4yWXRNR0V4WWpKak0yUTBaVFZtSW4xOUxDSndjbTlrZFdOMElq\ncDdJbXhwYm10eklqcDdJbkpsYkdGMFpXUWlPaUl2ZGpFdllXTmpiM1Z1ZEhN\ndk1tTXhaRFJtTW1VdE9XRXpZaTAwWXpWa0xUaGxOMll0TUdFeFlqSmpNMlEw\nWlRWbUwyeHBZMlZ1YzJWekx6TXlaV0V3Tm1FeUxUVmpaVFl0TkdWaE1DMWhO\nREJsTFdZMVkyVmtPREl5TXpabVpTOXdjbTlrZFdOMEluMHNJbVJoZEdFaU9u\nc2lkSGx3WlNJNkluQnliMlIxWTNSeklpd2lhV1FpT2lJNVlqVTVOV1EwWVMx\nbFltUTFMVFE0TW1VdE9ETXdNaTAwTmprNFpURTVNV0ptWldFaWZYMHNJbkJ2\nYkdsamVTSTZleUpzYVc1cmN5STZleUp5Wld4aGRHVmtJam9pTDNZeEwyRmpZ\nMjkxYm5Sekx6SmpNV1EwWmpKbExUbGhNMkl0TkdNMVpDMDRaVGRtTFRCaE1X\nSXlZek5rTkdVMVppOXNhV05sYm5ObGN5OHpNbVZoTURaaE1pMDFZMlUyTFRS\nbFlUQXRZVFF3WlMxbU5XTmxaRGd5TWpNMlptVXZjRzlzYVdONUluMHNJbVJo\nZEdFaU9uc2lkSGx3WlNJNkluQnZiR2xqYVdWeklpd2lhV1FpT2lJNVltTXhO\nREJqWkMxaE5qZ3lMVFJtTm1NdE9EaGhaaTFpWkRkak5XTXdNMkZsTm1FaWZY\nMHNJbWR5YjNWd0lqcDdJbXhwYm10eklqcDdJbkpsYkdGMFpXUWlPaUl2ZGpF\ndllXTmpiM1Z1ZEhNdk1tTXhaRFJtTW1VdE9XRXpZaTAwWXpWa0xUaGxOMll0\nTUdFeFlqSmpNMlEwWlRWbUwyeHBZMlZ1YzJWekx6TXlaV0V3Tm1FeUxUVmpa\nVFl0TkdWaE1DMWhOREJsTFdZMVkyVmtPREl5TXpabVpTOW5jbTkxY0NKOUxD\nSmtZWFJoSWpwdWRXeHNmU3dpYjNkdVpYSWlPbnNpYkdsdWEzTWlPbnNpY21W\nc1lYUmxaQ0k2SWk5Mk1TOWhZMk52ZFc1MGN5OHlZekZrTkdZeVpTMDVZVE5p\nTFRSak5XUXRPR1UzWmkwd1lURmlNbU16WkRSbE5XWXZiR2xqWlc1elpYTXZN\nekpsWVRBMllUSXROV05sTmkwMFpXRXdMV0UwTUdVdFpqVmpaV1E0TWpJek5t\nWmxMMjkzYm1WeUluMHNJbVJoZEdFaU9tNTFiR3g5TENKMWMyVnljeUk2ZXlK\nc2FXNXJjeUk2ZXlKeVpXeGhkR1ZrSWpvaUwzWXhMMkZqWTI5MWJuUnpMekpq\nTVdRMFpqSmxMVGxoTTJJdE5HTTFaQzA0WlRkbUxUQmhNV0l5WXpOa05HVTFa\naTlzYVdObGJuTmxjeTh6TW1WaE1EWmhNaTAxWTJVMkxUUmxZVEF0WVRRd1pT\nMW1OV05sWkRneU1qTTJabVV2ZFhObGNuTWlmU3dpYldWMFlTSTZleUpqYjNW\ndWRDSTZNSDE5TENKdFlXTm9hVzVsY3lJNmV5SnNhVzVyY3lJNmV5SnlaV3ho\nZEdWa0lqb2lMM1l4TDJGalkyOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXRO\nR00xWkMwNFpUZG1MVEJoTVdJeVl6TmtOR1UxWmk5c2FXTmxibk5sY3k4ek1t\nVmhNRFpoTWkwMVkyVTJMVFJsWVRBdFlUUXdaUzFtTldObFpEZ3lNak0yWm1V\ndmJXRmphR2x1WlhNaWZTd2liV1YwWVNJNmV5SmpiM0psY3lJNk1Dd2liV1Z0\nYjNKNUlqb3dMQ0prYVhOcklqb3dMQ0pqYjNWdWRDSTZNSDE5TENKMGIydGxi\nbk1pT25zaWJHbHVhM01pT25zaWNtVnNZWFJsWkNJNklpOTJNUzloWTJOdmRX\nNTBjeTh5WXpGa05HWXlaUzA1WVROaUxUUmpOV1F0T0dVM1ppMHdZVEZpTW1N\nelpEUmxOV1l2YkdsalpXNXpaWE12TXpKbFlUQTJZVEl0TldObE5pMDBaV0V3\nTFdFME1HVXRaalZqWldRNE1qSXpObVpsTDNSdmEyVnVjeUo5ZlN3aVpXNTBh\nWFJzWlcxbGJuUnpJanA3SW14cGJtdHpJanA3SW5KbGJHRjBaV1FpT2lJdmRq\nRXZZV05qYjNWdWRITXZNbU14WkRSbU1tVXRPV0V6WWkwMFl6VmtMVGhsTjJZ\ndE1HRXhZakpqTTJRMFpUVm1MMnhwWTJWdWMyVnpMek15WldFd05tRXlMVFZq\nWlRZdE5HVmhNQzFoTkRCbExXWTFZMlZrT0RJeU16Wm1aUzlsYm5ScGRHeGxi\nV1Z1ZEhNaWZYMTlMQ0pzYVc1cmN5STZleUp6Wld4bUlqb2lMM1l4TDJGalky\nOTFiblJ6THpKak1XUTBaakpsTFRsaE0ySXROR00xWkMwNFpUZG1MVEJoTVdJ\neVl6TmtOR1UxWmk5c2FXTmxibk5sY3k4ek1tVmhNRFpoTWkwMVkyVTJMVFJs\nWVRBdFlUUXdaUzFtTldObFpEZ3lNak0yWm1VaWZYMHNJbTFsZEdFaU9uc2lh\nWE56ZFdWa0lqb2lNakF5TmkweE1DMHlNbFF4TmpvME9EbzBPQzR6TXpWYUlp\nd2laWGh3YVhKNUlqb2lNakF5TmkweE1DMHlNbFF4TnpvME9EbzBPQzR6TXpW\nYUlpd2lkSFJzSWpvek5qQXdmWDA9Iiwic2lnIjoiR2RodElYUVd1Zk1NZkts\nc0lTUnptN3paLzY1OWF3Si9LdWRFQnN0c1lHVmV4MGJDZzM1MFFBMmxXdk5S\nNGFDbTljS3dEWlNZTVlRcnFQb3pMZ29MaEVMb2ptM29ETXBFTEhoclpMcEhQ\nWGNQRHRubFdId0oySFlEbHFCMUFqYXltT1J2WU52MGsrK3pBSDAzOWQyL1FK\nRUhpbDdUWHFWd0NaRUw1MXY0Zk1McE84R29Yd3BrK1RsUGM5S0FEWVlsMEhZ\nZjhvdVV6NmJMSFBOazc5Q21STWR2WUpNSmVlMW5veGtvUDVteTJXY1gwOHlx\nRm0yZ08zcnBINXFGbi9yM2RRUjE3ZW5TV3dBNVZEUTYvVEh2cVZkYkxQb2I3\ndFFKVDVGakZKR2s0Y1hPMStzTW9XampxRW1SWVVjQU5lYnFsaUFzcUlNbGY3\nYm4xNDBrRGxFaGlBPT0iLCJhbGciOiJiYXNlNjQrcnNhLXNoYTI1NiJ9\n-----END LICENSE FILE-----\n",
+            "expiry": "\u003cts\u003e",
+            "includes": [],
+            "issued": "\u003cts\u003e",
+            "ttl": 3600
+          },
+          "id": "\u003cuuid:8\u003e",
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:4\u003e"
+              }
+            }
+          },
+          "type": "license-files"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout signed rsa",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "CHECKOUT_ALGORITHM_INVALID",
+            "detail": "invalid encoding algorithm",
+            "source": {
+              "parameter": "algorithm"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout invalid algorithm",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "CHECKOUT_TTL_INVALID",
+            "detail": "must be greater than or equal to 3600 (1 hour)",
+            "source": {
+              "parameter": "ttl"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout ttl too small",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "CHECKOUT_INCLUDE_INVALID",
+            "detail": "invalid includes",
+            "source": {
+              "parameter": "include"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:11\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout invalid include",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": null,
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "\u003clicense-key:1\u003e"
+      },
+      "name": "checkout binary",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

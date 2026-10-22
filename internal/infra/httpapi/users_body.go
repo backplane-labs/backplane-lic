@@ -281,7 +281,7 @@ func metadataAttrOf(obj map[string]any) (map[string]any, error) {
 		return map[string]any{}, nil
 	}
 
-	m, err := hash(raw, pointerOf("data", "attributes", "metadata"))
+	m, err := metadataOf(raw, pointerOf("data", "attributes", "metadata"))
 
 	return underscoredMetadata(m), err
 }

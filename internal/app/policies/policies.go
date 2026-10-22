@@ -573,6 +573,10 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 		attr("NAME_TOO_LONG", "is too long (maximum is 255 characters)", "name")
 	}
 
+	if detail := domain.MetadataViolation(policy.Metadata); detail != "" {
+		attr("METADATA_TOO_LONG", detail, "metadata")
+	}
+
 	if d := policy.Duration; d != nil && *d < 86400 {
 		attr("DURATION_INVALID", "must be greater than or equal to 86400 (1 day)", "duration")
 	}

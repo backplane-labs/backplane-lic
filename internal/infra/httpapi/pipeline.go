@@ -111,6 +111,12 @@ func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeOptional)
 
 		return
+	case oas.ValidateLicenseKeyOperation:
+		// POST /licenses/actions/validate-key authenticates softly
+		// (anonymous validation is allowed).
+		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeOptional)
+
+		return
 	default:
 		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeRequired)
 

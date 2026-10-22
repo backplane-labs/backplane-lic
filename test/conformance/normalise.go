@@ -45,6 +45,12 @@ type normaliser struct {
 	b64      *regexp.Regexp
 	base32   *regexp.Regexp
 	b32Find  *regexp.Regexp
+
+	plainKey  *regexp.Regexp
+	schemeKey *regexp.Regexp
+	signedKey *regexp.Regexp
+	jwtKey    *regexp.Regexp
+	legacyKey *regexp.Regexp
 }
 
 func (n *normaliser) compile() {
@@ -55,9 +61,18 @@ func (n *normaliser) compile() {
 	n.ts = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$`)
 	n.token = regexp.MustCompile(`^[a-z]+-[0-9a-f]{20,}v[123]$`)
 	n.hex = regexp.MustCompile(`^[0-9a-fA-F]+$`)
-	n.b64 = regexp.MustCompile(`^[A-Za-z0-9+/]+={0,2}$`)
+	n.b64 = regexp.MustCompile(`^[A-Za-z0-9_+/=-]+={0,2}$`)
 	n.base32 = regexp.MustCompile(`^[A-Z2-7]{26,}$`)
 	n.b32Find = regexp.MustCompile(`[A-Z2-7]{26,}`)
+
+	// License keys: the plain XXXXXX-…-V3 form, the scheme forms
+	// (key/<seed>.<sig>, <seed>.<sig>, a bare encrypted blob, a JWT)
+	// and the legacy <32hex>-…-v1 form.
+	n.plainKey = regexp.MustCompile(`^[A-Z0-9]{6}(-[A-Z0-9]{6}){4}-V3$`)
+	n.schemeKey = regexp.MustCompile(`^(key/)?[A-Za-z0-9_=-]{40,}\.[A-Za-z0-9_=-]{20,}$`)
+	n.signedKey = regexp.MustCompile(`^[A-Za-z0-9_=-]+\.[A-Za-z0-9_=-]+$`)
+	n.jwtKey = regexp.MustCompile(`^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$`)
+	n.legacyKey = regexp.MustCompile(`^[0-9a-fA-F]{32}(-[0-9a-fA-F]+)+-v1$`)
 }
 
 func (n *normaliser) value(value any) any {
@@ -85,12 +100,25 @@ func (n *normaliser) value(value any) any {
 	}
 }
 
-func (n *normaliser) string(value string) string {
+func (n *normaliser) string(value string) string { //nolint:cyclop // the masking ladder
 	switch {
 	case n.token.MatchString(value):
 		return n.placeholder("token", value)
 	case n.ts.MatchString(value):
 		return "<ts>"
+	case n.plainKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case n.schemeKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case n.jwtKey.MatchString(value):
+		return n.placeholder("jwt", value)
+	case n.signedKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case n.legacyKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case strings.HasPrefix(value, "-----BEGIN LICENSE FILE-----"),
+		strings.HasPrefix(value, "-----BEGIN MACHINE FILE-----"):
+		return n.placeholder("certificate", value)
 	}
 
 	// The docs origin of error links is instance configuration (the

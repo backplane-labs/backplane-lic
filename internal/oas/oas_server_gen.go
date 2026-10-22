@@ -14,6 +14,18 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/groups/{groupId}/owners
 	AttachGroupOwners(ctx context.Context, req AttachGroupOwnersReq, params AttachGroupOwnersParams) (*GroupOwnerCollectionDocument, error)
+	// AttachLicenseEntitlements implements attachLicenseEntitlements operation.
+	//
+	// Attach entitlements to a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/entitlements
+	AttachLicenseEntitlements(ctx context.Context, req AttachLicenseEntitlementsReq, params AttachLicenseEntitlementsParams) (*LicenseEntitlementListDocument, error)
+	// AttachLicenseUsers implements attachLicenseUsers operation.
+	//
+	// Attach users to a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/users
+	AttachLicenseUsers(ctx context.Context, req AttachLicenseUsersReq, params AttachLicenseUsersParams) (*LicenseUserListDocument, error)
 	// AttachPolicyEntitlements implements attachPolicyEntitlements operation.
 	//
 	// Attach entitlements to a policy.
@@ -26,6 +38,24 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/ban
 	BanUser(ctx context.Context, params BanUserParams) (*UserDocument, error)
+	// CheckInLicense implements checkInLicense operation.
+	//
+	// Check in a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-in
+	CheckInLicense(ctx context.Context, params CheckInLicenseParams) (*LicenseDocument, error)
+	// CheckoutLicense implements checkoutLicense operation.
+	//
+	// Check out a license file (JSON:API document).
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+	CheckoutLicense(ctx context.Context, req CheckoutLicenseReq, params CheckoutLicenseParams) (*LicenseFileDocument, error)
+	// CheckoutLicenseFile implements checkoutLicenseFile operation.
+	//
+	// Check out a license file (binary certificate).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+	CheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (*CheckoutLicenseFileOKHeaders, error)
 	// CreateEntitlement implements createEntitlement operation.
 	//
 	// Create an entitlement.
@@ -44,6 +74,18 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/keys
 	CreateKey(ctx context.Context, req CreateKeyReq, params CreateKeyParams) (*KeyDocumentHeaders, error)
+	// CreateLicense implements createLicense operation.
+	//
+	// Create a license.
+	//
+	// POST /v1/accounts/{account}/licenses
+	CreateLicense(ctx context.Context, req CreateLicenseReq, params CreateLicenseParams) (*LicenseDocumentHeaders, error)
+	// CreateLicenseToken implements createLicenseToken operation.
+	//
+	// Generate an activation token for a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/tokens
+	CreateLicenseToken(ctx context.Context, req CreateLicenseTokenReq, params CreateLicenseTokenParams) (*TokenDocument, error)
 	// CreatePolicy implements createPolicy operation.
 	//
 	// Create a policy.
@@ -80,6 +122,12 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/tokens
 	CreateUserToken(ctx context.Context, req CreateUserTokenReq, params CreateUserTokenParams) (*TokenDocument, error)
+	// DecrementLicenseUsage implements decrementLicenseUsage operation.
+	//
+	// Decrement a license's usage counter.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage
+	DecrementLicenseUsage(ctx context.Context, req DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (*LicenseDocument, error)
 	// DeleteGroup implements deleteGroup operation.
 	//
 	// Delete a group (members keep existing, group nulled).
@@ -110,6 +158,12 @@ type Handler interface {
 	//
 	// DELETE /v1/accounts/{account}/keys/{keyId}
 	DestroyKey(ctx context.Context, params DestroyKeyParams) error
+	// DestroyLicense implements destroyLicense operation.
+	//
+	// Delete a license.
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}
+	DestroyLicense(ctx context.Context, params DestroyLicenseParams) error
 	// DestroyPolicy implements destroyPolicy operation.
 	//
 	// Delete a policy.
@@ -128,6 +182,18 @@ type Handler interface {
 	//
 	// DELETE /v1/accounts/{account}/groups/{groupId}/owners
 	DetachGroupOwners(ctx context.Context, req DetachGroupOwnersReq, params DetachGroupOwnersParams) error
+	// DetachLicenseEntitlements implements detachLicenseEntitlements operation.
+	//
+	// Detach entitlements from a license.
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}/entitlements
+	DetachLicenseEntitlements(ctx context.Context, req DetachLicenseEntitlementsReq, params DetachLicenseEntitlementsParams) error
+	// DetachLicenseUsers implements detachLicenseUsers operation.
+	//
+	// Detach users from a license.
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}/users
+	DetachLicenseUsers(ctx context.Context, req DetachLicenseUsersReq, params DetachLicenseUsersParams) error
 	// DetachPolicyEntitlements implements detachPolicyEntitlements operation.
 	//
 	// Detach entitlements from a policy.
@@ -153,6 +219,12 @@ type Handler interface {
 	//
 	// GET /v1/health
 	Health(ctx context.Context) error
+	// IncrementLicenseUsage implements incrementLicenseUsage operation.
+	//
+	// Increment a license's usage counter.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
+	IncrementLicenseUsage(ctx context.Context, req IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (*LicenseDocument, error)
 	// IndexEntitlements implements indexEntitlements operation.
 	//
 	// List entitlements.
@@ -165,6 +237,36 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/keys
 	IndexKeys(ctx context.Context, params IndexKeysParams) (*KeyListDocument, error)
+	// IndexLicenseEntitlements implements indexLicenseEntitlements operation.
+	//
+	// List a license's entitlements (policy and license attached).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements
+	IndexLicenseEntitlements(ctx context.Context, params IndexLicenseEntitlementsParams) (*EntitlementListDocument, error)
+	// IndexLicenseMachines implements indexLicenseMachines operation.
+	//
+	// List a license's machines.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/machines
+	IndexLicenseMachines(ctx context.Context, params IndexLicenseMachinesParams) (*MachineListDocument, error)
+	// IndexLicenseTokens implements indexLicenseTokens operation.
+	//
+	// List a license's tokens.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/tokens
+	IndexLicenseTokens(ctx context.Context, params IndexLicenseTokensParams) (*TokenCollectionDocument, error)
+	// IndexLicenseUsers implements indexLicenseUsers operation.
+	//
+	// List a license's users (owner and licensees).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/users
+	IndexLicenseUsers(ctx context.Context, params IndexLicenseUsersParams) (*UserCollectionDocument, error)
+	// IndexLicenses implements indexLicenses operation.
+	//
+	// List licenses.
+	//
+	// GET /v1/accounts/{account}/licenses
+	IndexLicenses(ctx context.Context, params IndexLicensesParams) (*LicenseListDocument, error)
 	// IndexPolicies implements indexPolicies operation.
 	//
 	// List policies.
@@ -182,7 +284,7 @@ type Handler interface {
 	// List a policy's licenses.
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/licenses
-	IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseStubListDocument, error)
+	IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseListDocument, error)
 	// IndexPolicyPool implements indexPolicyPool operation.
 	//
 	// List a policy's key pool.
@@ -194,7 +296,7 @@ type Handler interface {
 	// List a product's licenses.
 	//
 	// GET /v1/accounts/{account}/products/{productId}/licenses
-	IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseStubListDocument, error)
+	IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseListDocument, error)
 	// IndexProductMachines implements indexProductMachines operation.
 	//
 	// List a product's machines.
@@ -230,7 +332,7 @@ type Handler interface {
 	// List a group's licenses.
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/licenses
-	ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*UserLicenseCollectionDocument, error)
+	ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*LicenseListDocument, error)
 	// ListGroupMachines implements listGroupMachines operation.
 	//
 	// List a group's machines.
@@ -266,7 +368,7 @@ type Handler interface {
 	// List a user's licenses.
 	//
 	// GET /v1/accounts/{account}/users/{userId}/licenses
-	ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*UserLicenseCollectionDocument, error)
+	ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*LicenseListDocument, error)
 	// ListUserMachines implements listUserMachines operation.
 	//
 	// List a user's machines.
@@ -322,6 +424,12 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/profile
 	Profile(ctx context.Context, params ProfileParams) (*ProfileDocument, error)
+	// QuickValidateLicense implements quickValidateLicense operation.
+	//
+	// Quickly validate a license (no scope checks).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+	QuickValidateLicense(ctx context.Context, params QuickValidateLicenseParams) (*LicenseValidateDocument, error)
 	// RegenerateCurrentToken implements regenerateCurrentToken operation.
 	//
 	// 404 unless the request itself is token-authenticated.
@@ -334,18 +442,42 @@ type Handler interface {
 	//
 	// PUT /v1/accounts/{account}/tokens/{tokenId}
 	RegenerateToken(ctx context.Context, params RegenerateTokenParams) (*TokenDocument, error)
+	// ReinstateLicense implements reinstateLicense operation.
+	//
+	// Reinstate a suspended license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reinstate
+	ReinstateLicense(ctx context.Context, params ReinstateLicenseParams) (*LicenseDocument, error)
+	// RenewLicense implements renewLicense operation.
+	//
+	// Renew a license's expiry.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/renew
+	RenewLicense(ctx context.Context, params RenewLicenseParams) (*LicenseDocument, error)
 	// RequestPasswordReset implements requestPasswordReset operation.
 	//
 	// Always answers 204; unknown emails trigger nothing.
 	//
 	// POST /v1/accounts/{account}/passwords
 	RequestPasswordReset(ctx context.Context, req RequestPasswordResetReq, params RequestPasswordResetParams) error
+	// ResetLicenseUsage implements resetLicenseUsage operation.
+	//
+	// Reset a license's usage counter.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
+	ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (*LicenseDocument, error)
 	// ResetUserPassword implements resetUserPassword operation.
 	//
 	// Reset a user's password with a reset token.
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/reset-password
 	ResetUserPassword(ctx context.Context, req ResetUserPasswordReq, params ResetUserPasswordParams) (*UserDocument, error)
+	// RevokeLicense implements revokeLicense operation.
+	//
+	// Revoke a license (destroys it).
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}/actions/revoke
+	RevokeLicense(ctx context.Context, params RevokeLicenseParams) error
 	// RevokeToken implements revokeToken operation.
 	//
 	// Revoke a token.
@@ -369,7 +501,7 @@ type Handler interface {
 	// Show one of a group's licenses (id or key alias).
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}
-	ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*UserLicenseDocument, error)
+	ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*LicenseDocument, error)
 	// ShowGroupMachine implements showGroupMachine operation.
 	//
 	// Show one of a group's machines (id or fingerprint alias).
@@ -406,6 +538,66 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/keys/{keyId}/product
 	ShowKeyProduct(ctx context.Context, params ShowKeyProductParams) (*ProductDocument, error)
+	// ShowLicense implements showLicense operation.
+	//
+	// Retrieve a license (by id or key).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}
+	ShowLicense(ctx context.Context, params ShowLicenseParams) (*LicenseDocument, error)
+	// ShowLicenseEntitlement implements showLicenseEntitlement operation.
+	//
+	// Retrieve one of a license's entitlements.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements/{entitlementId}
+	ShowLicenseEntitlement(ctx context.Context, params ShowLicenseEntitlementParams) (*EntitlementDocument, error)
+	// ShowLicenseGroup implements showLicenseGroup operation.
+	//
+	// Retrieve a license's group.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/group
+	ShowLicenseGroup(ctx context.Context, params ShowLicenseGroupParams) (*GroupDocument, error)
+	// ShowLicenseMachine implements showLicenseMachine operation.
+	//
+	// Retrieve one of a license's machines (by id or fingerprint).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/machines/{machineId}
+	ShowLicenseMachine(ctx context.Context, params ShowLicenseMachineParams) (*MachineDocument, error)
+	// ShowLicenseOwner implements showLicenseOwner operation.
+	//
+	// Retrieve a license's owner.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/owner
+	ShowLicenseOwner(ctx context.Context, params ShowLicenseOwnerParams) (*LicenseOwnerDocument, error)
+	// ShowLicensePolicy implements showLicensePolicy operation.
+	//
+	// Retrieve a license's policy.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/policy
+	ShowLicensePolicy(ctx context.Context, params ShowLicensePolicyParams) (*PolicyDocument, error)
+	// ShowLicenseProduct implements showLicenseProduct operation.
+	//
+	// Retrieve a license's product.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/product
+	ShowLicenseProduct(ctx context.Context, params ShowLicenseProductParams) (*ProductDocument, error)
+	// ShowLicenseToken implements showLicenseToken operation.
+	//
+	// Retrieve one of a license's tokens.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/tokens/{tokenId}
+	ShowLicenseToken(ctx context.Context, params ShowLicenseTokenParams) (*TokenDocument, error)
+	// ShowLicenseUser implements showLicenseUser operation.
+	//
+	// Retrieve one of a license's users (by id or email).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/users/{userId}
+	ShowLicenseUser(ctx context.Context, params ShowLicenseUserParams) (*LicenseOwnerDocument, error)
+	// ShowLicenseUserAlias implements showLicenseUserAlias operation.
+	//
+	// Retrieve a license's owner (v1.5 alias).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/user
+	ShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (*LicenseOwnerDocument, error)
 	// ShowPolicy implements showPolicy operation.
 	//
 	// Retrieve a policy.
@@ -423,7 +615,7 @@ type Handler interface {
 	// Retrieve one of a policy's licenses.
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
-	ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (ShowPolicyLicenseOK, error)
+	ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (*LicenseDocument, error)
 	// ShowPolicyPoolKey implements showPolicyPoolKey operation.
 	//
 	// Retrieve one of a policy's pooled keys.
@@ -447,7 +639,7 @@ type Handler interface {
 	// Retrieve one of a product's licenses.
 	//
 	// GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}
-	ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (ShowProductLicenseOK, error)
+	ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (*LicenseDocument, error)
 	// ShowProductMachine implements showProductMachine operation.
 	//
 	// Retrieve one of a product's machines.
@@ -495,7 +687,7 @@ type Handler interface {
 	// Show one of a user's licenses (id or key alias).
 	//
 	// GET /v1/accounts/{account}/users/{userId}/licenses/{licenseId}
-	ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*UserLicenseDocument, error)
+	ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*LicenseDocument, error)
 	// ShowUserMachine implements showUserMachine operation.
 	//
 	// Show one of a user's machines (id or fingerprint alias).
@@ -520,6 +712,12 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/users/{userId}/tokens/{tokenId}
 	ShowUserToken(ctx context.Context, params ShowUserTokenParams) (*TokenDocument, error)
+	// SuspendLicense implements suspendLicense operation.
+	//
+	// Suspend a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/suspend
+	SuspendLicense(ctx context.Context, params SuspendLicenseParams) (*LicenseDocument, error)
 	// UnbanUser implements unbanUser operation.
 	//
 	// Unban a user.
@@ -544,6 +742,36 @@ type Handler interface {
 	//
 	// PATCH /v1/accounts/{account}/keys/{keyId}
 	UpdateKey(ctx context.Context, req UpdateKeyReq, params UpdateKeyParams) (*KeyDocument, error)
+	// UpdateLicense implements updateLicense operation.
+	//
+	// Update a license.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}
+	UpdateLicense(ctx context.Context, req UpdateLicenseReq, params UpdateLicenseParams) (*LicenseDocument, error)
+	// UpdateLicenseGroup implements updateLicenseGroup operation.
+	//
+	// Set a license's group.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/group
+	UpdateLicenseGroup(ctx context.Context, req UpdateLicenseGroupReq, params UpdateLicenseGroupParams) (*LicenseDocument, error)
+	// UpdateLicenseOwner implements updateLicenseOwner operation.
+	//
+	// Set a license's owner.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/owner
+	UpdateLicenseOwner(ctx context.Context, req UpdateLicenseOwnerReq, params UpdateLicenseOwnerParams) (*LicenseDocument, error)
+	// UpdateLicensePolicy implements updateLicensePolicy operation.
+	//
+	// Transfer a license to a policy.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/policy
+	UpdateLicensePolicy(ctx context.Context, req UpdateLicensePolicyReq, params UpdateLicensePolicyParams) (*LicenseDocument, error)
+	// UpdateLicenseUserAlias implements updateLicenseUserAlias operation.
+	//
+	// Set a license's owner (v1.5 alias).
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/user
+	UpdateLicenseUserAlias(ctx context.Context, req UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (*LicenseDocument, error)
 	// UpdatePolicy implements updatePolicy operation.
 	//
 	// Scheme, encrypted and usePool are immutable; relationships are not accepted.
@@ -580,6 +808,18 @@ type Handler interface {
 	//
 	// PATCH /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
 	UpdateUserSecondFactor(ctx context.Context, req UpdateUserSecondFactorReq, params UpdateUserSecondFactorParams) (*SecondFactorDocument, error)
+	// ValidateLicense implements validateLicense operation.
+	//
+	// Validate a license (with meta.scope).
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+	ValidateLicense(ctx context.Context, req ValidateLicenseReq, params ValidateLicenseParams) (*LicenseValidateDocument, error)
+	// ValidateLicenseKey implements validateLicenseKey operation.
+	//
+	// Validate a license by key (authentication optional).
+	//
+	// POST /v1/accounts/{account}/licenses/actions/validate-key
+	ValidateLicenseKey(ctx context.Context, req ValidateLicenseKeyReq, params ValidateLicenseKeyParams) (*LicenseValidateDocument, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.
