@@ -82,9 +82,9 @@ func (s *Server) Call(ctx context.Context, in *licconsolev1.CallRequest) (*licco
 		outcome = "failed"
 	}
 
-	// Never audit query values, bodies, response data, or secrets. API
-	// paths identify subjects; query values can contain keys and emails.
-	s.audit(ctx, operator, "lic.console.call", in.GetMethod()+" "+target.Path, outcome, rec.Code)
+	// License keys and emails may be path aliases, not only body/query
+	// values. Audit canonical IDs and route names, never alias material.
+	s.audit(ctx, operator, "lic.console.call", in.GetMethod()+" "+auditPath(target.Path), outcome, rec.Code)
 
 	headers := make(map[string]string, len(rec.Header()))
 	for key, values := range rec.Header() {
@@ -95,6 +95,34 @@ func (s *Server) Call(ctx context.Context, in *licconsolev1.CallRequest) (*licco
 		Status:  int32(rec.Code), //nolint:gosec // HTTP status is in [100,599].
 		Headers: headers, Body: rec.Body.Bytes(),
 	}, nil
+}
+
+func auditPath(path string) string {
+	parts := strings.Split(path, "/")
+	for i, part := range parts {
+		if routeSegment(part) {
+			continue
+		}
+
+		if _, err := uuid.Parse(part); err != nil {
+			parts[i] = ":identifier"
+		}
+	}
+
+	return strings.Join(parts, "/")
+}
+
+func routeSegment(part string) bool {
+	switch part {
+	case "", "v1", "accounts", "products", "policies", "licenses", "users", "groups", "entitlements", "tokens",
+		"webhook-endpoints", "webhook-events", "keys", "pool", "owners", "owner", "user", "group", "product", "policy",
+		"second-factors", "passwords", "me", "actions", "validate", "validate-key", "renew", "revoke", "suspend",
+		"reinstate", "check-in", "check-out", "increment-usage", "decrement-usage", "reset-usage", "ban", "unban",
+		"reset-password", "update-password", "retry", "machines", "components", "processes":
+		return true
+	default:
+		return false
+	}
 }
 
 func requestURL(in *licconsolev1.CallRequest) (*url.URL, error) {

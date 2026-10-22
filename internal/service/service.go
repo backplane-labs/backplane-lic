@@ -138,11 +138,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 		return loop(ctx, time.Minute, notificationPass(jobsRunner, notifier))
 	})
 
-	consoleComponent := deps.NewComponent(root, "console")
-	admin := console.New(late, consoleStore{store: store}, id, build.Get().Version,
-		slog.New(xlog.NewSlogHandler(consoleComponent.Log())))
-
-	return &Service{Console: admin, Store: store, Cache: cache, HTTP: late}, nil
+	return &Service{Console: newConsole(root, store, id, late), Store: store, Cache: cache, HTTP: late}, nil
 }
 
 func notificationPass(jobsRunner *jobs.Runner, notifier licenses.Notifier) func(context.Context) error {

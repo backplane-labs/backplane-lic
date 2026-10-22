@@ -87,8 +87,9 @@ func TestCallPreservesHTTPResponse(t *testing.T) {
 	ctx := backplanetest.Operator(t.Context(), session)
 
 	out, err := srv.Call(ctx, &licconsolev1.CallRequest{
-		Method: "POST", Path: "/v1/licenses", Query: map[string]string{"page[number]": "3", "key": "secret-query"},
-		Body: []byte(`{"secret":"secret-body"}`),
+		Method: "POST", Path: "/v1/licenses/secret-license-key",
+		Query: map[string]string{"page[number]": "3", "key": "secret-query"},
+		Body:  []byte(`{"secret":"secret-body"}`),
 	})
 	if err != nil || out.GetStatus() != http.StatusUnprocessableEntity ||
 		!bytes.Equal(out.GetBody(), []byte{0, 255, 42}) || out.GetHeaders()["Content-Disposition"] == "" {
@@ -105,7 +106,8 @@ func TestCallPreservesHTTPResponse(t *testing.T) {
 		t.Fatalf("audit: %v", audit)
 	}
 
-	if strings.Contains(logs.String(), "secret-query") || strings.Contains(logs.String(), "secret-body") {
+	if strings.Contains(logs.String(), "secret-query") || strings.Contains(logs.String(), "secret-body") ||
+		strings.Contains(logs.String(), "secret-license-key") {
 		t.Fatalf("secret in audit: %s", logs.String())
 	}
 }
