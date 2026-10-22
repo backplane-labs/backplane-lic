@@ -16,7 +16,7 @@ export function decodeDocument(status: number, bytes: Uint8Array): Document {
   return document;
 }
 export function listData(document?: Document): Resource[] { return Array.isArray(document?.data) ? document.data : document?.data ? [document.data] : []; }
-export function labelOf(resource: Resource) { return String(resource.attributes?.name ?? resource.attributes?.email ?? resource.attributes?.code ?? resource.attributes?.url ?? resource.id); }
+export function labelOf(resource: Resource) { return String(resource.attributes?.name ?? resource.attributes?.email ?? resource.attributes?.key ?? resource.attributes?.code ?? resource.attributes?.event ?? resource.attributes?.url ?? resource.id); }
 export function nextPage(links: Document['links']): Record<string, string> | undefined {
   if (!links?.next) return undefined;
   const next = new URL(links.next, 'https://console.invalid');
@@ -61,4 +61,11 @@ export function secretsOf(document: Document): Record<string, unknown> {
   }
   // Token generation/regeneration returns the secret as data.attributes.token.
   return secrets;
+}
+
+// humanize is the fallback label of an untranslated attribute name:
+// distributionStrategy reads as "Distribution strategy".
+export function humanize(key: string): string {
+  const words = key.replace(/[-_]/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }

@@ -17,6 +17,7 @@ export function scaffoldDraft(fields: FieldSpec[], values: NativeStruct = {}): N
 }
 function scaffoldField(field: FieldSpec): Native {
   if (field.fields) return scaffoldDraft(field.fields);
+  if (field.options?.length) return field.options[0].value;
   if (field.choices?.length) return field.choices[0];
   if (field.kind === 'bool') return false;
   if (field.kind === 'int64') return 0n;

@@ -4,8 +4,9 @@ import type { FieldSpec } from './resources';
 
 export function formSchema(fields: FieldSpec[], title: (key: string) => string = (key) => key): Schema {
   const convert = (field: FieldSpec): Record<string, unknown> => ({
-    name: field.name, title: title(field.name), required: !!field.required, nullable: !!field.nullable, secret: !!field.secret,
+    name: field.name, title: title(field.label ?? field.name), required: !!field.required, nullable: !!field.nullable, secret: !!field.secret,
     ...(field.fields ? { object: { schema: { fields: field.fields.map(convert) } } }
+      : field.options ? { choice: { options: field.options.map((option) => ({ value: { stringValue: option.value }, label: option.label })) } }
       : field.choices ? { choice: { options: field.choices.map((value) => ({ value: { stringValue: value }, label: value })) } }
       : { [field.kind ?? 'string']: {} }),
   });
@@ -15,8 +16,8 @@ export function validateDraft(schema: Schema, values: NativeStruct) {
   const engine = Engine.compile(schema);
   return engine.bake({ ...values });
 }
-export function relationFields(relations: { name: string; required?: boolean }[]): FieldSpec[] {
-  return relations.map((relation) => ({ name: relation.name + 'Id', required: relation.required, nullable: !relation.required }));
+export function relationFields(relations: { name: string; type: string; required?: boolean }[]): FieldSpec[] {
+  return relations.map((relation) => ({ name: relation.name + 'Id', required: relation.required, nullable: !relation.required, relatesTo: relation.type }));
 }
 export function relationshipBody(values: Record<string, unknown>, relations: { name: string; type: string }[]) {
   const relationships: Record<string, unknown> = {};

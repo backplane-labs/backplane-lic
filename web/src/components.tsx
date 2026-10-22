@@ -4,13 +4,13 @@ import { structToNative, type Baked, type NativeStruct } from '@gopherex/schemap
 import { SchemaForm } from '@backplane-labs/backplane-schema-forms';
 import { CodeEditor, JSONViewer } from '@backplane-labs/backplane-editors';
 import { usePluginContext } from '@backplane-labs/backplane-plugin-sdk';
-import { Button, Checkbox, EmptyState, Panel, Stack } from '@backplane-labs/backplane-ui';
+import { Button, Checkbox, ClipboardButton, EmptyState, KeyValueList, Panel, Stack, StatusBadge } from '@backplane-labs/backplane-ui';
 import { formSchema, validateDraft } from './schemas';
-import { json, parseJSON, redact, RequestError, secretsOf, type Document } from './model';
+import { humanize, json, parseJSON, redact, RequestError, secretsOf, type Document } from './model';
 import type { FieldSpec } from './resources';
 import { completeEditor, errorFieldPath, fieldRange, parseDraft, scaffoldDraft, validateEditor } from './editor-model';
 
-export function useText() { const { t } = useTranslation('module.lic'); return (key: string, args?: Record<string, unknown>) => t(key, { defaultValue: key, ...args }); }
+export function useText() { const { t } = useTranslation('module.lic'); return (key: string, args?: Record<string, unknown>) => t(key, { defaultValue: humanize(key), ...args }); }
 export const row = { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } as const;
 export const mono = { fontFamily: 'var(--font-mono)', overflowWrap: 'anywhere' } as const;
 export function ErrorNotice({ error, retry }: { error: unknown; retry?: () => void }) {
@@ -21,13 +21,32 @@ export function ObjectView({ value, label }: { value: unknown; label: string }) 
   const { mode } = usePluginContext();
   return <div style={{ minWidth: 0, maxWidth: '100%' }}><JSONViewer label={label} value={json(redact(value))} mode={mode} height={280} /></div>;
 }
+// AttributeList reads a record as label/value rows; nested values stay JSON.
+export function AttributeList({ value }: { value: Record<string, unknown> | undefined }) {
+  const t = useText();
+  const entries = Object.entries(value ?? {});
+  return <dl style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, max-content) 1fr', gap: '6px 20px', margin: 0 }}>{entries.map(([key, item]) => <div key={key} style={{ display: 'contents' }}>
+    <dt style={{ color: 'var(--muted-foreground)' }}>{t(key)}</dt>
+    <dd style={{ margin: 0, ...(typeof item === 'object' && item !== null ? mono : {}), overflowWrap: 'anywhere' }}>{item === null || item === undefined || item === '' ? '—' : typeof item === 'object' ? JSON.stringify(item) : String(item)}</dd>
+  </div>)}</dl>;
+}
+export function CopyButton({ value }: { value: string }) {
+  const t = useText(), [state, setState] = useState('');
+  return <Button size="sm" variant="outline" onClick={() => { void navigator.clipboard.writeText(value).then(() => setState(t('copied')), () => setState(t('copyFailed'))); }}>{state || t('copy')}</Button>;
+}
 export function Result({ document, dismiss }: { document: Document; dismiss: () => void }) {
-  const t = useText(), secrets = secretsOf(document), [copied, setCopied] = useState('');
-  return <Panel title={Object.keys(secrets).length ? t('oneTimeSecret') : t('result')} actions={<Button size="sm" variant="ghost" onClick={dismiss}>{t('dismiss')}</Button>}>
-    {Object.keys(secrets).length > 0 && <Stack gap={8}><p>{t('secretHelp')}</p><pre tabIndex={0} style={{ ...mono, whiteSpace: 'pre-wrap' }}>{json(secrets)}</pre>
-      <Button variant="outline" onClick={() => { void navigator.clipboard.writeText(json(secrets)).then(() => setCopied(t('copied')), () => setCopied(t('copyFailed'))); }}>{t('copy')}</Button>{copied && <p role="status">{copied}</p>}
-    </Stack>}
-    <ObjectView value={document} label={t('result')} />
+  const t = useText(), secrets = secretsOf(document);
+  const verdict = typeof document.meta?.valid === 'boolean' ? document.meta : undefined;
+  const warning = typeof document.meta?.warning === 'string' ? document.meta.warning : undefined;
+  return <Panel title={Object.keys(secrets).length ? t('oneTimeSecret') : verdict ? t('validation') : t('result')} actions={<Button size="sm" variant="ghost" onClick={dismiss}>{t('dismiss')}</Button>}>
+    <Stack gap={12}>
+      {verdict && <div role="status" style={row}><StatusBadge tone={verdict.valid ? 'success' : 'danger'} dot>{String(verdict.code ?? (verdict.valid ? 'VALID' : 'INVALID'))}</StatusBadge><span>{String(verdict.detail ?? '')}</span></div>}
+      {warning && <p role="status">{warning}</p>}
+      {Object.keys(secrets).length > 0 && <Stack gap={8}><p>{t('secretHelp')}</p>
+        <KeyValueList items={Object.entries(secrets).map(([name, value]) => ({ key: name, label: t(name), mono: true, value: <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', overflowWrap: 'anywhere' }}>{String(value)}<ClipboardButton value={String(value)} /></span> }))} />
+      </Stack>}
+      <details><summary>{t('response')}</summary><ObjectView value={document} label={t('response')} /></details>
+    </Stack>
   </Panel>;
 }
 export type Operation = { title: string; fields: FieldSpec[]; initial?: NativeStruct; dangerous?: boolean; submitLabel?: string; execute: (values: NativeStruct, signal: AbortSignal) => Promise<Document>; success?: (document: Document) => void };
@@ -35,8 +54,10 @@ export type Operation = { title: string; fields: FieldSpec[]; initial?: NativeSt
 /** The same descriptor drives ordinary controls and the advanced typed JSON editor. */
 export function OperationForm({ operation, close, done }: { operation: Operation; close: () => void; done: (document: Document) => void }) {
   const t = useText(), { mode } = usePluginContext();
-  const [advanced, setAdvanced] = useState(false), [dirty, setDirty] = useState(false), [busy, setBusy] = useState(false), [confirmed, setConfirmed] = useState(false);
-  const baseline = useMemo(() => json(scaffoldDraft(operation.fields, operation.initial)), [operation]);
+  const [advanced, setAdvanced] = useState(false), [dirty, setDirty] = useState(false), [busy, setBusy] = useState(false), [confirmed, setConfirmed] = useState(false), [discarding, setDiscarding] = useState(false);
+  // Required fields start as editable controls, not as unset placeholders.
+  const formInitial = useMemo(() => scaffoldDraft(operation.fields, operation.initial), [operation]);
+  const baseline = useMemo(() => json(formInitial), [formInitial]);
   const [text, setText] = useState(baseline), [error, setError] = useState<unknown>();
   const [reveal, setReveal] = useState<{ from: number; to: number; key: number }>();
   const active = useRef<AbortController | null>(null), mounted = useRef(true), formRoot = useRef<HTMLDivElement>(null);
@@ -64,7 +85,8 @@ export function OperationForm({ operation, close, done }: { operation: Operation
   const schema = useMemo(() => formSchema(operation.fields, t), [operation.fields, t]);
   // This component is keyed by the caller's selected operation, never by query refresh.
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; active.current?.abort(); }; }, []);
-  const cancel = () => { if (!busy && dirty && !window.confirm(t('unsaved'))) return; active.current?.abort(); if (busy) done({ meta: { warning: t('requestCancelled') } }); else close(); };
+  const leave = () => { active.current?.abort(); if (busy) done({ meta: { warning: t('requestCancelled') } }); else close(); };
+  const cancel = () => { if (!busy && dirty) { setDiscarding(true); return; } leave(); };
   const submit = async (values: NativeStruct, parentSignal?: AbortSignal) => {
     if (active.current || operation.dangerous && !confirmed) return;
     const controller = new AbortController(); active.current = controller;
@@ -78,6 +100,7 @@ export function OperationForm({ operation, close, done }: { operation: Operation
   };
   return <Panel title={operation.title} actions={<Button size="sm" variant="outline" onClick={cancel}>{t('cancel')}</Button>}>
     <div ref={formRoot}><Stack gap={16}>
+      {discarding && <div role="alert" style={row}><span>{t('unsaved')}</span><Button size="sm" variant="destructive" onClick={leave}>{t('discard')}</Button><Button size="sm" variant="outline" onClick={() => setDiscarding(false)}>{t('keepEditing')}</Button></div>}
       {operation.dangerous && <div role="note"><p>{t('confirmHelp')}</p><label style={row}><Checkbox checked={confirmed} onCheckedChange={(value) => setConfirmed(value === true)} />{t('confirmTitle', { action: operation.title })}</label></div>}
       <div style={row}><Button size="sm" variant="outline" disabled={busy || dirty} onClick={() => setAdvanced(!advanced)}>{t(advanced ? 'form' : 'advanced')}</Button></div>
       {advanced ? <Stack gap={12}><p>{t('jsonHelp')}</p>
@@ -98,7 +121,7 @@ export function OperationForm({ operation, close, done }: { operation: Operation
             void submit(structToNative(outcome.baked.values!)).catch(() => {});
           } catch (failure) { setError(failure); }
         }}>{busy ? t('loading') : operation.submitLabel ?? t('confirm')}</Button>
-      </Stack> : <SchemaForm schema={schema} initialValues={operation.initial} label={operation.title} disabled={busy || operation.dangerous && !confirmed} submitLabel={operation.submitLabel ?? t('confirm')} onDirtyChange={setDirty} onSubmit={(baked: Baked, signal) => submit(structToNative(baked.values!), signal)} />}
+      </Stack> : <SchemaForm schema={schema} initialValues={formInitial} label={operation.title} disabled={busy || operation.dangerous && !confirmed} submitLabel={operation.submitLabel ?? t('confirm')} onDirtyChange={setDirty} onSubmit={(baked: Baked, signal) => submit(structToNative(baked.values!), signal)} />}
       {fieldErrors.length > 0 ? <section role="alert" aria-label={t('validation')}><strong>{t('validation')}</strong><ul>{fieldErrors.map((failure, index) => {
         const path = errorFieldPath(failure, operation.fields);
         return <li key={index} id={`${errorsId}-${index}`}>

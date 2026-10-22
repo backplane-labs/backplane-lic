@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { accountPath, decodeDocument, json, listData, nextPage, parseJSON, redact, RequestError, secretsOf, wireJSON, writableAttributes } from './model.ts';
+import { accountPath, decodeDocument, humanize, json, labelOf, listData, nextPage, parseJSON, redact, RequestError, secretsOf, wireJSON, writableAttributes } from './model.ts';
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
 test('account and resource identifiers are safely addressed without losing aliases', () => {
   assert.equal(accountPath('acme/team', 'licenses/key'), '/v1/accounts/acme%2Fteam/licenses/key');
@@ -36,4 +36,11 @@ test('one-time secrets are separated from normal views, including provisioning U
   assert.ok(!display.includes('secret-token'));
   assert.ok(!display.includes('secret=foo'));
   assert.ok(display.includes('CI'));
+});
+test('untranslated attributes read as words and unnamed licenses are labelled by key', () => {
+  assert.equal(humanize('distributionStrategy'), 'Distribution strategy');
+  assert.equal(humanize('webhook-endpoints'), 'Webhook endpoints');
+  assert.equal(humanize('maxMachines'), 'Max machines');
+  assert.equal(labelOf({ type: 'licenses', id: 'id-1', attributes: { name: null, key: 'ABC-123' } }), 'ABC-123');
+  assert.equal(labelOf({ type: 'webhook-events', id: 'id-2', attributes: { event: 'license.created' } }), 'license.created');
 });
