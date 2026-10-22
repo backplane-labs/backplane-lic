@@ -136,7 +136,7 @@
             "code": "PASSWORD_TOO_SHORT",
             "detail": "is too short (minimum is 6 characters)",
             "links": {
-              "about": "https://keygen.sh/docs/api/users/#users-object-attrs-password"
+              "about": "https://\u003cdocs-host\u003e/docs/api/users/#users-object-attrs-password"
             },
             "source": {
               "pointer": "/data/attributes/password"
@@ -172,7 +172,7 @@
             "code": "EMAIL_INVALID",
             "detail": "is invalid",
             "links": {
-              "about": "https://keygen.sh/docs/api/users/#users-object-attrs-email"
+              "about": "https://\u003cdocs-host\u003e/docs/api/users/#users-object-attrs-email"
             },
             "source": {
               "pointer": "/data/attributes/email"
@@ -290,7 +290,7 @@
             "code": "EMAIL_TAKEN",
             "detail": "has already been taken",
             "links": {
-              "about": "https://keygen.sh/docs/api/users/#users-object-attrs-email"
+              "about": "https://\u003cdocs-host\u003e/docs/api/users/#users-object-attrs-email"
             },
             "source": {
               "pointer": "/data/attributes/email"
@@ -467,7 +467,7 @@
             "code": "TOKEN_MISSING",
             "detail": "You must be authenticated to complete the request",
             "links": {
-              "about": "https://keygen.test/docs/api/authentication/"
+              "about": "https://\u003cdocs-host\u003e/docs/api/authentication/"
             },
             "title": "Unauthorized"
           }

@@ -372,18 +372,25 @@ components:
       required: [data, meta]
       properties:
         data:
-          $ref: "#/components/schemas/UserResource"
+          oneOf:
+            - $ref: "#/components/schemas/UserResource"
+            - $ref: "#/components/schemas/ProductResource"
+            - $ref: "#/components/schemas/LicenseResource"
         meta:
           $ref: "#/components/schemas/ProfileMeta"
 
     MeDocument:
-      # The current bearer plus, for token authn, the current token in
-      # included (without its secret).
+      # The current bearer (user, product or license) plus, for token
+      # authn, the current token in included (without its secret); the
+      # reference omits included entirely without one.
       type: object
-      required: [data, included]
+      required: [data]
       properties:
         data:
-          $ref: "#/components/schemas/UserResource"
+          oneOf:
+            - $ref: "#/components/schemas/UserResource"
+            - $ref: "#/components/schemas/ProductResource"
+            - $ref: "#/components/schemas/LicenseResource"
         included:
           type: array
           items:
@@ -1167,6 +1174,446 @@ components:
         links:
           $ref: "#/components/schemas/ListLinks"
 
+
+    # --- licenses (resource group B3) ---
+
+    LicenseAttributes:
+      type: object
+      required:
+        [name, expiry, status, uses, suspended, scheme, encrypted, strict,
+         floating, protected, version, maxMachines, maxProcesses, maxUsers,
+         maxCores, maxMemory, maxDisk, maxUses, requireHeartbeat,
+         requireCheckIn, lastValidated, lastCheckIn, nextCheckIn,
+         lastCheckOut, metadata, created, updated]
+      properties:
+        name:
+          type: ["string", "null"]
+        key:
+          # Omitted entirely for a legacy-encrypted license whose raw
+          # plaintext is unavailable (every read after creation).
+          type: string
+        expiry:
+          type: ["string", "null"]
+        status:
+          type: string
+        uses:
+          type: integer
+        suspended:
+          type: boolean
+        scheme:
+          type: ["string", "null"]
+        encrypted:
+          type: boolean
+        strict:
+          type: boolean
+        floating:
+          type: boolean
+        protected:
+          type: boolean
+        version:
+          type: ["string", "null"]
+        maxMachines:
+          type: ["integer", "null"]
+        maxProcesses:
+          type: ["integer", "null"]
+        maxUsers:
+          type: ["integer", "null"]
+        maxCores:
+          type: ["integer", "null"]
+        maxMemory:
+          type: ["integer", "null"]
+        maxDisk:
+          type: ["integer", "null"]
+        maxUses:
+          type: ["integer", "null"]
+        requireHeartbeat:
+          type: boolean
+        requireCheckIn:
+          type: boolean
+        lastValidated:
+          type: ["string", "null"]
+        lastCheckIn:
+          type: ["string", "null"]
+        nextCheckIn:
+          type: ["string", "null"]
+        lastCheckOut:
+          type: ["string", "null"]
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    LicenseUsersRelationship:
+      type: object
+      required: [links, meta]
+      properties:
+        links:
+          $ref: "#/components/schemas/RelationshipLinks"
+        meta:
+          type: object
+          required: [count]
+          properties:
+            count:
+              type: integer
+
+    LicenseMachinesRelationship:
+      type: object
+      required: [links, meta]
+      properties:
+        links:
+          $ref: "#/components/schemas/RelationshipLinks"
+        meta:
+          type: object
+          required: [cores, memory, disk, count]
+          properties:
+            cores:
+              type: integer
+            memory:
+              type: integer
+            disk:
+              type: integer
+            count:
+              type: integer
+
+    LicenseRelationships:
+      type: object
+        # account, product, policy, group, owner carry always-emitted
+        # linkage (null for an absent group/owner); users and machines
+        # are link+meta to-many; tokens and entitlements link-only.
+      required: [account, product, policy, group, owner, users, machines, tokens, entitlements]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        product:
+          $ref: "#/components/schemas/ToOneRelationship"
+        policy:
+          $ref: "#/components/schemas/ToOneRelationship"
+        group:
+          $ref: "#/components/schemas/ToOneRelationship"
+        owner:
+          $ref: "#/components/schemas/ToOneRelationship"
+        users:
+          $ref: "#/components/schemas/LicenseUsersRelationship"
+        machines:
+          $ref: "#/components/schemas/LicenseMachinesRelationship"
+        tokens:
+          $ref: "#/components/schemas/ToManyRelationship"
+        entitlements:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    LicenseResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [licenses]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/LicenseAttributes"
+        relationships:
+          $ref: "#/components/schemas/LicenseRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    LicenseDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/LicenseResource"
+            - type: "null"
+
+    # The owner show answers data: null for an ownerless license (the
+    # shared UserDocument is not nullable).
+    LicenseOwnerDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/UserResource"
+            - type: "null"
+
+    LicenseListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LicenseResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    LicenseValidateMeta:
+      type: object
+      required: [ts, valid, detail, code]
+      properties:
+        ts:
+          $ref: "#/components/schemas/Timestamp"
+        valid:
+          type: boolean
+        detail:
+          type: string
+        code:
+          type: string
+        nonce:
+          type: integer
+        scope:
+          type: object
+          additionalProperties: true
+
+    LicenseValidateDocument:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/LicenseResource"
+            - type: "null"
+        meta:
+          $ref: "#/components/schemas/LicenseValidateMeta"
+
+    # The license↔user and license↔entitlement join resources answer
+    # attach; their links key is "related" (the reference's serializer
+    # quirk — no self link).
+    JoinLinks:
+      type: object
+      required: [related]
+      properties:
+        related:
+          type: string
+
+    LicenseUserResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [license-users]
+        id:
+          type: string
+        attributes:
+          type: object
+          required: [created, updated]
+          properties:
+            created:
+              $ref: "#/components/schemas/Timestamp"
+            updated:
+              $ref: "#/components/schemas/Timestamp"
+        relationships:
+          type: object
+          required: [account, license, user]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            license:
+              $ref: "#/components/schemas/ToOneRelationship"
+            user:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/JoinLinks"
+
+    LicenseUserListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LicenseUserResource"
+
+    LicenseEntitlementResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [license-entitlements]
+        id:
+          type: string
+        attributes:
+          type: object
+          required: [created, updated]
+          properties:
+            created:
+              $ref: "#/components/schemas/Timestamp"
+            updated:
+              $ref: "#/components/schemas/Timestamp"
+        relationships:
+          type: object
+          required: [account, entitlement, license]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            entitlement:
+              $ref: "#/components/schemas/ToOneRelationship"
+            license:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/JoinLinks"
+
+    LicenseEntitlementListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/LicenseEntitlementResource"
+
+    # Machines reached through a license's relationship (the full
+    # machine group lands next; this renders the rows that exist).
+    MachineAttributes:
+      type: object
+      required:
+        [fingerprint, cores, memory, disk, ip, hostname, platform, name,
+         requireHeartbeat, heartbeatStatus, heartbeatDuration, maxProcesses,
+         lastCheckOut, lastHeartbeat, nextHeartbeat, metadata, created, updated]
+      properties:
+        fingerprint:
+          type: string
+        cores:
+          type: ["integer", "null"]
+        memory:
+          type: ["integer", "null"]
+        disk:
+          type: ["integer", "null"]
+        ip:
+          type: ["string", "null"]
+        hostname:
+          type: ["string", "null"]
+        platform:
+          type: ["string", "null"]
+        name:
+          type: ["string", "null"]
+        requireHeartbeat:
+          type: boolean
+        heartbeatStatus:
+          type: string
+        heartbeatDuration:
+          type: ["integer", "null"]
+        maxProcesses:
+          type: ["integer", "null"]
+        lastCheckOut:
+          type: ["string", "null"]
+        lastHeartbeat:
+          type: ["string", "null"]
+        nextHeartbeat:
+          type: ["string", "null"]
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    MachineRelationships:
+      type: object
+      required: [account, product, group, license, owner, components, processes]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        product:
+          $ref: "#/components/schemas/ToOneRelationship"
+        group:
+          $ref: "#/components/schemas/ToOneRelationship"
+        license:
+          $ref: "#/components/schemas/ToOneRelationship"
+        owner:
+          $ref: "#/components/schemas/ToOneRelationship"
+        components:
+          $ref: "#/components/schemas/ToManyRelationship"
+        processes:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    MachineResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [machines]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/MachineAttributes"
+        relationships:
+          $ref: "#/components/schemas/MachineRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    MachineDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/MachineResource"
+            - type: "null"
+
+    MachineListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MachineResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    LicenseFileAttributes:
+      type: object
+      required: [certificate, algorithm, includes, ttl, expiry, issued]
+      properties:
+        certificate:
+          type: string
+        algorithm:
+          type: string
+        includes:
+          type: array
+          items:
+            type: string
+        ttl:
+          type: ["integer", "null"]
+        expiry:
+          type: ["string", "null"]
+        issued:
+          $ref: "#/components/schemas/Timestamp"
+
+    LicenseFileResource:
+      type: object
+      required: [type, id, attributes, relationships]
+      properties:
+        type:
+          type: string
+          enum: [license-files]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/LicenseFileAttributes"
+        relationships:
+          type: object
+          required: [account, license]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            license:
+              $ref: "#/components/schemas/ToOneRelationship"
+
+    LicenseFileDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/LicenseFileResource"
+
     # --- webhooks ---
 
     WebhookEndpointAttributes:
@@ -1215,6 +1662,7 @@ components:
       required: [data]
       properties:
         data:
+          $ref: "#/components/schemas/LicenseFileResource"
           $ref: "#/components/schemas/WebhookEndpointResource"
 
     WebhookEndpointListDocument:

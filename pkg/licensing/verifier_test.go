@@ -535,7 +535,7 @@ func TestVerifyLicenseKeyRSASchemes(t *testing.T) {
 		t.Run(string(testCase.scheme), func(t *testing.T) {
 			t.Parallel()
 
-			msg := []byte(encDataset)
+			msg := dataset
 			if testCase.prefix {
 				msg = []byte("key/" + encDataset)
 			}

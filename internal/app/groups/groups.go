@@ -220,6 +220,10 @@ func (s Scenario) Create(
 		UpdatedAt:   now,
 	}
 
+	if err := metadataValidation(group.Metadata); err != nil {
+		return domain.Group{}, err
+	}
+
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
 		if err := s.store.InsertGroup(ctx, group); err != nil {
 			return fmt.Errorf("groups: create: %w", err)
@@ -278,6 +282,10 @@ func (s Scenario) Update(
 
 	if attrs.Metadata != nil {
 		group.Metadata = attrs.Metadata
+
+		if err := metadataValidation(group.Metadata); err != nil {
+			return domain.Group{}, err
+		}
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
@@ -629,4 +637,21 @@ func (s Scenario) readRelationshipGroup(
 	}
 
 	return group, nil
+}
+
+// LicenseGroup resolves and authorizes the group of the license
+// relationship routes.
+func (s Scenario) LicenseGroup(
+	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
+) (domain.Group, error) {
+	return s.readRelationshipGroup(ctx, account, principal, id, "group.licenses.read")
+}
+
+func metadataValidation(metadata map[string]any) error {
+	if detail := domain.MetadataViolation(metadata); detail != "" {
+		return apperr.Validation("METADATA_TOO_LONG", detail,
+			"/data/attributes/metadata", "groups/#groups-object-attrs-metadata")
+	}
+
+	return nil
 }

@@ -238,7 +238,7 @@
             "code": "USER_TAKEN",
             "detail": "already exists",
             "links": {
-              "about": "https://keygen.sh/docs/api/group-owners/#group-owners-object-relationships-user"
+              "about": "https://\u003cdocs-host\u003e/docs/api/group-owners/#group-owners-object-relationships-user"
             },
             "source": {
               "pointer": "/data/relationships/user"
@@ -274,7 +274,7 @@
             "code": "USER_NOT_FOUND",
             "detail": "must exist",
             "links": {
-              "about": "https://keygen.sh/docs/api/group-owners/#group-owners-object-relationships-user"
+              "about": "https://\u003cdocs-host\u003e/docs/api/group-owners/#group-owners-object-relationships-user"
             },
             "source": {
               "pointer": "/data/relationships/user"

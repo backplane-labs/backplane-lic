@@ -139,11 +139,10 @@ func (a *API) ShowPolicyProduct(
 	return &oas.ProductDocument{Data: render.ProductResource(req.account.ID, product)}, nil
 }
 
-// IndexPolicyLicenses implements GET /v1/accounts/{account}/policies/{policyId}/licenses
-// (empty until the licenses group lands).
+// IndexPolicyLicenses implements GET /v1/accounts/{account}/policies/{policyId}/licenses.
 func (a *API) IndexPolicyLicenses(
 	ctx context.Context, params oas.IndexPolicyLicensesParams,
-) (*oas.LicenseStubListDocument, error) {
+) (*oas.LicenseListDocument, error) {
 	req := requestOf(ctx)
 
 	if err := checkEnvironment(req); err != nil {
@@ -155,32 +154,40 @@ func (a *API) IndexPolicyLicenses(
 		return nil, err
 	}
 
-	if _, err := a.policyRelationship(ctx, req, params.PolicyId, "license.read"); err != nil {
+	policy, err := a.policyRelationship(ctx, req, params.PolicyId, "license.read")
+	if err != nil {
 		return nil, err
 	}
 
-	return &oas.LicenseStubListDocument{
-		Data:  []oas.LicenseStubListDocumentDataItem{},
-		Links: render.Links(linksDoc(req, listParams, 0, uuidNil())),
-	}, nil
+	page, err := a.licenses.OfPolicy(ctx, req.account, policy, licenseFilter(req.query), listParams)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	return a.licenseListDocument(req, page, listParams), nil
 }
 
-// ShowPolicyLicense implements GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
-// (404 until the licenses group lands).
+// ShowPolicyLicense implements GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}.
 func (a *API) ShowPolicyLicense(
 	ctx context.Context, params oas.ShowPolicyLicenseParams,
-) (oas.ShowPolicyLicenseOK, error) {
+) (*oas.LicenseDocument, error) {
 	req := requestOf(ctx)
 
 	if err := checkEnvironment(req); err != nil {
 		return nil, err
 	}
 
-	if _, err := a.policyRelationship(ctx, req, params.PolicyId, "license.read"); err != nil {
+	policy, err := a.policyRelationship(ctx, req, params.PolicyId, "license.read")
+	if err != nil {
 		return nil, err
 	}
 
-	return nil, notFound("license", params.LicenseId)
+	license, err := a.licenses.OfPolicyShow(ctx, req.account, policy, params.LicenseId)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
 }
 
 // IndexPolicyPool implements GET /v1/accounts/{account}/policies/{policyId}/pool.

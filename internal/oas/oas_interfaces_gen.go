@@ -5,8 +5,20 @@ type AttachGroupOwnersReq interface {
 	attachGroupOwnersReq()
 }
 
+type AttachLicenseEntitlementsReq interface {
+	attachLicenseEntitlementsReq()
+}
+
+type AttachLicenseUsersReq interface {
+	attachLicenseUsersReq()
+}
+
 type AttachPolicyEntitlementsReq interface {
 	attachPolicyEntitlementsReq()
+}
+
+type CheckoutLicenseReq interface {
+	checkoutLicenseReq()
 }
 
 type CreateEntitlementReq interface {
@@ -19,6 +31,14 @@ type CreateGroupReq interface {
 
 type CreateKeyReq interface {
 	createKeyReq()
+}
+
+type CreateLicenseReq interface {
+	createLicenseReq()
+}
+
+type CreateLicenseTokenReq interface {
+	createLicenseTokenReq()
 }
 
 type CreatePolicyReq interface {
@@ -49,6 +69,10 @@ type CreateWebhookEndpointReq interface {
 	createWebhookEndpointReq()
 }
 
+type DecrementLicenseUsageReq interface {
+	decrementLicenseUsageReq()
+}
+
 type DeleteUserSecondFactorReq interface {
 	deleteUserSecondFactorReq()
 }
@@ -57,12 +81,24 @@ type DetachGroupOwnersReq interface {
 	detachGroupOwnersReq()
 }
 
+type DetachLicenseEntitlementsReq interface {
+	detachLicenseEntitlementsReq()
+}
+
+type DetachLicenseUsersReq interface {
+	detachLicenseUsersReq()
+}
+
 type DetachPolicyEntitlementsReq interface {
 	detachPolicyEntitlementsReq()
 }
 
 type GenerateTokenReq interface {
 	generateTokenReq()
+}
+
+type IncrementLicenseUsageReq interface {
+	incrementLicenseUsageReq()
 }
 
 type ReplaceUserSecondFactorReq interface {
@@ -93,6 +129,26 @@ type UpdateKeyReq interface {
 	updateKeyReq()
 }
 
+type UpdateLicenseGroupReq interface {
+	updateLicenseGroupReq()
+}
+
+type UpdateLicenseOwnerReq interface {
+	updateLicenseOwnerReq()
+}
+
+type UpdateLicensePolicyReq interface {
+	updateLicensePolicyReq()
+}
+
+type UpdateLicenseReq interface {
+	updateLicenseReq()
+}
+
+type UpdateLicenseUserAliasReq interface {
+	updateLicenseUserAliasReq()
+}
+
 type UpdatePolicyReq interface {
 	updatePolicyReq()
 }
@@ -119,4 +175,12 @@ type UpdateUserSecondFactorReq interface {
 
 type UpdateWebhookEndpointReq interface {
 	updateWebhookEndpointReq()
+}
+
+type ValidateLicenseKeyReq interface {
+	validateLicenseKeyReq()
+}
+
+type ValidateLicenseReq interface {
+	validateLicenseReq()
 }

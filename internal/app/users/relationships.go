@@ -286,3 +286,33 @@ func kindSingular(kind string) string {
 		return "license"
 	}
 }
+
+// RelatedUser resolves and authorizes the user of a relationship route
+// (the nested license routes of the licenses group reuse it).
+func (s Scenario) RelatedUser(
+	ctx context.Context,
+	account domain.Account,
+	principal access.Principal,
+	alias, kind string,
+) (domain.User, error) {
+	permission := map[string]string{
+		kindProducts: "product.read",
+		kindLicenses: "license.read",
+		kindMachines: "machine.read",
+	}[kind]
+
+	if err := access.Require(ctx, permission); err != nil {
+		return domain.User{}, err //nolint:wrapcheck // the port's own error
+	}
+
+	user, err := s.visible(ctx, account, principal, alias)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	if err := s.authorizeRelated(ctx, account, principal, user, kind, uuid.Nil); err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+}

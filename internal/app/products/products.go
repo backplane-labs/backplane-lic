@@ -592,6 +592,10 @@ func (s Scenario) validate(product domain.Product) error {
 		attr("NAME_TOO_LONG", "is too long (maximum is 255 characters)", "name")
 	}
 
+	if detail := domain.MetadataViolation(product.Metadata); detail != "" {
+		attr("METADATA_TOO_LONG", detail, "metadata")
+	}
+
 	switch {
 	case product.Code == "":
 		// null is fine

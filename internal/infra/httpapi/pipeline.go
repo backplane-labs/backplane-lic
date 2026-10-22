@@ -113,6 +113,12 @@ func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeOptional)
 
 		return
+	case oas.ValidateLicenseKeyOperation:
+		// POST /licenses/actions/validate-key authenticates softly
+		// (anonymous validation is allowed).
+		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeOptional)
+
+		return
 	default:
 		p.serveAccountScoped(w, r, req, routePath, accountScoped, authModeRequired)
 
@@ -571,7 +577,14 @@ func decodeBody(r *http.Request) (map[string]any, error) {
 	}
 
 	var decoded any
-	if err := json.Unmarshal(raw, &decoded); err != nil {
+	if !json.Valid(raw) {
+		return nil, json.Unmarshal(raw, &decoded) //nolint:wrapcheck // maps to JSON_INVALID
+	}
+
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+
+	if err := decoder.Decode(&decoded); err != nil {
 		return nil, err //nolint:wrapcheck // the decode error maps to JSON_INVALID
 	}
 

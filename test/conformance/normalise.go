@@ -46,6 +46,11 @@ type normaliser struct {
 	b64      *regexp.Regexp
 	base32   *regexp.Regexp
 	b32Find  *regexp.Regexp
+
+	plainKey  *regexp.Regexp
+	schemeKey *regexp.Regexp
+	b64url    *regexp.Regexp
+	legacyKey *regexp.Regexp
 }
 
 func (n *normaliser) compile() {
@@ -57,8 +62,16 @@ func (n *normaliser) compile() {
 	n.token = regexp.MustCompile(`^[a-z]+-[0-9a-f]{20,}v[123]$`)
 	n.hex = regexp.MustCompile(`^[0-9a-fA-F]+$`)
 	n.b64 = regexp.MustCompile(`^[A-Za-z0-9+/]+={0,2}$`)
+	n.b64url = regexp.MustCompile(`^[A-Za-z0-9_-]+={1,2}$`)
 	n.base32 = regexp.MustCompile(`^[A-Z2-7]{26,}$`)
 	n.b32Find = regexp.MustCompile(`[A-Z2-7]{26,}`)
+
+	// License keys: the plain XXXXXX-…-V3 form, the scheme forms
+	// (key/<seed>.<sig>, <seed>.<sig>, a bare encrypted blob, a JWT)
+	// and the legacy <32hex>-…-v1 form.
+	n.plainKey = regexp.MustCompile(`^[A-Z0-9]{6}(-[A-Z0-9]{6}){4}-V3$`)
+	n.schemeKey = regexp.MustCompile(`^(key/)?[A-Za-z0-9_=-]{20,}(\.[A-Za-z0-9_=-]{30,}){1,2}$`)
+	n.legacyKey = regexp.MustCompile(`^[0-9a-fA-F]{32}(-[0-9a-fA-F]+)+-v1$`)
 }
 
 func (n *normaliser) value(value any) any {
@@ -122,12 +135,21 @@ func (n *normaliser) webhookEvent(resource map[string]any) map[string]any {
 	return out
 }
 
-func (n *normaliser) string(value string) string { //nolint:cyclop // one branch per mask rule
+func (n *normaliser) string(value string) string { //nolint:cyclop // the masking ladder
 	switch {
 	case n.token.MatchString(value):
 		return n.placeholder("token", value)
 	case n.ts.MatchString(value):
 		return "<ts>"
+	case n.plainKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case n.schemeKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case n.legacyKey.MatchString(value):
+		return n.placeholder("license-key", value)
+	case strings.HasPrefix(value, "-----BEGIN LICENSE FILE-----"),
+		strings.HasPrefix(value, "-----BEGIN MACHINE FILE-----"):
+		return n.placeholder("certificate", value)
 	}
 
 	// A webhook event's payload is a JSON document carried as a string;
@@ -158,6 +180,8 @@ func (n *normaliser) string(value string) string { //nolint:cyclop // one branch
 	case len(value) >= minBlobLen && n.hex.MatchString(value):
 		return n.placeholder("hex", value)
 	case len(value) >= minBlobLen && n.b64.MatchString(value):
+		return n.placeholder("b64", value)
+	case len(value) >= minBlobLen && n.b64url.MatchString(value):
 		return n.placeholder("b64", value)
 	case n.base32.MatchString(value):
 		return n.placeholder("b32", value)
