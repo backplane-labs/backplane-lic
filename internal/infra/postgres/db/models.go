@@ -315,9 +315,29 @@ type LicWebhookEvents struct {
 	IdempotencyToken  string
 	Status            string
 	Attempts          int32
-	NextAttemptAt     *time.Time
 	LastResponseCode  *int32
 	LastResponseBody  *string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+}
+
+type LicOutboxMessages struct {
+	ID            uuid.UUID
+	Topic         string
+	PartitionKey  *string
+	Payload       []byte
+	Headers       json.RawMessage
+	ContentType   *string
+	MessageType   *string
+	Status        string
+	Attempts      int32
+	MaxAttempts   *int32
+	LockedBy      *string
+	LockedUntil   *time.Time
+	NextAttemptAt time.Time
+	LastError     *string
+	CreatedAt     time.Time
+	PublishedAt   *time.Time
+	LeaseToken    *uuid.UUID
+	FinishedAt    *time.Time
 }

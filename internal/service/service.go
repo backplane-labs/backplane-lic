@@ -6,9 +6,12 @@ package service
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -19,6 +22,9 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/valkey"
 	"github.com/google/uuid"
 
+	outbox "github.com/gopherex/pg-outbox"
+	"github.com/gopherex/xlog"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
@@ -27,6 +33,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/jobs"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
+	"github.com/backplane-labs/backplane-lic/internal/app/port"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
@@ -64,27 +71,35 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	spec := accounts.Spec{ID: id, Name: cfg.Account.Name, Slug: cfg.Account.Slug}
 	late := &lateHandler{}
 
+	var relayOutbox *outbox.Outbox
+
 	bootstrap := deps.NewComponent(root, "bootstrap")
 	bootstrap.OnStart(func(ctx context.Context) error {
 		if _, err := accounts.Bootstrap(ctx, store.Get().Accounts, spec); err != nil {
 			return fmt.Errorf("bootstrap: %w", err)
 		}
 
-		late.set(Handler(store.Get(), spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit))
+		relay, err := webhookOutbox(store.Get(), spec.ID, cfg.HTTP, root.Identity().Instance,
+			slog.New(xlog.NewSlogHandler(bootstrap.Log())))
+		if err != nil {
+			return err
+		}
+
+		relayOutbox = relay
+		late.set(handler(store.Get(), spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay))
 
 		return nil
 	})
 
-	// Background work: the webhook delivery worker and the periodic
-	// jobs runner (both multi-replica safe: SKIP LOCKED claims, the
-	// jobs advisory lock).
-	allow := allowPrivate(cfg.HTTP.WebhookAllowPrivate)
-
+	// The constructor starts nothing. The SDK owns Run and cancellation.
 	delivery := deps.NewComponent(root, "webhook-delivery")
 	delivery.Go(func(ctx context.Context) error {
-		worker := whwebhook.NewWorker(store.Get(), spec.ID, domain.NetResolver{}, allow, time.Now)
+		err := relayOutbox.Run(ctx)
+		if errors.Is(err, context.Canceled) {
+			return nil
+		}
 
-		return loop(ctx, 5*time.Second, worker.DeliverDue) //nolint:mnd // the poll cadence
+		return fmt.Errorf("webhook outbox: %w", err)
 	})
 
 	runner := deps.NewComponent(root, "jobs")
@@ -134,14 +149,30 @@ func allowPrivate(cidrs []string) []*net.IPNet {
 // calls it at start, tests call it directly.
 func Handler(
 	store *postgres.Store, spec accounts.Spec, cfg HTTP, docsHost, revision string,
+) (http.Handler, error) {
+	instance, err := os.Hostname()
+	if err != nil {
+		return nil, fmt.Errorf("webhook instance hostname: %w", err)
+	}
+
+	queue, err := webhookOutbox(store, spec.ID, cfg, instance, slog.Default())
+	if err != nil {
+		return nil, err
+	}
+
+	return handler(store, spec, cfg, docsHost, revision, queue), nil
+}
+
+func handler(store *postgres.Store, spec accounts.Spec, cfg HTTP, docsHost, revision string,
+	queue port.WebhookQueue,
 ) http.Handler {
 	clock := time.Now
-	publisher := events.Publisher(webhooks.NewPublisher(store, spec.ID, rand.Reader, clock))
+	publisher := events.Publisher(webhooks.NewPublisher(store, queue, spec.ID, rand.Reader, clock))
 	resolver := domain.Resolver(domain.NetResolver{})
 	allow := allowPrivate(cfg.WebhookAllowPrivate)
 
 	return httpapi.New(httpapi.Deps{
-		Webhooks: webhooks.New(store, resolver, allow, rand.Reader, clock),
+		Webhooks: webhooks.New(store, resolver, allow, queue, clock),
 		Accounts: store.Accounts,
 		Authn:    authn.New(store, clock),
 		Users:    users.New(store, publisher, clock),
@@ -176,4 +207,27 @@ func (l *lateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	(*h).ServeHTTP(w, r)
+}
+
+// webhookOutbox configures the relay and the transaction-aware enqueue facade.
+func webhookOutbox(store *postgres.Store, accountID uuid.UUID, cfg HTTP, instance string,
+	log *slog.Logger,
+) (*outbox.Outbox, error) {
+	delivery := whwebhook.NewWorker(store, accountID, domain.NetResolver{},
+		allowPrivate(cfg.WebhookAllowPrivate), time.Now)
+
+	relay, err := outbox.New(store.Pool, store.DB.DB, delivery,
+		outbox.WithSchema(postgres.Schema), outbox.WithInstanceID(instance),
+		outbox.WithListenPool(store.Pool), outbox.WithLogger(log),
+		outbox.WithBatchSize(1), outbox.WithMaxAttempts(whwebhook.MaxAttempts),
+		outbox.WithRetryBackoff(whwebhook.RetryBackoff),
+		outbox.WithRetention(jobs.Day), outbox.WithDeadRetention(jobs.WebhookBacklogDays*jobs.Day),
+		outbox.WithDiscardRetention(jobs.Day), outbox.WithCleanupInterval(time.Hour),
+		outbox.WithClearPayloadOnComplete(true),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("webhook outbox: %w", err)
+	}
+
+	return relay, nil
 }

@@ -113,7 +113,10 @@ func serverUnderTest(t *testing.T) conformance.Target {
 		t.Fatalf("conformance: seed admin: %v", err)
 	}
 
-	handler := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")
+	handler, err := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")
+	if err != nil {
+		t.Fatalf("conformance: handler: %v", err)
+	}
 
 	return &conformance.HandlerTarget{Handler: handler, AdminToken: adminToken}
 }

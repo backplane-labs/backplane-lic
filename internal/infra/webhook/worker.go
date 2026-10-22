@@ -1,7 +1,5 @@
-// Package webhook delivers the outbox rows: it claims due webhook
-// events (FOR UPDATE SKIP LOCKED), POSTs the serialized event to the
-// endpoint with Keygen's headers and signature, and records the
-// outcome, the retry schedule and the auto-disable rules.
+// Package webhook implements pg-outbox delivery: signed HTTP POSTs with
+// Keygen's outcome classification, URL checks and auto-disable rules.
 package webhook
 
 import (
@@ -21,7 +19,10 @@ import (
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
 
+	outbox "github.com/gopherex/pg-outbox"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
+	"github.com/backplane-labs/backplane-lic/internal/app/port"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
@@ -33,12 +34,9 @@ import (
 // as the literal RES_BODY_TOO_LARGE.
 const maxResponseBytes = 2048
 
-// maxAttempts is the reference's retry budget: the first delivery plus
+// MaxAttempts is the reference's retry budget: the first delivery plus
 // 15 sidekiq retries.
-const maxAttempts = 16
-
-// claimBatch is the number of due rows one pass claims.
-const claimBatch = 10
+const MaxAttempts = 16
 
 // requestTimeout bounds each of the connect, write and read phases,
 // like the reference's HTTParty timeouts.
@@ -48,29 +46,16 @@ const requestTimeout = 15 * time.Second
 const userAgentFormat = "Keygen/%s (+https://keygen.sh/docs/api/webhooks/)"
 
 // Store is the worker's storage port (satisfied by *postgres.Store).
-type Store interface {
-	Do(ctx context.Context, fn func(ctx context.Context) error) error
+type Store = port.WebhookDeliveryStore
 
-	Account(ctx context.Context, id uuid.UUID) (domain.Account, error)
-	ClaimDueWebhookEvents(
-		ctx context.Context, accountID uuid.UUID, limit int, now, lease time.Time,
-	) ([]webhooks.Delivery, error)
-	SetWebhookEventDelivered(ctx context.Context, accountID, id uuid.UUID, code int, body string) error
-	SetWebhookEventFailure(
-		ctx context.Context, accountID, id uuid.UUID, status domain.WebhookEventStatus,
-		code *int, body string, nextAttempt *time.Time,
-	) error
-	DisableWebhookEndpoint(ctx context.Context, accountID, id uuid.UUID) error
+// delivery is a resource and its endpoint's live delivery settings.
+type delivery struct {
+	Event              domain.WebhookEvent
+	EndpointURL        string
+	SignatureAlgorithm string
 }
 
-// claimLease is how long a claimed row stays invisible to other
-// workers: the batch's worst case (every delivery sits out the full
-// request timeout) plus headroom. A crashed worker's rows become due
-// again when the lease passes.
-const claimLease = 5 * time.Minute
-
-// Worker delivers due webhook events. It is immutable after
-// construction; the composition root runs DeliverDue periodically.
+// Worker is the pg-outbox Publisher. Construction starts no background work.
 type Worker struct {
 	store     Store
 	accountID uuid.UUID
@@ -78,7 +63,6 @@ type Worker struct {
 	resolver  domain.Resolver
 	allowed   []*net.IPNet
 	clock     func() time.Time
-	random    func() float64
 }
 
 // NewWorker builds the worker over the store (the account whose keys
@@ -94,7 +78,6 @@ func NewWorker(
 		resolver:  resolver,
 		allowed:   allowed,
 		clock:     clock,
-		random:    rand.Float64,
 	}
 }
 
@@ -147,42 +130,86 @@ var errForbiddenAddress = errors.New("webhook: address refused by the URL rules"
 // reference's RedirectionTooDeep.
 var errRedirect = errors.New("webhook: redirect")
 
-// DeliverDue claims the due batch and delivers it. The claim is one
-// short transaction (SKIP LOCKED + the lease push); every delivery and
-// every outcome recording runs in its own statement-level transaction,
-// so one delivery's failure never rolls back another's recorded
-// outcome.
-func (w *Worker) DeliverDue(ctx context.Context) error {
-	now := w.clock()
-
-	batch, err := w.store.ClaimDueWebhookEvents(ctx, w.accountID, claimBatch, now, now.Add(claimLease))
-	if err != nil {
-		return fmt.Errorf("webhook: claim: %w", err)
+// Publish delivers one independently claimed message. BatchSize must be one:
+// pg-outbox applies a Publisher outcome to the whole batch.
+func (w *Worker) Publish(ctx context.Context, messages []outbox.Message) error {
+	if len(messages) != 1 {
+		return outbox.Permanent(errBatchSize) //nolint:wrapcheck // relay control marker
 	}
 
-	if len(batch) == 0 {
-		return nil
+	message := messages[0]
+
+	id, err := uuid.Parse(string(message.Payload))
+	if err != nil {
+		return outbox.Permanent(fmt.Errorf("webhook: invalid event reference: %w", err)) //nolint:wrapcheck // control marker
+	}
+
+	event, err := w.store.WebhookEventByID(ctx, w.accountID, id)
+	if errors.Is(err, webhooks.ErrNotFound) {
+		return outbox.Discard(err) //nolint:wrapcheck // relay control marker
+	}
+
+	if err != nil {
+		return fmt.Errorf("webhook: load event: %w", err)
+	}
+
+	err = w.publish(ctx, message, event)
+	if err == nil || message.Attempts < MaxAttempts {
+		return err
+	}
+
+	var (
+		discarded *outbox.DiscardError
+		permanent *outbox.PermanentError
+	)
+
+	if errors.As(err, &discarded) || errors.As(err, &permanent) {
+		return err
+	}
+	// Infrastructure/signing failures must not leave a live API resource when
+	// the relay exhausts its budget. Preserve the last observed HTTP outcome.
+	if markErr := w.store.SetWebhookEventExhausted(ctx, w.accountID, event.ID); markErr != nil {
+		return errors.Join(err, fmt.Errorf("webhook: record exhaustion: %w", markErr))
+	}
+
+	return outbox.Permanent(err) //nolint:wrapcheck // relay control marker
+}
+
+func (w *Worker) publish(ctx context.Context, message outbox.Message, event domain.WebhookEvent) error {
+	if !event.EndpointID.Valid {
+		return outbox.Discard(webhooks.ErrNotFound) //nolint:wrapcheck // relay control marker
+	}
+
+	endpoint, err := w.store.WebhookEndpointByID(ctx, w.accountID, event.EndpointID.UUID)
+	if errors.Is(err, webhooks.ErrNotFound) {
+		return outbox.Discard(err) //nolint:wrapcheck // relay control marker
+	}
+
+	if err != nil {
+		return fmt.Errorf("webhook: load endpoint: %w", err)
 	}
 
 	account, err := w.store.Account(ctx, w.accountID)
 	if err != nil {
 		return fmt.Errorf("webhook: account: %w", err)
 	}
+	// Claims count attempts, including crash recovery. Use the relay's persisted
+	// count rather than the API row's count to detect the final attempt.
+	event.Attempts = message.Attempts - 1
 
-	var errs []error
-
-	for i := range batch {
-		if err := w.deliver(ctx, account, batch[i]); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	return errors.Join(errs...)
+	return w.deliver(ctx, account, delivery{
+		Event: event, EndpointURL: endpoint.URL, SignatureAlgorithm: endpoint.SignatureAlgorithm,
+	})
 }
+
+var (
+	errBatchSize = errors.New("webhook: delivery requires batch size one")
+	errDelivery  = errors.New("webhook: delivery failed")
+)
 
 // deliver performs one delivery and records its outcome.
 func (w *Worker) deliver(
-	ctx context.Context, account domain.Account, delivery webhooks.Delivery,
+	ctx context.Context, account domain.Account, delivery delivery,
 ) error {
 	// The endpoint URL is re-validated before every delivery (fresh
 	// DNS): a gone name is RESOLV_ERROR — FAILED, but retried in case
@@ -240,7 +267,7 @@ func (w *Worker) deliver(
 
 // body serializes the delivered webhook-event document: the stored
 // event with its payload string, rendered fresh for the delivery.
-func (w *Worker) body(delivery webhooks.Delivery) string {
+func (w *Worker) body(delivery delivery) string {
 	encoder := jx.Encoder{}
 	document := oas.WebhookEventDocument{
 		Data: render.WebhookEvent(w.accountID, delivery.Event),
@@ -255,7 +282,7 @@ func (w *Worker) body(delivery webhooks.Delivery) string {
 // the digest of the body, the signature over the signing string and
 // Keygen's header set.
 func (w *Worker) request(
-	ctx context.Context, account domain.Account, delivery webhooks.Delivery, body string,
+	ctx context.Context, account domain.Account, delivery delivery, body string,
 ) (*http.Request, error) {
 	target, err := url.Parse(delivery.EndpointURL)
 	if err != nil {
@@ -309,7 +336,7 @@ func (w *Worker) request(
 // responseFailure applies the non-2xx rules: the auto-disable cases,
 // else FAILING with a retry (FAILED once the budget is spent).
 func (w *Worker) responseFailure(
-	ctx context.Context, delivery webhooks.Delivery, code int, body string,
+	ctx context.Context, delivery delivery, code int, body string,
 ) error {
 	event := delivery.Event
 	endpointURL := event.Endpoint
@@ -317,20 +344,12 @@ func (w *Worker) responseFailure(
 	switch {
 	case strings.Contains(endpointURL, ".ngrok.io") && code == http.StatusNotFound &&
 		ngrokTunnelNotFound.MatchString(body):
-		if err := w.fail(ctx, delivery, domain.EventFailed, &code, body, false); err != nil {
-			return err
-		}
-
-		return w.disable(ctx, delivery)
+		return w.failAndDisable(ctx, delivery, code, body)
 	case strings.Contains(endpointURL, ".ngrok.io") && code == http.StatusGatewayTimeout,
 		strings.Contains(endpointURL, ".loca.lt") && code == http.StatusGatewayTimeout:
 		return w.fail(ctx, delivery, domain.EventFailed, &code, body, false)
 	case code == http.StatusGone, code == 530: //nolint:mnd // Cloudflare's "Frozen" code
-		if err := w.fail(ctx, delivery, domain.EventFailed, &code, body, false); err != nil {
-			return err
-		}
-
-		return w.disable(ctx, delivery)
+		return w.failAndDisable(ctx, delivery, code, body)
 	default:
 		return w.fail(ctx, delivery, domain.EventFailing, &code, body, true)
 	}
@@ -341,7 +360,7 @@ var ngrokTunnelNotFound = regexp.MustCompile(`(?i)tunnel .+?\.ngrok\.io not foun
 
 // transportFailure classifies a delivery that never got a response,
 // with the reference's pseudo response bodies.
-func (w *Worker) transportFailure(ctx context.Context, delivery webhooks.Delivery, err error) error {
+func (w *Worker) transportFailure(ctx context.Context, delivery delivery, err error) error {
 	var dnsErr *net.DNSError
 
 	switch {
@@ -371,30 +390,45 @@ func (w *Worker) transportFailure(ctx context.Context, delivery webhooks.Deliver
 	}
 }
 
-// fail records a failure outcome; retry schedules the next attempt
-// with the reference's backoff unless the budget is spent.
+// fail records the API outcome before returning the relay's retry control.
+// Scheduling belongs exclusively to pg-outbox; the API row is not a lease.
 func (w *Worker) fail(
-	ctx context.Context,
-	delivery webhooks.Delivery,
-	status domain.WebhookEventStatus,
-	code *int,
-	body string,
-	retry bool,
+	ctx context.Context, delivery delivery, status domain.WebhookEventStatus,
+	code *int, body string, retry bool,
 ) error {
-	var next *time.Time
-
-	if retry && delivery.Event.Attempts+1 < maxAttempts {
-		backoff := Backoff(delivery.Event.Attempts+1, w.random())
-		due := w.clock().Add(backoff)
-		next = &due
+	terminal := !retry || delivery.Event.Attempts+1 >= MaxAttempts
+	if terminal {
+		status = domain.EventFailed
 	}
 
-	return w.store.SetWebhookEventFailure( //nolint:wrapcheck // the store's own error
-		ctx, w.accountID, delivery.Event.ID, status, code, body, next)
+	if err := w.store.SetWebhookEventFailure(ctx, w.accountID, delivery.Event.ID, status, code, body); err != nil {
+		return fmt.Errorf("webhook: record failure: %w", err)
+	}
+
+	if terminal {
+		return outbox.Permanent(errDelivery) //nolint:wrapcheck // relay control marker
+	}
+
+	return errDelivery
+}
+
+func (w *Worker) failAndDisable(ctx context.Context, delivery delivery, code int, body string) error {
+	if err := w.store.Do(ctx, func(ctx context.Context) error {
+		if err := w.store.SetWebhookEventFailure(ctx, w.accountID, delivery.Event.ID,
+			domain.EventFailed, &code, body); err != nil {
+			return fmt.Errorf("webhook: record terminal failure: %w", err)
+		}
+
+		return w.disable(ctx, delivery)
+	}); err != nil {
+		return fmt.Errorf("webhook: auto-disable: %w", err)
+	}
+
+	return outbox.Permanent(errDelivery) //nolint:wrapcheck // relay control marker
 }
 
 // disable empties the endpoint's subscriptions (auto-disable).
-func (w *Worker) disable(ctx context.Context, delivery webhooks.Delivery) error {
+func (w *Worker) disable(ctx context.Context, delivery delivery) error {
 	if !delivery.Event.EndpointID.Valid {
 		return nil
 	}
@@ -406,7 +440,8 @@ func (w *Worker) disable(ctx context.Context, delivery webhooks.Delivery) error 
 // Backoff is the reference's sidekiq retry curve: count**4 seconds
 // plus a jitter of 10 minutes times a uniform 1..10.
 func Backoff(count int, random float64) time.Duration {
-	jitter := time.Duration((1 + random*9) * float64(10*time.Minute)) //nolint:mnd // rand(1..10) minutes
+	bucket := min(int(random*10), 9)                     //nolint:mnd // uniform integer rand(1..10)
+	jitter := time.Duration(1+bucket) * 10 * time.Minute //nolint:mnd // ten-minute increments
 	seconds := time.Duration(count*count*count*count) * time.Second
 
 	return seconds + jitter
@@ -428,4 +463,9 @@ func hasErrno(err error, errno syscall.Errno) bool {
 	var sysErr syscall.Errno
 
 	return errors.As(err, &sysErr) && sysErr == errno
+}
+
+// RetryBackoff is the Keygen curve used by the relay after a failed attempt.
+func RetryBackoff(attempt int) time.Duration {
+	return Backoff(attempt, rand.Float64()) //nolint:gosec // scheduling jitter, not a secret
 }
