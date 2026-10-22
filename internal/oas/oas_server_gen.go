@@ -8,6 +8,13 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// GenerateToken implements generateToken operation.
+	//
+	// Basic email:password (with meta.otp for two-factor users) or any token authentication. The
+	// response carries the token's raw secret exactly once.
+	//
+	// POST /v1/accounts/{account}/tokens
+	GenerateToken(ctx context.Context, req GenerateTokenReq, params GenerateTokenParams) (*TokenDocumentHeaders, error)
 	// GetAccount implements getAccount operation.
 	//
 	// The configured account with its public keys in top-level meta.
@@ -20,12 +27,25 @@ type Handler interface {
 	//
 	// GET /v1/health
 	Health(ctx context.Context) error
+	// Me implements me operation.
+	//
+	// The authenticated bearer's document; a token-authenticated request also includes the current token
+	// (without its secret) in included.
+	//
+	// GET /v1/accounts/{account}/me
+	Me(ctx context.Context, params MeParams) (*MeDocument, error)
 	// Ping implements ping operation.
 	//
 	// Empty 200 response; outside content negotiation, any Accept works.
 	//
 	// GET /v1/ping
 	Ping(ctx context.Context) error
+	// Profile implements profile operation.
+	//
+	// The authenticated bearer's document with the current token id in meta.
+	//
+	// GET /v1/accounts/{account}/profile
+	Profile(ctx context.Context, params ProfileParams) (*ProfileDocument, error)
 	// NewError creates *ErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

@@ -15,10 +15,10 @@ import (
 )
 
 // ErrNotFound: no account row with that id.
-var ErrNotFound = errors.New("accounts: account not found")
+var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
 
 // CurrentAPIVersion is the only API version the clone serves.
-const CurrentAPIVersion = "1.7"
+const CurrentAPIVersion = "1.8"
 
 // Store is the consumer-side storage port of the scenario.
 type Store interface {
@@ -58,6 +58,7 @@ func Bootstrap(ctx context.Context, store Store, spec Spec) (domain.Account, err
 		Name:       spec.Name,
 		Slug:       spec.Slug,
 		APIVersion: CurrentAPIVersion,
+		Protected:  true,
 		Keys:       keys,
 	}
 

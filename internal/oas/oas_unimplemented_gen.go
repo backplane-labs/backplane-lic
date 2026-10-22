@@ -13,6 +13,16 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// GenerateToken implements generateToken operation.
+//
+// Basic email:password (with meta.otp for two-factor users) or any token authentication. The
+// response carries the token's raw secret exactly once.
+//
+// POST /v1/accounts/{account}/tokens
+func (UnimplementedHandler) GenerateToken(ctx context.Context, req GenerateTokenReq, params GenerateTokenParams) (r *TokenDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAccount implements getAccount operation.
 //
 // The configured account with its public keys in top-level meta.
@@ -31,6 +41,16 @@ func (UnimplementedHandler) Health(ctx context.Context) error {
 	return ht.ErrNotImplemented
 }
 
+// Me implements me operation.
+//
+// The authenticated bearer's document; a token-authenticated request also includes the current token
+// (without its secret) in included.
+//
+// GET /v1/accounts/{account}/me
+func (UnimplementedHandler) Me(ctx context.Context, params MeParams) (r *MeDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Ping implements ping operation.
 //
 // Empty 200 response; outside content negotiation, any Accept works.
@@ -38,6 +58,15 @@ func (UnimplementedHandler) Health(ctx context.Context) error {
 // GET /v1/ping
 func (UnimplementedHandler) Ping(ctx context.Context) error {
 	return ht.ErrNotImplemented
+}
+
+// Profile implements profile operation.
+//
+// The authenticated bearer's document with the current token id in meta.
+//
+// GET /v1/accounts/{account}/profile
+func (UnimplementedHandler) Profile(ctx context.Context, params ProfileParams) (r *ProfileDocument, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // NewError creates *ErrorStatusCode from error returned by handler.

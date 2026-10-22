@@ -136,6 +136,14 @@ test-live: ## Tests against the compose PostgreSQL and Valkey
 	LIC_TEST_VALKEY_ADDR="127.0.0.1:6390" \
 	go test -race -count=1 ./...
 
+.PHONY: conformance
+conformance: ## Run the differential conformance suite (skips unless LIC_CONFORMANCE_TARGET is set)
+	go test -count=1 ./test/conformance
+
+.PHONY: conformance-record
+conformance-record: ## Re-record conformance goldens from the Keygen CE reference (:3900)
+	go test -count=1 ./test/conformance -record
+
 .PHONY: build
 build: ## Build the service into ./bin/lic
 	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o "$(BIN)/lic" ./cmd/lic

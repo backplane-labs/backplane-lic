@@ -1,0 +1,24 @@
+{
+  "scenario": "bad_accept",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "MIME_TYPE_INVALID",
+            "detail": "The mime type of the request is not acceptable (check content-type and accept headers)",
+            "title": "Bad request"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8"
+      },
+      "name": "html accept",
+      "present": [
+        "X-Request-Id"
+      ],
+      "status": 400
+    }
+  ]
+}

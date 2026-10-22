@@ -1,0 +1,43 @@
+# Tokens: the generate endpoint (POST /tokens). The token routes
+# (index/show/regenerate/revoke) and the bearer sub-routes arrive with
+# their scenarios.
+paths:
+  /v1/accounts/{account}/tokens:
+    post:
+      operationId: generateToken
+      summary: Generate a token
+      description: >-
+        Basic email:password (with meta.otp for two-factor users) or any
+        token authentication. The response carries the token's raw secret
+        exactly once.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              # Decoded as a free-form object and shape-validated by the
+              # scenario, reproducing the reference's typed-params errors
+              # ("unpermitted parameter", "is missing", "is invalid") with
+              # their exact pointers.
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Token document (with the raw secret).
+          headers:
+            Location:
+              description: The new token's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"

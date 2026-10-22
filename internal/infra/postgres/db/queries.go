@@ -4,6 +4,7 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -85,4 +86,267 @@ type InsertAccountParams struct {
 func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) error {
 	_, err := q.db.Exec(ctx, insertAccountSQL, arg.ID, arg.Name, arg.Slug, arg.APIVersion, arg.Protected, arg.SecretKey, arg.PrivateKey, arg.PublicKey, arg.Ed25519PrivateKey, arg.Ed25519PublicKey, arg.EcdsaPrivateKey, arg.EcdsaPublicKey)
 	return err
+}
+
+const getLicenseAuthByKeySQL = `SELECT l.id, l.account_id, l.key, l.suspended, l.expiry,
+  (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,
+  p.authentication_strategy, p.expiration_strategy
+FROM lic.licenses l
+JOIN lic.policies p ON p.id = l.policy_id
+LEFT JOIN lic.users u ON u.id = l.user_id
+WHERE l.account_id = $1 AND l.key = $2;`
+
+type GetLicenseAuthByKeyParams struct {
+	AccountID uuid.UUID
+	Key       string
+}
+
+type GetLicenseAuthByKeyRow struct {
+	ID                     uuid.UUID
+	AccountID              uuid.UUID
+	Key                    string
+	Suspended              bool
+	Expiry                 *time.Time
+	OwnerBanned            bool
+	AuthenticationStrategy *string
+	ExpirationStrategy     *string
+}
+
+func (q *Queries) GetLicenseAuthByKey(ctx context.Context, arg GetLicenseAuthByKeyParams) (GetLicenseAuthByKeyRow, error) {
+	row := q.db.QueryRow(ctx, getLicenseAuthByKeySQL, arg.AccountID, arg.Key)
+	var i GetLicenseAuthByKeyRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Key, &i.Suspended, &i.Expiry, &i.OwnerBanned, &i.AuthenticationStrategy, &i.ExpirationStrategy)
+	return i, err
+}
+
+const getLicenseAuthByIDSQL = `SELECT l.id, l.account_id, l.key, l.suspended, l.expiry,
+  (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,
+  p.authentication_strategy, p.expiration_strategy
+FROM lic.licenses l
+JOIN lic.policies p ON p.id = l.policy_id
+LEFT JOIN lic.users u ON u.id = l.user_id
+WHERE l.account_id = $1 AND l.id = $2;`
+
+type GetLicenseAuthByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetLicenseAuthByIDRow struct {
+	ID                     uuid.UUID
+	AccountID              uuid.UUID
+	Key                    string
+	Suspended              bool
+	Expiry                 *time.Time
+	OwnerBanned            bool
+	AuthenticationStrategy *string
+	ExpirationStrategy     *string
+}
+
+func (q *Queries) GetLicenseAuthByID(ctx context.Context, arg GetLicenseAuthByIDParams) (GetLicenseAuthByIDRow, error) {
+	row := q.db.QueryRow(ctx, getLicenseAuthByIDSQL, arg.AccountID, arg.ID)
+	var i GetLicenseAuthByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Key, &i.Suspended, &i.Expiry, &i.OwnerBanned, &i.AuthenticationStrategy, &i.ExpirationStrategy)
+	return i, err
+}
+
+const getTokenByDigestSQL = `SELECT id, account_id, digest, bearer_id, bearer_type, bearer_role, kind,
+  name, expiry, permissions, created_at, updated_at
+FROM lic.tokens
+WHERE account_id = $1 AND digest = $2;`
+
+type GetTokenByDigestParams struct {
+	AccountID uuid.UUID
+	Digest    string
+}
+
+type GetTokenByDigestRow struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	Digest      string
+	BearerID    *uuid.UUID
+	BearerType  *string
+	BearerRole  *string
+	Kind        *string
+	Name        *string
+	Expiry      *time.Time
+	Permissions json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (q *Queries) GetTokenByDigest(ctx context.Context, arg GetTokenByDigestParams) (GetTokenByDigestRow, error) {
+	row := q.db.QueryRow(ctx, getTokenByDigestSQL, arg.AccountID, arg.Digest)
+	var i GetTokenByDigestRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.Digest, &i.BearerID, &i.BearerType, &i.BearerRole, &i.Kind, &i.Name, &i.Expiry, &i.Permissions, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertTokenSQL = `INSERT INTO lic.tokens (
+  id, account_id, digest, bearer_id, bearer_type, bearer_role, kind,
+  name, expiry, permissions
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7,
+  $8, $9, $10
+);`
+
+type InsertTokenParams struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	Digest      string
+	BearerID    *uuid.UUID
+	BearerType  *string
+	BearerRole  *string
+	Kind        *string
+	Name        *string
+	Expiry      *time.Time
+	Permissions json.RawMessage
+}
+
+func (q *Queries) InsertToken(ctx context.Context, arg InsertTokenParams) error {
+	_, err := q.db.Exec(ctx, insertTokenSQL, arg.ID, arg.AccountID, arg.Digest, arg.BearerID, arg.BearerType, arg.BearerRole, arg.Kind, arg.Name, arg.Expiry, arg.Permissions)
+	return err
+}
+
+const getUserByEmailSQL = `SELECT id, account_id, first_name, last_name, email, password_digest, role,
+  permissions, group_id, metadata, banned_at, created_at, updated_at
+FROM lic.users
+WHERE account_id = $1 AND lower(email) = lower($2);`
+
+type GetUserByEmailParams struct {
+	AccountID uuid.UUID
+	Email     *string
+}
+
+type GetUserByEmailRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	GroupID        *uuid.UUID
+	Metadata       json.RawMessage
+	BannedAt       *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmailSQL, arg.AccountID, arg.Email)
+	var i GetUserByEmailRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const getUserByIDSQL = `SELECT id, account_id, first_name, last_name, email, password_digest, role,
+  permissions, group_id, metadata, banned_at, created_at, updated_at
+FROM lic.users
+WHERE account_id = $1 AND id = $2;`
+
+type GetUserByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetUserByIDRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	GroupID        *uuid.UUID
+	Metadata       json.RawMessage
+	BannedAt       *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, arg GetUserByIDParams) (GetUserByIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByIDSQL, arg.AccountID, arg.ID)
+	var i GetUserByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertUserSQL = `INSERT INTO lic.users (
+  id, account_id, first_name, last_name, email, password_digest, role,
+  permissions, metadata
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7,
+  $8, $9
+);`
+
+type InsertUserParams struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	FirstName      *string
+	LastName       *string
+	Email          *string
+	PasswordDigest *string
+	Role           string
+	Permissions    json.RawMessage
+	Metadata       json.RawMessage
+}
+
+func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) error {
+	_, err := q.db.Exec(ctx, insertUserSQL, arg.ID, arg.AccountID, arg.FirstName, arg.LastName, arg.Email, arg.PasswordDigest, arg.Role, arg.Permissions, arg.Metadata)
+	return err
+}
+
+const userHasActiveLicenseSQL = `SELECT EXISTS (
+  SELECT 1
+  FROM lic.licenses l
+  WHERE l.account_id = $1
+    AND (
+      l.user_id = $2
+      OR EXISTS (
+        SELECT 1 FROM lic.license_users lu
+        WHERE lu.license_id = l.id AND lu.user_id = $2
+      )
+    )
+    AND GREATEST(
+      l.created_at,
+      COALESCE(l.last_validated_at, l.created_at),
+      COALESCE(l.last_check_in_at, l.created_at),
+      COALESCE(l.last_check_out_at, l.created_at)
+    ) >= $3
+) AS active;`
+
+type UserHasActiveLicenseParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+	Cutoff    *time.Time
+}
+
+type UserHasActiveLicenseRow struct {
+	Active bool
+}
+
+func (q *Queries) UserHasActiveLicense(ctx context.Context, arg UserHasActiveLicenseParams) (UserHasActiveLicenseRow, error) {
+	row := q.db.QueryRow(ctx, userHasActiveLicenseSQL, arg.AccountID, arg.ID, arg.Cutoff)
+	var i UserHasActiveLicenseRow
+	err := row.Scan(&i.Active)
+	return i, err
+}
+
+const getEnabledSecondFactorSecretSQL = `SELECT secret
+FROM lic.second_factors
+WHERE user_id = $1 AND enabled
+LIMIT 1;`
+
+type GetEnabledSecondFactorSecretRow struct {
+	Secret string
+}
+
+func (q *Queries) GetEnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (GetEnabledSecondFactorSecretRow, error) {
+	row := q.db.QueryRow(ctx, getEnabledSecondFactorSecretSQL, userID)
+	var i GetEnabledSecondFactorSecretRow
+	err := row.Scan(&i.Secret)
+	return i, err
 }

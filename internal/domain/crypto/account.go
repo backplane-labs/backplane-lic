@@ -24,13 +24,15 @@ const (
 
 // AccountKeys is the account's key material. Storage formats follow
 // Keygen's: the secret key and both ed25519 keys are hex strings, the RSA
-// and ECDSA keys are PEM.
+// private key is PKCS#1 PEM, the RSA and ECDSA public keys are SPKI PEM
+// ("PUBLIC KEY") — the form the reference serves base64-encoded in the
+// account document's meta.
 type AccountKeys struct {
 	// SecretKey hex-encodes 64 random bytes; v3 token digests are
 	// HMAC-SHA256 over it.
 	SecretKey string
-	// RSAPrivate/RSAPublic are PKCS#1 PEM ("RSA PRIVATE KEY" /
-	// "RSA PUBLIC KEY"), 2048 bits.
+	// RSAPrivate/RSAPublic are PKCS#1 ("RSA PRIVATE KEY") and SPKI
+	// ("PUBLIC KEY") PEM respectively, 2048 bits.
 	RSAPrivate string
 	RSAPublic  string
 	// Ed25519Private hex-encodes the 32-byte seed; Ed25519Public the
@@ -67,7 +69,11 @@ func GenerateAccountKeys(rng io.Reader) (AccountKeys, error) {
 	}
 
 	rsaPrivPEM := pemPKCS1Private(rsaKey)
-	rsaPubPEM := pemPKCS1Public(&rsaKey.PublicKey)
+
+	rsaPubPEM, err := pemSPKIPublic(&rsaKey.PublicKey)
+	if err != nil {
+		return AccountKeys{}, err
+	}
 
 	ecPrivPEM, err := pemSEC1Private(ecKey)
 	if err != nil {
@@ -98,8 +104,13 @@ func pemPKCS1Private(key *rsa.PrivateKey) string {
 	return pemBlock("RSA PRIVATE KEY", x509.MarshalPKCS1PrivateKey(key))
 }
 
-func pemPKCS1Public(key *rsa.PublicKey) string {
-	return pemBlock("RSA PUBLIC KEY", x509.MarshalPKCS1PublicKey(key))
+func pemSPKIPublic(key any) (string, error) {
+	der, err := x509.MarshalPKIXPublicKey(key)
+	if err != nil {
+		return "", fmt.Errorf("crypto: marshal spki public key: %w", err)
+	}
+
+	return pemBlock("PUBLIC KEY", der), nil
 }
 
 func pemSEC1Private(key *ecdsa.PrivateKey) (string, error) {
@@ -109,13 +120,4 @@ func pemSEC1Private(key *ecdsa.PrivateKey) (string, error) {
 	}
 
 	return pemBlock("EC PRIVATE KEY", der), nil
-}
-
-func pemSPKIPublic(key *ecdsa.PublicKey) (string, error) {
-	der, err := x509.MarshalPKIXPublicKey(key)
-	if err != nil {
-		return "", fmt.Errorf("crypto: marshal ecdsa public key: %w", err)
-	}
-
-	return pemBlock("PUBLIC KEY", der), nil
 }

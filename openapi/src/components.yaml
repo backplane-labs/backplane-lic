@@ -183,6 +183,160 @@ components:
           items:
             $ref: "#/components/schemas/Error"
 
+    UserAttributes:
+      type: object
+      required: [fullName, firstName, lastName, email, status, role, metadata, created, updated]
+      properties:
+        fullName:
+          type: ["string", "null"]
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        status:
+          type: string
+        role:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    UserRelationships:
+      type: object
+      required: [account, group, products, licenses, machines, tokens, secondFactors]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        group:
+          $ref: "#/components/schemas/ToOneRelationship"
+        products:
+          $ref: "#/components/schemas/ToManyRelationship"
+        licenses:
+          $ref: "#/components/schemas/ToManyRelationship"
+        machines:
+          $ref: "#/components/schemas/ToManyRelationship"
+        tokens:
+          $ref: "#/components/schemas/ToManyRelationship"
+        secondFactors:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    UserResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [users]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/UserAttributes"
+        relationships:
+          $ref: "#/components/schemas/UserRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    UserDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/UserResource"
+
+    TokenAttributes:
+      # token (the raw secret) and the activation counters are optional:
+      # the secret only on creation/regeneration, the counters only on
+      # activation tokens.
+      type: object
+      required: [kind, expiry, name, created, updated]
+      properties:
+        kind:
+          type: string
+        token:
+          type: ["string", "null"]
+        expiry:
+          type: ["string", "null"]
+        name:
+          type: ["string", "null"]
+        maxActivations:
+          type: ["integer", "null"]
+        activations:
+          type: ["integer", "null"]
+        maxDeactivations:
+          type: ["integer", "null"]
+        deactivations:
+          type: ["integer", "null"]
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    TokenRelationships:
+      type: object
+      required: [account, bearer]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        bearer:
+          $ref: "#/components/schemas/ToOneRelationship"
+
+    TokenResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [tokens]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/TokenAttributes"
+        relationships:
+          $ref: "#/components/schemas/TokenRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    TokenDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/TokenResource"
+
+    ProfileMeta:
+      type: object
+      required: [tokenId]
+      properties:
+        tokenId:
+          type: ["string", "null"]
+
+    ProfileDocument:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/UserResource"
+        meta:
+          $ref: "#/components/schemas/ProfileMeta"
+
+    MeDocument:
+      # The current bearer plus, for token authn, the current token in
+      # included (without its secret).
+      type: object
+      required: [data, included]
+      properties:
+        data:
+          $ref: "#/components/schemas/UserResource"
+        included:
+          type: array
+          items:
+            $ref: "#/components/schemas/TokenResource"
+
   responses:
     Error:
       description: Keygen JSON:API error document.

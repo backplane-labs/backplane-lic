@@ -1,0 +1,136 @@
+{
+  "scenario": "account_show",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "apiVersion": "1.8",
+            "created": "\u003cts\u003e",
+            "name": "example.com",
+            "protected": true,
+            "slug": "example-com",
+            "status": "SUBSCRIBED",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:1\u003e"
+          },
+          "meta": {
+            "keys": {
+              "ecdsa": "\u003cb64:1\u003e",
+              "ed25519": "\u003cb64:2\u003e",
+              "rsa2048": "\u003cb64:3\u003e"
+            },
+            "publicKey": "\u003cb64:3\u003e"
+          },
+          "relationships": {
+            "arches": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/arches"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "components": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/components"
+              }
+            },
+            "keys": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/keys"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "processes": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/processes"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/products"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "settings": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/settings"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/users"
+              }
+            },
+            "webhookEndpoints": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/webhook-endpoints"
+              }
+            },
+            "webhookEvents": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:1\u003e/webhook-events"
+              }
+            }
+          },
+          "type": "accounts"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show by slug",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

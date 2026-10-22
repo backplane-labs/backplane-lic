@@ -6,7 +6,10 @@ package oas
 type OperationName = string
 
 const (
-	GetAccountOperation OperationName = "GetAccount"
-	HealthOperation     OperationName = "Health"
-	PingOperation       OperationName = "Ping"
+	GenerateTokenOperation OperationName = "GenerateToken"
+	GetAccountOperation    OperationName = "GetAccount"
+	HealthOperation        OperationName = "Health"
+	MeOperation            OperationName = "Me"
+	PingOperation          OperationName = "Ping"
+	ProfileOperation       OperationName = "Profile"
 )

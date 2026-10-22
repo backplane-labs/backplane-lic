@@ -1,0 +1,30 @@
+{
+  "scenario": "not_found_route",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested endpoint was not found (check your HTTP method, Accept header, and URL path)",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:1\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unknown path",
+      "present": [
+        "X-Request-Id"
+      ],
+      "status": 404
+    }
+  ]
+}

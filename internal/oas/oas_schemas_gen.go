@@ -97,7 +97,6 @@ func (s *AccountAttributes) SetUpdated(val Timestamp) {
 // Ref: #/components/schemas/AccountDocument
 type AccountDocument struct {
 	Data AccountResource `json:"data"`
-	Meta AccountMeta     `json:"meta"`
 }
 
 // GetData returns the value of Data.
@@ -105,19 +104,9 @@ func (s *AccountDocument) GetData() AccountResource {
 	return s.Data
 }
 
-// GetMeta returns the value of Meta.
-func (s *AccountDocument) GetMeta() AccountMeta {
-	return s.Meta
-}
-
 // SetData sets the value of Data.
 func (s *AccountDocument) SetData(val AccountResource) {
 	s.Data = val
-}
-
-// SetMeta sets the value of Meta.
-func (s *AccountDocument) SetMeta(val AccountMeta) {
-	s.Meta = val
 }
 
 // Ref: #/components/schemas/AccountKeysMeta
@@ -381,6 +370,7 @@ type AccountResource struct {
 	Attributes    AccountAttributes    `json:"attributes"`
 	Relationships AccountRelationships `json:"relationships"`
 	Links         ResourceLinks        `json:"links"`
+	Meta          AccountMeta          `json:"meta"`
 }
 
 // GetType returns the value of Type.
@@ -408,6 +398,11 @@ func (s *AccountResource) GetLinks() ResourceLinks {
 	return s.Links
 }
 
+// GetMeta returns the value of Meta.
+func (s *AccountResource) GetMeta() AccountMeta {
+	return s.Meta
+}
+
 // SetType sets the value of Type.
 func (s *AccountResource) SetType(val AccountResourceType) {
 	s.Type = val
@@ -431,6 +426,11 @@ func (s *AccountResource) SetRelationships(val AccountRelationships) {
 // SetLinks sets the value of Links.
 func (s *AccountResource) SetLinks(val ResourceLinks) {
 	s.Links = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *AccountResource) SetMeta(val AccountMeta) {
+	s.Meta = val
 }
 
 type AccountResourceType string
@@ -644,8 +644,76 @@ func (s *ErrorStatusCode) SetResponse(val ErrorDocument) {
 	s.Response = val
 }
 
+type GenerateTokenReqApplicationJSON map[string]jx.Raw
+
+func (s *GenerateTokenReqApplicationJSON) init() GenerateTokenReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*GenerateTokenReqApplicationJSON) generateTokenReq() {}
+
+type GenerateTokenReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *GenerateTokenReqApplicationVndAPIJSON) init() GenerateTokenReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*GenerateTokenReqApplicationVndAPIJSON) generateTokenReq() {}
+
+type GenerateTokenReqEmptyBody struct{}
+
+func (*GenerateTokenReqEmptyBody) generateTokenReq() {}
+
 // HealthNoContent is response for Health operation.
 type HealthNoContent struct{}
+
+// Ref: #/components/schemas/MeDocument
+type MeDocument struct {
+	Data     UserResource    `json:"data"`
+	Included []TokenResource `json:"included"`
+}
+
+// GetData returns the value of Data.
+func (s *MeDocument) GetData() UserResource {
+	return s.Data
+}
+
+// GetIncluded returns the value of Included.
+func (s *MeDocument) GetIncluded() []TokenResource {
+	return s.Included
+}
+
+// SetData sets the value of Data.
+func (s *MeDocument) SetData(val UserResource) {
+	s.Data = val
+}
+
+// SetIncluded sets the value of Included.
+func (s *MeDocument) SetIncluded(val []TokenResource) {
+	s.Included = val
+}
+
+// Ref: #/components/schemas/Metadata
+type Metadata map[string]jx.Raw
+
+func (s *Metadata) init() Metadata {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // NewNilBool returns new NilBool with value set to v.
 func NewNilBool(v bool) NilBool {
@@ -686,6 +754,51 @@ func (o NilBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilResourceIdentifier returns new NilResourceIdentifier with value set to v.
+func NewNilResourceIdentifier(v ResourceIdentifier) NilResourceIdentifier {
+	return NilResourceIdentifier{
+		Value: v,
+	}
+}
+
+// NilResourceIdentifier is nullable ResourceIdentifier.
+type NilResourceIdentifier struct {
+	Value ResourceIdentifier
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilResourceIdentifier) SetTo(v ResourceIdentifier) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilResourceIdentifier) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilResourceIdentifier) SetToNull() {
+	o.Null = true
+	var v ResourceIdentifier
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilResourceIdentifier) Get() (v ResourceIdentifier, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilResourceIdentifier) Or(d ResourceIdentifier) ResourceIdentifier {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -823,6 +936,69 @@ func (o OptErrorSource) Get() (v ErrorSource, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptErrorSource) Or(d ErrorSource) ErrorSource {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilInt returns new OptNilInt with value set to v.
+func NewOptNilInt(v int) OptNilInt {
+	return OptNilInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilInt is optional nullable int.
+type OptNilInt struct {
+	Value int
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilInt was set.
+func (o OptNilInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilInt) SetTo(v int) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilInt) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -987,6 +1163,47 @@ func (o OptToManyRelationshipMeta) Or(d ToManyRelationshipMeta) ToManyRelationsh
 // PingOK is response for Ping operation.
 type PingOK struct{}
 
+// Ref: #/components/schemas/ProfileDocument
+type ProfileDocument struct {
+	Data UserResource `json:"data"`
+	Meta ProfileMeta  `json:"meta"`
+}
+
+// GetData returns the value of Data.
+func (s *ProfileDocument) GetData() UserResource {
+	return s.Data
+}
+
+// GetMeta returns the value of Meta.
+func (s *ProfileDocument) GetMeta() ProfileMeta {
+	return s.Meta
+}
+
+// SetData sets the value of Data.
+func (s *ProfileDocument) SetData(val UserResource) {
+	s.Data = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *ProfileDocument) SetMeta(val ProfileMeta) {
+	s.Meta = val
+}
+
+// Ref: #/components/schemas/ProfileMeta
+type ProfileMeta struct {
+	TokenId NilString `json:"tokenId"`
+}
+
+// GetTokenId returns the value of TokenId.
+func (s *ProfileMeta) GetTokenId() NilString {
+	return s.TokenId
+}
+
+// SetTokenId sets the value of TokenId.
+func (s *ProfileMeta) SetTokenId(val NilString) {
+	s.TokenId = val
+}
+
 // Ref: #/components/schemas/RelationshipLinks
 type RelationshipLinks struct {
 	Related NilString `json:"related"`
@@ -1000,6 +1217,32 @@ func (s *RelationshipLinks) GetRelated() NilString {
 // SetRelated sets the value of Related.
 func (s *RelationshipLinks) SetRelated(val NilString) {
 	s.Related = val
+}
+
+// Ref: #/components/schemas/ResourceIdentifier
+type ResourceIdentifier struct {
+	Type string `json:"type"`
+	ID   string `json:"id"`
+}
+
+// GetType returns the value of Type.
+func (s *ResourceIdentifier) GetType() string {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *ResourceIdentifier) GetID() string {
+	return s.ID
+}
+
+// SetType sets the value of Type.
+func (s *ResourceIdentifier) SetType(val string) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *ResourceIdentifier) SetID(val string) {
+	s.ID = val
 }
 
 // Ref: #/components/schemas/ResourceLinks
@@ -1054,4 +1297,581 @@ func (s *ToManyRelationshipMeta) init() ToManyRelationshipMeta {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/ToOneRelationship
+type ToOneRelationship struct {
+	Links RelationshipLinks     `json:"links"`
+	Data  NilResourceIdentifier `json:"data"`
+}
+
+// GetLinks returns the value of Links.
+func (s *ToOneRelationship) GetLinks() RelationshipLinks {
+	return s.Links
+}
+
+// GetData returns the value of Data.
+func (s *ToOneRelationship) GetData() NilResourceIdentifier {
+	return s.Data
+}
+
+// SetLinks sets the value of Links.
+func (s *ToOneRelationship) SetLinks(val RelationshipLinks) {
+	s.Links = val
+}
+
+// SetData sets the value of Data.
+func (s *ToOneRelationship) SetData(val NilResourceIdentifier) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/TokenAttributes
+type TokenAttributes struct {
+	Kind             string       `json:"kind"`
+	Token            OptNilString `json:"token"`
+	Expiry           NilString    `json:"expiry"`
+	Name             NilString    `json:"name"`
+	MaxActivations   OptNilInt    `json:"maxActivations"`
+	Activations      OptNilInt    `json:"activations"`
+	MaxDeactivations OptNilInt    `json:"maxDeactivations"`
+	Deactivations    OptNilInt    `json:"deactivations"`
+	Created          Timestamp    `json:"created"`
+	Updated          Timestamp    `json:"updated"`
+}
+
+// GetKind returns the value of Kind.
+func (s *TokenAttributes) GetKind() string {
+	return s.Kind
+}
+
+// GetToken returns the value of Token.
+func (s *TokenAttributes) GetToken() OptNilString {
+	return s.Token
+}
+
+// GetExpiry returns the value of Expiry.
+func (s *TokenAttributes) GetExpiry() NilString {
+	return s.Expiry
+}
+
+// GetName returns the value of Name.
+func (s *TokenAttributes) GetName() NilString {
+	return s.Name
+}
+
+// GetMaxActivations returns the value of MaxActivations.
+func (s *TokenAttributes) GetMaxActivations() OptNilInt {
+	return s.MaxActivations
+}
+
+// GetActivations returns the value of Activations.
+func (s *TokenAttributes) GetActivations() OptNilInt {
+	return s.Activations
+}
+
+// GetMaxDeactivations returns the value of MaxDeactivations.
+func (s *TokenAttributes) GetMaxDeactivations() OptNilInt {
+	return s.MaxDeactivations
+}
+
+// GetDeactivations returns the value of Deactivations.
+func (s *TokenAttributes) GetDeactivations() OptNilInt {
+	return s.Deactivations
+}
+
+// GetCreated returns the value of Created.
+func (s *TokenAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *TokenAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetKind sets the value of Kind.
+func (s *TokenAttributes) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetToken sets the value of Token.
+func (s *TokenAttributes) SetToken(val OptNilString) {
+	s.Token = val
+}
+
+// SetExpiry sets the value of Expiry.
+func (s *TokenAttributes) SetExpiry(val NilString) {
+	s.Expiry = val
+}
+
+// SetName sets the value of Name.
+func (s *TokenAttributes) SetName(val NilString) {
+	s.Name = val
+}
+
+// SetMaxActivations sets the value of MaxActivations.
+func (s *TokenAttributes) SetMaxActivations(val OptNilInt) {
+	s.MaxActivations = val
+}
+
+// SetActivations sets the value of Activations.
+func (s *TokenAttributes) SetActivations(val OptNilInt) {
+	s.Activations = val
+}
+
+// SetMaxDeactivations sets the value of MaxDeactivations.
+func (s *TokenAttributes) SetMaxDeactivations(val OptNilInt) {
+	s.MaxDeactivations = val
+}
+
+// SetDeactivations sets the value of Deactivations.
+func (s *TokenAttributes) SetDeactivations(val OptNilInt) {
+	s.Deactivations = val
+}
+
+// SetCreated sets the value of Created.
+func (s *TokenAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *TokenAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/TokenDocument
+type TokenDocument struct {
+	Data TokenResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *TokenDocument) GetData() TokenResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *TokenDocument) SetData(val TokenResource) {
+	s.Data = val
+}
+
+// TokenDocumentHeaders wraps TokenDocument with response headers.
+type TokenDocumentHeaders struct {
+	Location OptString
+	Response TokenDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *TokenDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *TokenDocumentHeaders) GetResponse() TokenDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *TokenDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *TokenDocumentHeaders) SetResponse(val TokenDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/TokenRelationships
+type TokenRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	Bearer  ToOneRelationship `json:"bearer"`
+}
+
+// GetAccount returns the value of Account.
+func (s *TokenRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetBearer returns the value of Bearer.
+func (s *TokenRelationships) GetBearer() ToOneRelationship {
+	return s.Bearer
+}
+
+// SetAccount sets the value of Account.
+func (s *TokenRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetBearer sets the value of Bearer.
+func (s *TokenRelationships) SetBearer(val ToOneRelationship) {
+	s.Bearer = val
+}
+
+// Ref: #/components/schemas/TokenResource
+type TokenResource struct {
+	Type          TokenResourceType  `json:"type"`
+	ID            string             `json:"id"`
+	Attributes    TokenAttributes    `json:"attributes"`
+	Relationships TokenRelationships `json:"relationships"`
+	Links         ResourceLinks      `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *TokenResource) GetType() TokenResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *TokenResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *TokenResource) GetAttributes() TokenAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *TokenResource) GetRelationships() TokenRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *TokenResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *TokenResource) SetType(val TokenResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *TokenResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *TokenResource) SetAttributes(val TokenAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *TokenResource) SetRelationships(val TokenRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *TokenResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type TokenResourceType string
+
+const (
+	TokenResourceTypeTokens TokenResourceType = "tokens"
+)
+
+// AllValues returns all TokenResourceType values.
+func (TokenResourceType) AllValues() []TokenResourceType {
+	return []TokenResourceType{
+		TokenResourceTypeTokens,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TokenResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case TokenResourceTypeTokens:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TokenResourceType) UnmarshalText(data []byte) error {
+	switch TokenResourceType(data) {
+	case TokenResourceTypeTokens:
+		*s = TokenResourceTypeTokens
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/UserAttributes
+type UserAttributes struct {
+	FullName  NilString `json:"fullName"`
+	FirstName NilString `json:"firstName"`
+	LastName  NilString `json:"lastName"`
+	Email     NilString `json:"email"`
+	Status    string    `json:"status"`
+	Role      string    `json:"role"`
+	Metadata  Metadata  `json:"metadata"`
+	Created   Timestamp `json:"created"`
+	Updated   Timestamp `json:"updated"`
+}
+
+// GetFullName returns the value of FullName.
+func (s *UserAttributes) GetFullName() NilString {
+	return s.FullName
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *UserAttributes) GetFirstName() NilString {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *UserAttributes) GetLastName() NilString {
+	return s.LastName
+}
+
+// GetEmail returns the value of Email.
+func (s *UserAttributes) GetEmail() NilString {
+	return s.Email
+}
+
+// GetStatus returns the value of Status.
+func (s *UserAttributes) GetStatus() string {
+	return s.Status
+}
+
+// GetRole returns the value of Role.
+func (s *UserAttributes) GetRole() string {
+	return s.Role
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *UserAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *UserAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *UserAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetFullName sets the value of FullName.
+func (s *UserAttributes) SetFullName(val NilString) {
+	s.FullName = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *UserAttributes) SetFirstName(val NilString) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *UserAttributes) SetLastName(val NilString) {
+	s.LastName = val
+}
+
+// SetEmail sets the value of Email.
+func (s *UserAttributes) SetEmail(val NilString) {
+	s.Email = val
+}
+
+// SetStatus sets the value of Status.
+func (s *UserAttributes) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetRole sets the value of Role.
+func (s *UserAttributes) SetRole(val string) {
+	s.Role = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *UserAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *UserAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *UserAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/UserRelationships
+type UserRelationships struct {
+	Account       ToOneRelationship  `json:"account"`
+	Group         ToOneRelationship  `json:"group"`
+	Products      ToManyRelationship `json:"products"`
+	Licenses      ToManyRelationship `json:"licenses"`
+	Machines      ToManyRelationship `json:"machines"`
+	Tokens        ToManyRelationship `json:"tokens"`
+	SecondFactors ToManyRelationship `json:"secondFactors"`
+}
+
+// GetAccount returns the value of Account.
+func (s *UserRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetGroup returns the value of Group.
+func (s *UserRelationships) GetGroup() ToOneRelationship {
+	return s.Group
+}
+
+// GetProducts returns the value of Products.
+func (s *UserRelationships) GetProducts() ToManyRelationship {
+	return s.Products
+}
+
+// GetLicenses returns the value of Licenses.
+func (s *UserRelationships) GetLicenses() ToManyRelationship {
+	return s.Licenses
+}
+
+// GetMachines returns the value of Machines.
+func (s *UserRelationships) GetMachines() ToManyRelationship {
+	return s.Machines
+}
+
+// GetTokens returns the value of Tokens.
+func (s *UserRelationships) GetTokens() ToManyRelationship {
+	return s.Tokens
+}
+
+// GetSecondFactors returns the value of SecondFactors.
+func (s *UserRelationships) GetSecondFactors() ToManyRelationship {
+	return s.SecondFactors
+}
+
+// SetAccount sets the value of Account.
+func (s *UserRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetGroup sets the value of Group.
+func (s *UserRelationships) SetGroup(val ToOneRelationship) {
+	s.Group = val
+}
+
+// SetProducts sets the value of Products.
+func (s *UserRelationships) SetProducts(val ToManyRelationship) {
+	s.Products = val
+}
+
+// SetLicenses sets the value of Licenses.
+func (s *UserRelationships) SetLicenses(val ToManyRelationship) {
+	s.Licenses = val
+}
+
+// SetMachines sets the value of Machines.
+func (s *UserRelationships) SetMachines(val ToManyRelationship) {
+	s.Machines = val
+}
+
+// SetTokens sets the value of Tokens.
+func (s *UserRelationships) SetTokens(val ToManyRelationship) {
+	s.Tokens = val
+}
+
+// SetSecondFactors sets the value of SecondFactors.
+func (s *UserRelationships) SetSecondFactors(val ToManyRelationship) {
+	s.SecondFactors = val
+}
+
+// Ref: #/components/schemas/UserResource
+type UserResource struct {
+	Type          UserResourceType  `json:"type"`
+	ID            string            `json:"id"`
+	Attributes    UserAttributes    `json:"attributes"`
+	Relationships UserRelationships `json:"relationships"`
+	Links         ResourceLinks     `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *UserResource) GetType() UserResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *UserResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *UserResource) GetAttributes() UserAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *UserResource) GetRelationships() UserRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *UserResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *UserResource) SetType(val UserResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *UserResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *UserResource) SetAttributes(val UserAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *UserResource) SetRelationships(val UserRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *UserResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type UserResourceType string
+
+const (
+	UserResourceTypeUsers UserResourceType = "users"
+)
+
+// AllValues returns all UserResourceType values.
+func (UserResourceType) AllValues() []UserResourceType {
+	return []UserResourceType{
+		UserResourceTypeUsers,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UserResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case UserResourceTypeUsers:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UserResourceType) UnmarshalText(data []byte) error {
+	switch UserResourceType(data) {
+	case UserResourceTypeUsers:
+		*s = UserResourceTypeUsers
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }

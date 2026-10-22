@@ -17,6 +17,22 @@ type Config struct {
 	// Account is the single account of the installation: the row is
 	// created at startup from these fields when missing.
 	Account Account `json:"account"`
+
+	// HTTP is the public API's runtime section.
+	HTTP HTTP `json:"http"`
+
+	// DocsHost overrides the docs origin of error links (the reference
+	// derives it from its configured host); empty derives it from the
+	// request host.
+	DocsHost string `json:"docsHost" schemapb:"description=Docs links origin"` //nolint:tagliatelle // config is camelCase
+}
+
+// HTTP holds the public API's runtime settings.
+type HTTP struct {
+	// TrustedProxies lists the proxy CIDRs (or single IPs) whose
+	// X-Forwarded-For is honored when resolving the client address;
+	// empty means every request is keyed by its remote address.
+	TrustedProxies []string `json:"trustedProxies" schemapb:"description=Proxies"` //nolint:tagliatelle // camelCase
 }
 
 // Account identifies the configured account; both its id and its slug

@@ -1,0 +1,24 @@
+{
+  "scenario": "invalid_json",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "JSON_INVALID",
+            "detail": "The request could not be completed because it contains invalid JSON (check formatting/encoding)",
+            "title": "Bad request"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8"
+      },
+      "name": "broken body",
+      "present": [
+        "X-Request-Id"
+      ],
+      "status": 400
+    }
+  ]
+}

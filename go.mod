@@ -7,11 +7,14 @@ require (
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/uuid v1.6.0
+	github.com/gopherex/xlog v1.2.1
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/ogen-go/ogen v1.20.3
+	github.com/valkey-io/valkey-go v1.0.79
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/metric v1.45.0
 	go.opentelemetry.io/otel/trace v1.45.0
+	golang.org/x/crypto v0.57.0
 )
 
 require (
@@ -47,7 +50,6 @@ require (
 	github.com/gopherex/xconf/contrib/sources/consul v1.4.0 // indirect
 	github.com/gopherex/xconf/contrib/sources/env v1.4.0 // indirect
 	github.com/gopherex/xconf/contrib/sources/file v1.4.0 // indirect
-	github.com/gopherex/xlog v1.2.1 // indirect
 	github.com/gopherex/xlog/contrib/libs/otel v1.2.1 // indirect
 	github.com/gopherex/xlog/contrib/libs/pgx v1.2.1 // indirect
 	github.com/gopherex/xprobe v1.2.0 // indirect
@@ -91,7 +93,6 @@ require (
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
-	github.com/valkey-io/valkey-go v1.0.79 // indirect
 	github.com/valkey-io/valkey-go/valkeyaside v1.0.79 // indirect
 	github.com/valkey-io/valkey-go/valkeyotel v1.0.79 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
@@ -115,7 +116,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/exp v0.0.0-20250808145144-a408d31f581a // indirect
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/net v0.58.0 // indirect

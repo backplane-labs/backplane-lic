@@ -1,0 +1,39 @@
+{
+  "scenario": "unauthenticated_account",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "TOKEN_MISSING",
+            "detail": "You must be authenticated to complete the request",
+            "links": {
+              "about": "https://keygen.test/docs/api/authentication/"
+            },
+            "title": "Unauthorized"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:1\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8",
+        "WWW-Authenticate": "Bearer realm=\"keygen\""
+      },
+      "name": "no credentials",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 401
+    }
+  ]
+}

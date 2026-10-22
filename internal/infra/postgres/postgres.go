@@ -10,9 +10,11 @@ import (
 
 	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/deps"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
+	"github.com/google/uuid"
 
 	"github.com/gopherex/xlog"
 
+	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres/db"
 )
 
@@ -31,6 +33,12 @@ type Store struct {
 
 	// Accounts is the account repository.
 	Accounts AccountsRepo
+	// Users is the users repository.
+	Users UsersRepo
+	// Tokens is the tokens repository.
+	Tokens TokensRepo
+	// Licenses is the license-auth repository.
+	Licenses LicensesRepo
 }
 
 // New is the provider: the postgres driver with the schema and the
@@ -67,7 +75,77 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 		return nil, err //nolint:wrapcheck // the driver's own error
 	}
 
-	q := db.New(pg.DB)
+	queries := db.New(pg.DB)
 
-	return &Store{DB: pg, Q: q, Accounts: AccountsRepo{q: q}}, nil
+	return &Store{
+		DB:       pg,
+		Q:        queries,
+		Accounts: AccountsRepo{q: queries},
+		Users:    UsersRepo{q: queries},
+		Tokens:   TokensRepo{q: queries},
+		Licenses: LicensesRepo{q: queries},
+	}, nil
+}
+
+// The Store delegates the app scenarios' storage ports to its
+// repositories, so the tree's single dependency satisfies them all.
+
+// TokenByDigest loads a token by its digest.
+func (s *Store) TokenByDigest(ctx context.Context, accountID uuid.UUID, digest string) (domain.Token, error) {
+	return s.Tokens.TokenByDigest(ctx, accountID, digest)
+}
+
+// InsertToken writes a new token row.
+func (s *Store) InsertToken(ctx context.Context, token domain.Token) error {
+	return s.Tokens.InsertToken(ctx, token)
+}
+
+// BearerUser loads the override bearer (a user).
+func (s *Store) BearerUser(ctx context.Context, accountID, id uuid.UUID) (domain.User, error) {
+	return s.Users.UserByID(ctx, accountID, id)
+}
+
+// UserByID loads a user; ErrNotFound when none.
+func (s *Store) UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error) {
+	return s.Users.UserByID(ctx, accountID, id)
+}
+
+// UserByEmail loads a user by downcased email; ErrNotFound when none.
+func (s *Store) UserByEmail(ctx context.Context, accountID uuid.UUID, email string) (domain.User, error) {
+	return s.Users.UserByEmail(ctx, accountID, email)
+}
+
+// InsertUser writes a new user row.
+func (s *Store) InsertUser(ctx context.Context, user domain.User) error {
+	return s.Users.InsertUser(ctx, user)
+}
+
+// UserHasActiveLicense answers the user's status input.
+func (s *Store) UserHasActiveLicense(ctx context.Context, accountID, id uuid.UUID) (bool, error) {
+	return s.Users.UserHasActiveLicense(ctx, accountID, id)
+}
+
+// EnabledSecondFactorSecret loads the user's enabled TOTP secret.
+func (s *Store) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (string, bool, error) {
+	return s.Users.EnabledSecondFactorSecret(ctx, userID)
+}
+
+// LicenseByKey loads the license-auth slice by key.
+func (s *Store) LicenseByKey(ctx context.Context, accountID uuid.UUID, key string) (domain.LicenseAuth, error) {
+	return s.Licenses.LicenseByKey(ctx, accountID, key)
+}
+
+// LicenseByID loads the license-auth slice by id.
+func (s *Store) LicenseByID(ctx context.Context, accountID, id uuid.UUID) (domain.LicenseAuth, error) {
+	return s.Licenses.LicenseByID(ctx, accountID, id)
+}
+
+// Account loads the account by id.
+func (s *Store) Account(ctx context.Context, id uuid.UUID) (domain.Account, error) {
+	return s.Accounts.Account(ctx, id)
+}
+
+// InsertAccount writes a new account row.
+func (s *Store) InsertAccount(ctx context.Context, account domain.Account) error {
+	return s.Accounts.InsertAccount(ctx, account)
 }

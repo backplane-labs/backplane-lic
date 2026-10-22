@@ -1,0 +1,18 @@
+{
+  "scenario": "health",
+  "steps": [
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "health",
+      "present": [
+        "X-Request-Id"
+      ],
+      "status": 204
+    }
+  ]
+}

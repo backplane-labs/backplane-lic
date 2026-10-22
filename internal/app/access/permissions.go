@@ -1,0 +1,481 @@
+// Package access is the authorization foundation: the CE permission sets
+// per role, the effective-permission intersection with wildcards, the
+// principal in the request context and the Require helper scenarios call.
+package access
+
+import "github.com/backplane-labs/backplane-lic/internal/domain"
+
+// AllPermissions is the full catalog of permission names (the
+// reference's ALL_PERMISSIONS, transcribed verbatim as data).
+var AllPermissions = []string{ //nolint:gochecknoglobals // transcribed reference data []string{
+	"account.analytics.read",
+	"account.billing.read",
+	"account.billing.update",
+	"account.plan.read",
+	"account.plan.update",
+	"account.read",
+	"account.subscription.read",
+	"account.subscription.update",
+	"account.update",
+	"admin.create",
+	"admin.delete",
+	"admin.invite",
+	"admin.read",
+	"admin.update",
+	"arch.read",
+	"artifact.create",
+	"artifact.delete",
+	"artifact.read",
+	"artifact.update",
+	"component.create",
+	"component.delete",
+	"component.read",
+	"component.update",
+	"channel.read",
+	"constraint.read",
+	"engine.read",
+	"entitlement.create",
+	"entitlement.delete",
+	"entitlement.read",
+	"entitlement.update",
+	"environment.create",
+	"environment.delete",
+	"environment.read",
+	"environment.tokens.generate",
+	"environment.update",
+	"event-log.read",
+	"group.create",
+	"group.delete",
+	"group.licenses.read",
+	"group.machines.read",
+	"group.owners.attach",
+	"group.owners.detach",
+	"group.owners.read",
+	"group.read",
+	"group.update",
+	"group.users.read",
+	"key.create",
+	"key.delete",
+	"key.read",
+	"key.update",
+	"license.check-in",
+	"license.check-out",
+	"license.create",
+	"license.delete",
+	"license.entitlements.attach",
+	"license.entitlements.detach",
+	"license.group.update",
+	"license.owner.update",
+	"license.policy.update",
+	"license.read",
+	"license.reinstate",
+	"license.renew",
+	"license.revoke",
+	"license.suspend",
+	"license.tokens.generate",
+	"license.update",
+	"license.usage.decrement",
+	"license.usage.increment",
+	"license.usage.reset",
+	"license.user.update",
+	"license.users.attach",
+	"license.users.detach",
+	"license.validate",
+	"machine.check-out",
+	"machine.create",
+	"machine.delete",
+	"machine.group.update",
+	"machine.heartbeat.ping",
+	"machine.heartbeat.reset",
+	"machine.owner.update",
+	"machine.proofs.generate",
+	"machine.read",
+	"machine.update",
+	"package.create",
+	"package.delete",
+	"package.read",
+	"package.update",
+	"platform.read",
+	"policy.create",
+	"policy.delete",
+	"policy.entitlements.attach",
+	"policy.entitlements.detach",
+	"policy.pool.pop",
+	"policy.read",
+	"policy.update",
+	"process.create",
+	"process.delete",
+	"process.heartbeat.ping",
+	"process.read",
+	"process.update",
+	"product.create",
+	"product.delete",
+	"product.read",
+	"product.tokens.generate",
+	"product.update",
+	"release.constraints.attach",
+	"release.constraints.detach",
+	"release.create",
+	"release.delete",
+	"release.download",
+	"release.package.update",
+	"release.publish",
+	"release.read",
+	"release.update",
+	"release.upgrade",
+	"release.upload",
+	"release.yank",
+	"request-log.read",
+	"token.generate",
+	"token.read",
+	"token.regenerate",
+	"token.revoke",
+	"user.ban",
+	"user.create",
+	"user.delete",
+	"user.group.update",
+	"user.invite",
+	"user.password.reset",
+	"user.password.update",
+	"user.read",
+	"user.second-factors.create",
+	"user.second-factors.delete",
+	"user.second-factors.read",
+	"user.second-factors.update",
+	"user.tokens.generate",
+	"user.unban",
+	"user.update",
+	"webhook-endpoint.create",
+	"webhook-endpoint.delete",
+	"webhook-endpoint.read",
+	"webhook-endpoint.update",
+	"webhook-event.delete",
+	"webhook-event.read",
+	"webhook-event.retry",
+}
+
+// allPermissions is the admin set: every permission.
+var allPermissions = toSet(AllPermissions) //nolint:gochecknoglobals // derived from the catalog
+
+// readOnlyPermissions is the read-only user role's default set.
+var readOnlyPermissions = toSet([]string{ //nolint:gochecknoglobals // transcribed reference data
+	"account.analytics.read",
+	"account.billing.read",
+	"account.plan.read",
+	"account.read",
+	"account.subscription.read",
+	"admin.read",
+	"arch.read",
+	"artifact.read",
+	"component.read",
+	"channel.read",
+	"constraint.read",
+	"engine.read",
+	"entitlement.read",
+	"environment.read",
+	"event-log.read",
+	"group.licenses.read",
+	"group.machines.read",
+	"group.owners.read",
+	"group.read",
+	"group.users.read",
+	"key.read",
+	"license.read",
+	"license.validate",
+	"machine.read",
+	"package.read",
+	"platform.read",
+	"policy.read",
+	"process.read",
+	"product.read",
+	"release.download",
+	"release.read",
+	"release.upgrade",
+	"request-log.read",
+	"token.generate",
+	"token.read",
+	"user.password.reset",
+	"user.password.update",
+	"user.read",
+	"user.second-factors.read",
+	"webhook-endpoint.read",
+	"webhook-event.read",
+})
+
+// productPermissions is the product bearer's default set.
+var productPermissions = toSet([]string{ //nolint:gochecknoglobals // transcribed reference data
+	"account.read",
+	"arch.read",
+	"artifact.create",
+	"artifact.delete",
+	"artifact.read",
+	"artifact.update",
+	"component.create",
+	"component.delete",
+	"component.read",
+	"component.update",
+	"channel.read",
+	"constraint.read",
+	"engine.read",
+	"entitlement.read",
+	"group.create",
+	"group.delete",
+	"group.licenses.read",
+	"group.machines.read",
+	"group.owners.attach",
+	"group.owners.detach",
+	"group.owners.read",
+	"group.read",
+	"group.update",
+	"group.users.read",
+	"key.create",
+	"key.delete",
+	"key.read",
+	"key.update",
+	"license.check-in",
+	"license.check-out",
+	"license.create",
+	"license.delete",
+	"license.entitlements.attach",
+	"license.entitlements.detach",
+	"license.group.update",
+	"license.owner.update",
+	"license.policy.update",
+	"license.read",
+	"license.reinstate",
+	"license.renew",
+	"license.revoke",
+	"license.suspend",
+	"license.tokens.generate",
+	"license.update",
+	"license.usage.decrement",
+	"license.usage.increment",
+	"license.usage.reset",
+	"license.user.update",
+	"license.users.attach",
+	"license.users.detach",
+	"license.validate",
+	"machine.check-out",
+	"machine.create",
+	"machine.delete",
+	"machine.group.update",
+	"machine.heartbeat.ping",
+	"machine.heartbeat.reset",
+	"machine.owner.update",
+	"machine.proofs.generate",
+	"machine.read",
+	"machine.update",
+	"package.create",
+	"package.delete",
+	"package.read",
+	"package.update",
+	"platform.read",
+	"policy.create",
+	"policy.delete",
+	"policy.entitlements.attach",
+	"policy.entitlements.detach",
+	"policy.pool.pop",
+	"policy.read",
+	"policy.update",
+	"process.create",
+	"process.delete",
+	"process.heartbeat.ping",
+	"process.read",
+	"process.update",
+	"product.read",
+	"product.update",
+	"release.constraints.attach",
+	"release.constraints.detach",
+	"release.create",
+	"release.delete",
+	"release.download",
+	"release.package.update",
+	"release.publish",
+	"release.read",
+	"release.update",
+	"release.upgrade",
+	"release.upload",
+	"release.yank",
+	"token.generate",
+	"token.read",
+	"token.regenerate",
+	"token.revoke",
+	"user.ban",
+	"user.create",
+	"user.delete",
+	"user.group.update",
+	"user.read",
+	"user.tokens.generate",
+	"user.unban",
+	"user.update",
+	"webhook-endpoint.create",
+	"webhook-endpoint.delete",
+	"webhook-endpoint.read",
+	"webhook-endpoint.update",
+	"webhook-event.read",
+})
+
+// userPermissions is the plain user role's default set: the reference's
+// USER_PERMISSIONS minus account.read, license.users.attach,
+// license.users.detach, policy.read and product.read (backwards
+// compatibility defaults).
+var userPermissions = toSet([]string{ //nolint:gochecknoglobals // transcribed reference data
+	"arch.read",
+	"artifact.read",
+	"component.create",
+	"component.delete",
+	"component.read",
+	"component.update",
+	"channel.read",
+	"constraint.read",
+	"engine.read",
+	"entitlement.read",
+	"group.licenses.read",
+	"group.machines.read",
+	"group.owners.read",
+	"group.read",
+	"group.users.read",
+	"license.check-in",
+	"license.check-out",
+	"license.create",
+	"license.delete",
+	"license.policy.update",
+	"license.read",
+	"license.renew",
+	"license.revoke",
+	"license.usage.increment",
+	"license.validate",
+	"machine.check-out",
+	"machine.create",
+	"machine.delete",
+	"machine.heartbeat.ping",
+	"machine.proofs.generate",
+	"machine.read",
+	"machine.update",
+	"package.read",
+	"platform.read",
+	"process.create",
+	"process.delete",
+	"process.heartbeat.ping",
+	"process.read",
+	"process.update",
+	"release.download",
+	"release.read",
+	"release.upgrade",
+	"token.generate",
+	"token.read",
+	"token.regenerate",
+	"token.revoke",
+	"user.password.reset",
+	"user.password.update",
+	"user.read",
+	"user.second-factors.create",
+	"user.second-factors.delete",
+	"user.second-factors.read",
+	"user.second-factors.update",
+	"user.update",
+})
+
+// licensePermissions is the license bearer's default set:
+// LICENSE_PERMISSIONS minus account.read, product.read, policy.read and
+// user.read.
+var licensePermissions = toSet([]string{ //nolint:gochecknoglobals // transcribed reference data
+	"arch.read",
+	"artifact.read",
+	"component.create",
+	"component.delete",
+	"component.read",
+	"component.update",
+	"channel.read",
+	"constraint.read",
+	"engine.read",
+	"entitlement.read",
+	"group.owners.read",
+	"group.read",
+	"license.check-in",
+	"license.check-out",
+	"license.read",
+	"license.usage.increment",
+	"license.validate",
+	"machine.check-out",
+	"machine.create",
+	"machine.delete",
+	"machine.heartbeat.ping",
+	"machine.proofs.generate",
+	"machine.read",
+	"machine.update",
+	"package.read",
+	"platform.read",
+	"process.create",
+	"process.delete",
+	"process.heartbeat.ping",
+	"process.read",
+	"process.update",
+	"release.download",
+	"release.read",
+	"release.upgrade",
+	"token.read",
+	"token.regenerate",
+	"token.revoke",
+})
+
+// RolePermissions returns the role's CE default permission set.
+func RolePermissions(role domain.Role) map[string]struct{} {
+	switch role {
+	case domain.RoleAdmin, domain.RoleDeveloper, domain.RoleSalesAgent, domain.RoleSupportRole:
+		// The admin-family roles default to the full set.
+		return allPermissions
+	case domain.RoleReadOnly:
+		return readOnlyPermissions
+	case domain.RoleProduct:
+		return productPermissions
+	case domain.RoleLicense:
+		return licensePermissions
+	default:
+		return userPermissions
+	}
+}
+
+// Effective computes the effective permission set of a token
+// authentication: the intersection of the bearer's role set and the
+// token's own permissions, where a wildcard ("*") on either side defers
+// to the other side.
+func Effective(role domain.Role, tokenPermissions []string) map[string]struct{} {
+	roleSet := RolePermissions(role)
+
+	tokenHasWildcard := false
+
+	for _, p := range tokenPermissions {
+		if p == "*" {
+			tokenHasWildcard = true
+
+			break
+		}
+	}
+
+	if tokenHasWildcard || len(tokenPermissions) == 0 {
+		return roleSet
+	}
+
+	// An admin-family bearer holds the wildcard: every token permission
+	// passes; otherwise the plain intersection applies.
+	bearerHasWildcard := len(roleSet) == len(allPermissions)
+	out := make(map[string]struct{}, len(tokenPermissions))
+
+	for _, p := range tokenPermissions {
+		if _, ok := roleSet[p]; ok || bearerHasWildcard {
+			out[p] = struct{}{}
+		}
+	}
+
+	return out
+}
+
+func toSet(list []string) map[string]struct{} {
+	set := make(map[string]struct{}, len(list))
+	for _, p := range list {
+		set[p] = struct{}{}
+	}
+
+	return set
+}

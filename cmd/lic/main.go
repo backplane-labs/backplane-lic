@@ -1,7 +1,7 @@
 // lic is the Backplane licensing service: a 1:1 clone of the Keygen CE
 // licensing API (URLs, JSON:API documents, headers, error codes,
 // behavior) so Keygen clients cannot tell the difference. Singleplayer,
-// API version 1.7.
+// API version 1.8.
 package main
 
 import (
@@ -21,11 +21,10 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("lic: %w", err)
 	}
 
-	// The public JSON:API. The middleware pipeline of the architecture
-	// contract (request id, path normalisation, negotiation,
-	// authentication, response signing) wraps svc.State().HTTP here as
-	// it lands in phase A2.
-	svc.HTTP("/v1/", svc.State().HTTP)
+	// The public JSON:API: the full middleware pipeline mounted at the
+	// root, so paths outside /v1 get the reference's 404 and the
+	// singleplayer bare paths (/v1/me, /v1/tokens, ...) resolve.
+	svc.HTTP("/", svc.State().HTTP)
 
 	if err := svc.Run(ctx); err != nil {
 		return fmt.Errorf("lic: %w", err)

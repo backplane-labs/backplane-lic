@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/elliptic"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
@@ -42,9 +43,13 @@ func TestGenerateAccountKeys(t *testing.T) {
 		t.Errorf("rsa key: %d bits, want 2048", rsaKey.N.BitLen())
 	}
 
-	rsaPubBlock := pemBlock(t, "RSA PUBLIC KEY", keys.RSAPublic)
-	if _, err := x509.ParsePKCS1PublicKey(rsaPubBlock); err != nil {
+	rsaPubBlock := pemBlock(t, "PUBLIC KEY", keys.RSAPublic)
+
+	rsaPub, err := x509.ParsePKIXPublicKey(rsaPubBlock)
+	if err != nil {
 		t.Errorf("rsa public key: %v", err)
+	} else if pubKey, ok := rsaPub.(*rsa.PublicKey); !ok || !pubKey.Equal(&rsaKey.PublicKey) {
+		t.Error("rsa public key does not match the private key")
 	}
 
 	seed, err := hex.DecodeString(keys.Ed25519Private)

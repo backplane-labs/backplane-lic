@@ -40,6 +40,40 @@ paths:
         default:
           $ref: "#/components/responses/Error"
 
+  /v1/accounts/{account}/me:
+    get:
+      operationId: me
+      summary: The current bearer
+      description: The authenticated bearer's document; a token-authenticated request also includes the current token (without its secret) in included.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Bearer document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MeDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/profile:
+    get:
+      operationId: profile
+      summary: The current bearer's profile
+      description: The authenticated bearer's document with the current token id in meta.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Profile document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProfileDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
 components:
   schemas:
     AccountAttributes:
@@ -122,7 +156,7 @@ components:
 
     AccountResource:
       type: object
-      required: [type, id, attributes, relationships, links]
+      required: [type, id, attributes, relationships, links, meta]
       properties:
         type:
           type: string
@@ -135,10 +169,12 @@ components:
           $ref: "#/components/schemas/AccountRelationships"
         links:
           $ref: "#/components/schemas/ResourceLinks"
+        meta:
+          $ref: "#/components/schemas/AccountMeta"
 
     AccountKeysMeta:
       # Base64 (strict) of the account's public key material; ed25519 is
-      # the raw public key bytes, rsa2048/ecdsa are PEM.
+      # base64 of the hex string, rsa2048/ecdsa of the SPKI PEM.
       type: object
       required: [ed25519, rsa2048, ecdsa]
       properties:
@@ -160,9 +196,7 @@ components:
 
     AccountDocument:
       type: object
-      required: [data, meta]
+      required: [data]
       properties:
         data:
           $ref: "#/components/schemas/AccountResource"
-        meta:
-          $ref: "#/components/schemas/AccountMeta"

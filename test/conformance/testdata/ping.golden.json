@@ -1,0 +1,19 @@
+{
+  "scenario": "ping",
+  "steps": [
+    {
+      "body": null,
+      "headers": {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "ping",
+      "present": [
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

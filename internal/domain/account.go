@@ -11,6 +11,11 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 )
 
+// Status of a CE singleplayer account on the wire: Keygen CE reports the
+// account as subscribed (the billing state an installation has without
+// billing).
+const AccountStatusSubscribed = "SUBSCRIBED"
+
 // Account is the single account of the installation. It exists implicitly:
 // the row is created at startup from configuration when missing.
 type Account struct {
