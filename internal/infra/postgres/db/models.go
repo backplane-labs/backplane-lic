@@ -341,3 +341,11 @@ type LicOutboxMessages struct {
 	LeaseToken    *uuid.UUID
 	FinishedAt    *time.Time
 }
+
+type LicAutomationActivityResults struct {
+	AccountID    uuid.UUID
+	ExecutionKey string
+	RequestHash  string
+	Result       json.RawMessage
+	CreatedAt    time.Time
+}

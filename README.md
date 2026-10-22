@@ -111,8 +111,8 @@ HTTP requests and access logs never contain the reset token. The page clears
 the fragment immediately after loading. Query-string reset credentials are
 not accepted. The reset form uses the public
 `POST /users/{user-id}/actions/reset-password` action with the reset token
-and new password. Configure your password-reset email sender to produce
-these links; serving the SPA doesn't add an email delivery endpoint.
+and new password. The `lic.Deliver` automation (below) produces these links from
+`automation.portalBase`; serving the SPA adds no email endpoint.
 
 License downloads use the public check-out action and save its certificate
 as a `.lic` file. Keygen allows a user to check out only their own unprotected
@@ -149,3 +149,89 @@ env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn typecheck
 env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn test
 env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn build
 ```
+
+## Installation automation
+
+Lic declares the optional `lic.Deliver` hook. Without a binding, password
+reset retains Keygen's webhook-only behavior. With the shipped binding,
+lic calls `templates.Render`, then `courier.SendMail`; lic contains no SMTP
+credentials or message branding. `POST /passwords` still returns the same
+204, and `meta.deliver: false` suppresses mail without suppressing the webhook.
+
+Mount `deployments/wiring` into the **Backplane platform** container and set
+`BACKPLANE_WIRING_DIR` to its mount path, for example `/etc/backplane/wiring`.
+Mount `deployments/templates` into **backplane-templates** and set
+`TEMPLATES_FILES_DIR=/etc/lic-templates` to that mount path. Both services
+reconcile their files automatically; no console import or startup job is
+needed. Keep unrelated wiring and templates in those directories too, since
+removing a file removes its managed definition.
+
+Configure lic's public portal link and message language:
+
+```yaml
+automation:
+  portalBase: https://licenses.example.com/portal
+  locale: en
+```
+
+The environment overrides are `LIC_AUTOMATION_PORTAL_BASE` and
+`LIC_AUTOMATION_LOCALE`. `portalBase` must identify the public portal, not
+the API; the reset link appends `/reset#account=<uuid>&user=<uuid>&token=<claim>`.
+The fragment stays in the browser, out of server/proxy logs and Referer headers.
+The portal reads it client-side and submits `token` as `passwordResetToken` with `newPassword`
+to the existing user `reset-password` action. Templates include English and
+Russian; the templates service handles language fallback.
+
+### Transactions and retries
+
+The business mutation, Keygen webhook records and automation outbox records
+commit together. The pg-outbox relay performs hook calls and event publication
+after commit. A failed delivery retries the same stored message and token,
+not the password-reset request. The message ID becomes `hook.Key`, so a lost
+reply retries the same Backplane execution; binding steps also retain their
+activity idempotency keys. Delivery remains at-least-once: the configured
+courier channel must honor its activity key to avoid duplicate external mail.
+An unbound hook, including a binding removed between `Bound` and `Call`,
+succeeds without mail. Other hook errors remain retryable.
+
+The relay uses the webhook retry budget (16 attempts), then retains a dead
+record for 30 days for operator investigation. Completed outbox payloads are
+cleared. Reset URLs contain credentials; restrict database access and don't
+log delivery payloads. Backplane password-reset events contain user identity
+only, never the reset token.
+
+Lic declares these stable Backplane event names: `lic.UserCreated`,
+`lic.PasswordResetRequested`, `lic.LicenseCreated`, `lic.LicenseExpiringSoon`,
+`lic.LicenseExpired`, `lic.LicenseRenewed`, `lic.LicenseSuspended`,
+`lic.LicenseRevoked`, `lic.LicenseValidationFailed` and `lic.UsageIncremented`.
+Event IDs survive relay retries; consumers must deduplicate by ID. Installations
+need NATS JetStream for events and Backplane's hook execution transport for
+mail. A missing transport leaves committed work pending; it never turns a
+committed password reset into an HTTP delivery error.
+
+### Activities
+
+Other services can call these typed activities from wiring:
+
+| Activity | Input | Result |
+|---|---|---|
+| `lic.CreateLicense` | `policy_id`, optional `owner_id`, `name`, `key`, `expiry`, `metadata` | license snapshot and key |
+| `lic.GetLicense` | `license` (UUID or key) | license snapshot and key |
+| `lic.SuspendLicense` / `lic.RenewLicense` | `license` | updated snapshot and key |
+| `lic.ValidateKey` | `key`, optional `product`, `policy`, `fingerprints`, `entitlements` | `valid`, `code`, `detail`, nullable license |
+| `lic.IncrementUsage` | `license`, `increment` | updated snapshot and key |
+
+These are installation-internal **admin** operations, not an alternative
+public authentication API. Restrict who can author wiring and invoke internal
+activities. The handlers use the same application scenarios as HTTP, so policy
+checks, key generation and Keygen webhooks still apply.
+
+Mutating activities, including validation touches, commit a durable result
+receipt with the business write. They take their key from
+`activity.InfoOf(ctx).Key`; concurrent attempts serialize under a PostgreSQL
+transaction lock. Repeating the same key returns the committed result, while
+reusing it with different input fails permanently. Receipts have no automatic
+expiry: deleting one permits an old retry to repeat its mutation. They may
+contain a license key, including the one-time plaintext of a legacy-encrypted
+key, so treat this table as credential storage. Domain validation errors fail
+without retry; storage and transport failures remain retryable.

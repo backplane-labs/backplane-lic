@@ -90,6 +90,89 @@ func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) er
 	return err
 }
 
+const lockAutomationActivitySQL = `SELECT pg_advisory_xact_lock(hashtextextended($1::text || ':lic:activity:' || $2::text, 0));`
+
+type LockAutomationActivityParams struct {
+	AccountID    string
+	ExecutionKey string
+}
+
+func (q *Queries) LockAutomationActivity(ctx context.Context, arg LockAutomationActivityParams) error {
+	_, err := q.db.Exec(ctx, lockAutomationActivitySQL, arg.AccountID, arg.ExecutionKey)
+	return err
+}
+
+const getAutomationActivityResultSQL = `SELECT request_hash, result FROM lic.automation_activity_results
+WHERE account_id = $1 AND execution_key = $2;`
+
+type GetAutomationActivityResultParams struct {
+	AccountID    uuid.UUID
+	ExecutionKey string
+}
+
+type GetAutomationActivityResultRow struct {
+	RequestHash string
+	Result      json.RawMessage
+}
+
+func (q *Queries) GetAutomationActivityResult(ctx context.Context, arg GetAutomationActivityResultParams) (GetAutomationActivityResultRow, error) {
+	row := q.db.QueryRow(ctx, getAutomationActivityResultSQL, arg.AccountID, arg.ExecutionKey)
+	var i GetAutomationActivityResultRow
+	err := row.Scan(&i.RequestHash, &i.Result)
+	return i, err
+}
+
+const saveAutomationActivityResultSQL = `INSERT INTO lic.automation_activity_results (account_id, execution_key, request_hash, result)
+VALUES ($1, $2, $3, $4);
+
+-- Automation integration tests read only the current account's committed work.`
+
+type SaveAutomationActivityResultParams struct {
+	AccountID    uuid.UUID
+	ExecutionKey string
+	RequestHash  string
+	Result       json.RawMessage
+}
+
+func (q *Queries) SaveAutomationActivityResult(ctx context.Context, arg SaveAutomationActivityResultParams) error {
+	_, err := q.db.Exec(ctx, saveAutomationActivityResultSQL, arg.AccountID, arg.ExecutionKey, arg.RequestHash, arg.Result)
+	return err
+}
+
+const listAutomationMessagesSQL = `SELECT id, topic, message_type, payload, status, attempts
+FROM lic.outbox_messages
+WHERE partition_key = $1::text AND topic IN ('lic.events', 'lic.deliver')
+ORDER BY created_at, id;`
+
+type ListAutomationMessagesRow struct {
+	ID          uuid.UUID
+	Topic       string
+	MessageType *string
+	Payload     []byte
+	Status      string
+	Attempts    int32
+}
+
+func (q *Queries) ListAutomationMessages(ctx context.Context, accountID *string) ([]ListAutomationMessagesRow, error) {
+	rows, err := q.db.Query(ctx, listAutomationMessagesSQL, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAutomationMessagesRow
+	for rows.Next() {
+		var i ListAutomationMessagesRow
+		if err := rows.Scan(&i.ID, &i.Topic, &i.MessageType, &i.Payload, &i.Status, &i.Attempts); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getEntitlementByIDSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
 FROM lic.entitlements
 WHERE account_id = $1 AND id = $2;`

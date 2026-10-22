@@ -23,6 +23,8 @@ type Config struct {
 	// HTTP is the public API's runtime section.
 	HTTP HTTP `json:"http"`
 
+	Automation Automation `json:"automation"`
+
 	// DocsHost overrides the docs origin of error links (the reference
 	// derives it from its configured host); empty derives it from the
 	// request host.
@@ -42,6 +44,12 @@ type HTTP struct {
 	// internal receivers; the reference's
 	// KEYGEN_ALLOWED_PRIVATE_ADDRESSES).
 	WebhookAllowPrivate []string `json:"webhookAllowPrivate" schemapb:"description=Private webhook CIDRs"` //nolint:tagliatelle,lll // camelCase
+}
+
+// Automation configures links and language, not mail transport or branding.
+type Automation struct {
+	PortalBase string `json:"portalBase" schemapb:"description=Public portal base URL"` //nolint:tagliatelle,lll // config is camelCase
+	Locale     string `json:"locale"     schemapb:"description=Default message language (en or ru)"`
 }
 
 // Account identifies the configured account; both its id and its slug
