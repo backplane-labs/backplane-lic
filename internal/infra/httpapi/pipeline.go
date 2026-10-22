@@ -41,9 +41,11 @@ const (
 
 	// passwordLimit is the reference's "req/ip/auth" throttle: 5
 	// attempts per minute.
-	passwordLimit          = 5
-	passwordWindow         = time.Minute
-	secondFactorWindow     = 10 * time.Minute
+	passwordLimit      = 5
+	passwordWindow     = time.Minute
+	secondFactorWindow = 10 * time.Minute
+	// secondFactorThrottle names the reference's MFA management window.
+	secondFactorThrottle   = "mutmfa"
 	secondFactorRouteDepth = 6
 
 	// maxBodyBytes caps the request body before decoding.
@@ -536,13 +538,13 @@ func throttleRule(r *http.Request, routePath string) (string, string, time.Durat
 	}
 
 	if r.Method == http.MethodPost && len(parts) == secondFactorRouteDepth {
-		return "mutmfa", parts[4], secondFactorWindow
+		return secondFactorThrottle, parts[4], secondFactorWindow
 	}
 
 	if len(parts) > secondFactorRouteDepth {
 		switch r.Method {
 		case http.MethodPatch, http.MethodPut, http.MethodDelete:
-			return "mutmfa", parts[4], secondFactorWindow
+			return secondFactorThrottle, parts[4], secondFactorWindow
 		}
 	}
 

@@ -21,10 +21,10 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/infra/commit"
 )
 
-// TokenTTL bounds how long a cached token row may outlive a change that
-// raced the generation bump (bumped before its transaction committed).
+// TokenTTL bounds a cached row's life should a post-commit bump fail.
 const TokenTTL = 30 * time.Second
 
 // Tokens caches token lookups by digest. The cache key carries the
@@ -60,8 +60,20 @@ func (t Tokens) generation(ctx context.Context, accountID uuid.UUID) (int64, err
 	return value, nil
 }
 
-// bump starts a new token generation for the account.
+// bump starts a new token generation for the account, and again once the
+// surrounding transaction commits: a lookup that refilled the cache from
+// the still-uncommitted row lands under a generation nobody reads.
 func (t Tokens) bump(ctx context.Context, accountID uuid.UUID) error {
+	if err := t.incr(ctx, accountID); err != nil {
+		return err
+	}
+
+	commit.After(ctx, func(ctx context.Context) { _ = t.incr(ctx, accountID) })
+
+	return nil
+}
+
+func (t Tokens) incr(ctx context.Context, accountID uuid.UUID) error {
 	client := t.client.Client()
 	if err := client.Do(ctx, client.B().Incr().Key(generationKey(accountID)).Build()).Error(); err != nil {
 		return fmt.Errorf("cache: bump token generation: %w", err)
@@ -71,24 +83,18 @@ func (t Tokens) bump(ctx context.Context, accountID uuid.UUID) error {
 }
 
 // Authn decorates the authentication store's token lookup.
-//
-//nolint:ireturn // a decorator of the port
 func (t Tokens) Authn(inner authn.Store) authn.Store {
 	return authnStore{Store: inner, tokens: t}
 }
 
 // Manage decorates the token management store: regenerating or revoking
 // a token starts a new generation.
-//
-//nolint:ireturn // a decorator of the port
 func (t Tokens) Manage(inner tokens.Store) tokens.Store {
 	return manageStore{Store: inner, tokens: t}
 }
 
 // Users decorates the users store: revoking a user's tokens (password
 // changes and resets) starts a new generation.
-//
-//nolint:ireturn // a decorator of the port
 func (t Tokens) Users(inner users.Store) users.Store {
 	return usersStore{Store: inner, tokens: t}
 }
@@ -184,16 +190,10 @@ func (s usersStore) DeleteUserTokensExcept(ctx context.Context, accountID, userI
 type None struct{}
 
 // Authn answers the store itself.
-//
-//nolint:ireturn // the port itself
 func (None) Authn(inner authn.Store) authn.Store { return inner }
 
 // Manage answers the store itself.
-//
-//nolint:ireturn // the port itself
 func (None) Manage(inner tokens.Store) tokens.Store { return inner }
 
 // Users answers the store itself.
-//
-//nolint:ireturn // the port itself
 func (None) Users(inner users.Store) users.Store { return inner }

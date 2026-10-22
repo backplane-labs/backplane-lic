@@ -17,6 +17,7 @@ import (
 	"github.com/gopherex/xlog"
 
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/infra/commit"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres/db"
 )
 
@@ -29,9 +30,12 @@ type txRunner struct {
 	trm tx.Trm
 }
 
-// Do runs fn in one transaction (nested calls join the open one).
+// Do runs fn in one transaction (nested calls join the open one); actions
+// deferred with commit.After run once it commits.
 func (r txRunner) Do(ctx context.Context, fn func(ctx context.Context) error) error {
-	return tx.DoReadCommitted(ctx, r.trm, fn) //nolint:wrapcheck // fn's own error
+	return commit.Scope(ctx, func(ctx context.Context) error { //nolint:wrapcheck // fn's own error
+		return tx.DoReadCommitted(ctx, r.trm, fn)
+	})
 }
 
 //go:embed migrations/*.sql
@@ -128,8 +132,11 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 // Do runs fn in one read-committed transaction; every store query that
 // carries the transaction's context joins it (pgtx). Nested calls join
 // the open transaction.
+// Actions deferred with commit.After inside fn run once it commits.
 func (s *Store) Do(ctx context.Context, fn func(ctx context.Context) error) error {
-	return tx.DoReadCommitted(ctx, s.Trm, fn) //nolint:wrapcheck // fn's own error
+	return commit.Scope(ctx, func(ctx context.Context) error { //nolint:wrapcheck // fn's own error
+		return tx.DoReadCommitted(ctx, s.Trm, fn)
+	})
 }
 
 // The Store delegates the app scenarios' storage ports to its

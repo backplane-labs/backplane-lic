@@ -158,6 +158,8 @@ linters:
         - github.com/gopherex/xconf.Source
         - github.com/backplane-labs/backplane/pkg/backplane/internal/configrt.State
         - github.com/nats-io/nats.go/jetstream.ConsumeContext
+        # A cache decorator answers the storage port it wraps.
+        - github.com/backplane-labs/backplane-lic/internal/app/.*\.Store$
         - google.golang.org/protobuf/proto.Message
         # The installed transport and the tree's readiness are interfaces by
         # nature: whatever carries events, whatever composite of probes.
