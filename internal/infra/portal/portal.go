@@ -30,10 +30,10 @@ var (
 
 // Config controls the customer portal; disabled unless explicitly enabled.
 type Config struct {
-	Enabled bool   `json:"enabled" schemapb:"description=Serve the customer portal"`
-	Title   string `json:"title"   schemapb:"description=Vendor product name"`
+	Enabled bool   `json:"enabled,omitempty" schemapb:"description=Serve the customer portal"`
+	Title   string `json:"title,omitempty"   schemapb:"description=Vendor product name"`
 	// BasePath defaults to /portal; configuration uses camelCase.
-	BasePath string `json:"basePath" schemapb:"description=Portal path"` //nolint:tagliatelle // camelCase config
+	BasePath string `json:"basePath,omitempty" schemapb:"description=Portal path"` //nolint:tagliatelle // camelCase config
 }
 
 type clientConfig struct {

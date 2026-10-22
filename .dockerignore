@@ -1,0 +1,8 @@
+.git
+.claude
+bin
+**/node_modules
+portal/dist
+internal/infra/portal/dist/assets
+.env
+.dev

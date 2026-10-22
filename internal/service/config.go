@@ -32,7 +32,7 @@ type Config struct {
 // HTTP holds the public API's runtime settings.
 type HTTP struct {
 	// Portal serves the standalone customer SPA on the public HTTP listener.
-	Portal portal.Config `json:"portal"`
+	Portal portal.Config `json:"portal,omitempty"`
 	// TrustedProxies lists the proxy CIDRs (or single IPs) whose
 	// X-Forwarded-For is honored when resolving the client address;
 	// empty means every request is keyed by its remote address.
