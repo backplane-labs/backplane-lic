@@ -88,61 +88,6 @@
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "expiry": "\u003cts\u003e",
-            "kind": "user-token",
-            "name": "banme",
-            "token": "\u003ctoken:1\u003e",
-            "updated": "\u003cts\u003e"
-          },
-          "id": "\u003cuuid:3\u003e",
-          "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/tokens/\u003cuuid:3\u003e"
-          },
-          "relationships": {
-            "account": {
-              "data": {
-                "id": "\u003cuuid:2\u003e",
-                "type": "accounts"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e"
-              }
-            },
-            "bearer": {
-              "data": {
-                "id": "\u003cuuid:1\u003e",
-                "type": "users"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
-              }
-            }
-          },
-          "type": "tokens"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "mint banme token",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 200
-    },
-    {
-      "body": {
-        "data": {
-          "attributes": {
-            "created": "\u003cts\u003e",
             "email": "banme-\u003crun\u003e@example.com",
             "firstName": "First",
             "fullName": "First User",
@@ -219,36 +164,6 @@
         "X-Request-Id"
       ],
       "status": 200
-    },
-    {
-      "body": {
-        "errors": [
-          {
-            "code": "USER_BANNED",
-            "detail": "User is banned",
-            "title": "Access denied"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:4\u003e"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "banned user token is rejected",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 403
     },
     {
       "body": {
@@ -423,7 +338,7 @@
           }
         ],
         "meta": {
-          "id": "\u003cuuid:5\u003e"
+          "id": "\u003cuuid:3\u003e"
         }
       },
       "headers": {

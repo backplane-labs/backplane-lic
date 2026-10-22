@@ -1,6 +1,7 @@
 package conformance
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"regexp"
@@ -84,7 +85,7 @@ func (n *normaliser) value(value any) any {
 			out[key] = n.value(node[key])
 		}
 
-		return out
+		return n.webhookEvent(out)
 	case []any:
 		out := make([]any, len(node))
 
@@ -98,6 +99,42 @@ func (n *normaliser) value(value any) any {
 	default:
 		return value
 	}
+}
+
+// webhookEvent masks the webhook-event resource's delivery outcome:
+// whether and how a delivery succeeded depends on the live network of
+// whichever server ran the scenario (the reference's worker POSTs to
+// the real URL; an in-process server under test has no worker), so
+// status, response code and response body compare as placeholders.
+// Everything else — event, endpoint, payload, apiVersion,
+// idempotencyToken — is compared strictly.
+func (n *normaliser) webhookEvent(resource map[string]any) map[string]any {
+	if resource["type"] != "webhook-events" {
+		return resource
+	}
+
+	attributes, ok := resource["attributes"].(map[string]any)
+	if !ok {
+		return resource
+	}
+
+	masked := make(map[string]any, len(attributes))
+	for key, value := range attributes {
+		masked[key] = value
+	}
+
+	masked["status"] = "<delivery-status>"
+	masked["lastResponseCode"] = nil
+	masked["lastResponseBody"] = nil
+
+	out := make(map[string]any, len(resource))
+	for key, value := range resource {
+		out[key] = value
+	}
+
+	out["attributes"] = masked
+
+	return out
 }
 
 func (n *normaliser) string(value string) string { //nolint:cyclop // the masking ladder
@@ -119,6 +156,18 @@ func (n *normaliser) string(value string) string { //nolint:cyclop // the maskin
 	case strings.HasPrefix(value, "-----BEGIN LICENSE FILE-----"),
 		strings.HasPrefix(value, "-----BEGIN MACHINE FILE-----"):
 		return n.placeholder("certificate", value)
+	}
+
+	// A webhook event's payload is a JSON document carried as a string;
+	// normalise its content (UUIDs, timestamps, keys) the same way, so
+	// the embedded document compares structurally.
+	if len(value) > 1 && (value[0] == '{' || value[0] == '[') {
+		var decoded any
+		if err := json.Unmarshal([]byte(value), &decoded); err == nil {
+			if raw, err := json.Marshal(n.value(decoded)); err == nil {
+				return string(raw)
+			}
+		}
 	}
 
 	// The docs origin of error links is instance configuration (the

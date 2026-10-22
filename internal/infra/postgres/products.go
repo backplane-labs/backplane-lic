@@ -24,6 +24,7 @@ type Page = paging.Page
 // storage port.
 type ProductsRepo struct {
 	q *db.Queries
+	txRunner
 }
 
 // ProductByID loads a product by id.

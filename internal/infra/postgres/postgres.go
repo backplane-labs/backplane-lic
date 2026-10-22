@@ -12,6 +12,7 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/google/uuid"
 
+	"github.com/gopherex/pgtx/pkg/tx"
 	"github.com/gopherex/xlog"
 
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -20,6 +21,17 @@ import (
 
 // Schema every table lives in.
 const Schema = "lic"
+
+// txRunner gives a repository the Store's Do: one read-committed
+// transaction whose context every query on the pool joins.
+type txRunner struct {
+	trm tx.Trm
+}
+
+// Do runs fn in one transaction (nested calls join the open one).
+func (r txRunner) Do(ctx context.Context, fn func(ctx context.Context) error) error {
+	return tx.DoReadCommitted(ctx, r.trm, fn) //nolint:wrapcheck // fn's own error
+}
 
 //go:embed migrations/*.sql
 var migrations embed.FS
@@ -49,8 +61,10 @@ type Store struct {
 	Keys KeysRepo
 	// Groups is the groups repository.
 	Groups GroupsRepo
-	// SecondFactors is the second-factors repository.
-	SecondFactors SecondFactorsRepo
+	// Webhooks is the webhook endpoints and events repository.
+	Webhooks WebhooksRepo
+	// Jobs is the periodic-jobs repository.
+	Jobs JobsRepo
 }
 
 // New is the provider: the postgres driver with the schema and the
@@ -88,21 +102,29 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 	}
 
 	queries := db.New(pg.DB)
+	runner := txRunner{trm: pg.Trm}
 
 	return &Store{
-		DB:            pg,
-		Q:             queries,
-		Accounts:      AccountsRepo{q: queries},
-		Users:         UsersRepo{q: queries},
-		Tokens:        TokensRepo{q: queries},
-		Licenses:      LicensesRepo{q: queries},
-		Groups:        GroupsRepo{q: queries},
-		SecondFactors: SecondFactorsRepo{q: queries},
-		Products:      ProductsRepo{q: queries},
-		Policies:      PoliciesRepo{q: queries},
-		Entitlements:  EntitlementsRepo{q: queries},
-		Keys:          KeysRepo{q: queries},
+		DB:           pg,
+		Q:            queries,
+		Accounts:     AccountsRepo{q: queries},
+		Users:        UsersRepo{q: queries},
+		Tokens:       TokensRepo{q: queries},
+		Licenses:     LicensesRepo{q: queries},
+		Groups:       GroupsRepo{q: queries},
+		Products:     ProductsRepo{q: queries, txRunner: runner},
+		Policies:     PoliciesRepo{q: queries, txRunner: runner},
+		Entitlements: EntitlementsRepo{q: queries, txRunner: runner},
+		Keys:         KeysRepo{q: queries, txRunner: runner},
+		Webhooks:     WebhooksRepo{q: queries},
 	}, nil
+}
+
+// Do runs fn in one read-committed transaction; every store query that
+// carries the transaction's context joins it (pgtx). Nested calls join
+// the open transaction.
+func (s *Store) Do(ctx context.Context, fn func(ctx context.Context) error) error {
+	return tx.DoReadCommitted(ctx, s.Trm, fn) //nolint:wrapcheck // fn's own error
 }
 
 // The Store delegates the app scenarios' storage ports to its
@@ -141,11 +163,6 @@ func (s *Store) InsertUser(ctx context.Context, user domain.User) error {
 // UserHasActiveLicense answers the user's status input.
 func (s *Store) UserHasActiveLicense(ctx context.Context, accountID, id uuid.UUID) (bool, error) {
 	return s.Users.UserHasActiveLicense(ctx, accountID, id)
-}
-
-// EnabledSecondFactorSecret loads the user's enabled TOTP secret.
-func (s *Store) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (string, bool, error) {
-	return s.Users.EnabledSecondFactorSecret(ctx, userID)
 }
 
 // LicenseByKey loads the license-auth slice by key.

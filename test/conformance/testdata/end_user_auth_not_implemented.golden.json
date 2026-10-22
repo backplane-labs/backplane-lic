@@ -1,12 +1,12 @@
 {
-  "scenario": "second_factor_delete",
+  "scenario": "end_user_auth_not_implemented",
   "steps": [
     {
       "body": {
         "data": {
           "attributes": {
             "created": "\u003cts\u003e",
-            "email": "sfd-\u003crun\u003e@example.com",
+            "email": "ni-\u003crun\u003e@example.com",
             "firstName": null,
             "fullName": null,
             "lastName": null,
@@ -70,7 +70,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "create user",
+      "name": "create the target user",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -80,119 +80,47 @@
         "X-Request-Id"
       ],
       "status": 201
-    },
-    {
-      "body": {
-        "data": {
-          "attributes": {
-            "created": "\u003cts\u003e",
-            "enabled": false,
-            "secret": "\u003cb32:1\u003e",
-            "updated": "\u003cts\u003e",
-            "uri": "otpauth://totp/Keygen:sfd-\u003crun\u003e%40example.com?secret=\u003cb32:1\u003e\u0026image=https%3A%2F%2Fkeygen.sh%2Fimages%2Flogomark.png\u0026issuer=Keygen"
-          },
-          "id": "\u003cuuid:3\u003e",
-          "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/second-factors/\u003cuuid:3\u003e"
-          },
-          "relationships": {
-            "account": {
-              "data": {
-                "id": "\u003cuuid:2\u003e",
-                "type": "accounts"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e"
-              }
-            },
-            "user": {
-              "data": {
-                "id": "\u003cuuid:1\u003e",
-                "type": "users"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
-              }
-            }
-          },
-          "type": "second-factors"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "create factor",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 201
-    },
-    {
-      "body": {
-        "data": {
-          "attributes": {
-            "created": "\u003cts\u003e",
-            "enabled": true,
-            "updated": "\u003cts\u003e"
-          },
-          "id": "\u003cuuid:3\u003e",
-          "links": {
-            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e/second-factors/\u003cuuid:3\u003e"
-          },
-          "relationships": {
-            "account": {
-              "data": {
-                "id": "\u003cuuid:2\u003e",
-                "type": "accounts"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e"
-              }
-            },
-            "user": {
-              "data": {
-                "id": "\u003cuuid:1\u003e",
-                "type": "users"
-              },
-              "links": {
-                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:1\u003e"
-              }
-            }
-          },
-          "type": "second-factors"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "enable with otp",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 200
     },
     {
       "body": {
         "errors": [
           {
-            "detail": "The request could not be completed because of a conflict",
-            "title": "Conflict"
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:3\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "basic password login on tokens",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 501
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "TOKEN_INVALID",
+            "detail": "You must be authenticated to complete the request",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/authentication/#token-authentication"
+            },
+            "title": "Unauthorized"
           }
         ],
         "meta": {
@@ -203,43 +131,10 @@
         "Content-Type": "application/vnd.api+json; charset=utf-8",
         "Keygen-Edition": "CE",
         "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "create a second factor conflicts",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 409
-    },
-    {
-      "body": {
-        "errors": [
-          {
-            "code": "OTP_INVALID",
-            "detail": "second factor must be valid",
-            "source": {
-              "pointer": "/meta/otp"
-            },
-            "title": "Unauthorized"
-          }
-        ],
-        "meta": {
-          "id": "\u003cuuid:5\u003e"
-        }
-      },
-      "headers": {
-        "Content-Type": "application/vnd.api+json; charset=utf-8",
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8",
-        "WWW-Authenticate": "Bearer realm=\"keygen\""
+        "WWW-Authenticate": "Basic realm=\"keygen\""
       },
-      "name": "delete without otp",
+      "name": "basic password login on the account",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -251,26 +146,17 @@
       "status": 401
     },
     {
-      "body": null,
-      "headers": {
-        "Keygen-Edition": "CE",
-        "Keygen-Mode": "singleplayer",
-        "Keygen-Version": "1.8"
-      },
-      "name": "delete with otp",
-      "present": [
-        "Keygen-Signature",
-        "Keygen-Digest",
-        "Digest",
-        "Keygen-Date",
-        "Date",
-        "X-Request-Id"
-      ],
-      "status": 204
-    },
-    {
       "body": {
-        "data": []
+        "errors": [
+          {
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
       },
       "headers": {
         "Content-Type": "application/vnd.api+json; charset=utf-8",
@@ -278,7 +164,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "index empty after delete",
+      "name": "user token minting",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -287,15 +173,45 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 200
+      "status": 501
     },
     {
       "body": {
         "errors": [
           {
-            "code": "NOT_FOUND",
-            "detail": "The requested second factor '\u003cuuid:6\u003e' was not found",
-            "title": "Not found"
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "token generation for a user bearer",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 501
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
           }
         ],
         "meta": {
@@ -308,7 +224,7 @@
         "Keygen-Mode": "singleplayer",
         "Keygen-Version": "1.8"
       },
-      "name": "show unknown factor",
+      "name": "second factors index",
       "present": [
         "Keygen-Signature",
         "Keygen-Digest",
@@ -317,7 +233,127 @@
         "Date",
         "X-Request-Id"
       ],
-      "status": 404
+      "status": 501
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:8\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "second factor create",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 501
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "password update",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 501
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "password reset",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 501
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_IMPLEMENTED",
+            "detail": "end-user authentication is not supported",
+            "title": "Not implemented"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:11\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "password reset request",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 501
     }
   ]
 }

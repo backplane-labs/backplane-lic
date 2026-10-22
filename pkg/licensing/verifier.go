@@ -109,7 +109,12 @@ func (v Verifier) verify(algorithm string, msg, sig []byte) error {
 
 		digest := sha256.Sum256(msg)
 
-		if err := rsa.VerifyPSS(v.rsaKey, crypto.SHA256, digest[:], sig, nil); err != nil {
+		// Salt length auto: Keygen signs PSS with the maximum salt
+		// (OpenSSL's salt_length: :max), so the verifier must accept
+		// any salt length the signer chose.
+		pss := &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthAuto}
+
+		if err := rsa.VerifyPSS(v.rsaKey, crypto.SHA256, digest[:], sig, pss); err != nil {
 			return fmt.Errorf("%w: %w", ErrSignatureInvalid, err)
 		}
 	case algRSASHA256:

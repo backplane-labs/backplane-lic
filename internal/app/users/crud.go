@@ -9,7 +9,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
@@ -80,27 +79,30 @@ func (s Scenario) Create(
 
 	applyAttrs(&user, attrs)
 
-	digest, err := s.passwordDigest(attrs.Password)
-	if err != nil {
+	if err := validatePassword(attrs.Password); err != nil {
 		return Listed{}, err
 	}
-
-	user.PasswordDigest = digest
 
 	if err := s.validateNew(ctx, account.ID, user, attrs.GroupSet); err != nil {
 		return Listed{}, err
 	}
 
-	if err := s.store.InsertUser(ctx, user); err != nil {
-		if errors.Is(err, ErrEmailTaken) {
-			return Listed{}, unprocessable("EMAIL_TAKEN", "has already been taken", "attributes/email")
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertUser(ctx, user); err != nil {
+			if errors.Is(err, ErrEmailTaken) {
+				return unprocessable("EMAIL_TAKEN", "has already been taken", "attributes/email")
+			}
+
+			return fmt.Errorf("users: create: %w", err)
 		}
 
-		return Listed{}, fmt.Errorf("users: create: %w", err)
-	}
+		if err := s.events.Publish(ctx, "user.created", user); err != nil {
+			return fmt.Errorf("users: create: %w", err)
+		}
 
-	if err := s.events.Publish(ctx, "user.created", user); err != nil {
-		return Listed{}, fmt.Errorf("users: create: %w", err)
+		return nil
+	}); err != nil {
+		return Listed{}, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return Listed{User: user, Status: user.Status(false, s.clock())}, nil
@@ -161,13 +163,8 @@ func (s Scenario) Update(
 		user.GroupID = attrs.Group
 	}
 
-	digest, err := s.passwordDigest(attrs.Password)
-	if err != nil {
+	if err := validatePassword(attrs.Password); err != nil {
 		return Listed{}, err
-	}
-
-	if attrs.Password != nil {
-		user.PasswordDigest = digest
 	}
 
 	groupChanged := attrs.GroupSet && user.GroupID != original.GroupID
@@ -177,23 +174,30 @@ func (s Scenario) Update(
 		return Listed{}, err
 	}
 
-	if err := s.store.UpdateUser(ctx, user); err != nil {
-		if errors.Is(err, ErrEmailTaken) {
-			return Listed{}, unprocessable("EMAIL_TAKEN", "has already been taken", "attributes/email")
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateUser(ctx, user); err != nil {
+			if errors.Is(err, ErrEmailTaken) {
+				return unprocessable("EMAIL_TAKEN", "has already been taken", "attributes/email")
+			}
+
+			return fmt.Errorf("users: update: %w", err)
 		}
 
-		return Listed{}, fmt.Errorf("users: update: %w", err)
-	}
-
-	// A role change revokes the user's tokens (all but the acting one).
-	if roleChanged {
-		if err := s.revokeTokens(ctx, account.ID, user.ID, principal); err != nil {
-			return Listed{}, err
+		// A role change revokes the user's tokens (all but the acting
+		// one).
+		if roleChanged {
+			if err := s.revokeTokens(ctx, account.ID, user.ID, principal); err != nil {
+				return err
+			}
 		}
-	}
 
-	if err := s.events.Publish(ctx, "user.updated", user); err != nil {
-		return Listed{}, fmt.Errorf("users: update: %w", err)
+		if err := s.events.Publish(ctx, "user.updated", user); err != nil {
+			return fmt.Errorf("users: update: %w", err)
+		}
+
+		return nil
+	}); err != nil {
+		return Listed{}, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	user.Role = role
@@ -241,12 +245,14 @@ func (s Scenario) Delete(
 		}
 	}
 
-	if err := s.store.DeleteUser(ctx, account.ID, user.ID); err != nil {
-		return fmt.Errorf("users: delete: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.DeleteUser(ctx, account.ID, user.ID); err != nil {
+			return fmt.Errorf("users: delete: %w", err)
+		}
 
-	if err := s.events.Publish(ctx, "user.deleted", user); err != nil {
-		return fmt.Errorf("users: delete: %w", err)
+		return s.events.Publish(ctx, "user.deleted", user)
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return nil
@@ -392,35 +398,32 @@ func applyAttrs(user *domain.User, attrs Attrs) {
 	}
 }
 
-// passwordDigest validates the password length and answers its bcrypt
-// digest (nil password → passwordless, empty string → cleared).
-func (s Scenario) passwordDigest(password *string) (string, error) {
+// validatePassword keeps the reference's wire validation of the
+// password attribute (length bounds); the value itself is no longer
+// stored — end-user authentication is out of scope, nothing reads a
+// digest.
+func validatePassword(password *string) error {
 	if password == nil {
-		return "", nil
+		return nil
 	}
 
 	n := utf8.RuneCountInString(*password)
 	switch {
 	case n < minPasswordLen:
-		return "", unprocessable(
+		return unprocessable(
 			"PASSWORD_TOO_SHORT",
 			"is too short (minimum is 6 characters)",
 			"attributes/password",
 		)
 	case n > maxPasswordLen:
-		return "", unprocessable(
+		return unprocessable(
 			"PASSWORD_TOO_LONG",
 			"is too long (maximum is 72 characters)",
 			"attributes/password",
 		)
 	}
 
-	digest, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", fmt.Errorf("users: password: %w", err)
-	}
-
-	return string(digest), nil
+	return nil
 }
 
 // validateNew runs the model validations of a create (group existence

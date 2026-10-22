@@ -156,23 +156,33 @@ func (s Scenario) Pop(ctx context.Context, account domain.Account, id uuid.UUID)
 		}
 	}
 
-	key, err := s.pool.PopPolicyKey(ctx, account.ID, policy.ID)
-	if errors.Is(err, keys.ErrPoolEmpty) {
-		return domain.Key{}, &apperr.T{
-			Status: 422, //nolint:mnd // the reference's literal bound
-			Title:  apperr.TitleUnprocessable,
-			Detail: "pool is empty",
-			Source: apperr.Source{Pointer: "/data/relationships/pool"},
+	var key domain.Key
+
+	err = s.store.Do(ctx, func(ctx context.Context) error {
+		popped, err := s.pool.PopPolicyKey(ctx, account.ID, policy.ID)
+		if errors.Is(err, keys.ErrPoolEmpty) {
+			return &apperr.T{
+				Status: 422, //nolint:mnd // the reference's literal bound
+				Title:  apperr.TitleUnprocessable,
+				Detail: "pool is empty",
+				Source: apperr.Source{Pointer: "/data/relationships/pool"},
+			}
 		}
-	}
 
+		if err != nil {
+			return fmt.Errorf("policies: pop: %w", err)
+		}
+
+		key = popped
+		key.ProductID = policy.ProductID
+
+		_ = s.events.Publish(ctx, "policy.pool.popped", key)
+
+		return nil
+	})
 	if err != nil {
-		return domain.Key{}, fmt.Errorf("policies: pop: %w", err)
+		return domain.Key{}, err //nolint:wrapcheck // the transaction's own error
 	}
-
-	key.ProductID = policy.ProductID
-
-	_ = s.events.Publish(ctx, "policy.pool.popped", key)
 
 	return key, nil
 }
@@ -273,7 +283,7 @@ type EntitlementList struct {
 
 // Attach attaches entitlements to the policy; the answer carries the
 // join rows (one policy-entitlements document per requested id).
-func (s Scenario) Attach( //nolint:funlen // the attribute table
+func (s Scenario) Attach( //nolint:funlen,cyclop // the attribute table
 	ctx context.Context, account domain.Account, id uuid.UUID, entitlementIDs []uuid.UUID,
 ) ([]domain.PolicyEntitlement, error) {
 	if err := access.Require(ctx, "policy.entitlements.attach"); err != nil {
@@ -315,28 +325,36 @@ func (s Scenario) Attach( //nolint:funlen // the attribute table
 
 	now := s.clock()
 
-	for _, entitlement := range entitlementsOK {
-		if err := s.entitlements.InsertPolicyEntitlements(
-			ctx, account.ID, policy.ID, uuid.New(), []uuid.UUID{entitlement.ID},
-		); err != nil {
-			if errors.Is(err, ErrEntitlementTaken) {
-				return nil, apperr.Validation("ENTITLEMENT_TAKEN", "already exists",
-					"/data/relationships/entitlement", "entitlements/#entitlements-object-relationships-entitlement")
+	attach := func(ctx context.Context) error {
+		for _, entitlement := range entitlementsOK {
+			if err := s.entitlements.InsertPolicyEntitlements(
+				ctx, account.ID, policy.ID, uuid.New(), []uuid.UUID{entitlement.ID},
+			); err != nil {
+				if errors.Is(err, ErrEntitlementTaken) {
+					return apperr.Validation("ENTITLEMENT_TAKEN", "already exists",
+						"/data/relationships/entitlement", "entitlements/#entitlements-object-relationships-entitlement")
+				}
+
+				return fmt.Errorf("policies: attach: %w", err)
 			}
 
-			return nil, fmt.Errorf("policies: attach: %w", err)
+			join := domain.PolicyEntitlement{
+				ID:            uuid.Nil, // rendered from the store below
+				AccountID:     account.ID,
+				PolicyID:      policy.ID,
+				EntitlementID: entitlement.ID,
+				CreatedAt:     now,
+				UpdatedAt:     now,
+			}
+
+			_ = s.events.Publish(ctx, "policy.entitlements.attached", join)
 		}
 
-		join := domain.PolicyEntitlement{
-			ID:            uuid.Nil, // rendered from the store below
-			AccountID:     account.ID,
-			PolicyID:      policy.ID,
-			EntitlementID: entitlement.ID,
-			CreatedAt:     now,
-			UpdatedAt:     now,
-		}
+		return nil
+	}
 
-		_ = s.events.Publish(ctx, "policy.entitlements.attached", join)
+	if err := s.store.Do(ctx, attach); err != nil {
+		return nil, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	joins, err := s.entitlements.ListPolicyEntitlements(ctx, account.ID, policy.ID)
@@ -392,16 +410,26 @@ func (s Scenario) Detach(
 		}
 	}
 
-	if _, err := s.entitlements.DeletePolicyEntitlements(ctx, account.ID, policy.ID, entitlementIDs); err != nil {
-		return fmt.Errorf("policies: detach: %w", err)
+	detach := func(ctx context.Context) error {
+		if _, err := s.entitlements.DeletePolicyEntitlements(
+			ctx, account.ID, policy.ID, entitlementIDs,
+		); err != nil {
+			return fmt.Errorf("policies: detach: %w", err)
+		}
+
+		for _, entitlementID := range entitlementIDs {
+			_ = s.events.Publish(ctx, "policy.entitlements.detached", domain.PolicyEntitlement{
+				AccountID:     account.ID,
+				PolicyID:      policy.ID,
+				EntitlementID: entitlementID,
+			})
+		}
+
+		return nil
 	}
 
-	for _, entitlementID := range entitlementIDs {
-		_ = s.events.Publish(ctx, "policy.entitlements.detached", domain.PolicyEntitlement{
-			AccountID:     account.ID,
-			PolicyID:      policy.ID,
-			EntitlementID: entitlementID,
-		})
+	if err := s.store.Do(ctx, detach); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return nil

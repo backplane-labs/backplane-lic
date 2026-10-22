@@ -132,23 +132,80 @@ func (tgt *HTTPTarget) applyHeaders(req *http.Request) {
 type HandlerTarget struct {
 	Handler http.Handler
 
-	mu         sync.Mutex
-	adminToken string
+	// AdminToken is the raw admin token the test seeded directly in
+	// the database (the email:password mint is retired); the harness
+	// authenticates with it.
+	AdminToken string
 }
 
-// cachedAdminToken mints the admin token at most once per target: password
-// attempts are throttled by the reference server.
+// The poll's cadence and budget.
+const (
+	pollEvery   = 100 * time.Millisecond
+	pollTimeout = 30 * time.Second
+)
+
+// WaitForEvent polls the webhook-events index until an event of the
+// given name whose endpoint matches the endpointURL template and whose
+// payload carries the marker template exists, then stores its id in
+// vars[idVar]. The reference creates webhook events in a background
+// worker, so the row can lag the request that produced it; the marker
+// picks this scenario's own event out of the parallel scenarios' traffic.
+func WaitForEvent(
+	tb testing.TB, target Target, vars map[string]string,
+	idVar, endpointURL, event, marker string,
+) {
+	tb.Helper()
+
+	endpointURL = interpolate(tb, endpointURL, vars)
+	marker = interpolate(tb, marker, vars)
+
+	deadline := time.Now().Add(pollTimeout)
+
+	for {
+		status, raw := call(tb, target, http.MethodGet,
+			"/v1/accounts/"+AccountSlug+"/webhook-events?events%5B%5D="+event+"&limit=100",
+			"", map[string]string{
+				"Authorization": "Bearer " + AdminToken(tb, target),
+			})
+
+		if status == http.StatusOK {
+			var doc struct {
+				Data []struct {
+					ID         string `json:"id"`
+					Attributes struct {
+						Endpoint string `json:"endpoint"`
+						Event    string `json:"event"`
+						Payload  string `json:"payload"`
+					} `json:"attributes"`
+				} `json:"data"`
+			}
+
+			if err := json.Unmarshal(raw, &doc); err == nil {
+				for _, item := range doc.Data {
+					if item.Attributes.Endpoint == endpointURL &&
+						item.Attributes.Event == event &&
+						strings.Contains(item.Attributes.Payload, marker) {
+						vars[idVar] = item.ID
+
+						return
+					}
+				}
+			}
+		}
+
+		if time.Now().After(deadline) {
+			tb.Fatalf("conformance: no %s webhook event for %s: %s", event, endpointURL, raw)
+		}
+
+		time.Sleep(pollEvery)
+	}
+}
+
+// cachedAdminToken answers the seeded admin token.
 func (h *HandlerTarget) cachedAdminToken(tb testing.TB) string {
 	tb.Helper()
 
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	if h.adminToken == "" {
-		h.adminToken = mintAdminToken(tb, h)
-	}
-
-	return h.adminToken
+	return h.AdminToken
 }
 
 // NewRequest implements Target.
@@ -211,6 +268,11 @@ type Step struct {
 	// Prepare runs before the step and may compute variables the body or
 	// headers interpolate (e.g. a TOTP code from a captured secret).
 	Prepare func(tb testing.TB, vars map[string]string)
+	// Poll runs before the step and may call the target (admin
+	// authentication included) until an asynchronous effect exists —
+	// the reference broadcasts webhook events from a background worker,
+	// so the event a step shows may lag the action that produced it.
+	Poll func(tb testing.TB, target Target, vars map[string]string)
 }
 
 // Scenario is a named, self-contained sequence of steps: it must create
@@ -278,6 +340,10 @@ func Run(tb testing.TB, target Target, scenario Scenario, signer ed25519.PublicK
 
 	for index := range scenario.Steps {
 		step := scenario.Steps[index]
+
+		if step.Poll != nil {
+			step.Poll(tb, target, vars)
+		}
 
 		if step.Prepare != nil {
 			step.Prepare(tb, vars)

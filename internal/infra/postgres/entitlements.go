@@ -20,6 +20,7 @@ import (
 // queries to the entitlements and policies scenarios' storage ports.
 type EntitlementsRepo struct {
 	q *db.Queries
+	txRunner
 }
 
 // EntitlementByID loads an entitlement by id.

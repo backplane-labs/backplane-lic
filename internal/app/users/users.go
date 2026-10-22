@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -30,26 +29,20 @@ func New(store Store, publisher events.Publisher, clock func() time.Time) Scenar
 
 // SeedAdmin creates the configured admin user when her email is not
 // taken (bcrypt, like the reference's has_secure_password).
-func (s Scenario) SeedAdmin(ctx context.Context, accountID uuid.UUID, email, password string) error {
-	digest, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("users: seed admin: %w", err)
-	}
-
+func (s Scenario) SeedAdmin(ctx context.Context, accountID uuid.UUID, email string) error {
 	now := s.clock()
 
 	user := domain.User{
-		ID:             uuid.New(),
-		AccountID:      accountID,
-		Email:          email,
-		PasswordDigest: string(digest),
-		Role:           domain.RoleAdmin,
-		Metadata:       map[string]any{},
-		CreatedAt:      now,
-		UpdatedAt:      now,
+		ID:        uuid.New(),
+		AccountID: accountID,
+		Email:     email,
+		Role:      domain.RoleAdmin,
+		Metadata:  map[string]any{},
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
-	err = s.store.InsertUser(ctx, user)
+	err := s.store.InsertUser(ctx, user)
 	if errors.Is(err, ErrEmailTaken) {
 		return nil
 	}

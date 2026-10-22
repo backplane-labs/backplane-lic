@@ -2788,6 +2788,208 @@ paths:
                 $ref: '#/components/schemas/UserDocument'
         default:
           $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/webhook-endpoints:
+    get:
+      operationId: listWebhookEndpoints
+      summary: List webhook endpoints
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Webhook endpoint collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEndpointListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createWebhookEndpoint
+      summary: Create a webhook endpoint
+      description: A product bearer scopes the endpoint to its own product even without the product relationship
+        (the reference's Zapier workaround).
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Webhook endpoint document.
+          headers:
+            Location:
+              description: The new endpoint's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEndpointDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}:
+    get:
+      operationId: showWebhookEndpoint
+      summary: Show a webhook endpoint
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: webhookEndpointId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Webhook endpoint document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEndpointDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateWebhookEndpoint
+      summary: Update a webhook endpoint
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: webhookEndpointId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Webhook endpoint document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEndpointDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: destroyWebhookEndpoint
+      summary: Delete a webhook endpoint
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: webhookEndpointId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/webhook-events:
+    get:
+      operationId: listWebhookEvents
+      summary: List webhook events
+      description: Supports the events[] filter (exact event names; an unknown name matches nothing) and
+        the shared pagination parameters.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Webhook event collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEventListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/webhook-events/{webhookEventId}:
+    get:
+      operationId: showWebhookEvent
+      summary: Show a webhook event
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: webhookEventId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Webhook event document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEventDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: destroyWebhookEvent
+      summary: Delete a webhook event
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: webhookEventId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry:
+    post:
+      operationId: retryWebhookEvent
+      summary: Retry a webhook event
+      description: 'Enqueues a fresh delivery: a NEW webhook event copying the payload, api version and
+        idempotency token of the original.'
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: webhookEventId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: The new webhook event document.
+          headers:
+            Location:
+              description: The new event's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookEventDocument'
+        default:
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     AccountPath:
@@ -4517,13 +4719,6 @@ components:
               $ref: '#/components/schemas/ToOneRelationship'
         links:
           $ref: '#/components/schemas/JoinLinks'
-    LicenseUserDocument:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          $ref: '#/components/schemas/LicenseUserResource'
     LicenseUserListDocument:
       type: object
       required:
@@ -4791,6 +4986,171 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/LicenseFileResource'
+    WebhookEndpointAttributes:
+      type: object
+      required:
+      - url
+      - subscriptions
+      - signatureAlgorithm
+      - apiVersion
+      - created
+      - updated
+      properties:
+        url:
+          type: string
+        subscriptions:
+          type: array
+          items:
+            type: string
+        signatureAlgorithm:
+          type: string
+        apiVersion:
+          type: string
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    WebhookEndpointResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook-endpoints
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/WebhookEndpointAttributes'
+        relationships:
+          type: object
+          required:
+          - account
+          - product
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+            product:
+              $ref: '#/components/schemas/ToOneRelationship'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    WebhookEndpointDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/WebhookEndpointResource'
+    WebhookEndpointListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookEndpointResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
+    WebhookEventAttributes:
+      type: object
+      required:
+      - endpoint
+      - payload
+      - event
+      - status
+      - lastResponseCode
+      - lastResponseBody
+      - apiVersion
+      - created
+      - updated
+      properties:
+        endpoint:
+          type: string
+        payload:
+          type: string
+        event:
+          type: string
+        status:
+          type: string
+          enum:
+          - DELIVERING
+          - DELIVERED
+          - FAILING
+          - FAILED
+        lastResponseCode:
+          type:
+          - integer
+          - 'null'
+        lastResponseBody:
+          type:
+          - string
+          - 'null'
+        apiVersion:
+          type: string
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    WebhookEventMeta:
+      type: object
+      required:
+      - idempotencyToken
+      properties:
+        idempotencyToken:
+          type: string
+    WebhookEventResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      - meta
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook-events
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/WebhookEventAttributes'
+        relationships:
+          type: object
+          required:
+          - account
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+        meta:
+          $ref: '#/components/schemas/WebhookEventMeta'
+    WebhookEventDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/WebhookEventResource'
+    WebhookEventListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookEventResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
     AccountAttributes:
       type: object
       required:

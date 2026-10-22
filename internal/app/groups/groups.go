@@ -26,6 +26,9 @@ var ErrNotFound = domain.ErrNotFound
 //
 //nolint:interfacebloat // one port per scenario is the architecture's shape
 type Store interface {
+	// Do runs fn in one transaction; the writes and the webhook
+	// events of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// GroupByID loads a group; ErrNotFound.
 	GroupByID(ctx context.Context, accountID, id uuid.UUID) (domain.Group, error)
 	// ListGroups answers the principal-scoped page.
@@ -218,12 +221,14 @@ func (s Scenario) Create(
 		return domain.Group{}, apperr.Unprocessable("METADATA_TOO_LONG", detail, "/data/attributes/metadata")
 	}
 
-	if err := s.store.InsertGroup(ctx, group); err != nil {
-		return domain.Group{}, fmt.Errorf("groups: create: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.InsertGroup(ctx, group); err != nil {
+			return fmt.Errorf("groups: create: %w", err)
+		}
 
-	if err := s.events.Publish(ctx, "group.created", group); err != nil {
-		return domain.Group{}, fmt.Errorf("groups: create: %w", err)
+		return s.events.Publish(ctx, "group.created", group)
+	}); err != nil {
+		return domain.Group{}, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return group, nil
@@ -282,12 +287,14 @@ func (s Scenario) Update(
 		}
 	}
 
-	if err := s.store.UpdateGroup(ctx, group); err != nil {
-		return domain.Group{}, fmt.Errorf("groups: update: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateGroup(ctx, group); err != nil {
+			return fmt.Errorf("groups: update: %w", err)
+		}
 
-	if err := s.events.Publish(ctx, "group.updated", group); err != nil {
-		return domain.Group{}, fmt.Errorf("groups: update: %w", err)
+		return s.events.Publish(ctx, "group.updated", group)
+	}); err != nil {
+		return domain.Group{}, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return group, nil
@@ -310,12 +317,14 @@ func (s Scenario) Delete(
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
-	if err := s.store.DeleteGroup(ctx, account.ID, group.ID); err != nil {
-		return fmt.Errorf("groups: delete: %w", err)
-	}
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.DeleteGroup(ctx, account.ID, group.ID); err != nil {
+			return fmt.Errorf("groups: delete: %w", err)
+		}
 
-	if err := s.events.Publish(ctx, "group.deleted", group); err != nil {
-		return fmt.Errorf("groups: delete: %w", err)
+		return s.events.Publish(ctx, "group.deleted", group)
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return nil
@@ -417,39 +426,43 @@ func (s Scenario) AttachOwners(
 	attached := make([]domain.GroupOwner, 0, len(userIDs))
 	now := s.clock()
 
-	for _, userID := range userIDs {
-		if _, err := s.store.UserByID(ctx, account.ID, userID); err != nil {
-			if errors.Is(err, ErrNotFound) {
-				return nil, groupOwnerUnprocessable("USER_NOT_FOUND", "must exist")
+	attach := func(ctx context.Context) error {
+		for _, userID := range userIDs {
+			if _, err := s.store.UserByID(ctx, account.ID, userID); err != nil {
+				if errors.Is(err, ErrNotFound) {
+					return groupOwnerUnprocessable("USER_NOT_FOUND", "must exist")
+				}
+
+				return err //nolint:wrapcheck // the port's own error
 			}
 
-			return nil, err //nolint:wrapcheck // the port's own error
+			if _, err := s.store.GetGroupOwnerByUser(ctx, account.ID, group.ID, userID); err == nil {
+				return groupOwnerUnprocessable("USER_TAKEN", "already exists")
+			} else if !errors.Is(err, ErrNotFound) {
+				return err //nolint:wrapcheck // the port's own error
+			}
+
+			owner := domain.GroupOwner{
+				ID:        uuid.New(),
+				AccountID: account.ID,
+				GroupID:   group.ID,
+				UserID:    userID,
+				CreatedAt: now,
+				UpdatedAt: now,
+			}
+
+			if err := s.store.InsertGroupOwner(ctx, owner); err != nil {
+				return fmt.Errorf("groups: attach owner: %w", err)
+			}
+
+			attached = append(attached, owner)
 		}
 
-		if _, err := s.store.GetGroupOwnerByUser(ctx, account.ID, group.ID, userID); err == nil {
-			return nil, groupOwnerUnprocessable("USER_TAKEN", "already exists")
-		} else if !errors.Is(err, ErrNotFound) {
-			return nil, err //nolint:wrapcheck // the port's own error
-		}
-
-		owner := domain.GroupOwner{
-			ID:        uuid.New(),
-			AccountID: account.ID,
-			GroupID:   group.ID,
-			UserID:    userID,
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-
-		if err := s.store.InsertGroupOwner(ctx, owner); err != nil {
-			return nil, fmt.Errorf("groups: attach owner: %w", err)
-		}
-
-		attached = append(attached, owner)
+		return s.events.Publish(ctx, "group.owners.attached", attached)
 	}
 
-	if err := s.events.Publish(ctx, "group.owners.attached", attached); err != nil {
-		return nil, fmt.Errorf("groups: attach owner: %w", err)
+	if err := s.store.Do(ctx, attach); err != nil {
+		return nil, err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return attached, nil
@@ -487,11 +500,30 @@ func (s Scenario) DetachOwners(
 		}
 	}
 
-	if _, err := s.store.DeleteGroupOwnersByUsers(ctx, account.ID, group.ID, userIDs); err != nil {
-		return fmt.Errorf("groups: detach owners: %w", err)
+	// The join rows are collected before the delete so the event
+	// carries them (the reference broadcasts the destroyed records).
+	detached := make([]domain.GroupOwner, 0, len(userIDs))
+
+	for _, userID := range userIDs {
+		owner, err := s.store.GetGroupOwnerByUser(ctx, account.ID, group.ID, userID)
+		if err != nil {
+			return err //nolint:wrapcheck // the port's own error
+		}
+
+		detached = append(detached, owner)
 	}
 
-	return s.events.Publish(ctx, "group.owners.detached", nil) //nolint:wrapcheck // the port's own error
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if _, err := s.store.DeleteGroupOwnersByUsers(ctx, account.ID, group.ID, userIDs); err != nil {
+			return fmt.Errorf("groups: detach owners: %w", err)
+		}
+
+		return s.events.Publish(ctx, "group.owners.detached", detached)
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
+	}
+
+	return nil
 }
 
 // load resolves the group inside the principal's scope (an invisible

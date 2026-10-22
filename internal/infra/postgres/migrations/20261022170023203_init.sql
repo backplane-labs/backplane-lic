@@ -461,14 +461,10 @@ ALTER TABLE "lic"."tokens" ADD CONSTRAINT "tokens_account_id_fkey" FOREIGN KEY (
 ALTER TABLE "lic"."users" ADD CONSTRAINT "users_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "lic"."accounts" ("id") ON DELETE CASCADE;
 ALTER TABLE "lic"."users" ADD CONSTRAINT "users_group_id_fkey" FOREIGN KEY ("group_id") REFERENCES "lic"."groups" ("id") ON DELETE SET NULL;
 ALTER TABLE "lic"."webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "lic"."accounts" ("id") ON DELETE CASCADE;
-ALTER TABLE "lic"."webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "lic"."products" ("id") ON DELETE CASCADE;
 ALTER TABLE "lic"."webhook_events" ADD CONSTRAINT "webhook_events_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "lic"."accounts" ("id") ON DELETE CASCADE;
-ALTER TABLE "lic"."webhook_events" ADD CONSTRAINT "webhook_events_webhook_endpoint_id_fkey" FOREIGN KEY ("webhook_endpoint_id") REFERENCES "lic"."webhook_endpoints" ("id") ON DELETE SET NULL;
 
 -- sqld:down
-ALTER TABLE "lic"."webhook_events" DROP CONSTRAINT "webhook_events_webhook_endpoint_id_fkey";
 ALTER TABLE "lic"."webhook_events" DROP CONSTRAINT "webhook_events_account_id_fkey";
-ALTER TABLE "lic"."webhook_endpoints" DROP CONSTRAINT "webhook_endpoints_product_id_fkey";
 ALTER TABLE "lic"."webhook_endpoints" DROP CONSTRAINT "webhook_endpoints_account_id_fkey";
 ALTER TABLE "lic"."users" DROP CONSTRAINT "users_group_id_fkey";
 ALTER TABLE "lic"."users" DROP CONSTRAINT "users_account_id_fkey";

@@ -9,6 +9,7 @@ import (
 // The stored polymorphic bearer types.
 const (
 	bearerTypeUser    = "User"
+	bearerTypeProduct = "Product"
 	bearerTypeLicense = "License"
 )
 
@@ -37,6 +38,10 @@ func TokenShow(p Principal, token domain.Token, userOfProduct, licenseOfProduct 
 	case isAdminFamily(p):
 		return nil
 	case p.IsProduct():
+		if token.BearerType == bearerTypeProduct && token.BearerID == p.BearerID {
+			return nil
+		}
+
 		if token.BearerType == bearerTypeUser && userOfProduct() {
 			return nil
 		}
@@ -63,6 +68,10 @@ func TokenRegenerate(p Principal, token domain.Token, userOfProduct, licenseOfPr
 			return nil
 		}
 	case p.IsProduct():
+		if token.BearerType == bearerTypeProduct && token.BearerID == p.BearerID {
+			return nil
+		}
+
 		if token.BearerType == bearerTypeUser && userOfProduct() {
 			return nil
 		}

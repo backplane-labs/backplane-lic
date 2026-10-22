@@ -947,6 +947,41 @@ func (q *Queries) ListGroupMachines(ctx context.Context, arg ListGroupMachinesPa
 	return items, nil
 }
 
+const tryJobsAdvisoryLockSQL = `SELECT pg_try_advisory_xact_lock(hashtext('lic:jobs'))::boolean AS locked;`
+
+type TryJobsAdvisoryLockRow struct {
+	Locked *bool
+}
+
+func (q *Queries) TryJobsAdvisoryLock(ctx context.Context) (TryJobsAdvisoryLockRow, error) {
+	row := q.db.QueryRow(ctx, tryJobsAdvisoryLockSQL)
+	var i TryJobsAdvisoryLockRow
+	err := row.Scan(&i.Locked)
+	return i, err
+}
+
+const pruneWebhookEventsBeforeSQL = `DELETE FROM lic.webhook_events
+WHERE created_at < $1
+  AND ($2::uuid IS NULL OR account_id = $2);`
+
+type PruneWebhookEventsBeforeParams struct {
+	Cutoff    time.Time
+	AccountID *uuid.UUID
+}
+
+func (q *Queries) PruneWebhookEventsBefore(ctx context.Context, arg PruneWebhookEventsBeforeParams) (int64, error) {
+	tag, err := q.db.Exec(ctx, pruneWebhookEventsBeforeSQL, arg.Cutoff, arg.AccountID)
+	return tag.RowsAffected(), err
+}
+
+const pruneTokensExpiredBeforeSQL = `DELETE FROM lic.tokens
+WHERE expiry IS NOT NULL AND expiry < $1;`
+
+func (q *Queries) PruneTokensExpiredBefore(ctx context.Context, cutoff *time.Time) (int64, error) {
+	tag, err := q.db.Exec(ctx, pruneTokensExpiredBeforeSQL, cutoff)
+	return tag.RowsAffected(), err
+}
+
 const getKeyByIDSQL = `SELECT k.id, k.account_id, k.policy_id, po.product_id, k.key,
   k.created_at, k.updated_at
 FROM lic.keys k
@@ -5127,162 +5162,6 @@ func (q *Queries) GetProductToken(ctx context.Context, arg GetProductTokenParams
 	return i, err
 }
 
-const getSecondFactorByIDSQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
-FROM lic.second_factors
-WHERE account_id = $1 AND user_id = $2 AND id = $3;`
-
-type GetSecondFactorByIDParams struct {
-	AccountID uuid.UUID
-	UserID    uuid.UUID
-	ID        uuid.UUID
-}
-
-type GetSecondFactorByIDRow struct {
-	ID             uuid.UUID
-	AccountID      uuid.UUID
-	UserID         uuid.UUID
-	Secret         string
-	Enabled        bool
-	LastVerifiedAt *time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-}
-
-func (q *Queries) GetSecondFactorByID(ctx context.Context, arg GetSecondFactorByIDParams) (GetSecondFactorByIDRow, error) {
-	row := q.db.QueryRow(ctx, getSecondFactorByIDSQL, arg.AccountID, arg.UserID, arg.ID)
-	var i GetSecondFactorByIDRow
-	err := row.Scan(&i.ID, &i.AccountID, &i.UserID, &i.Secret, &i.Enabled, &i.LastVerifiedAt, &i.CreatedAt, &i.UpdatedAt)
-	return i, err
-}
-
-const getSecondFactorAnySQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
-FROM lic.second_factors
-WHERE user_id = $1
-LIMIT 1;`
-
-type GetSecondFactorAnyRow struct {
-	ID             uuid.UUID
-	AccountID      uuid.UUID
-	UserID         uuid.UUID
-	Secret         string
-	Enabled        bool
-	LastVerifiedAt *time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-}
-
-func (q *Queries) GetSecondFactorAny(ctx context.Context, userID uuid.UUID) (GetSecondFactorAnyRow, error) {
-	row := q.db.QueryRow(ctx, getSecondFactorAnySQL, userID)
-	var i GetSecondFactorAnyRow
-	err := row.Scan(&i.ID, &i.AccountID, &i.UserID, &i.Secret, &i.Enabled, &i.LastVerifiedAt, &i.CreatedAt, &i.UpdatedAt)
-	return i, err
-}
-
-const insertSecondFactorSQL = `INSERT INTO lic.second_factors (id, account_id, user_id, secret)
-VALUES ($1, $2, $3, $4);`
-
-type InsertSecondFactorParams struct {
-	ID        uuid.UUID
-	AccountID uuid.UUID
-	UserID    uuid.UUID
-	Secret    string
-}
-
-func (q *Queries) InsertSecondFactor(ctx context.Context, arg InsertSecondFactorParams) error {
-	_, err := q.db.Exec(ctx, insertSecondFactorSQL, arg.ID, arg.AccountID, arg.UserID, arg.Secret)
-	return err
-}
-
-const updateSecondFactorSQL = `UPDATE lic.second_factors
-SET enabled = $1, last_verified_at = $2, updated_at = now()
-WHERE account_id = $3 AND user_id = $4 AND id = $5;`
-
-type UpdateSecondFactorParams struct {
-	Enabled        bool
-	LastVerifiedAt *time.Time
-	AccountID      uuid.UUID
-	UserID         uuid.UUID
-	ID             uuid.UUID
-}
-
-func (q *Queries) UpdateSecondFactor(ctx context.Context, arg UpdateSecondFactorParams) error {
-	_, err := q.db.Exec(ctx, updateSecondFactorSQL, arg.Enabled, arg.LastVerifiedAt, arg.AccountID, arg.UserID, arg.ID)
-	return err
-}
-
-const deleteSecondFactorSQL = `DELETE FROM lic.second_factors
-WHERE account_id = $1 AND user_id = $2 AND id = $3;`
-
-type DeleteSecondFactorParams struct {
-	AccountID uuid.UUID
-	UserID    uuid.UUID
-	ID        uuid.UUID
-}
-
-func (q *Queries) DeleteSecondFactor(ctx context.Context, arg DeleteSecondFactorParams) error {
-	_, err := q.db.Exec(ctx, deleteSecondFactorSQL, arg.AccountID, arg.UserID, arg.ID)
-	return err
-}
-
-const listSecondFactorsSQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
-FROM lic.second_factors
-WHERE account_id = $1 AND user_id = $2
-ORDER BY created_at DESC, id DESC
-LIMIT $3;`
-
-type ListSecondFactorsParams struct {
-	AccountID uuid.UUID
-	UserID    uuid.UUID
-	Limit     int64
-}
-
-type ListSecondFactorsRow struct {
-	ID             uuid.UUID
-	AccountID      uuid.UUID
-	UserID         uuid.UUID
-	Secret         string
-	Enabled        bool
-	LastVerifiedAt *time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-}
-
-func (q *Queries) ListSecondFactors(ctx context.Context, arg ListSecondFactorsParams) ([]ListSecondFactorsRow, error) {
-	rows, err := q.db.Query(ctx, listSecondFactorsSQL, arg.AccountID, arg.UserID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListSecondFactorsRow
-	for rows.Next() {
-		var i ListSecondFactorsRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.UserID, &i.Secret, &i.Enabled, &i.LastVerifiedAt, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getEnabledSecondFactorSecretSQL = `SELECT secret
-FROM lic.second_factors
-WHERE user_id = $1 AND enabled
-LIMIT 1;`
-
-type GetEnabledSecondFactorSecretRow struct {
-	Secret string
-}
-
-func (q *Queries) GetEnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (GetEnabledSecondFactorSecretRow, error) {
-	row := q.db.QueryRow(ctx, getEnabledSecondFactorSecretSQL, userID)
-	var i GetEnabledSecondFactorSecretRow
-	err := row.Scan(&i.Secret)
-	return i, err
-}
-
 const getTokenByDigestSQL = `SELECT id, account_id, digest, bearer_id, bearer_type, bearer_role, kind,
   name, expiry, permissions, max_activations, activations, max_deactivations,
   deactivations, created_at, updated_at
@@ -5966,6 +5845,484 @@ func (q *Queries) GroupIdsOfUser(ctx context.Context, arg GroupIdsOfUserParams) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const getWebhookEndpointByIDSQL = `SELECT id, account_id, product_id, url, subscriptions, signature_algorithm,
+  api_version, created_at, updated_at
+FROM lic.webhook_endpoints
+WHERE account_id = $1 AND id = $2;`
+
+type GetWebhookEndpointByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetWebhookEndpointByIDRow struct {
+	ID                 uuid.UUID
+	AccountID          uuid.UUID
+	ProductID          *uuid.UUID
+	URL                string
+	Subscriptions      json.RawMessage
+	SignatureAlgorithm string
+	APIVersion         *string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
+func (q *Queries) GetWebhookEndpointByID(ctx context.Context, arg GetWebhookEndpointByIDParams) (GetWebhookEndpointByIDRow, error) {
+	row := q.db.QueryRow(ctx, getWebhookEndpointByIDSQL, arg.AccountID, arg.ID)
+	var i GetWebhookEndpointByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.URL, &i.Subscriptions, &i.SignatureAlgorithm, &i.APIVersion, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const getWebhookEndpointProductSQL = `-- The event's endpoint's product (the product bearer's read scope).
+SELECT product_id FROM lic.webhook_endpoints
+WHERE account_id = $1 AND id = $2;`
+
+type GetWebhookEndpointProductParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetWebhookEndpointProductRow struct {
+	ProductID *uuid.UUID
+}
+
+func (q *Queries) GetWebhookEndpointProduct(ctx context.Context, arg GetWebhookEndpointProductParams) (GetWebhookEndpointProductRow, error) {
+	row := q.db.QueryRow(ctx, getWebhookEndpointProductSQL, arg.AccountID, arg.ID)
+	var i GetWebhookEndpointProductRow
+	err := row.Scan(&i.ProductID)
+	return i, err
+}
+
+const getWebhookEndpointByURLSQL = `-- The retry action's fallback when the event's endpoint row is gone:
+-- the first endpoint of the account with the event's URL snapshot.
+SELECT id, account_id, product_id, url, subscriptions, signature_algorithm,
+  api_version, created_at, updated_at
+FROM lic.webhook_endpoints
+WHERE account_id = $1 AND url = $2
+ORDER BY created_at DESC, id DESC
+LIMIT 1;`
+
+type GetWebhookEndpointByURLParams struct {
+	AccountID uuid.UUID
+	URL       string
+}
+
+type GetWebhookEndpointByURLRow struct {
+	ID                 uuid.UUID
+	AccountID          uuid.UUID
+	ProductID          *uuid.UUID
+	URL                string
+	Subscriptions      json.RawMessage
+	SignatureAlgorithm string
+	APIVersion         *string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
+func (q *Queries) GetWebhookEndpointByURL(ctx context.Context, arg GetWebhookEndpointByURLParams) (GetWebhookEndpointByURLRow, error) {
+	row := q.db.QueryRow(ctx, getWebhookEndpointByURLSQL, arg.AccountID, arg.URL)
+	var i GetWebhookEndpointByURLRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.URL, &i.Subscriptions, &i.SignatureAlgorithm, &i.APIVersion, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertWebhookEndpointSQL = `INSERT INTO lic.webhook_endpoints (
+  id, account_id, product_id, url, subscriptions, signature_algorithm, api_version
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7
+);`
+
+type InsertWebhookEndpointParams struct {
+	ID                 uuid.UUID
+	AccountID          uuid.UUID
+	ProductID          *uuid.UUID
+	URL                string
+	Subscriptions      json.RawMessage
+	SignatureAlgorithm string
+	APIVersion         *string
+}
+
+func (q *Queries) InsertWebhookEndpoint(ctx context.Context, arg InsertWebhookEndpointParams) error {
+	_, err := q.db.Exec(ctx, insertWebhookEndpointSQL, arg.ID, arg.AccountID, arg.ProductID, arg.URL, arg.Subscriptions, arg.SignatureAlgorithm, arg.APIVersion)
+	return err
+}
+
+const updateWebhookEndpointSQL = `UPDATE lic.webhook_endpoints SET
+  url = $1,
+  subscriptions = $2,
+  signature_algorithm = $3,
+  api_version = $4,
+  product_id = $5,
+  updated_at = now()
+WHERE account_id = $6 AND id = $7;`
+
+type UpdateWebhookEndpointParams struct {
+	URL                string
+	Subscriptions      json.RawMessage
+	SignatureAlgorithm string
+	APIVersion         *string
+	ProductID          *uuid.UUID
+	AccountID          uuid.UUID
+	ID                 uuid.UUID
+}
+
+func (q *Queries) UpdateWebhookEndpoint(ctx context.Context, arg UpdateWebhookEndpointParams) error {
+	_, err := q.db.Exec(ctx, updateWebhookEndpointSQL, arg.URL, arg.Subscriptions, arg.SignatureAlgorithm, arg.APIVersion, arg.ProductID, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteWebhookEndpointSQL = `DELETE FROM lic.webhook_endpoints WHERE account_id = $1 AND id = $2;`
+
+type DeleteWebhookEndpointParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteWebhookEndpoint(ctx context.Context, arg DeleteWebhookEndpointParams) error {
+	_, err := q.db.Exec(ctx, deleteWebhookEndpointSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const disableWebhookEndpointSQL = `-- Keygen's disable!: subscriptions emptied, saved without validation and
+-- without touching updated_at.
+UPDATE lic.webhook_endpoints SET subscriptions = '[]'::jsonb
+WHERE account_id = $1 AND id = $2;`
+
+type DisableWebhookEndpointParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DisableWebhookEndpoint(ctx context.Context, arg DisableWebhookEndpointParams) error {
+	_, err := q.db.Exec(ctx, disableWebhookEndpointSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const countWebhookEndpointsSQL = `SELECT count(*)::int AS total FROM lic.webhook_endpoints
+WHERE account_id = $1
+  AND ($2::uuid IS NULL OR product_id = $2);`
+
+type CountWebhookEndpointsParams struct {
+	AccountID uuid.UUID
+	ProductID *uuid.UUID
+}
+
+type CountWebhookEndpointsRow struct {
+	Total int32
+}
+
+func (q *Queries) CountWebhookEndpoints(ctx context.Context, arg CountWebhookEndpointsParams) (CountWebhookEndpointsRow, error) {
+	row := q.db.QueryRow(ctx, countWebhookEndpointsSQL, arg.AccountID, arg.ProductID)
+	var i CountWebhookEndpointsRow
+	err := row.Scan(&i.Total)
+	return i, err
+}
+
+const listWebhookEndpointsSQL = `SELECT id, account_id, product_id, url, subscriptions, signature_algorithm,
+  api_version, created_at, updated_at
+FROM lic.webhook_endpoints
+WHERE account_id = $1
+  AND ($2::uuid IS NULL OR product_id = $2)
+  AND (
+    $3::uuid IS NULL
+    OR CASE
+      WHEN $4::boolean THEN
+        (created_at, id) > (
+          SELECT c.created_at, c.id FROM lic.webhook_endpoints c WHERE c.id = $3
+        )
+      ELSE
+        (created_at, id) < (
+          SELECT c.created_at, c.id FROM lic.webhook_endpoints c WHERE c.id = $3
+        )
+    END
+  )
+ORDER BY
+  CASE WHEN $4::boolean THEN created_at END ASC,
+  CASE WHEN $4::boolean THEN id END ASC,
+  created_at DESC,
+  id DESC
+LIMIT $5
+OFFSET $6;`
+
+type ListWebhookEndpointsParams struct {
+	AccountID uuid.UUID
+	ProductID *uuid.UUID
+	Cursor    *uuid.UUID
+	Asc       bool
+	Limit     int64
+	Offset    int64
+}
+
+type ListWebhookEndpointsRow struct {
+	ID                 uuid.UUID
+	AccountID          uuid.UUID
+	ProductID          *uuid.UUID
+	URL                string
+	Subscriptions      json.RawMessage
+	SignatureAlgorithm string
+	APIVersion         *string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
+func (q *Queries) ListWebhookEndpoints(ctx context.Context, arg ListWebhookEndpointsParams) ([]ListWebhookEndpointsRow, error) {
+	rows, err := q.db.Query(ctx, listWebhookEndpointsSQL, arg.AccountID, arg.ProductID, arg.Cursor, arg.Asc, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListWebhookEndpointsRow
+	for rows.Next() {
+		var i ListWebhookEndpointsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.URL, &i.Subscriptions, &i.SignatureAlgorithm, &i.APIVersion, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSubscribedWebhookEndpointsSQL = `-- The endpoints an event is delivered to (the publisher's outbox fan-out).
+SELECT id, account_id, product_id, url, subscriptions, signature_algorithm,
+  api_version, created_at, updated_at
+FROM lic.webhook_endpoints
+WHERE account_id = $1
+  AND (subscriptions ? '*' OR subscriptions ? $2::text)
+ORDER BY created_at DESC, id DESC;`
+
+type ListSubscribedWebhookEndpointsParams struct {
+	AccountID uuid.UUID
+	Event     string
+}
+
+type ListSubscribedWebhookEndpointsRow struct {
+	ID                 uuid.UUID
+	AccountID          uuid.UUID
+	ProductID          *uuid.UUID
+	URL                string
+	Subscriptions      json.RawMessage
+	SignatureAlgorithm string
+	APIVersion         *string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
+func (q *Queries) ListSubscribedWebhookEndpoints(ctx context.Context, arg ListSubscribedWebhookEndpointsParams) ([]ListSubscribedWebhookEndpointsRow, error) {
+	rows, err := q.db.Query(ctx, listSubscribedWebhookEndpointsSQL, arg.AccountID, arg.Event)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListSubscribedWebhookEndpointsRow
+	for rows.Next() {
+		var i ListSubscribedWebhookEndpointsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.URL, &i.Subscriptions, &i.SignatureAlgorithm, &i.APIVersion, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertWebhookEventSQL = `INSERT INTO lic.webhook_events (
+  id, account_id, webhook_endpoint_id, endpoint, event, payload, api_version,
+  idempotency_token, status, attempts, next_attempt_at
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7,
+  $8, $9, 0, $10
+);`
+
+type InsertWebhookEventParams struct {
+	ID                uuid.UUID
+	AccountID         uuid.UUID
+	WebhookEndpointID *uuid.UUID
+	Endpoint          string
+	Event             string
+	Payload           string
+	APIVersion        *string
+	IdempotencyToken  string
+	Status            string
+	NextAttemptAt     *time.Time
+}
+
+func (q *Queries) InsertWebhookEvent(ctx context.Context, arg InsertWebhookEventParams) error {
+	_, err := q.db.Exec(ctx, insertWebhookEventSQL, arg.ID, arg.AccountID, arg.WebhookEndpointID, arg.Endpoint, arg.Event, arg.Payload, arg.APIVersion, arg.IdempotencyToken, arg.Status, arg.NextAttemptAt)
+	return err
+}
+
+const getWebhookEventByIDSQL = `SELECT id, account_id, webhook_endpoint_id, endpoint, event, payload, api_version,
+  idempotency_token, status, attempts, next_attempt_at, last_response_code,
+  last_response_body, created_at, updated_at
+FROM lic.webhook_events
+WHERE account_id = $1 AND id = $2;`
+
+type GetWebhookEventByIDParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetWebhookEventByIDRow struct {
+	ID                uuid.UUID
+	AccountID         uuid.UUID
+	WebhookEndpointID *uuid.UUID
+	Endpoint          string
+	Event             string
+	Payload           string
+	APIVersion        *string
+	IdempotencyToken  string
+	Status            string
+	Attempts          int32
+	NextAttemptAt     *time.Time
+	LastResponseCode  *int32
+	LastResponseBody  *string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+func (q *Queries) GetWebhookEventByID(ctx context.Context, arg GetWebhookEventByIDParams) (GetWebhookEventByIDRow, error) {
+	row := q.db.QueryRow(ctx, getWebhookEventByIDSQL, arg.AccountID, arg.ID)
+	var i GetWebhookEventByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const deleteWebhookEventSQL = `DELETE FROM lic.webhook_events WHERE account_id = $1 AND id = $2;`
+
+type DeleteWebhookEventParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteWebhookEvent(ctx context.Context, arg DeleteWebhookEventParams) error {
+	_, err := q.db.Exec(ctx, deleteWebhookEventSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const claimDueWebhookEventsSQL = `-- The delivery worker's claim: the due rows are locked FOR UPDATE SKIP
+-- LOCKED and immediately pushed to the lease horizon, all in one short
+-- transaction — the delivery itself runs outside any transaction, so a
+-- crashed or slow worker reclaims its rows only after the lease and no
+-- delivery outcome is ever rolled back together with another's.
+WITH due AS (
+  SELECT e.id
+  FROM lic.webhook_events e
+  JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id
+  WHERE e.account_id = $1
+    AND e.status IN ('DELIVERING', 'FAILING')
+    AND (e.next_attempt_at IS NULL OR e.next_attempt_at <= $2::timestamptz)
+    AND we.id IS NOT NULL
+  ORDER BY e.created_at ASC, e.id ASC
+  LIMIT $3
+  FOR UPDATE OF e SKIP LOCKED
+)
+UPDATE lic.webhook_events e
+SET next_attempt_at = $4::timestamptz
+FROM due, lic.webhook_endpoints we
+WHERE e.id = due.id
+  AND we.id = e.webhook_endpoint_id
+RETURNING e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,
+  e.api_version, e.idempotency_token, e.status, e.attempts, e.next_attempt_at,
+  e.last_response_code, e.last_response_body, e.created_at, e.updated_at,
+  we.url AS endpoint_url, we.signature_algorithm AS endpoint_signature_algorithm;`
+
+type ClaimDueWebhookEventsParams struct {
+	AccountID uuid.UUID
+	Now       *time.Time
+	Limit     int64
+	Lease     *time.Time
+}
+
+type ClaimDueWebhookEventsRow struct {
+	ID                         uuid.UUID
+	AccountID                  uuid.UUID
+	WebhookEndpointID          *uuid.UUID
+	Endpoint                   string
+	Event                      string
+	Payload                    string
+	APIVersion                 *string
+	IdempotencyToken           string
+	Status                     string
+	Attempts                   int32
+	NextAttemptAt              *time.Time
+	LastResponseCode           *int32
+	LastResponseBody           *string
+	CreatedAt                  time.Time
+	UpdatedAt                  time.Time
+	EndpointURL                string
+	EndpointSignatureAlgorithm string
+}
+
+func (q *Queries) ClaimDueWebhookEvents(ctx context.Context, arg ClaimDueWebhookEventsParams) ([]ClaimDueWebhookEventsRow, error) {
+	rows, err := q.db.Query(ctx, claimDueWebhookEventsSQL, arg.AccountID, arg.Now, arg.Limit, arg.Lease)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ClaimDueWebhookEventsRow
+	for rows.Next() {
+		var i ClaimDueWebhookEventsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt, &i.EndpointURL, &i.EndpointSignatureAlgorithm); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setWebhookEventDeliveredSQL = `UPDATE lic.webhook_events SET
+  status = 'DELIVERED',
+  last_response_code = $1,
+  last_response_body = $2,
+  attempts = attempts + 1,
+  next_attempt_at = NULL,
+  updated_at = now()
+WHERE account_id = $3 AND id = $4;`
+
+type SetWebhookEventDeliveredParams struct {
+	LastResponseCode *int32
+	LastResponseBody *string
+	AccountID        uuid.UUID
+	ID               uuid.UUID
+}
+
+func (q *Queries) SetWebhookEventDelivered(ctx context.Context, arg SetWebhookEventDeliveredParams) error {
+	_, err := q.db.Exec(ctx, setWebhookEventDeliveredSQL, arg.LastResponseCode, arg.LastResponseBody, arg.AccountID, arg.ID)
+	return err
+}
+
+const setWebhookEventFailureSQL = `UPDATE lic.webhook_events SET
+  status = $1,
+  last_response_code = $2,
+  last_response_body = $3,
+  attempts = attempts + 1,
+  next_attempt_at = $4,
+  updated_at = now()
+WHERE account_id = $5 AND id = $6;`
+
+type SetWebhookEventFailureParams struct {
+	Status           string
+	LastResponseCode *int32
+	LastResponseBody *string
+	NextAttemptAt    *time.Time
+	AccountID        uuid.UUID
+	ID               uuid.UUID
+}
+
+func (q *Queries) SetWebhookEventFailure(ctx context.Context, arg SetWebhookEventFailureParams) error {
+	_, err := q.db.Exec(ctx, setWebhookEventFailureSQL, arg.Status, arg.LastResponseCode, arg.LastResponseBody, arg.NextAttemptAt, arg.AccountID, arg.ID)
+	return err
 }
 
 type DeleteGroupOwnersByUsersParams struct {
@@ -6939,6 +7296,116 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 	for rows.Next() {
 		var i ListUsersRow
 		if err := rows.Scan(&i.ID, &i.AccountID, &i.FirstName, &i.LastName, &i.Email, &i.PasswordDigest, &i.Role, &i.Permissions, &i.GroupID, &i.Metadata, &i.BannedAt, &i.CreatedAt, &i.UpdatedAt, &i.Status); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type CountWebhookEventsParams struct {
+	AccountID uuid.UUID
+	Events    []string
+	ProductID *uuid.UUID
+}
+
+type CountWebhookEventsRow struct {
+	Total int32
+}
+
+func (q *Queries) CountWebhookEvents(ctx context.Context, arg CountWebhookEventsParams) (CountWebhookEventsRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.Events)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.ProductID)
+		positions[3] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*)::int AS total FROM lic.webhook_events e\nLEFT JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id\nWHERE e.account_id = $%d\n  AND ($%d::text[] IS NULL OR e.event = ANY($%d::text[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (e.webhook_endpoint_id IS NOT NULL AND we.product_id = $%d)\n  );", positions[1], positions[2], positions[2], positions[3], positions[3]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountWebhookEventsRow
+	err := row.Scan(&i.Total)
+	return i, err
+}
+
+type ListWebhookEventsParams struct {
+	AccountID uuid.UUID
+	Events    []string
+	ProductID *uuid.UUID
+	Cursor    *uuid.UUID
+	Asc       bool
+	Limit     int64
+	Offset    int64
+}
+
+type ListWebhookEventsRow struct {
+	ID                uuid.UUID
+	AccountID         uuid.UUID
+	WebhookEndpointID *uuid.UUID
+	Endpoint          string
+	Event             string
+	Payload           string
+	APIVersion        *string
+	IdempotencyToken  string
+	Status            string
+	Attempts          int32
+	NextAttemptAt     *time.Time
+	LastResponseCode  *int32
+	LastResponseBody  *string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+func (q *Queries) ListWebhookEvents(ctx context.Context, arg ListWebhookEventsParams) ([]ListWebhookEventsRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.Events)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.ProductID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.Cursor)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Asc)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.Limit)
+		positions[6] = len(args)
+	}
+	if positions[7] == 0 {
+		args = append(args, arg.Offset)
+		positions[7] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT e.id, e.account_id, e.webhook_endpoint_id, e.endpoint, e.event, e.payload,\n  e.api_version, e.idempotency_token, e.status, e.attempts, e.next_attempt_at,\n  e.last_response_code, e.last_response_body, e.created_at, e.updated_at\nFROM lic.webhook_events e\nLEFT JOIN lic.webhook_endpoints we ON we.id = e.webhook_endpoint_id\nWHERE e.account_id = $%d\n  AND ($%d::text[] IS NULL OR e.event = ANY($%d::text[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (e.webhook_endpoint_id IS NOT NULL AND we.product_id = $%d)\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR CASE\n      WHEN $%d::boolean THEN\n        (e.created_at, e.id) > (\n          SELECT c.created_at, c.id FROM lic.webhook_events c WHERE c.id = $%d\n        )\n      ELSE\n        (e.created_at, e.id) < (\n          SELECT c.created_at, c.id FROM lic.webhook_events c WHERE c.id = $%d\n        )\n    END\n  )\nORDER BY\n  CASE WHEN $%d::boolean THEN e.created_at END ASC,\n  CASE WHEN $%d::boolean THEN e.id END ASC,\n  e.created_at DESC,\n  e.id DESC\nLIMIT $%d\nOFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[5], positions[4], positions[4], positions[5], positions[5], positions[6], positions[7]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListWebhookEventsRow
+	for rows.Next() {
+		var i ListWebhookEventsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.WebhookEndpointID, &i.Endpoint, &i.Event, &i.Payload, &i.APIVersion, &i.IdempotencyToken, &i.Status, &i.Attempts, &i.NextAttemptAt, &i.LastResponseCode, &i.LastResponseBody, &i.CreatedAt, &i.UpdatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

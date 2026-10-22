@@ -141,6 +141,13 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/tokens
 	CreateUserToken(ctx context.Context, request CreateUserTokenReq, params CreateUserTokenParams) (*TokenDocument, error)
+	// CreateWebhookEndpoint invokes createWebhookEndpoint operation.
+	//
+	// A product bearer scopes the endpoint to its own product even without the product relationship (the
+	// reference's Zapier workaround).
+	//
+	// POST /v1/accounts/{account}/webhook-endpoints
+	CreateWebhookEndpoint(ctx context.Context, request CreateWebhookEndpointReq, params CreateWebhookEndpointParams) (*WebhookEndpointDocumentHeaders, error)
 	// DecrementLicenseUsage invokes decrementLicenseUsage operation.
 	//
 	// Decrement a license's usage counter.
@@ -195,6 +202,18 @@ type Invoker interface {
 	//
 	// DELETE /v1/accounts/{account}/products/{productId}
 	DestroyProduct(ctx context.Context, params DestroyProductParams) error
+	// DestroyWebhookEndpoint invokes destroyWebhookEndpoint operation.
+	//
+	// Delete a webhook endpoint.
+	//
+	// DELETE /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+	DestroyWebhookEndpoint(ctx context.Context, params DestroyWebhookEndpointParams) error
+	// DestroyWebhookEvent invokes destroyWebhookEvent operation.
+	//
+	// Delete a webhook event.
+	//
+	// DELETE /v1/accounts/{account}/webhook-events/{webhookEventId}
+	DestroyWebhookEvent(ctx context.Context, params DestroyWebhookEventParams) error
 	// DetachGroupOwners invokes detachGroupOwners operation.
 	//
 	// Detach group owners.
@@ -418,6 +437,19 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/users
 	ListUsers(ctx context.Context, params ListUsersParams) (*UserCollectionDocument, error)
+	// ListWebhookEndpoints invokes listWebhookEndpoints operation.
+	//
+	// List webhook endpoints.
+	//
+	// GET /v1/accounts/{account}/webhook-endpoints
+	ListWebhookEndpoints(ctx context.Context, params ListWebhookEndpointsParams) (*WebhookEndpointListDocument, error)
+	// ListWebhookEvents invokes listWebhookEvents operation.
+	//
+	// Supports the events[] filter (exact event names; an unknown name matches nothing) and the shared
+	// pagination parameters.
+	//
+	// GET /v1/accounts/{account}/webhook-events
+	ListWebhookEvents(ctx context.Context, params ListWebhookEventsParams) (*WebhookEventListDocument, error)
 	// Me invokes me operation.
 	//
 	// The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -491,6 +523,13 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/reset-password
 	ResetUserPassword(ctx context.Context, request ResetUserPasswordReq, params ResetUserPasswordParams) (*UserDocument, error)
+	// RetryWebhookEvent invokes retryWebhookEvent operation.
+	//
+	// Enqueues a fresh delivery: a NEW webhook event copying the payload, api version and idempotency
+	// token of the original.
+	//
+	// POST /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry
+	RetryWebhookEvent(ctx context.Context, request RetryWebhookEventReq, params RetryWebhookEventParams) (*WebhookEventDocumentHeaders, error)
 	// RevokeLicense invokes revokeLicense operation.
 	//
 	// Revoke a license (destroys it).
@@ -731,6 +770,18 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/users/{userId}/tokens/{tokenId}
 	ShowUserToken(ctx context.Context, params ShowUserTokenParams) (*TokenDocument, error)
+	// ShowWebhookEndpoint invokes showWebhookEndpoint operation.
+	//
+	// Show a webhook endpoint.
+	//
+	// GET /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+	ShowWebhookEndpoint(ctx context.Context, params ShowWebhookEndpointParams) (*WebhookEndpointDocument, error)
+	// ShowWebhookEvent invokes showWebhookEvent operation.
+	//
+	// Show a webhook event.
+	//
+	// GET /v1/accounts/{account}/webhook-events/{webhookEventId}
+	ShowWebhookEvent(ctx context.Context, params ShowWebhookEventParams) (*WebhookEventDocument, error)
 	// SuspendLicense invokes suspendLicense operation.
 	//
 	// Suspend a license.
@@ -827,6 +878,12 @@ type Invoker interface {
 	//
 	// PATCH /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
 	UpdateUserSecondFactor(ctx context.Context, request UpdateUserSecondFactorReq, params UpdateUserSecondFactorParams) (*SecondFactorDocument, error)
+	// UpdateWebhookEndpoint invokes updateWebhookEndpoint operation.
+	//
+	// Update a webhook endpoint.
+	//
+	// PATCH /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+	UpdateWebhookEndpoint(ctx context.Context, request UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (*WebhookEndpointDocument, error)
 	// ValidateLicense invokes validateLicense operation.
 	//
 	// Validate a license (with meta.scope).
@@ -2923,6 +2980,103 @@ func (c *Client) sendCreateUserToken(ctx context.Context, request CreateUserToke
 	return result, nil
 }
 
+// CreateWebhookEndpoint invokes createWebhookEndpoint operation.
+//
+// A product bearer scopes the endpoint to its own product even without the product relationship (the
+// reference's Zapier workaround).
+//
+// POST /v1/accounts/{account}/webhook-endpoints
+func (c *Client) CreateWebhookEndpoint(ctx context.Context, request CreateWebhookEndpointReq, params CreateWebhookEndpointParams) (*WebhookEndpointDocumentHeaders, error) {
+	res, err := c.sendCreateWebhookEndpoint(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateWebhookEndpoint(ctx context.Context, request CreateWebhookEndpointReq, params CreateWebhookEndpointParams) (res *WebhookEndpointDocumentHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createWebhookEndpoint"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-endpoints"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateWebhookEndpointOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-endpoints"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateWebhookEndpointRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateWebhookEndpointResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DecrementLicenseUsage invokes decrementLicenseUsage operation.
 //
 // Decrement a license's usage counter.
@@ -3941,6 +4095,228 @@ func (c *Client) sendDestroyProduct(ctx context.Context, params DestroyProductPa
 
 	stage = "DecodeResponse"
 	result, err := decodeDestroyProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DestroyWebhookEndpoint invokes destroyWebhookEndpoint operation.
+//
+// Delete a webhook endpoint.
+//
+// DELETE /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+func (c *Client) DestroyWebhookEndpoint(ctx context.Context, params DestroyWebhookEndpointParams) error {
+	_, err := c.sendDestroyWebhookEndpoint(ctx, params)
+	return err
+}
+
+func (c *Client) sendDestroyWebhookEndpoint(ctx context.Context, params DestroyWebhookEndpointParams) (res *DestroyWebhookEndpointNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("destroyWebhookEndpoint"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DestroyWebhookEndpointOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-endpoints/"
+	{
+		// Encode "webhookEndpointId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "webhookEndpointId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.WebhookEndpointId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDestroyWebhookEndpointResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DestroyWebhookEvent invokes destroyWebhookEvent operation.
+//
+// Delete a webhook event.
+//
+// DELETE /v1/accounts/{account}/webhook-events/{webhookEventId}
+func (c *Client) DestroyWebhookEvent(ctx context.Context, params DestroyWebhookEventParams) error {
+	_, err := c.sendDestroyWebhookEvent(ctx, params)
+	return err
+}
+
+func (c *Client) sendDestroyWebhookEvent(ctx context.Context, params DestroyWebhookEventParams) (res *DestroyWebhookEventNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("destroyWebhookEvent"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-events/{webhookEventId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DestroyWebhookEventOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-events/"
+	{
+		// Encode "webhookEventId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "webhookEventId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.WebhookEventId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDestroyWebhookEventResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7882,6 +8258,193 @@ func (c *Client) sendListUsers(ctx context.Context, params ListUsersParams) (res
 	return result, nil
 }
 
+// ListWebhookEndpoints invokes listWebhookEndpoints operation.
+//
+// List webhook endpoints.
+//
+// GET /v1/accounts/{account}/webhook-endpoints
+func (c *Client) ListWebhookEndpoints(ctx context.Context, params ListWebhookEndpointsParams) (*WebhookEndpointListDocument, error) {
+	res, err := c.sendListWebhookEndpoints(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListWebhookEndpoints(ctx context.Context, params ListWebhookEndpointsParams) (res *WebhookEndpointListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listWebhookEndpoints"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-endpoints"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListWebhookEndpointsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-endpoints"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListWebhookEndpointsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListWebhookEvents invokes listWebhookEvents operation.
+//
+// Supports the events[] filter (exact event names; an unknown name matches nothing) and the shared
+// pagination parameters.
+//
+// GET /v1/accounts/{account}/webhook-events
+func (c *Client) ListWebhookEvents(ctx context.Context, params ListWebhookEventsParams) (*WebhookEventListDocument, error) {
+	res, err := c.sendListWebhookEvents(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListWebhookEvents(ctx context.Context, params ListWebhookEventsParams) (res *WebhookEventListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listWebhookEvents"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-events"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListWebhookEventsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-events"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeListWebhookEventsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // Me invokes me operation.
 //
 // The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -9111,6 +9674,122 @@ func (c *Client) sendResetUserPassword(ctx context.Context, request ResetUserPas
 
 	stage = "DecodeResponse"
 	result, err := decodeResetUserPasswordResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RetryWebhookEvent invokes retryWebhookEvent operation.
+//
+// Enqueues a fresh delivery: a NEW webhook event copying the payload, api version and idempotency
+// token of the original.
+//
+// POST /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry
+func (c *Client) RetryWebhookEvent(ctx context.Context, request RetryWebhookEventReq, params RetryWebhookEventParams) (*WebhookEventDocumentHeaders, error) {
+	res, err := c.sendRetryWebhookEvent(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRetryWebhookEvent(ctx context.Context, request RetryWebhookEventReq, params RetryWebhookEventParams) (res *WebhookEventDocumentHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("retryWebhookEvent"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RetryWebhookEventOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-events/"
+	{
+		// Encode "webhookEventId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "webhookEventId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.WebhookEventId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/retry"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRetryWebhookEventRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeRetryWebhookEventResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13967,6 +14646,228 @@ func (c *Client) sendShowUserToken(ctx context.Context, params ShowUserTokenPara
 	return result, nil
 }
 
+// ShowWebhookEndpoint invokes showWebhookEndpoint operation.
+//
+// Show a webhook endpoint.
+//
+// GET /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+func (c *Client) ShowWebhookEndpoint(ctx context.Context, params ShowWebhookEndpointParams) (*WebhookEndpointDocument, error) {
+	res, err := c.sendShowWebhookEndpoint(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowWebhookEndpoint(ctx context.Context, params ShowWebhookEndpointParams) (res *WebhookEndpointDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showWebhookEndpoint"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowWebhookEndpointOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-endpoints/"
+	{
+		// Encode "webhookEndpointId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "webhookEndpointId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.WebhookEndpointId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowWebhookEndpointResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowWebhookEvent invokes showWebhookEvent operation.
+//
+// Show a webhook event.
+//
+// GET /v1/accounts/{account}/webhook-events/{webhookEventId}
+func (c *Client) ShowWebhookEvent(ctx context.Context, params ShowWebhookEventParams) (*WebhookEventDocument, error) {
+	res, err := c.sendShowWebhookEvent(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowWebhookEvent(ctx context.Context, params ShowWebhookEventParams) (res *WebhookEventDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showWebhookEvent"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-events/{webhookEventId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowWebhookEventOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-events/"
+	{
+		// Encode "webhookEventId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "webhookEventId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.WebhookEventId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowWebhookEventResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // SuspendLicense invokes suspendLicense operation.
 //
 // Suspend a license.
@@ -15805,6 +16706,120 @@ func (c *Client) sendUpdateUserSecondFactor(ctx context.Context, request UpdateU
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateUserSecondFactorResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateWebhookEndpoint invokes updateWebhookEndpoint operation.
+//
+// Update a webhook endpoint.
+//
+// PATCH /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+func (c *Client) UpdateWebhookEndpoint(ctx context.Context, request UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (*WebhookEndpointDocument, error) {
+	res, err := c.sendUpdateWebhookEndpoint(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateWebhookEndpoint(ctx context.Context, request UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (res *WebhookEndpointDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateWebhookEndpoint"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateWebhookEndpointOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/webhook-endpoints/"
+	{
+		// Encode "webhookEndpointId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "webhookEndpointId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.WebhookEndpointId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateWebhookEndpointRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateWebhookEndpointResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

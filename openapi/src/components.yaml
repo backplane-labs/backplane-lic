@@ -1413,13 +1413,6 @@ components:
         links:
           $ref: "#/components/schemas/JoinLinks"
 
-    LicenseUserDocument:
-      type: object
-      required: [data]
-      properties:
-        data:
-          $ref: "#/components/schemas/LicenseUserResource"
-
     LicenseUserListDocument:
       type: object
       required: [data]
@@ -1614,6 +1607,142 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/LicenseFileResource"
+
+    # --- webhooks ---
+
+    WebhookEndpointAttributes:
+      type: object
+      required: [url, subscriptions, signatureAlgorithm, apiVersion, created, updated]
+      properties:
+        url:
+          type: string
+        subscriptions:
+          type: array
+          items:
+            type: string
+        signatureAlgorithm:
+          type: string
+        apiVersion:
+          type: string
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    WebhookEndpointResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [webhook-endpoints]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/WebhookEndpointAttributes"
+        relationships:
+          type: object
+          required: [account, product]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            product:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    WebhookEndpointDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/LicenseFileResource"
+          $ref: "#/components/schemas/WebhookEndpointResource"
+
+    WebhookEndpointListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WebhookEndpointResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
+
+    WebhookEventAttributes:
+      type: object
+      required:
+        [endpoint, payload, event, status, lastResponseCode, lastResponseBody, apiVersion, created, updated]
+      properties:
+        endpoint:
+          type: string
+        payload:
+          type: string
+        event:
+          type: string
+        status:
+          type: string
+          enum: [DELIVERING, DELIVERED, FAILING, FAILED]
+        lastResponseCode:
+          type: ["integer", "null"]
+        lastResponseBody:
+          type: ["string", "null"]
+        apiVersion:
+          type: string
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    WebhookEventMeta:
+      # Resource-level meta: the delivery's idempotency token (copied
+      # verbatim by the retry action).
+      type: object
+      required: [idempotencyToken]
+      properties:
+        idempotencyToken:
+          type: string
+
+    WebhookEventResource:
+      type: object
+      required: [type, id, attributes, relationships, links, meta]
+      properties:
+        type:
+          type: string
+          enum: [webhook-events]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/WebhookEventAttributes"
+        relationships:
+          type: object
+          required: [account]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+        meta:
+          $ref: "#/components/schemas/WebhookEventMeta"
+
+    WebhookEventDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/WebhookEventResource"
+
+    WebhookEventListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WebhookEventResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
   responses:
     Error:
       description: Keygen JSON:API error document.
@@ -1621,3 +1750,4 @@ components:
         application/vnd.api+json:
           schema:
             $ref: "#/components/schemas/ErrorDocument"
+

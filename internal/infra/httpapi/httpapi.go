@@ -19,12 +19,11 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
-	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
-	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
+	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
@@ -46,26 +45,23 @@ type Spec struct {
 
 // Deps is everything the HTTP face is built from.
 type Deps struct {
-	Accounts      Accounts
-	Authn         authn.Scenario
-	Users         users.Scenario
-	Tokens        tokens.Scenario
-	Groups        groups.Scenario
-	SecondFactors secondfactors.Scenario
-	Passwords     passwords.Scenario
-	Products      products.Scenario
-	Policies      policies.Scenario
-	Entitlements  entitlements.Scenario
-	Keys          keys.Scenario
-	Licenses      licenses.Scenario
-	Spec          Spec
+	Accounts     Accounts
+	Authn        authn.Scenario
+	Users        users.Scenario
+	Tokens       tokens.Scenario
+	Groups       groups.Scenario
+	Products     products.Scenario
+	Policies     policies.Scenario
+	Entitlements entitlements.Scenario
+	Keys         keys.Scenario
+	Licenses     licenses.Scenario
+	Webhooks     webhooks.Scenario
+	Spec         Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
 	// DocsHost overrides the docs origin of error links; when empty it
 	// is derived from the request host (its last two labels).
 	DocsHost string
-	// Throttle counts password attempts; nil disables the limiter.
-	Throttle Throttler
 	// TrustedProxies lists the proxy CIDRs whose X-Forwarded-For is
 	// honored when resolving the client IP (empty: RemoteAddr always).
 	TrustedProxies []string
@@ -77,19 +73,18 @@ type Deps struct {
 type API struct {
 	oas.UnimplementedHandler
 
-	accounts      Accounts
-	users         users.Scenario
-	tokens        tokens.Scenario
-	groups        groups.Scenario
-	secondFactors secondfactors.Scenario
-	passwords     passwords.Scenario
-	products      products.Scenario
-	policies      policies.Scenario
-	entitlements  entitlements.Scenario
-	keys          keys.Scenario
-	licenses      licenses.Scenario
-	clock         func() time.Time
-	spec          Spec
+	accounts     Accounts
+	users        users.Scenario
+	tokens       tokens.Scenario
+	groups       groups.Scenario
+	products     products.Scenario
+	policies     policies.Scenario
+	entitlements entitlements.Scenario
+	keys         keys.Scenario
+	licenses     licenses.Scenario
+	webhooks     webhooks.Scenario
+	clock        func() time.Time
+	spec         Spec
 }
 
 // New builds the service's HTTP handler: the ogen server wrapped in the
@@ -102,19 +97,18 @@ func New(deps Deps) http.Handler {
 	}
 
 	api := &API{
-		accounts:      deps.Accounts,
-		users:         deps.Users,
-		tokens:        deps.Tokens,
-		groups:        deps.Groups,
-		secondFactors: deps.SecondFactors,
-		passwords:     deps.Passwords,
-		products:      deps.Products,
-		policies:      deps.Policies,
-		entitlements:  deps.Entitlements,
-		keys:          deps.Keys,
-		licenses:      deps.Licenses,
-		clock:         clock,
-		spec:          deps.Spec,
+		accounts:     deps.Accounts,
+		users:        deps.Users,
+		tokens:       deps.Tokens,
+		groups:       deps.Groups,
+		products:     deps.Products,
+		policies:     deps.Policies,
+		entitlements: deps.Entitlements,
+		keys:         deps.Keys,
+		licenses:     deps.Licenses,
+		webhooks:     deps.Webhooks,
+		clock:        clock,
+		spec:         deps.Spec,
 	}
 
 	server, err := oas.NewServer(api)
@@ -124,15 +118,13 @@ func New(deps Deps) http.Handler {
 	}
 
 	return &pipeline{
-		server:         server,
-		accounts:       deps.Accounts,
-		authn:          deps.Authn,
-		spec:           deps.Spec,
-		revision:       deps.Revision,
-		docsHost:       deps.DocsHost,
-		throttle:       deps.Throttle,
-		trustedProxies: parseCIDRs(deps.TrustedProxies),
-		clock:          clock,
+		server:   server,
+		accounts: deps.Accounts,
+		authn:    deps.Authn,
+		spec:     deps.Spec,
+		revision: deps.Revision,
+		docsHost: deps.DocsHost,
+		clock:    clock,
 	}
 }
 
@@ -194,16 +186,16 @@ func (a *API) GenerateToken(
 func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 	req := requestOf(ctx)
 
+	if !req.principal.IsUser() {
+		return nil, errNotUserBearer
+	}
+
 	if req.principal.IsLicense() {
 		return a.meLicense(ctx, req)
 	}
 
 	if req.principal.IsProduct() {
 		return a.meProduct(ctx, req)
-	}
-
-	if !req.principal.IsUser() {
-		return nil, errNotUserBearer
 	}
 
 	user, status, err := a.users.Me(ctx, req.account.ID, req.principal.BearerID)
@@ -215,6 +207,7 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 		Type:         oas.UserResourceMeDocumentData,
 		UserResource: render.User(req.account.ID, user, status),
 	}}
+
 	if req.token != nil {
 		doc.Included = []oas.TokenResource{
 			render.Token(req.account.ID, *req.token, req.principal.Role, ""),
@@ -229,16 +222,16 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDocument, error) {
 	req := requestOf(ctx)
 
+	if !req.principal.IsUser() {
+		return nil, errNotUserBearer
+	}
+
 	if req.principal.IsLicense() {
 		return a.profileLicense(ctx, req)
 	}
 
 	if req.principal.IsProduct() {
 		return a.profileProduct(ctx, req)
-	}
-
-	if !req.principal.IsUser() {
-		return nil, errNotUserBearer
 	}
 
 	user, status, err := a.users.Me(ctx, req.account.ID, req.principal.BearerID)

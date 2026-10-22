@@ -18,6 +18,7 @@ import (
 // storage port.
 type PoliciesRepo struct {
 	q *db.Queries
+	txRunner
 }
 
 // PolicyByID loads a policy by id.

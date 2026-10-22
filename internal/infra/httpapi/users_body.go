@@ -352,54 +352,6 @@ func underscoredMetadata(m map[string]any) map[string]any {
 	return m
 }
 
-// validatePasswordChange decodes meta{<old>,new_password} of the
-// password actions.
-func validatePasswordChange(req *request, firstKey, secondKey string) (string, string, error) {
-	body := req.body
-	if body == nil {
-		body = map[string]any{}
-	}
-
-	if err := unpermitted(body, "/", "meta"); err != nil {
-		return "", "", err
-	}
-
-	metaRaw, ok := body["meta"]
-	if !ok {
-		return "", "", apperr.BadRequestSource("is missing", "/meta")
-	}
-
-	meta, err := hash(metaRaw, "/meta")
-	if err != nil {
-		return "", "", err
-	}
-
-	if err := unpermitted(meta, "/meta/", firstKey, secondKey); err != nil {
-		return "", "", err
-	}
-
-	first, err := metaString(meta, firstKey)
-	if err != nil {
-		return "", "", err
-	}
-
-	second, err := metaString(meta, secondKey)
-	if err != nil {
-		return "", "", err
-	}
-
-	return first, second, nil
-}
-
-func metaString(meta map[string]any, key string) (string, error) {
-	raw, ok := meta[key]
-	if !ok {
-		return "", apperr.BadRequestSource("is missing", pointerOf("meta", key))
-	}
-
-	return str(raw, pointerOf("meta", key))
-}
-
 // validateGroupBody decodes the body of PUT /users/{id}/group.
 func validateGroupBody(req *request) (uuid.NullUUID, bool, error) {
 	body := req.body

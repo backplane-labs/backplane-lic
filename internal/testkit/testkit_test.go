@@ -4,12 +4,12 @@ import (
 	"context"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/backplane-labs/backplane/pkg/backplane/config"
 	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gopherex/xlog"
 
@@ -47,11 +47,17 @@ func TestSeedAdmin(t *testing.T) {
 		t.Fatalf("bootstrap: %v", err)
 	}
 
-	if err := testkit.SeedAdmin(ctx, store, id, "tk-admin@example.com", "tk-password-123"); err != nil {
+	raw, err := testkit.SeedAdmin(ctx, store, id, "tk-admin@example.com")
+	if err != nil {
 		t.Fatalf("seed: %v", err)
 	}
 
-	if err := testkit.SeedAdmin(ctx, store, id, "tk-admin@example.com", "other"); err != nil {
+	// The raw secret is a v3 admin token (the <role>-<hex>v3 shape).
+	if !strings.HasSuffix(raw, "v3") || !strings.HasPrefix(raw, "admin-") {
+		t.Fatalf("raw token shape: %q", raw)
+	}
+
+	if _, err := testkit.SeedAdmin(ctx, store, id, "tk-admin@example.com"); err != nil {
 		t.Fatalf("reseed: %v", err)
 	}
 
@@ -62,10 +68,6 @@ func TestSeedAdmin(t *testing.T) {
 
 	if user.Role != domain.RoleAdmin {
 		t.Errorf("role %q want %q", user.Role, domain.RoleAdmin)
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte("tk-password-123")); err != nil {
-		t.Errorf("password digest: %v", err)
 	}
 
 	if _, err := store.UserByEmail(ctx, id, "nobody@example.com"); err == nil {

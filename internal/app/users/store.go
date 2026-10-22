@@ -44,6 +44,9 @@ type Listed struct {
 //
 //nolint:interfacebloat // one port per scenario is the architecture's shape
 type Store interface {
+	// Do runs fn in one transaction; the writes and the webhook events
+	// of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// UserByID loads a user; ErrNotFound when none.
 	UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error)
 	// UserByEmail loads a user by downcased email; ErrNotFound.

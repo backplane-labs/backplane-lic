@@ -187,159 +187,21 @@ func (a *API) ShowUserToken(
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, "")}, nil
 }
 
-// CreateUserToken implements POST /users/{userId}/tokens (200 + secret).
+// CreateUserToken implements POST /users/{userId}/tokens: retired
+// with end-user authentication — user-bearer tokens do not exist (the
+// 501).
 func (a *API) CreateUserToken(
-	ctx context.Context, _ oas.CreateUserTokenReq, params oas.CreateUserTokenParams,
+	context.Context, oas.CreateUserTokenReq, oas.CreateUserTokenParams,
 ) (*oas.TokenDocument, error) {
-	req := requestOf(ctx)
-
-	user, err := a.subUser(ctx, req, params.UserId)
-	if err != nil {
-		return nil, err
-	}
-
-	attrs, err := validateUserTokenBody(req)
-	if err != nil {
-		return nil, err
-	}
-
-	token, raw, err := a.tokens.Manager().CreateForUser(ctx, req.account, req.principal, user, attrs)
-	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
-	}
-
-	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, raw)}, nil
+	return nil, apperr.NotImplemented()
 }
 
-// RequestPasswordReset implements POST /passwords: always 204.
+// RequestPasswordReset implements POST /passwords: retired with
+// end-user authentication (the 501).
 func (a *API) RequestPasswordReset(
-	ctx context.Context, _ oas.RequestPasswordResetReq, _ oas.RequestPasswordResetParams,
+	context.Context, oas.RequestPasswordResetReq, oas.RequestPasswordResetParams,
 ) error {
-	req := requestOf(ctx)
-
-	email, err := validatePasswordResetBody(req)
-	if err != nil {
-		return err
-	}
-
-	return a.passwords.Request(ctx, req.account, email, nil) //nolint:wrapcheck // the scenario's own error
-}
-
-// validatePasswordResetBody decodes meta{email, deliver?}.
-func validatePasswordResetBody(req *request) (string, error) {
-	body := req.body
-	if body == nil {
-		body = map[string]any{}
-	}
-
-	if err := unpermitted(body, "/", "meta"); err != nil {
-		return "", err
-	}
-
-	metaRaw, ok := body["meta"]
-	if !ok {
-		return "", apperr.BadRequestSource("is missing", "/meta")
-	}
-
-	meta, err := hash(metaRaw, "/meta")
-	if err != nil {
-		return "", err
-	}
-
-	if err := unpermitted(meta, "/meta/", "email", "deliver"); err != nil {
-		return "", err
-	}
-
-	email, err := metaString(meta, "email")
-	if err != nil {
-		return "", err
-	}
-
-	return email, nil
-}
-
-// validateUserTokenBody decodes the /users/{id}/tokens creation body:
-// data optional, attributes{name, expiry} only.
-func validateUserTokenBody(req *request) (tokens.CreateAttrs, error) {
-	var attrs tokens.CreateAttrs
-
-	if len(req.body) == 0 {
-		return attrs, nil
-	}
-
-	body := req.body
-
-	if err := unpermitted(body, "/", "data"); err != nil {
-		return attrs, err
-	}
-
-	dataRaw, ok := body["data"]
-	if !ok {
-		return attrs, nil
-	}
-
-	data, err := hash(dataRaw, "/data")
-	if err != nil {
-		return attrs, err
-	}
-
-	if err := unpermitted(data, "/data/", "type", "attributes"); err != nil {
-		return attrs, err
-	}
-
-	if typeRaw, present := data["type"]; present {
-		typeStr, err := str(typeRaw, pointerOf("data", "type"))
-		if err != nil {
-			return attrs, err
-		}
-
-		if typeStr != "token" && typeStr != "tokens" {
-			return attrs, apperr.BadRequestSource("is invalid", pointerOf("data", "type"))
-		}
-	}
-
-	attrsRaw, hasAttrs := data["attributes"]
-	if !hasAttrs {
-		return attrs, nil
-	}
-
-	return tokenAttrs(attrsRaw)
-}
-
-// tokenAttrs decodes attributes{expiry, name} of a token creation.
-func tokenAttrs(raw any) (tokens.CreateAttrs, error) {
-	var attrs tokens.CreateAttrs
-
-	obj, err := hash(raw, pointerOf("data", "attributes"))
-	if err != nil {
-		return attrs, err
-	}
-
-	if err := unpermitted(obj, "/data/attributes/", "expiry", "name"); err != nil {
-		return attrs, err
-	}
-
-	if value, present := obj["expiry"]; present && value != nil {
-		s, err := str(value, pointerOf("data", "attributes", "expiry"))
-		if err != nil {
-			return attrs, err
-		}
-
-		if t, parsed := parseTime(s); parsed {
-			attrs.Expiry = &t
-		}
-	}
-
-	if value, present := obj["name"]; present && value != nil {
-		s, err := str(value, pointerOf("data", "attributes", "name"))
-		if err != nil {
-			return attrs, err
-		}
-
-		attrs.Name = &s
-	}
-
-	return attrs, nil
+	return apperr.NotImplemented()
 }
 
 // filterUserTokens narrows a token page to the user's own (defensive;

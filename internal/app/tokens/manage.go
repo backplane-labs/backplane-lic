@@ -44,6 +44,9 @@ type CreateAttrs struct {
 
 // Store is the scenario's consumer-side storage port.
 type Store interface {
+	// Do runs fn in one transaction; the writes and the webhook
+	// events of one action commit together.
+	Do(ctx context.Context, fn func(ctx context.Context) error) error
 	// InsertToken writes a new token row.
 	InsertToken(ctx context.Context, token domain.Token) error
 	// BearerUser loads the override bearer (a user).
@@ -123,30 +126,6 @@ func (m Manager) Show(
 	}
 
 	return token, nil
-}
-
-// CreateForUser mints a token FOR the user (the /users/{id}/tokens
-// route): admin, developer, or a product the user is licensed to.
-func (m Manager) CreateForUser(
-	ctx context.Context,
-	account domain.Account,
-	principal access.Principal,
-	user domain.User,
-	attrs CreateAttrs,
-) (domain.Token, string, error) {
-	if err := access.Require(ctx, "token.generate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the port's own error
-	}
-
-	if err := access.TokenGenerateForUser(principal, user, func() bool {
-		ok, err := m.store.UserLicensedToProduct(ctx, account.ID, user.ID, principal.BearerID)
-
-		return err == nil && ok
-	}); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
-	}
-
-	return m.insert(ctx, account, user.ID, "User", user.Role, attrs)
 }
 
 // CreateForLicense mints an activation token for the license (the
@@ -253,11 +232,17 @@ func (m Manager) Revoke(
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
-	if err := m.store.DeleteToken(ctx, account.ID, token.ID); err != nil {
-		return fmt.Errorf("tokens: revoke: %w", err)
+	if err := m.store.Do(ctx, func(ctx context.Context) error {
+		if err := m.store.DeleteToken(ctx, account.ID, token.ID); err != nil {
+			return fmt.Errorf("tokens: revoke: %w", err)
+		}
+
+		return m.events.Publish(ctx, "token.revoked", token)
+	}); err != nil {
+		return err //nolint:wrapcheck // the transaction's own error
 	}
 
-	return m.events.Publish(ctx, "token.revoked", token) //nolint:wrapcheck // the port's own error
+	return nil
 }
 
 func (m Manager) regenerate(
@@ -275,14 +260,17 @@ func (m Manager) regenerate(
 	}
 
 	digest := crypto.DigestV3(account.Keys.SecretKey, raw)
-	if err := m.store.RegenerateToken(ctx, account.ID, token.ID, digest, expiry); err != nil {
-		return domain.Token{}, "", fmt.Errorf("tokens: regenerate: %w", err)
-	}
 
 	token.Expiry = expiry
 
-	if err := m.events.Publish(ctx, "token.regenerated", token); err != nil {
-		return domain.Token{}, "", fmt.Errorf("tokens: regenerate: %w", err)
+	if err := m.store.Do(ctx, func(ctx context.Context) error {
+		if err := m.store.RegenerateToken(ctx, account.ID, token.ID, digest, expiry); err != nil {
+			return fmt.Errorf("tokens: regenerate: %w", err)
+		}
+
+		return m.events.Publish(ctx, "token.regenerated", token)
+	}); err != nil {
+		return domain.Token{}, "", err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return token, raw, nil
@@ -321,12 +309,14 @@ func (m Manager) insert(
 		UpdatedAt:        now,
 	}
 
-	if err := m.store.InsertToken(ctx, token); err != nil {
-		return domain.Token{}, "", fmt.Errorf("tokens: insert: %w", err)
-	}
+	if err := m.store.Do(ctx, func(ctx context.Context) error {
+		if err := m.store.InsertToken(ctx, token); err != nil {
+			return fmt.Errorf("tokens: insert: %w", err)
+		}
 
-	if err := m.events.Publish(ctx, "token.generated", token); err != nil {
-		return domain.Token{}, "", fmt.Errorf("tokens: insert: %w", err)
+		return m.events.Publish(ctx, "token.generated", token)
+	}); err != nil {
+		return domain.Token{}, "", err //nolint:wrapcheck // the transaction's own error
 	}
 
 	return token, raw, nil

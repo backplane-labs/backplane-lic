@@ -8,12 +8,24 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
 	"github.com/backplane-labs/backplane-lic/internal/oas"
 )
+
+// subUser resolves the {userId} path param of the user sub-routes
+// (UUID or email alias) to the user row.
+func (a *API) subUser(ctx context.Context, req *request, alias string) (domain.User, error) {
+	user, err := a.users.Show(ctx, req.account, req.principal, alias)
+	if err != nil {
+		return domain.User{}, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	return user.User, nil
+}
 
 // queryOf answers the request's original query (the account form the
 // client used).
@@ -295,45 +307,20 @@ func (a *API) DeleteUser(ctx context.Context, params oas.DeleteUserParams) error
 }
 
 // UpdateUserPassword implements the update-password action.
+// UpdateUserPassword implements the update-password action: retired
+// with end-user authentication (the 501).
 func (a *API) UpdateUserPassword(
-	ctx context.Context, _ oas.UpdateUserPasswordReq, params oas.UpdateUserPasswordParams,
+	context.Context, oas.UpdateUserPasswordReq, oas.UpdateUserPasswordParams,
 ) (*oas.UserDocument, error) {
-	req := requestOf(ctx)
-
-	oldPassword, newPassword, err := validatePasswordChange(req, "old_password", "new_password")
-	if err != nil {
-		return nil, err
-	}
-
-	row, err := a.users.UpdatePassword(ctx, req.account, req.principal, params.UserId, oldPassword, newPassword)
-	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
-	}
-
-	doc := userDoc(row)
-
-	return &doc, nil
+	return nil, apperr.NotImplemented()
 }
 
-// ResetUserPassword implements the reset-password action.
+// ResetUserPassword implements the reset-password action: retired with
+// end-user authentication (the 501).
 func (a *API) ResetUserPassword(
-	ctx context.Context, _ oas.ResetUserPasswordReq, params oas.ResetUserPasswordParams,
+	context.Context, oas.ResetUserPasswordReq, oas.ResetUserPasswordParams,
 ) (*oas.UserDocument, error) {
-	req := requestOf(ctx)
-
-	token, newPassword, err := validatePasswordChange(req, "password_reset_token", "new_password")
-	if err != nil {
-		return nil, err
-	}
-
-	row, err := a.users.ResetPassword(ctx, req.account, req.principal, params.UserId, token, newPassword)
-	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
-	}
-
-	doc := userDoc(row)
-
-	return &doc, nil
+	return nil, apperr.NotImplemented()
 }
 
 // BanUser implements the ban action.

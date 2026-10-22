@@ -184,6 +184,16 @@ func (UnimplementedHandler) CreateUserToken(ctx context.Context, req CreateUserT
 	return r, ht.ErrNotImplemented
 }
 
+// CreateWebhookEndpoint implements createWebhookEndpoint operation.
+//
+// A product bearer scopes the endpoint to its own product even without the product relationship (the
+// reference's Zapier workaround).
+//
+// POST /v1/accounts/{account}/webhook-endpoints
+func (UnimplementedHandler) CreateWebhookEndpoint(ctx context.Context, req CreateWebhookEndpointReq, params CreateWebhookEndpointParams) (r *WebhookEndpointDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DecrementLicenseUsage implements decrementLicenseUsage operation.
 //
 // Decrement a license's usage counter.
@@ -262,6 +272,24 @@ func (UnimplementedHandler) DestroyPolicy(ctx context.Context, params DestroyPol
 //
 // DELETE /v1/accounts/{account}/products/{productId}
 func (UnimplementedHandler) DestroyProduct(ctx context.Context, params DestroyProductParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DestroyWebhookEndpoint implements destroyWebhookEndpoint operation.
+//
+// Delete a webhook endpoint.
+//
+// DELETE /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+func (UnimplementedHandler) DestroyWebhookEndpoint(ctx context.Context, params DestroyWebhookEndpointParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DestroyWebhookEvent implements destroyWebhookEvent operation.
+//
+// Delete a webhook event.
+//
+// DELETE /v1/accounts/{account}/webhook-events/{webhookEventId}
+func (UnimplementedHandler) DestroyWebhookEvent(ctx context.Context, params DestroyWebhookEventParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -599,6 +627,25 @@ func (UnimplementedHandler) ListUsers(ctx context.Context, params ListUsersParam
 	return r, ht.ErrNotImplemented
 }
 
+// ListWebhookEndpoints implements listWebhookEndpoints operation.
+//
+// List webhook endpoints.
+//
+// GET /v1/accounts/{account}/webhook-endpoints
+func (UnimplementedHandler) ListWebhookEndpoints(ctx context.Context, params ListWebhookEndpointsParams) (r *WebhookEndpointListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListWebhookEvents implements listWebhookEvents operation.
+//
+// Supports the events[] filter (exact event names; an unknown name matches nothing) and the shared
+// pagination parameters.
+//
+// GET /v1/accounts/{account}/webhook-events
+func (UnimplementedHandler) ListWebhookEvents(ctx context.Context, params ListWebhookEventsParams) (r *WebhookEventListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Me implements me operation.
 //
 // The authenticated bearer's document; a token-authenticated request also includes the current token
@@ -705,6 +752,16 @@ func (UnimplementedHandler) ResetLicenseUsage(ctx context.Context, params ResetL
 //
 // POST /v1/accounts/{account}/users/{userId}/actions/reset-password
 func (UnimplementedHandler) ResetUserPassword(ctx context.Context, req ResetUserPasswordReq, params ResetUserPasswordParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RetryWebhookEvent implements retryWebhookEvent operation.
+//
+// Enqueues a fresh delivery: a NEW webhook event copying the payload, api version and idempotency
+// token of the original.
+//
+// POST /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry
+func (UnimplementedHandler) RetryWebhookEvent(ctx context.Context, req RetryWebhookEventReq, params RetryWebhookEventParams) (r *WebhookEventDocumentHeaders, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1068,6 +1125,24 @@ func (UnimplementedHandler) ShowUserToken(ctx context.Context, params ShowUserTo
 	return r, ht.ErrNotImplemented
 }
 
+// ShowWebhookEndpoint implements showWebhookEndpoint operation.
+//
+// Show a webhook endpoint.
+//
+// GET /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+func (UnimplementedHandler) ShowWebhookEndpoint(ctx context.Context, params ShowWebhookEndpointParams) (r *WebhookEndpointDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowWebhookEvent implements showWebhookEvent operation.
+//
+// Show a webhook event.
+//
+// GET /v1/accounts/{account}/webhook-events/{webhookEventId}
+func (UnimplementedHandler) ShowWebhookEvent(ctx context.Context, params ShowWebhookEventParams) (r *WebhookEventDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SuspendLicense implements suspendLicense operation.
 //
 // Suspend a license.
@@ -1209,6 +1284,15 @@ func (UnimplementedHandler) UpdateUserPassword(ctx context.Context, req UpdateUs
 //
 // PATCH /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
 func (UnimplementedHandler) UpdateUserSecondFactor(ctx context.Context, req UpdateUserSecondFactorReq, params UpdateUserSecondFactorParams) (r *SecondFactorDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateWebhookEndpoint implements updateWebhookEndpoint operation.
+//
+// Update a webhook endpoint.
+//
+// PATCH /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
+func (UnimplementedHandler) UpdateWebhookEndpoint(ctx context.Context, req UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (r *WebhookEndpointDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

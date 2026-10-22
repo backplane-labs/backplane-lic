@@ -65,6 +65,10 @@ type CreateUserTokenReq interface {
 	createUserTokenReq()
 }
 
+type CreateWebhookEndpointReq interface {
+	createWebhookEndpointReq()
+}
+
 type DecrementLicenseUsageReq interface {
 	decrementLicenseUsageReq()
 }
@@ -103,6 +107,10 @@ type RequestPasswordResetReq interface {
 
 type ResetUserPasswordReq interface {
 	resetUserPasswordReq()
+}
+
+type RetryWebhookEventReq interface {
+	retryWebhookEventReq()
 }
 
 type UpdateEntitlementReq interface {
@@ -159,6 +167,10 @@ type UpdateUserReq interface {
 
 type UpdateUserSecondFactorReq interface {
 	updateUserSecondFactorReq()
+}
+
+type UpdateWebhookEndpointReq interface {
+	updateWebhookEndpointReq()
 }
 
 type ValidateLicenseKeyReq interface {
