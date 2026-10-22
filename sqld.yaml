@@ -1,0 +1,20 @@
+# sqld: the service's own PostgreSQL schema (lic), migrations and typed
+# queries. Run `make db` after editing schema.sql or queries/*.sql.
+version: "1"
+engine: postgresql
+options:
+  defaultSchema: lic
+schema:
+  - file: internal/infra/postgres/schema.sql
+queries:
+  - dir: internal/infra/postgres/queries
+migrations:
+  - dir: internal/infra/postgres/migrations
+plugins:
+  - name: go
+    binary: ./bin/sqld-gen-go
+    out: internal/infra/postgres/db
+    options:
+      package: db
+      overrides:
+        uuid: github.com/google/uuid.UUID

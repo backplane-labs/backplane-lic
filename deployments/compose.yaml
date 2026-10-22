@@ -1,0 +1,76 @@
+# Development dependencies of backplane-lic (compose project `lic`):
+# PostgreSQL on 127.0.0.1:5440 and Valkey on 127.0.0.1:6390.
+#
+# The `keygen` profile reproduces the Keygen CE v1.7.2 reference server used
+# by the conformance suite (see ARCH.md / test/conformance). Do NOT start it
+# while another instance (compose project `kgce`) is already bound to :3900.
+# Generate its environment first: `make keygen-env` (writes keygen/.env).
+name: lic
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: lic
+      POSTGRES_PASSWORD: lic
+      POSTGRES_DB: lic
+    ports:
+      - "127.0.0.1:5440:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "127.0.0.1:6390:6379"
+
+  # --- keygen profile: Keygen CE reference (conformance target) ---
+  keygen-postgres:
+    profiles: [keygen]
+    image: postgres:17.5
+    environment:
+      POSTGRES_USER: keygen
+      POSTGRES_PASSWORD: keygen
+      POSTGRES_DB: keygen
+    volumes:
+      - keygen-postgres-data:/var/lib/postgresql/data
+
+  keygen-redis:
+    profiles: [keygen]
+    image: valkey/valkey:8
+
+  keygen-setup:
+    profiles: [keygen]
+    image: keygen/api:v1.7.2
+    env_file: keygen/.env
+    environment:
+      DISABLE_DATABASE_ENVIRONMENT_CHECK: "1"
+    command: sh -c "until pg_isready -h keygen-postgres -U keygen; do sleep 1; done; bundle exec rails keygen:setup"
+    depends_on: [keygen-postgres]
+    restart: no
+
+  keygen-web:
+    profiles: [keygen]
+    image: keygen/api:v1.7.2
+    command: web
+    env_file: keygen/.env
+    environment:
+      DATABASE_URL: postgres://keygen:keygen@keygen-postgres:5432/keygen
+      REDIS_URL: redis://keygen-redis:6379
+    ports:
+      - "127.0.0.1:3900:3000"
+    depends_on: [keygen-postgres, keygen-redis]
+
+  keygen-worker:
+    profiles: [keygen]
+    image: keygen/api:v1.7.2
+    command: worker
+    env_file: keygen/.env
+    environment:
+      DATABASE_URL: postgres://keygen:keygen@keygen-postgres:5432/keygen
+      REDIS_URL: redis://keygen-redis:6379
+    depends_on: [keygen-postgres, keygen-redis]
+
+volumes:
+  postgres-data:
+  keygen-postgres-data:

@@ -1,0 +1,9 @@
+# Development configuration (see README): the compose PostgreSQL/Valkey.
+store:
+  dsn: postgres://lic:lic@127.0.0.1:5440/lic?sslmode=disable
+cache:
+  addr: 127.0.0.1:6390
+account:
+  id: 2c1d4f2e-9a3b-4c5d-8e7f-0a1b2c3d4e5f
+  slug: example-com
+  name: Example

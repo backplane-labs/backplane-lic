@@ -1,0 +1,27 @@
+# ogen configuration — https://ogen.dev/docs/config/
+# Drives Go generation from openapi/.build/openapi.3.0.yaml into internal/oas.
+# Invoked ONLY via `make gen-api` (no //go:generate directives in the tree).
+# The source of truth is openapi/src/** (OpenAPI 3.1), bundled by `make spec`
+# into openapi/openapi.yaml and down-projected to 3.0 for ogen.
+
+parser:
+  # Infer schema types where the spec leaves them implicit.
+  infer_types: true
+  # The spec is self-contained; never resolve remote $refs.
+  allow_remote: false
+
+generator:
+  features:
+    enable:
+      - "paths/server"                 # generate the server interfaces
+      - "ogen/otel"                    # OpenTelemetry instrumentation
+      - "ogen/unimplemented"           # default unimplemented handlers
+    disable: []
+    disable_all: false
+
+  ignore_not_implemented: []
+
+  # Every operation shares one `default` error response, so ogen generates a
+  # NewError(ctx, err) ErrorStatusCode method: handlers return plain Go errors
+  # and NewError renders them as Keygen JSON:API error documents.
+  convenient_errors: "on"

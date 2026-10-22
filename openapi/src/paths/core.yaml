@@ -1,0 +1,168 @@
+# Core endpoints: ping/health and the account resource. The account is
+# singleplayer: exactly one exists, resolved from configuration.
+paths:
+  /v1/ping:
+    get:
+      operationId: ping
+      summary: Liveness ping
+      description: Empty 200 response; outside content negotiation, any Accept works.
+      responses:
+        "200":
+          description: Empty body.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/health:
+    get:
+      operationId: health
+      summary: Readiness probe
+      description: 204 when the service is up.
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}:
+    get:
+      operationId: getAccount
+      summary: Show the account
+      description: The configured account with its public keys in top-level meta.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Account document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/AccountDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+components:
+  schemas:
+    AccountAttributes:
+      type: object
+      required: [name, slug, apiVersion, status, protected, created, updated]
+      properties:
+        name:
+          type: ["string", "null"]
+        slug:
+          type: ["string", "null"]
+        apiVersion:
+          type: ["string", "null"]
+        # billing&.state&.upcase — always null in CE.
+        status:
+          type: ["string", "null"]
+        protected:
+          type: ["boolean", "null"]
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    AccountRelationships:
+      # Every has_many the CE AccountSerializer renders, in serializer
+      # order (billing/plan are cloud-only and never appear).
+      type: object
+      required:
+        - settings
+        - webhookEndpoints
+        - webhookEvents
+        - products
+        - platforms
+        - arches
+        - channels
+        - releases
+        - artifacts
+        - policies
+        - users
+        - keys
+        - licenses
+        - machines
+        - components
+        - processes
+        - tokens
+      properties:
+        settings:
+          $ref: "#/components/schemas/ToManyRelationship"
+        webhookEndpoints:
+          $ref: "#/components/schemas/ToManyRelationship"
+        webhookEvents:
+          $ref: "#/components/schemas/ToManyRelationship"
+        products:
+          $ref: "#/components/schemas/ToManyRelationship"
+        platforms:
+          $ref: "#/components/schemas/ToManyRelationship"
+        arches:
+          $ref: "#/components/schemas/ToManyRelationship"
+        channels:
+          $ref: "#/components/schemas/ToManyRelationship"
+        releases:
+          $ref: "#/components/schemas/ToManyRelationship"
+        artifacts:
+          $ref: "#/components/schemas/ToManyRelationship"
+        policies:
+          $ref: "#/components/schemas/ToManyRelationship"
+        users:
+          $ref: "#/components/schemas/ToManyRelationship"
+        keys:
+          $ref: "#/components/schemas/ToManyRelationship"
+        licenses:
+          $ref: "#/components/schemas/ToManyRelationship"
+        machines:
+          $ref: "#/components/schemas/ToManyRelationship"
+        components:
+          $ref: "#/components/schemas/ToManyRelationship"
+        processes:
+          $ref: "#/components/schemas/ToManyRelationship"
+        tokens:
+          $ref: "#/components/schemas/ToManyRelationship"
+
+    AccountResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [accounts]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/AccountAttributes"
+        relationships:
+          $ref: "#/components/schemas/AccountRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    AccountKeysMeta:
+      # Base64 (strict) of the account's public key material; ed25519 is
+      # the raw public key bytes, rsa2048/ecdsa are PEM.
+      type: object
+      required: [ed25519, rsa2048, ecdsa]
+      properties:
+        ed25519:
+          type: string
+        rsa2048:
+          type: string
+        ecdsa:
+          type: string
+
+    AccountMeta:
+      type: object
+      required: [publicKey, keys]
+      properties:
+        publicKey:
+          type: string
+        keys:
+          $ref: "#/components/schemas/AccountKeysMeta"
+
+    AccountDocument:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/AccountResource"
+        meta:
+          $ref: "#/components/schemas/AccountMeta"

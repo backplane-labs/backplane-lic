@@ -1,0 +1,14 @@
+*.test
+*.out
+coverage.*
+go.work
+go.work.sum
+.env
+.idea/
+bin/
+
+# OpenAPI build artifacts
+openapi/.build/
+
+# local scratch state
+/.dev/

@@ -1,0 +1,401 @@
+openapi: 3.1.0
+info:
+  title: backplane-lic
+  summary: Keygen CE-compatible licensing API (singleplayer, API 1.7).
+  description: 'A 1:1 reproduction of the Keygen CE 1.7 licensing API: same URLs,
+
+    JSON:API documents, headers, error codes and behaviour. Paths are
+
+    written in the canonical multiplayer form `/v1/accounts/{account}/...`;
+
+    the bare singleplayer form `/v1/<resource>...` is rewritten to it by
+
+    the server before routing.
+
+    '
+  version: 1.7.0
+paths:
+  /v1/ping:
+    get:
+      operationId: ping
+      summary: Liveness ping
+      description: Empty 200 response; outside content negotiation, any Accept works.
+      responses:
+        '200':
+          description: Empty body.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/health:
+    get:
+      operationId: health
+      summary: Readiness probe
+      description: 204 when the service is up.
+      responses:
+        '204':
+          description: No content.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}:
+    get:
+      operationId: getAccount
+      summary: Show the account
+      description: The configured account with its public keys in top-level meta.
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Account document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AccountDocument'
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  parameters:
+    AccountPath:
+      name: account
+      in: path
+      required: true
+      description: Account id (UUID) or slug.
+      schema:
+        type: string
+    PageNumber:
+      name: page[number]
+      in: query
+      description: Offset pagination page number (1-100).
+      schema:
+        type:
+        - integer
+        - 'null'
+        minimum: 1
+        maximum: 100
+    PageSize:
+      name: page[size]
+      in: query
+      description: Page size (1-100); defaults to the limit.
+      schema:
+        type:
+        - integer
+        - 'null'
+        minimum: 1
+        maximum: 100
+    PageCursor:
+      name: page[cursor]
+      in: query
+      description: Keyset pagination cursor (a record UUID).
+      schema:
+        type:
+        - string
+        - 'null'
+    Limit:
+      name: limit
+      in: query
+      description: Number of records to return (1-100, default 10).
+      schema:
+        type:
+        - integer
+        - 'null'
+        minimum: 1
+        maximum: 100
+    Order:
+      name: order
+      in: query
+      description: Sort order (default desc in production).
+      schema:
+        type:
+        - string
+        - 'null'
+        enum:
+        - asc
+        - desc
+        - null
+  schemas:
+    Timestamp:
+      type: string
+    Metadata:
+      type: object
+      additionalProperties: true
+    ResourceIdentifier:
+      type: object
+      required:
+      - type
+      - id
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+    ResourceLinks:
+      type: object
+      required:
+      - self
+      properties:
+        self:
+          type: string
+    RelationshipLinks:
+      type: object
+      required:
+      - related
+      properties:
+        related:
+          type:
+          - string
+          - 'null'
+    ToOneRelationship:
+      type: object
+      required:
+      - links
+      - data
+      properties:
+        links:
+          $ref: '#/components/schemas/RelationshipLinks'
+        data:
+          anyOf:
+          - $ref: '#/components/schemas/ResourceIdentifier'
+          - type: 'null'
+    ToManyRelationship:
+      type: object
+      required:
+      - links
+      properties:
+        links:
+          $ref: '#/components/schemas/RelationshipLinks'
+        meta:
+          type: object
+          additionalProperties: true
+    PaginationMeta:
+      type: object
+      required:
+      - pages
+      - count
+      properties:
+        pages:
+          type: integer
+        count:
+          type: integer
+    CollectionLinks:
+      type: object
+      required:
+      - self
+      - first
+      - last
+      - prev
+      - next
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        last:
+          type: string
+        prev:
+          type:
+          - string
+          - 'null'
+        next:
+          type:
+          - string
+          - 'null'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    ErrorSource:
+      type: object
+      properties:
+        pointer:
+          type: string
+        parameter:
+          type: string
+        header:
+          type: string
+    ErrorLinks:
+      type: object
+      properties:
+        about:
+          type: string
+    Error:
+      type: object
+      required:
+      - title
+      - detail
+      properties:
+        title:
+          type: string
+        detail:
+          type: string
+        code:
+          type:
+          - string
+          - 'null'
+        source:
+          $ref: '#/components/schemas/ErrorSource'
+        links:
+          $ref: '#/components/schemas/ErrorLinks'
+    ErrorDocument:
+      type: object
+      required:
+      - meta
+      - errors
+      properties:
+        meta:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    AccountAttributes:
+      type: object
+      required:
+      - name
+      - slug
+      - apiVersion
+      - status
+      - protected
+      - created
+      - updated
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+        slug:
+          type:
+          - string
+          - 'null'
+        apiVersion:
+          type:
+          - string
+          - 'null'
+        status:
+          type:
+          - string
+          - 'null'
+        protected:
+          type:
+          - boolean
+          - 'null'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    AccountRelationships:
+      type: object
+      required:
+      - settings
+      - webhookEndpoints
+      - webhookEvents
+      - products
+      - platforms
+      - arches
+      - channels
+      - releases
+      - artifacts
+      - policies
+      - users
+      - keys
+      - licenses
+      - machines
+      - components
+      - processes
+      - tokens
+      properties:
+        settings:
+          $ref: '#/components/schemas/ToManyRelationship'
+        webhookEndpoints:
+          $ref: '#/components/schemas/ToManyRelationship'
+        webhookEvents:
+          $ref: '#/components/schemas/ToManyRelationship'
+        products:
+          $ref: '#/components/schemas/ToManyRelationship'
+        platforms:
+          $ref: '#/components/schemas/ToManyRelationship'
+        arches:
+          $ref: '#/components/schemas/ToManyRelationship'
+        channels:
+          $ref: '#/components/schemas/ToManyRelationship'
+        releases:
+          $ref: '#/components/schemas/ToManyRelationship'
+        artifacts:
+          $ref: '#/components/schemas/ToManyRelationship'
+        policies:
+          $ref: '#/components/schemas/ToManyRelationship'
+        users:
+          $ref: '#/components/schemas/ToManyRelationship'
+        keys:
+          $ref: '#/components/schemas/ToManyRelationship'
+        licenses:
+          $ref: '#/components/schemas/ToManyRelationship'
+        machines:
+          $ref: '#/components/schemas/ToManyRelationship'
+        components:
+          $ref: '#/components/schemas/ToManyRelationship'
+        processes:
+          $ref: '#/components/schemas/ToManyRelationship'
+        tokens:
+          $ref: '#/components/schemas/ToManyRelationship'
+    AccountResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - accounts
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/AccountAttributes'
+        relationships:
+          $ref: '#/components/schemas/AccountRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    AccountKeysMeta:
+      type: object
+      required:
+      - ed25519
+      - rsa2048
+      - ecdsa
+      properties:
+        ed25519:
+          type: string
+        rsa2048:
+          type: string
+        ecdsa:
+          type: string
+    AccountMeta:
+      type: object
+      required:
+      - publicKey
+      - keys
+      properties:
+        publicKey:
+          type: string
+        keys:
+          $ref: '#/components/schemas/AccountKeysMeta'
+    AccountDocument:
+      type: object
+      required:
+      - data
+      - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/AccountResource'
+        meta:
+          $ref: '#/components/schemas/AccountMeta'
+  responses:
+    Error:
+      description: Keygen JSON:API error document.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'

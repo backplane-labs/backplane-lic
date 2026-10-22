@@ -1,0 +1,15 @@
+# Document skeleton of the bundled spec: `make spec` merges the fragments
+# (components.yaml + paths/*.yaml) into openapi/openapi.yaml.
+openapi: 3.1.0
+info:
+  title: backplane-lic
+  summary: Keygen CE-compatible licensing API (singleplayer, API 1.7).
+  description: |
+    A 1:1 reproduction of the Keygen CE 1.7 licensing API: same URLs,
+    JSON:API documents, headers, error codes and behaviour. Paths are
+    written in the canonical multiplayer form `/v1/accounts/{account}/...`;
+    the bare singleplayer form `/v1/<resource>...` is rewritten to it by
+    the server before routing.
+  version: 1.7.0
+paths: {}
+components: {}
