@@ -56,10 +56,11 @@ func (r GroupsRepo) GroupByID(ctx context.Context, accountID, id uuid.UUID) (dom
 
 // ListGroups answers the member-scoped page.
 func (r GroupsRepo) ListGroups(
-	ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, p paging.Params,
+	ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, ids []uuid.UUID, p paging.Params,
 ) ([]domain.Group, error) {
 	rows, err := r.q.ListGroups(ctx, db.ListGroupsParams{
 		AccountID:     accountID,
+		FilterIds:     ids,
 		MemberUser:    nullUUIDPtr(memberUser),
 		MemberLicense: nil,
 		Cursor:        cursorPtr(p.Cursor),
@@ -82,9 +83,10 @@ func (r GroupsRepo) ListGroups(
 }
 
 // CountGroups answers the member-scoped total.
-func (r GroupsRepo) CountGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID) (int, error) {
+func (r GroupsRepo) CountGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, ids []uuid.UUID) (int, error) { //nolint:lll // the scope's arguments
 	row, err := r.q.CountGroups(ctx, db.CountGroupsParams{
 		AccountID:  accountID,
+		FilterIds:  ids,
 		MemberUser: nullUUIDPtr(memberUser),
 	})
 	if err != nil {

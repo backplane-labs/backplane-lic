@@ -40,9 +40,9 @@ type Store interface { //nolint:interfacebloat // one port per scenario, includi
 	// DeleteEntitlement destroys the row; false when gone.
 	DeleteEntitlement(ctx context.Context, accountID, id uuid.UUID) (bool, error)
 	// ListEntitlements pages the account's entitlements.
-	ListEntitlements(ctx context.Context, accountID uuid.UUID, page paging.Page) ([]domain.Entitlement, error)
+	ListEntitlements(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page paging.Page) ([]domain.Entitlement, error) //nolint:lll // the scope's arguments
 	// CountEntitlements counts the account's entitlements.
-	CountEntitlements(ctx context.Context, accountID uuid.UUID) (int, error)
+	CountEntitlements(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID) (int, error)
 	// ListEntitlementsByIDs applies the authorized scope before pagination.
 	ListEntitlementsByIDs(
 		ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page paging.Page,
@@ -88,7 +88,18 @@ type List struct {
 
 // Index answers the entitlements page the principal may see (the
 // user/license post-check narrows it to their own).
+// Index pages the bearer's entitlements.
 func (s Scenario) Index(ctx context.Context, account domain.Account, params paging.Params) (List, error) {
+	return s.index(ctx, account, nil, params)
+}
+
+// Search pages the account's entitlements among a search's matches.
+func (s Scenario) Search(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
+	return s.index(ctx, account, matches, params)
+}
+
+// index pages the bearer's scope; matches (nil: all) narrows the admin side.
+func (s Scenario) index(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
 	if err := access.Require(ctx, "entitlement.read"); err != nil {
 		return List{}, err //nolint:wrapcheck // the authorization's own error
 	}
@@ -108,7 +119,7 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 	if scoped {
 		items, err = s.store.ListEntitlementsByIDs(ctx, account.ID, ids, page)
 	} else {
-		items, err = s.store.ListEntitlements(ctx, account.ID, page)
+		items, err = s.store.ListEntitlements(ctx, account.ID, matches, page)
 	}
 
 	if err != nil {
@@ -129,7 +140,7 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 		if scoped {
 			count, err = s.store.CountEntitlementsByIDs(ctx, account.ID, ids)
 		} else {
-			count, err = s.store.CountEntitlements(ctx, account.ID)
+			count, err = s.store.CountEntitlements(ctx, account.ID, matches)
 		}
 
 		if err != nil {

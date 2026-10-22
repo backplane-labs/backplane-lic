@@ -8880,6 +8880,72 @@ func decodeRevokeTokenParams(args [2]string, argsEscaped bool, r *http.Request) 
 	return params, nil
 }
 
+// SearchParams is parameters of search operation.
+type SearchParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackSearchParams(packed middleware.Parameters) (params SearchParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeSearchParams(args [1]string, argsEscaped bool, r *http.Request) (params SearchParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ShowEntitlementParams is parameters of showEntitlement operation.
 type ShowEntitlementParams struct {
 	// Account id (UUID) or slug.

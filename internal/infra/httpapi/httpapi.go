@@ -22,6 +22,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
+	"github.com/backplane-labs/backplane-lic/internal/app/search"
 	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
@@ -61,6 +62,7 @@ type Deps struct {
 	Keys          keys.Scenario
 	Licenses      licenses.Scenario
 	Webhooks      webhooks.Scenario
+	Search        search.Scenario
 	Spec          Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
@@ -90,6 +92,7 @@ type API struct {
 	keys         keys.Scenario
 	licenses     licenses.Scenario
 	webhooks     webhooks.Scenario
+	search       search.Scenario
 	clock        func() time.Time
 	spec         Spec
 }
@@ -117,6 +120,7 @@ func New(deps Deps) http.Handler {
 		licenses:      deps.Licenses,
 		clock:         clock,
 		webhooks:      deps.Webhooks,
+		search:        deps.Search,
 		spec:          deps.Spec,
 	}
 

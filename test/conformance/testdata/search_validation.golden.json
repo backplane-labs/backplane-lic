@@ -1,0 +1,538 @@
+{
+  "scenario": "search_validation",
+  "steps": [
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/meta"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:1\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "empty body",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/meta/type"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:2\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "missing type",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "is missing",
+            "source": {
+              "pointer": "/meta/query"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:3\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "missing query",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "cannot be blank",
+            "source": {
+              "pointer": "/meta/query"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:4\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "blank query",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search type 'tokens' is not supported",
+            "source": {
+              "pointer": "/meta/type"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:5\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unsupported type",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search type 'nope' is not supported",
+            "source": {
+              "pointer": "/meta/type"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:6\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unknown type",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search query 'foo' is not supported for resource type 'users'",
+            "source": {
+              "pointer": "/meta/query/foo"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:7\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unsupported attribute",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search query 'metadata' is not supported for resource type 'groups'",
+            "source": {
+              "pointer": "/meta/query/metadata"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:8\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "camel attribute",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search query for 'email' is too small (minimum 3 characters)",
+            "source": {
+              "pointer": "/meta/query/email"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:9\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "too small",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search query for 'metadata' must be a hash of key-value search terms",
+            "source": {
+              "pointer": "/meta/query/metadata"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:10\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "metadata not a hash",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "search query for 'fooBar' is too small (minimum 3 characters)",
+            "source": {
+              "pointer": "/meta/query/metadata/fooBar"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:11\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "metadata term too small",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "unpermitted parameter",
+            "source": {
+              "pointer": "/data"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:12\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unpermitted top level",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "unpermitted parameter",
+            "source": {
+              "pointer": "/meta/foo"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:13\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "unpermitted meta member",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "type mismatch (received integer expected string)",
+            "source": {
+              "pointer": "/meta/type"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:14\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "type not a string",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "type mismatch (received integer expected string)",
+            "source": {
+              "pointer": "/meta/op"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:15\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "op not a string",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "type mismatch (received string expected object)",
+            "source": {
+              "pointer": "/meta/query"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:16\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "query not an object",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "machines answer nothing",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

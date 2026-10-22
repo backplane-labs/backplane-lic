@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-faster/errors"
+	"github.com/go-faster/jx"
 	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/otelogen"
@@ -548,6 +549,13 @@ type Invoker interface {
 	//
 	// DELETE /v1/accounts/{account}/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// Search invokes search operation.
+	//
+	// Matches licenses, users, products, policies, groups, entitlements or machines by attribute terms
+	// combined with AND or OR. The response is the resource type's list document.
+	//
+	// POST /v1/accounts/{account}/search
+	Search(ctx context.Context, request SearchReq, params SearchParams) (jx.Raw, error)
 	// ShowEntitlement invokes showEntitlement operation.
 	//
 	// Retrieve an entitlement (by id or code).
@@ -10152,6 +10160,103 @@ func (c *Client) sendRevokeToken(ctx context.Context, params RevokeTokenParams) 
 
 	stage = "DecodeResponse"
 	result, err := decodeRevokeTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// Search invokes search operation.
+//
+// Matches licenses, users, products, policies, groups, entitlements or machines by attribute terms
+// combined with AND or OR. The response is the resource type's list document.
+//
+// POST /v1/accounts/{account}/search
+func (c *Client) Search(ctx context.Context, request SearchReq, params SearchParams) (jx.Raw, error) {
+	res, err := c.sendSearch(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendSearch(ctx context.Context, request SearchReq, params SearchParams) (res jx.Raw, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("search"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/search"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, SearchOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/search"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeSearchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeSearchResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

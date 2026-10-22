@@ -31,6 +31,9 @@ type request struct {
 	challenge string
 	// body is the decoded, key-underscored request body (POST only).
 	body map[string]any
+	// raw is the request body as sent, for handlers that need the
+	// document's key order (search terms).
+	raw []byte
 	// query is the request's parsed query string (filters,
 	// pagination, the environment parameter).
 	query url.Values

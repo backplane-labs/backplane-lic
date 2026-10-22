@@ -75,10 +75,11 @@ func (r EntitlementsRepo) DeleteEntitlement(ctx context.Context, accountID, id u
 }
 
 // ListEntitlements pages the account-wide entitlement scope.
-func (r EntitlementsRepo) ListEntitlements(ctx context.Context, accountID uuid.UUID, page Page) ([]domain.Entitlement, error) { //nolint:lll // the wire name is long
+// ids narrows the scope to a search's matches; nil keeps the whole account.
+func (r EntitlementsRepo) ListEntitlements(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page Page) ([]domain.Entitlement, error) { //nolint:lll // the wire name is long
 	if page.Asc {
 		rows, err := r.q.ListEntitlementsAsc(ctx, db.ListEntitlementsAscParams{
-			AccountID: accountID, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
+			AccountID: accountID, FilterIds: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
 		})
 
 		return entitlementList(rows, func(row db.ListEntitlementsAscRow) db.GetEntitlementByIDRow {
@@ -87,7 +88,7 @@ func (r EntitlementsRepo) ListEntitlements(ctx context.Context, accountID uuid.U
 	}
 
 	rows, err := r.q.ListEntitlementsDesc(ctx, db.ListEntitlementsDescParams{
-		AccountID: accountID, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
+		AccountID: accountID, FilterIds: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
 	})
 
 	return entitlementList(rows, func(row db.ListEntitlementsDescRow) db.GetEntitlementByIDRow {
@@ -96,8 +97,8 @@ func (r EntitlementsRepo) ListEntitlements(ctx context.Context, accountID uuid.U
 }
 
 // CountEntitlements counts the account's entitlements.
-func (r EntitlementsRepo) CountEntitlements(ctx context.Context, accountID uuid.UUID) (int, error) {
-	row, err := r.q.CountEntitlements(ctx, accountID)
+func (r EntitlementsRepo) CountEntitlements(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID) (int, error) {
+	row, err := r.q.CountEntitlements(ctx, db.CountEntitlementsParams{AccountID: accountID, FilterIds: ids})
 	if err != nil {
 		return 0, fmt.Errorf("postgres: count entitlements: %w", err)
 	}
@@ -105,39 +106,27 @@ func (r EntitlementsRepo) CountEntitlements(ctx context.Context, accountID uuid.
 	return int(row.Count), nil
 }
 
-// ListEntitlementsByIDs pages only the authorized entitlement IDs.
+// ListEntitlementsByIDs pages only the authorized entitlement IDs; a nil
+// scope is empty, never the whole account.
 func (r EntitlementsRepo) ListEntitlementsByIDs(
 	ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page Page,
 ) ([]domain.Entitlement, error) {
-	if page.Asc {
-		rows, err := r.q.ListEntitlementsByIdsAsc(ctx, db.ListEntitlementsByIdsAscParams{
-			AccountID: accountID, Ids: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
-		})
-
-		return entitlementList(rows, func(row db.ListEntitlementsByIdsAscRow) db.GetEntitlementByIDRow {
-			return db.GetEntitlementByIDRow(row)
-		}, err)
+	if ids == nil {
+		ids = []uuid.UUID{}
 	}
 
-	rows, err := r.q.ListEntitlementsByIdsDesc(ctx, db.ListEntitlementsByIdsDescParams{
-		AccountID: accountID, Ids: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
-	})
-
-	return entitlementList(rows, func(row db.ListEntitlementsByIdsDescRow) db.GetEntitlementByIDRow {
-		return db.GetEntitlementByIDRow(row)
-	}, err)
+	return r.ListEntitlements(ctx, accountID, ids, page)
 }
 
 // CountEntitlementsByIDs counts only the authorized entitlement IDs.
 func (r EntitlementsRepo) CountEntitlementsByIDs(
 	ctx context.Context, accountID uuid.UUID, ids []uuid.UUID,
 ) (int, error) {
-	row, err := r.q.CountEntitlementsByIds(ctx, db.CountEntitlementsByIdsParams{AccountID: accountID, Ids: ids})
-	if err != nil {
-		return 0, fmt.Errorf("postgres: count scoped entitlements: %w", err)
+	if ids == nil {
+		ids = []uuid.UUID{}
 	}
 
-	return int(row.Count), nil
+	return r.CountEntitlements(ctx, accountID, ids)
 }
 
 // UserEntitlementIDs answers the entitlements of the user's licenses.
@@ -265,8 +254,7 @@ func (r EntitlementsRepo) DeletePolicyEntitlements(
 	return ids, nil
 }
 
-func entitlementList[T db.ListEntitlementsDescRow | db.ListEntitlementsAscRow |
-	db.ListEntitlementsByIdsDescRow | db.ListEntitlementsByIdsAscRow](
+func entitlementList[T db.ListEntitlementsDescRow | db.ListEntitlementsAscRow](
 	rows []T, conv func(T) db.GetEntitlementByIDRow, err error,
 ) ([]domain.Entitlement, error) {
 	if err != nil {

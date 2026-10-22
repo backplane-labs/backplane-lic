@@ -1,0 +1,3310 @@
+{
+  "scenario": "search_matches",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {
+              "tier": "gold\u003crun\u003e"
+            },
+            "name": "Srch\u003crun\u003e Desktop",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": null,
+            "checkInIntervalCount": null,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": null,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": false,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": null,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "Srch\u003crun\u003e Annual",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_MACHINE",
+            "protected": true,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": false,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create policy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "email": "srch\u003crun\u003e@example.test",
+            "firstName": "Srch\u003crun\u003e",
+            "fullName": "Srch\u003crun\u003e Owner",
+            "lastName": "Owner",
+            "metadata": {
+              "customerId": "cust\u003crun\u003e"
+            },
+            "role": "user",
+            "status": "ACTIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+              }
+            },
+            "products": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+              }
+            },
+            "secondFactors": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+              }
+            }
+          },
+          "type": "users"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create user",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": false,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {
+              "batch": "b\u003crun\u003e",
+              "seats": 1042
+            },
+            "name": "Srch\u003crun\u003e first",
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "users"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+              },
+              "meta": {
+                "count": 1
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create first license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": false,
+            "key": "\u003clicense-key:2\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 1,
+            "maxMemory": null,
+            "maxProcesses": null,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {
+              "batch": "b\u003crun\u003e",
+              "seats": 7007
+            },
+            "name": "Srch\u003crun\u003e second",
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:6\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create second license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "maxLicenses": null,
+            "maxMachines": null,
+            "maxUsers": null,
+            "metadata": {},
+            "name": "Srch\u003crun\u003e Team",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/machines"
+              }
+            },
+            "owners": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/owners"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/users"
+              }
+            }
+          },
+          "type": "groups"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create group",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": "SRCH\u003crun\u003e_EXPORT",
+            "created": "\u003cts\u003e",
+            "metadata": {},
+            "name": "Srch\u003crun\u003e Export",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:8\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/entitlements/\u003cuuid:8\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            }
+          },
+          "type": "entitlements"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "create entitlement",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by name",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by key",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by id",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by product name",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by policy id",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by owner email",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by user id",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses by cast metadata",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses and",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:1\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 1042
+              },
+              "name": "Srch\u003crun\u003e first",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:5\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": {
+                  "id": "\u003cuuid:4\u003e",
+                  "type": "users"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+                },
+                "meta": {
+                  "count": 1
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses or",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "encrypted": false,
+              "expiry": null,
+              "floating": false,
+              "key": "\u003clicense-key:2\u003e",
+              "lastCheckIn": null,
+              "lastCheckOut": null,
+              "lastValidated": null,
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {
+                "batch": "b\u003crun\u003e",
+                "seats": 7007
+              },
+              "name": "Srch\u003crun\u003e second",
+              "nextCheckIn": null,
+              "protected": true,
+              "requireCheckIn": false,
+              "requireHeartbeat": false,
+              "scheme": null,
+              "status": "ACTIVE",
+              "strict": false,
+              "suspended": false,
+              "updated": "\u003cts\u003e",
+              "uses": 0,
+              "version": null
+            },
+            "id": "\u003cuuid:6\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+                },
+                "meta": {
+                  "cores": 0,
+                  "count": 0,
+                  "disk": 0,
+                  "memory": 0
+                }
+              },
+              "owner": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+                }
+              },
+              "policy": {
+                "data": {
+                  "id": "\u003cuuid:3\u003e",
+                  "type": "policies"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+                },
+                "meta": {
+                  "count": 0
+                }
+              }
+            },
+            "type": "licenses"
+          }
+        ],
+        "links": {
+          "first": "/v1/accounts/example-com/search?page%5Bnumber%5D=1\u0026page%5Bsize%5D=1",
+          "last": "/v1/accounts/example-com/search?page%5Bnumber%5D=2\u0026page%5Bsize%5D=1",
+          "meta": {
+            "count": 2,
+            "pages": 2
+          },
+          "next": "/v1/accounts/example-com/search?page%5Bnumber%5D=2\u0026page%5Bsize%5D=1",
+          "prev": null,
+          "self": "/v1/accounts/example-com/search?page%5Bnumber%5D=1\u0026page%5Bsize%5D=1"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "licenses paged",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "srch\u003crun\u003e@example.test",
+              "firstName": "Srch\u003crun\u003e",
+              "fullName": "Srch\u003crun\u003e Owner",
+              "lastName": "Owner",
+              "metadata": {
+                "customerId": "cust\u003crun\u003e"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "users by email",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "srch\u003crun\u003e@example.test",
+              "firstName": "Srch\u003crun\u003e",
+              "fullName": "Srch\u003crun\u003e Owner",
+              "lastName": "Owner",
+              "metadata": {
+                "customerId": "cust\u003crun\u003e"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "users by full name",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "users by one name word",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "email": "srch\u003crun\u003e@example.test",
+              "firstName": "Srch\u003crun\u003e",
+              "fullName": "Srch\u003crun\u003e Owner",
+              "lastName": "Owner",
+              "metadata": {
+                "customerId": "cust\u003crun\u003e"
+              },
+              "role": "user",
+              "status": "ACTIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:4\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "group": {
+                "data": null,
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/group"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/machines"
+                }
+              },
+              "products": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/products"
+                }
+              },
+              "secondFactors": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/second-factors"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/users/\u003cuuid:4\u003e/tokens"
+                }
+              }
+            },
+            "type": "users"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "users by metadata",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "code": null,
+              "created": "\u003cts\u003e",
+              "distributionStrategy": "LICENSED",
+              "metadata": {
+                "tier": "gold\u003crun\u003e"
+              },
+              "name": "Srch\u003crun\u003e Desktop",
+              "platforms": null,
+              "updated": "\u003cts\u003e",
+              "url": null
+            },
+            "id": "\u003cuuid:1\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "artifacts": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+                }
+              },
+              "channels": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+                }
+              },
+              "platforms": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+                }
+              },
+              "policies": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+                }
+              },
+              "releases": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+                }
+              }
+            },
+            "type": "products"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "products by name",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "code": null,
+              "created": "\u003cts\u003e",
+              "distributionStrategy": "LICENSED",
+              "metadata": {
+                "tier": "gold\u003crun\u003e"
+              },
+              "name": "Srch\u003crun\u003e Desktop",
+              "platforms": null,
+              "updated": "\u003cts\u003e",
+              "url": null
+            },
+            "id": "\u003cuuid:1\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "artifacts": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+                }
+              },
+              "channels": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+                }
+              },
+              "platforms": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+                }
+              },
+              "policies": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+                }
+              },
+              "releases": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+                }
+              },
+              "tokens": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+                }
+              }
+            },
+            "type": "products"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "products by metadata",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "authenticationStrategy": "TOKEN",
+              "checkInInterval": null,
+              "checkInIntervalCount": null,
+              "componentMatchingStrategy": "MATCH_ANY",
+              "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+              "created": "\u003cts\u003e",
+              "duration": null,
+              "encrypted": false,
+              "expirationBasis": "FROM_CREATION",
+              "expirationStrategy": "RESTRICT_ACCESS",
+              "floating": false,
+              "heartbeatBasis": "FROM_FIRST_PING",
+              "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+              "heartbeatDuration": null,
+              "heartbeatResurrectionStrategy": "NO_REVIVE",
+              "machineLeasingStrategy": "PER_LICENSE",
+              "machineMatchingStrategy": "MATCH_ANY",
+              "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+              "maxCores": null,
+              "maxDisk": null,
+              "maxMachines": 1,
+              "maxMemory": null,
+              "maxProcesses": null,
+              "maxUsers": null,
+              "maxUses": null,
+              "metadata": {},
+              "name": "Srch\u003crun\u003e Annual",
+              "overageStrategy": "NO_OVERAGE",
+              "processLeasingStrategy": "PER_MACHINE",
+              "protected": true,
+              "renewalBasis": "FROM_EXPIRY",
+              "requireCheckIn": false,
+              "requireChecksumScope": false,
+              "requireComponentsScope": false,
+              "requireFingerprintScope": false,
+              "requireHeartbeat": false,
+              "requireMachineScope": false,
+              "requirePolicyScope": false,
+              "requireProductScope": false,
+              "requireUserScope": false,
+              "requireVersionScope": false,
+              "scheme": null,
+              "strict": false,
+              "transferStrategy": "KEEP_EXPIRY",
+              "updated": "\u003cts\u003e",
+              "usePool": false
+            },
+            "id": "\u003cuuid:3\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "entitlements": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/entitlements"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/licenses"
+                }
+              },
+              "pool": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/pool"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/product"
+                }
+              }
+            },
+            "type": "policies"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "policies by product",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "maxLicenses": null,
+              "maxMachines": null,
+              "maxUsers": null,
+              "metadata": {},
+              "name": "Srch\u003crun\u003e Team",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:7\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "licenses": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/licenses"
+                }
+              },
+              "machines": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/machines"
+                }
+              },
+              "owners": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/owners"
+                }
+              },
+              "users": {
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/groups/\u003cuuid:7\u003e/users"
+                }
+              }
+            },
+            "type": "groups"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "groups by name",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "code": "SRCH\u003crun\u003e_EXPORT",
+              "created": "\u003cts\u003e",
+              "metadata": {},
+              "name": "Srch\u003crun\u003e Export",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:8\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/entitlements/\u003cuuid:8\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              }
+            },
+            "type": "entitlements"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "entitlements by code",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "no matches",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

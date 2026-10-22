@@ -33,9 +33,9 @@ type Store interface {
 	// GroupByID loads a group; ErrNotFound.
 	GroupByID(ctx context.Context, accountID, id uuid.UUID) (domain.Group, error)
 	// ListGroups answers the principal-scoped page.
-	ListGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, p paging.Params) ([]domain.Group, error)
+	ListGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, ids []uuid.UUID, p paging.Params) ([]domain.Group, error) //nolint:lll // the scope's arguments
 	// CountGroups answers the scope's total.
-	CountGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID) (int, error)
+	CountGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, ids []uuid.UUID) (int, error)
 	// InsertGroup writes a new group row.
 	InsertGroup(ctx context.Context, group domain.Group) error
 	// UpdateGroup writes every mutable column.
@@ -154,6 +154,20 @@ func (s Scenario) Show(
 func (s Scenario) List(
 	ctx context.Context, account domain.Account, principal access.Principal, p paging.Params,
 ) (Page, error) {
+	return s.list(ctx, account, principal, nil, p)
+}
+
+// Search pages the account's groups among a search's matches.
+func (s Scenario) Search(
+	ctx context.Context, account domain.Account, principal access.Principal, matches []uuid.UUID, p paging.Params,
+) (Page, error) {
+	return s.list(ctx, account, principal, matches, p)
+}
+
+// list pages the principal's scope; matches (nil: all) narrows it.
+func (s Scenario) list(
+	ctx context.Context, account domain.Account, principal access.Principal, matches []uuid.UUID, p paging.Params,
+) (Page, error) {
 	if err := access.Require(ctx, "group.read"); err != nil {
 		return Page{}, err //nolint:wrapcheck // the port's own error
 	}
@@ -164,14 +178,14 @@ func (s Scenario) List(
 		member = uuid.NullUUID{UUID: principal.BearerID, Valid: true}
 	}
 
-	rows, err := s.store.ListGroups(ctx, account.ID, member, p)
+	rows, err := s.store.ListGroups(ctx, account.ID, member, matches, p)
 	if err != nil {
 		return Page{}, fmt.Errorf("groups: list: %w", err)
 	}
 
 	total := len(rows)
 	if p.Mode == paging.ModeOffset {
-		total, err = s.store.CountGroups(ctx, account.ID, member)
+		total, err = s.store.CountGroups(ctx, account.ID, member, matches)
 		if err != nil {
 			return Page{}, fmt.Errorf("groups: count: %w", err)
 		}

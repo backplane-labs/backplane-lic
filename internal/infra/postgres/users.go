@@ -171,6 +171,7 @@ func (r UsersRepo) CountUsers(
 
 	params := db.CountUsersParams{
 		AccountID: accountID,
+		FilterIds: f.IDs,
 		Roles:     f.Roles,
 		GroupID:   nullUUIDPtr(f.GroupID),
 		ProductID: nullUUIDPtr(f.ProductID),
@@ -396,6 +397,7 @@ func listUsersParams(
 	return db.ListUsersParams{
 		Cutoff:    cutoff,
 		AccountID: accountID,
+		FilterIds: f.IDs,
 		Roles:     f.Roles,
 		GroupID:   nullUUIDPtr(f.GroupID),
 		ProductID: nullUUIDPtr(f.ProductID),

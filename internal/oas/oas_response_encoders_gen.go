@@ -1328,6 +1328,22 @@ func encodeRevokeTokenResponse(response *RevokeTokenNoContent, w http.ResponseWr
 	return nil
 }
 
+func encodeSearchResponse(response jx.Raw, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.api+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	if len(response) != 0 {
+		e.Raw(response)
+	}
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeShowEntitlementResponse(response *EntitlementDocument, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/vnd.api+json")
 	w.WriteHeader(200)

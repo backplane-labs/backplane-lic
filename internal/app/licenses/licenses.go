@@ -35,6 +35,8 @@ var ErrUsageConflict = errors.New("licenses: usage conflict")
 // declarations); the hash filters arrive pre-resolved to timestamp
 // bounds.
 type Filter struct {
+	// IDs narrows the scope to a search's matches; nil keeps it whole.
+	IDs       []uuid.UUID
 	ProductID uuid.NullUUID
 	PolicyID  uuid.NullUUID
 	// OwnerID filters by owner id; OwnerEmail (exact) and

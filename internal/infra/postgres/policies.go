@@ -59,10 +59,10 @@ func (r PoliciesRepo) DeletePolicy(ctx context.Context, accountID, id uuid.UUID)
 // load the same page and fail the post-check); filterProductID narrows
 // by product when set.
 func (r PoliciesRepo) ListPolicies(
-	ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID, page Page,
+	ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID, ids []uuid.UUID, page Page,
 ) ([]domain.Policy, error) {
 	args := db.ListPoliciesDescParams{
-		AccountID: accountID, FilterProductID: filterProductID,
+		AccountID: accountID, FilterProductID: filterProductID, FilterIds: ids,
 		CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
 	}
 
@@ -78,8 +78,10 @@ func (r PoliciesRepo) ListPolicies(
 }
 
 // CountPolicies counts the admin-side scope.
-func (r PoliciesRepo) CountPolicies(ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID) (int, error) {
-	row, err := r.q.CountPolicies(ctx, db.CountPoliciesParams{AccountID: accountID, FilterProductID: filterProductID})
+func (r PoliciesRepo) CountPolicies(ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID, ids []uuid.UUID) (int, error) { //nolint:lll // the scope's arguments
+	row, err := r.q.CountPolicies(ctx, db.CountPoliciesParams{
+		AccountID: accountID, FilterProductID: filterProductID, FilterIds: ids,
+	})
 	if err != nil {
 		return 0, fmt.Errorf("postgres: count policies: %w", err)
 	}
@@ -161,7 +163,7 @@ func policyRowFromForProductAsc(row db.ListPoliciesForProductAscRow) db.GetPolic
 
 func policyArgsAsc(args db.ListPoliciesDescParams) db.ListPoliciesAscParams {
 	return db.ListPoliciesAscParams{ //nolint:staticcheck // mirrors the generated row types
-		AccountID: args.AccountID, FilterProductID: args.FilterProductID,
+		AccountID: args.AccountID, FilterProductID: args.FilterProductID, FilterIds: args.FilterIds,
 		CursorID: args.CursorID, Limit: args.Limit, Offset: args.Offset,
 	}
 }

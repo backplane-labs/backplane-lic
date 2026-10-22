@@ -47,6 +47,7 @@ SELECT id, account_id, name, code, distribution_strategy, url, platforms,
   metadata, created_at, updated_at
 FROM lic.products
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (
     @cursor_id::uuid IS NULL
     OR (created_at, id) < (
@@ -62,6 +63,7 @@ SELECT id, account_id, name, code, distribution_strategy, url, platforms,
   metadata, created_at, updated_at
 FROM lic.products
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (
     @cursor_id::uuid IS NULL
     OR (created_at, id) > (
@@ -73,7 +75,8 @@ ORDER BY created_at ASC, id ASC
 LIMIT @limit OFFSET @offset;
 
 -- name: CountProducts :one
-SELECT count(*) FROM lic.products WHERE account_id = @account_id;
+SELECT count(*) FROM lic.products WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]));
 
 -- The user scope (Product.for_user): open products UNION the products of
 -- the user's licenses (owned or attached).

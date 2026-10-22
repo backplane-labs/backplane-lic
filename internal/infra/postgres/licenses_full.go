@@ -796,6 +796,7 @@ func listLicensesArgs(
 
 	return db.ListLicensesParams{
 		AccountID:             accountID,
+		FilterIds:             f.IDs,
 		FilterProductID:       nullUUIDPtr(f.ProductID),
 		FilterPolicyID:        nullUUIDPtr(f.PolicyID),
 		FilterOwnerID:         nullUUIDPtr(f.OwnerID),
@@ -840,6 +841,7 @@ func listLicensesArgs(
 func listLicensesArgsAsc(args db.ListLicensesParams) db.ListLicensesAscParams {
 	return db.ListLicensesAscParams{ //nolint:staticcheck // mirrors the generated row types
 		AccountID:             args.AccountID,
+		FilterIds:             args.FilterIds,
 		FilterProductID:       args.FilterProductID,
 		FilterPolicyID:        args.FilterPolicyID,
 		FilterOwnerID:         args.FilterOwnerID,
@@ -884,6 +886,7 @@ func listLicensesArgsAsc(args db.ListLicensesParams) db.ListLicensesAscParams {
 func countLicensesArgs(args db.ListLicensesParams) db.CountLicensesParams {
 	return db.CountLicensesParams{
 		AccountID:             args.AccountID,
+		FilterIds:             args.FilterIds,
 		FilterProductID:       args.FilterProductID,
 		FilterPolicyID:        args.FilterPolicyID,
 		FilterOwnerID:         args.FilterOwnerID,

@@ -92,6 +92,7 @@ const (
 	RetryWebhookEventOperation         OperationName = "RetryWebhookEvent"
 	RevokeLicenseOperation             OperationName = "RevokeLicense"
 	RevokeTokenOperation               OperationName = "RevokeToken"
+	SearchOperation                    OperationName = "Search"
 	ShowEntitlementOperation           OperationName = "ShowEntitlement"
 	ShowGroupOperation                 OperationName = "ShowGroup"
 	ShowGroupLicenseOperation          OperationName = "ShowGroupLicense"

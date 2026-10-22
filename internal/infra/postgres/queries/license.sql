@@ -363,6 +363,7 @@ FROM lic.licenses l
 JOIN lic.policies p ON p.id = l.policy_id
 LEFT JOIN lic.users u ON u.id = l.user_id
 WHERE l.account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR l.id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@filter_product_id::uuid IS NULL OR l.product_id = @filter_product_id)
   AND (@filter_policy_id::uuid IS NULL OR l.policy_id = @filter_policy_id)
   AND (@filter_owner_id::uuid IS NULL OR l.user_id = @filter_owner_id)
@@ -552,6 +553,7 @@ FROM lic.licenses l
 JOIN lic.policies p ON p.id = l.policy_id
 LEFT JOIN lic.users u ON u.id = l.user_id
 WHERE l.account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR l.id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@filter_product_id::uuid IS NULL OR l.product_id = @filter_product_id)
   AND (@filter_policy_id::uuid IS NULL OR l.policy_id = @filter_policy_id)
   AND (@filter_owner_id::uuid IS NULL OR l.user_id = @filter_owner_id)
@@ -711,6 +713,7 @@ SELECT count(*) AS count
 FROM lic.licenses l
 LEFT JOIN lic.users u ON u.id = l.user_id
 WHERE l.account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR l.id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@filter_product_id::uuid IS NULL OR l.product_id = @filter_product_id)
   AND (@filter_policy_id::uuid IS NULL OR l.policy_id = @filter_policy_id)
   AND (@filter_owner_id::uuid IS NULL OR l.user_id = @filter_owner_id)

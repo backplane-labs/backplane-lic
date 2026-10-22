@@ -119,14 +119,14 @@ func (s *Store) GroupIDsOfUser(ctx context.Context, accountID, userID uuid.UUID)
 
 // ListGroups answers the member-scoped page.
 func (s *Store) ListGroups(
-	ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, p paging.Params,
+	ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, ids []uuid.UUID, p paging.Params,
 ) ([]domain.Group, error) {
-	return s.Groups.ListGroups(ctx, accountID, memberUser, p)
+	return s.Groups.ListGroups(ctx, accountID, memberUser, ids, p)
 }
 
 // CountGroups answers the member-scoped total.
-func (s *Store) CountGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID) (int, error) {
-	return s.Groups.CountGroups(ctx, accountID, memberUser)
+func (s *Store) CountGroups(ctx context.Context, accountID uuid.UUID, memberUser uuid.NullUUID, ids []uuid.UUID) (int, error) { //nolint:lll // the scope's arguments
+	return s.Groups.CountGroups(ctx, accountID, memberUser, ids)
 }
 
 // InsertGroup writes a new group row.

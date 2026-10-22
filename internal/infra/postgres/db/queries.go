@@ -304,121 +304,6 @@ func (q *Queries) DeleteEntitlement(ctx context.Context, arg DeleteEntitlementPa
 	return tag.RowsAffected(), err
 }
 
-const listEntitlementsDescSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
-FROM lic.entitlements
-WHERE account_id = $1
-  AND (
-    $2::uuid IS NULL
-    OR (created_at, id) < (
-      SELECT e2.created_at, e2.id FROM lic.entitlements e2
-      WHERE e2.account_id = $1 AND e2.id = $2
-    )
-  )
-ORDER BY created_at DESC, id DESC
-LIMIT $3 OFFSET $4;`
-
-type ListEntitlementsDescParams struct {
-	AccountID uuid.UUID
-	CursorID  *uuid.UUID
-	Limit     int64
-	Offset    int64
-}
-
-type ListEntitlementsDescRow struct {
-	ID        uuid.UUID
-	AccountID uuid.UUID
-	Name      string
-	Code      string
-	Metadata  json.RawMessage
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-func (q *Queries) ListEntitlementsDesc(ctx context.Context, arg ListEntitlementsDescParams) ([]ListEntitlementsDescRow, error) {
-	rows, err := q.db.Query(ctx, listEntitlementsDescSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListEntitlementsDescRow
-	for rows.Next() {
-		var i ListEntitlementsDescRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listEntitlementsAscSQL = `SELECT id, account_id, name, code, metadata, created_at, updated_at
-FROM lic.entitlements
-WHERE account_id = $1
-  AND (
-    $2::uuid IS NULL
-    OR (created_at, id) > (
-      SELECT e2.created_at, e2.id FROM lic.entitlements e2
-      WHERE e2.account_id = $1 AND e2.id = $2
-    )
-  )
-ORDER BY created_at ASC, id ASC
-LIMIT $3 OFFSET $4;`
-
-type ListEntitlementsAscParams struct {
-	AccountID uuid.UUID
-	CursorID  *uuid.UUID
-	Limit     int64
-	Offset    int64
-}
-
-type ListEntitlementsAscRow struct {
-	ID        uuid.UUID
-	AccountID uuid.UUID
-	Name      string
-	Code      string
-	Metadata  json.RawMessage
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-func (q *Queries) ListEntitlementsAsc(ctx context.Context, arg ListEntitlementsAscParams) ([]ListEntitlementsAscRow, error) {
-	rows, err := q.db.Query(ctx, listEntitlementsAscSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListEntitlementsAscRow
-	for rows.Next() {
-		var i ListEntitlementsAscRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const countEntitlementsSQL = `SELECT count(*) FROM lic.entitlements WHERE account_id = $1;
-
--- Authorized user/license scopes are applied before pagination and counts.`
-
-type CountEntitlementsRow struct {
-	Count int64
-}
-
-func (q *Queries) CountEntitlements(ctx context.Context, accountID uuid.UUID) (CountEntitlementsRow, error) {
-	row := q.db.QueryRow(ctx, countEntitlementsSQL, accountID)
-	var i CountEntitlementsRow
-	err := row.Scan(&i.Count)
-	return i, err
-}
-
 const userEntitlementIdsSQL = `SELECT entitlement_id FROM (
   SELECT pe.entitlement_id
   FROM lic.policy_entitlements pe
@@ -702,110 +587,6 @@ type DeleteGroupParams struct {
 func (q *Queries) DeleteGroup(ctx context.Context, arg DeleteGroupParams) error {
 	_, err := q.db.Exec(ctx, deleteGroupSQL, arg.AccountID, arg.ID)
 	return err
-}
-
-const countGroupsSQL = `SELECT count(*)::int AS total FROM lic.groups
-WHERE account_id = $1
-  AND (
-    $2::uuid IS NULL
-    OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = $2)
-    OR EXISTS (
-      SELECT 1 FROM lic.group_owners go
-      WHERE go.account_id = $1 AND go.group_id = lic.groups.id AND go.user_id = $2
-    )
-  );`
-
-type CountGroupsParams struct {
-	AccountID  uuid.UUID
-	MemberUser *uuid.UUID
-}
-
-type CountGroupsRow struct {
-	Total int32
-}
-
-func (q *Queries) CountGroups(ctx context.Context, arg CountGroupsParams) (CountGroupsRow, error) {
-	row := q.db.QueryRow(ctx, countGroupsSQL, arg.AccountID, arg.MemberUser)
-	var i CountGroupsRow
-	err := row.Scan(&i.Total)
-	return i, err
-}
-
-const listGroupsSQL = `SELECT id, account_id, name, max_users, max_licenses, max_machines, metadata,
-  created_at, updated_at
-FROM lic.groups
-WHERE account_id = $1
-  AND (
-    $2::uuid IS NULL
-    OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = $2)
-    OR EXISTS (
-      SELECT 1 FROM lic.group_owners go
-      WHERE go.account_id = $1 AND go.group_id = lic.groups.id AND go.user_id = $2
-    )
-  )
-  AND (
-    $3::uuid IS NULL
-    OR EXISTS (
-      SELECT 1 FROM lic.licenses l WHERE l.group_id = lic.groups.id AND l.id = $3
-    )
-  )
-  AND (
-    $4::uuid IS NULL
-    OR CASE
-      WHEN $5::boolean THEN
-        (created_at, id) > (SELECT c.created_at, c.id FROM lic.groups c WHERE c.id = $4)
-      ELSE
-        (created_at, id) < (SELECT c.created_at, c.id FROM lic.groups c WHERE c.id = $4)
-    END
-  )
-ORDER BY
-  CASE WHEN $5::boolean THEN created_at END ASC,
-  CASE WHEN $5::boolean THEN id END ASC,
-  created_at DESC,
-  id DESC
-LIMIT $6
-OFFSET $7;`
-
-type ListGroupsParams struct {
-	AccountID     uuid.UUID
-	MemberUser    *uuid.UUID
-	MemberLicense *uuid.UUID
-	Cursor        *uuid.UUID
-	Asc           bool
-	Limit         int64
-	Offset        int64
-}
-
-type ListGroupsRow struct {
-	ID          uuid.UUID
-	AccountID   uuid.UUID
-	Name        *string
-	MaxUsers    *int32
-	MaxLicenses *int32
-	MaxMachines *int32
-	Metadata    json.RawMessage
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
-func (q *Queries) ListGroups(ctx context.Context, arg ListGroupsParams) ([]ListGroupsRow, error) {
-	rows, err := q.db.Query(ctx, listGroupsSQL, arg.AccountID, arg.MemberUser, arg.MemberLicense, arg.Cursor, arg.Asc, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListGroupsRow
-	for rows.Next() {
-		var i ListGroupsRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.MaxUsers, &i.MaxLicenses, &i.MaxMachines, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const ownedGroupIdsForUserSQL = `SELECT group_id FROM lic.group_owners
@@ -2564,883 +2345,6 @@ func (q *Queries) CountLicenseMachines(ctx context.Context, arg CountLicenseMach
 	return i, err
 }
 
-const listLicensesSQL = `SELECT l.id, l.account_id, l.product_id, l.policy_id, l.user_id, l.group_id,
-  l.name, l.key, l.expiry, l.uses, l.suspended, l.protected, l.metadata,
-  l.max_machines_override, l.max_processes_override, l.max_users_override,
-  l.max_cores_override, l.max_memory_override, l.max_disk_override,
-  l.max_uses_override, l.machines_count, l.machines_core_count,
-  l.machines_memory_count, l.machines_disk_count, l.license_users_count,
-  l.last_validated_at, l.last_validated_checksum, l.last_validated_version,
-  l.last_check_in_at, l.last_check_out_at, l.created_at, l.updated_at,
-  (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,
-  u.email AS owner_email,
-  p.id AS policy_id2, p.account_id AS policy_account_id, p.product_id AS policy_product_id,
-  p.name AS policy_name, p.duration AS policy_duration, p.strict AS policy_strict,
-  p.floating AS policy_floating, p.use_pool AS policy_use_pool,
-  p.max_machines AS policy_max_machines, p.max_processes AS policy_max_processes,
-  p.max_users AS policy_max_users, p.max_cores AS policy_max_cores,
-  p.max_memory AS policy_max_memory, p.max_disk AS policy_max_disk,
-  p.max_uses AS policy_max_uses,
-  p.machine_uniqueness_strategy, p.machine_matching_strategy,
-  p.component_uniqueness_strategy, p.component_matching_strategy,
-  p.expiration_strategy, p.expiration_basis, p.renewal_basis, p.transfer_strategy,
-  p.authentication_strategy, p.machine_leasing_strategy, p.process_leasing_strategy,
-  p.overage_strategy, p.scheme AS policy_scheme, p.encrypted AS policy_encrypted,
-  p.protected AS policy_protected,
-  p.require_product_scope, p.require_policy_scope, p.require_machine_scope,
-  p.require_fingerprint_scope, p.require_components_scope, p.require_user_scope,
-  p.require_checksum_scope, p.require_version_scope, p.require_check_in,
-  p.check_in_interval, p.check_in_interval_count, p.heartbeat_duration,
-  p.heartbeat_cull_strategy, p.heartbeat_resurrection_strategy, p.heartbeat_basis,
-  p.require_heartbeat, p.metadata AS policy_metadata,
-  p.created_at AS policy_created_at, p.updated_at AS policy_updated_at
-FROM lic.licenses l
-JOIN lic.policies p ON p.id = l.policy_id
-LEFT JOIN lic.users u ON u.id = l.user_id
-WHERE l.account_id = $1
-  AND ($2::uuid IS NULL OR l.product_id = $2)
-  AND ($3::uuid IS NULL OR l.policy_id = $3)
-  AND ($4::uuid IS NULL OR l.user_id = $4)
-  AND ($5::text IS NULL OR u.email = $5)
-  AND ($6::text IS NULL OR u.email ILIKE '%' || $6 || '%')
-  AND (
-    $7::uuid IS NULL OR l.user_id = $7 OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      WHERE lu.license_id = l.id AND lu.user_id = $7
-    )
-  )
-  AND (
-    $8::text IS NULL
-    OR l.user_id IN (
-      SELECT id FROM lic.users WHERE account_id = l.account_id AND email = $8
-    )
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      JOIN lic.users luu ON luu.id = lu.user_id
-      WHERE lu.license_id = l.id AND luu.email = $8
-    )
-  )
-  AND (
-    $9::text IS NULL
-    OR l.user_id IN (
-      SELECT id FROM lic.users
-      WHERE account_id = l.account_id AND email ILIKE '%' || $9 || '%'
-    )
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      JOIN lic.users luu ON luu.id = lu.user_id
-      WHERE lu.license_id = l.id AND luu.email ILIKE '%' || $9 || '%'
-    )
-  )
-  AND (
-    $10::uuid IS NULL OR EXISTS (
-      SELECT 1 FROM lic.machines m WHERE m.license_id = l.id AND m.id = $10
-    )
-  )
-  AND ($11::uuid IS NULL OR l.group_id = $11)
-  AND (
-    $12::text IS NULL
-    OR CASE
-      WHEN l.user_id IS NOT NULL AND u.banned_at IS NOT NULL THEN 'BANNED'
-      WHEN l.suspended THEN 'SUSPENDED'
-      WHEN l.expiry IS NOT NULL AND l.expiry < $13 THEN 'EXPIRED'
-      WHEN l.expiry IS NOT NULL AND l.expiry > $13 AND l.expiry < $14 THEN 'EXPIRING'
-      WHEN NOT (
-        l.created_at >= $15
-        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $15)
-        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $15)
-        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $15)
-      ) THEN 'INACTIVE'
-      ELSE 'ACTIVE'
-    END = $12
-  )
-  AND ($16::boolean IS NULL OR l.suspended = $16)
-  AND (
-    $17::boolean IS NULL
-    OR (l.expiry IS NOT NULL AND l.expiry > $13 AND l.expiry < $14) = $17
-  )
-  AND (
-    $18::boolean IS NULL
-    OR (l.expiry IS NOT NULL AND l.expiry < $13) = $18
-  )
-  AND (
-    $19::boolean IS NULL
-    OR (l.expiry IS NULL OR l.expiry >= $13) = $19
-  )
-  AND (
-    $20::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $20)
-  )
-  AND (
-    $21::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $21)
-  )
-  AND (
-    $22::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry <= $22)
-  )
-  AND (
-    $23::timestamptz IS NULL
-    OR (
-      (l.user_id IS NULL OR u.banned_at IS NULL)
-      AND (
-        l.created_at >= $23
-        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $23)
-        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $23)
-        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $23)
-      )
-    )
-  )
-  AND (
-    $24::timestamptz IS NULL
-    OR (
-      (l.user_id IS NULL OR u.banned_at IS NULL)
-      AND l.created_at < $24
-      AND (l.last_validated_at IS NULL OR l.last_validated_at < $24)
-      AND (l.last_check_out_at IS NULL OR l.last_check_out_at < $24)
-      AND (l.last_check_in_at IS NULL OR l.last_check_in_at < $24)
-    )
-  )
-  AND (
-    $25::jsonb IS NULL
-    OR l.metadata @> $25
-    OR l.metadata @> $26
-  )
-  AND (
-    $27::boolean IS NULL
-    OR (
-      l.user_id IS NOT NULL
-      OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)
-    ) = $27
-  )
-  AND (
-    $28::boolean IS NULL
-    OR (
-      l.user_id IS NULL
-      AND NOT EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)
-    ) = $28
-  )
-  AND (
-    $29::boolean IS NULL
-    OR (l.machines_count >= 1) = $29
-  )
-  AND ($30::integer IS NULL OR l.machines_count = $30)
-  AND ($31::integer IS NULL OR l.machines_count > $31)
-  AND ($32::integer IS NULL OR l.machines_count >= $32)
-  AND ($33::integer IS NULL OR l.machines_count < $33)
-  AND ($34::integer IS NULL OR l.machines_count <= $34)
-  AND (
-    $35::text IS NULL
-    OR ($35::text = 'none' AND false)
-    OR ($35::text = 'product' AND l.product_id = $36)
-    OR (
-      $35::text = 'user'
-      AND (
-        l.user_id = $36
-        OR EXISTS (
-          SELECT 1 FROM lic.license_users lu
-          WHERE lu.license_id = l.id AND lu.user_id = $36
-        )
-      )
-    )
-    OR ($35::text = 'group_owner' AND EXISTS (
-      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = $36
-    ))
-    OR ($35::text = 'license' AND l.id = $36)
-  )
-  AND (
-    $37::uuid IS NULL
-    OR (l.created_at, l.id) < (SELECT created_at, id FROM lic.licenses WHERE id = $37)
-  )
-ORDER BY l.created_at DESC, l.id DESC
-LIMIT $38 OFFSET $39;`
-
-type ListLicensesParams struct {
-	AccountID             uuid.UUID
-	FilterProductID       *uuid.UUID
-	FilterPolicyID        *uuid.UUID
-	FilterOwnerID         *uuid.UUID
-	FilterOwnerEmail      *string
-	FilterOwnerEmailLike  *string
-	FilterUserID          *uuid.UUID
-	FilterUserEmail       *string
-	FilterUserEmailLike   *string
-	FilterMachineID       *uuid.UUID
-	FilterGroupID         *uuid.UUID
-	FilterStatus          *string
-	Now                   *time.Time
-	ExpiringSoon          *time.Time
-	ActivityCutoff        time.Time
-	FilterSuspended       *bool
-	FilterExpiring        *bool
-	FilterExpired         *bool
-	FilterUnexpired       *bool
-	ExpiryGte1            *time.Time
-	ExpiryGte2            *time.Time
-	ExpiryLte             *time.Time
-	ActivityActiveSince   *time.Time
-	ActivityInactiveSince *time.Time
-	FilterMetadata        json.RawMessage
-	FilterMetadataCast    json.RawMessage
-	FilterAssigned        *bool
-	FilterUnassigned      *bool
-	FilterActivated       *bool
-	ActivationsEq         *int32
-	ActivationsGt         *int32
-	ActivationsGte        *int32
-	ActivationsLt         *int32
-	ActivationsLte        *int32
-	ScopeKind             *string
-	ScopeID               uuid.UUID
-	Cursor                *uuid.UUID
-	Limit                 int64
-	Offset                int64
-}
-
-type ListLicensesRow struct {
-	ID                            uuid.UUID
-	AccountID                     uuid.UUID
-	ProductID                     uuid.UUID
-	PolicyID                      uuid.UUID
-	UserID                        *uuid.UUID
-	GroupID                       *uuid.UUID
-	Name                          *string
-	Key                           string
-	Expiry                        *time.Time
-	Uses                          int32
-	Suspended                     bool
-	Protected                     *bool
-	Metadata                      json.RawMessage
-	MaxMachinesOverride           *int32
-	MaxProcessesOverride          *int32
-	MaxUsersOverride              *int32
-	MaxCoresOverride              *int32
-	MaxMemoryOverride             *int64
-	MaxDiskOverride               *int64
-	MaxUsesOverride               *int32
-	MachinesCount                 int32
-	MachinesCoreCount             int32
-	MachinesMemoryCount           int64
-	MachinesDiskCount             int64
-	LicenseUsersCount             int32
-	LastValidatedAt               *time.Time
-	LastValidatedChecksum         *string
-	LastValidatedVersion          *string
-	LastCheckInAt                 *time.Time
-	LastCheckOutAt                *time.Time
-	CreatedAt                     time.Time
-	UpdatedAt                     time.Time
-	OwnerBanned                   bool
-	OwnerEmail                    *string
-	PolicyId2                     uuid.UUID
-	PolicyAccountID               uuid.UUID
-	PolicyProductID               uuid.UUID
-	PolicyName                    string
-	PolicyDuration                *int32
-	PolicyStrict                  bool
-	PolicyFloating                bool
-	PolicyUsePool                 bool
-	PolicyMaxMachines             *int32
-	PolicyMaxProcesses            *int32
-	PolicyMaxUsers                *int32
-	PolicyMaxCores                *int32
-	PolicyMaxMemory               *int64
-	PolicyMaxDisk                 *int64
-	PolicyMaxUses                 *int32
-	MachineUniquenessStrategy     *string
-	MachineMatchingStrategy       *string
-	ComponentUniquenessStrategy   *string
-	ComponentMatchingStrategy     *string
-	ExpirationStrategy            *string
-	ExpirationBasis               *string
-	RenewalBasis                  *string
-	TransferStrategy              *string
-	AuthenticationStrategy        *string
-	MachineLeasingStrategy        *string
-	ProcessLeasingStrategy        *string
-	OverageStrategy               *string
-	PolicyScheme                  *string
-	PolicyEncrypted               bool
-	PolicyProtected               *bool
-	RequireProductScope           bool
-	RequirePolicyScope            bool
-	RequireMachineScope           bool
-	RequireFingerprintScope       bool
-	RequireComponentsScope        bool
-	RequireUserScope              bool
-	RequireChecksumScope          bool
-	RequireVersionScope           bool
-	RequireCheckIn                bool
-	CheckInInterval               *string
-	CheckInIntervalCount          *int32
-	HeartbeatDuration             *int32
-	HeartbeatCullStrategy         *string
-	HeartbeatResurrectionStrategy *string
-	HeartbeatBasis                *string
-	RequireHeartbeat              bool
-	PolicyMetadata                json.RawMessage
-	PolicyCreatedAt               time.Time
-	PolicyUpdatedAt               time.Time
-}
-
-func (q *Queries) ListLicenses(ctx context.Context, arg ListLicensesParams) ([]ListLicensesRow, error) {
-	rows, err := q.db.Query(ctx, listLicensesSQL, arg.AccountID, arg.FilterProductID, arg.FilterPolicyID, arg.FilterOwnerID, arg.FilterOwnerEmail, arg.FilterOwnerEmailLike, arg.FilterUserID, arg.FilterUserEmail, arg.FilterUserEmailLike, arg.FilterMachineID, arg.FilterGroupID, arg.FilterStatus, arg.Now, arg.ExpiringSoon, arg.ActivityCutoff, arg.FilterSuspended, arg.FilterExpiring, arg.FilterExpired, arg.FilterUnexpired, arg.ExpiryGte1, arg.ExpiryGte2, arg.ExpiryLte, arg.ActivityActiveSince, arg.ActivityInactiveSince, arg.FilterMetadata, arg.FilterMetadataCast, arg.FilterAssigned, arg.FilterUnassigned, arg.FilterActivated, arg.ActivationsEq, arg.ActivationsGt, arg.ActivationsGte, arg.ActivationsLt, arg.ActivationsLte, arg.ScopeKind, arg.ScopeID, arg.Cursor, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListLicensesRow
-	for rows.Next() {
-		var i ListLicensesRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.PolicyID, &i.UserID, &i.GroupID, &i.Name, &i.Key, &i.Expiry, &i.Uses, &i.Suspended, &i.Protected, &i.Metadata, &i.MaxMachinesOverride, &i.MaxProcessesOverride, &i.MaxUsersOverride, &i.MaxCoresOverride, &i.MaxMemoryOverride, &i.MaxDiskOverride, &i.MaxUsesOverride, &i.MachinesCount, &i.MachinesCoreCount, &i.MachinesMemoryCount, &i.MachinesDiskCount, &i.LicenseUsersCount, &i.LastValidatedAt, &i.LastValidatedChecksum, &i.LastValidatedVersion, &i.LastCheckInAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.OwnerBanned, &i.OwnerEmail, &i.PolicyId2, &i.PolicyAccountID, &i.PolicyProductID, &i.PolicyName, &i.PolicyDuration, &i.PolicyStrict, &i.PolicyFloating, &i.PolicyUsePool, &i.PolicyMaxMachines, &i.PolicyMaxProcesses, &i.PolicyMaxUsers, &i.PolicyMaxCores, &i.PolicyMaxMemory, &i.PolicyMaxDisk, &i.PolicyMaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.PolicyScheme, &i.PolicyEncrypted, &i.PolicyProtected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.PolicyMetadata, &i.PolicyCreatedAt, &i.PolicyUpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listLicensesAscSQL = `SELECT l.id, l.account_id, l.product_id, l.policy_id, l.user_id, l.group_id,
-  l.name, l.key, l.expiry, l.uses, l.suspended, l.protected, l.metadata,
-  l.max_machines_override, l.max_processes_override, l.max_users_override,
-  l.max_cores_override, l.max_memory_override, l.max_disk_override,
-  l.max_uses_override, l.machines_count, l.machines_core_count,
-  l.machines_memory_count, l.machines_disk_count, l.license_users_count,
-  l.last_validated_at, l.last_validated_checksum, l.last_validated_version,
-  l.last_check_in_at, l.last_check_out_at, l.created_at, l.updated_at,
-  (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,
-  u.email AS owner_email,
-  p.id AS policy_id2, p.account_id AS policy_account_id, p.product_id AS policy_product_id,
-  p.name AS policy_name, p.duration AS policy_duration, p.strict AS policy_strict,
-  p.floating AS policy_floating, p.use_pool AS policy_use_pool,
-  p.max_machines AS policy_max_machines, p.max_processes AS policy_max_processes,
-  p.max_users AS policy_max_users, p.max_cores AS policy_max_cores,
-  p.max_memory AS policy_max_memory, p.max_disk AS policy_max_disk,
-  p.max_uses AS policy_max_uses,
-  p.machine_uniqueness_strategy, p.machine_matching_strategy,
-  p.component_uniqueness_strategy, p.component_matching_strategy,
-  p.expiration_strategy, p.expiration_basis, p.renewal_basis, p.transfer_strategy,
-  p.authentication_strategy, p.machine_leasing_strategy, p.process_leasing_strategy,
-  p.overage_strategy, p.scheme AS policy_scheme, p.encrypted AS policy_encrypted,
-  p.protected AS policy_protected,
-  p.require_product_scope, p.require_policy_scope, p.require_machine_scope,
-  p.require_fingerprint_scope, p.require_components_scope, p.require_user_scope,
-  p.require_checksum_scope, p.require_version_scope, p.require_check_in,
-  p.check_in_interval, p.check_in_interval_count, p.heartbeat_duration,
-  p.heartbeat_cull_strategy, p.heartbeat_resurrection_strategy, p.heartbeat_basis,
-  p.require_heartbeat, p.metadata AS policy_metadata,
-  p.created_at AS policy_created_at, p.updated_at AS policy_updated_at
-FROM lic.licenses l
-JOIN lic.policies p ON p.id = l.policy_id
-LEFT JOIN lic.users u ON u.id = l.user_id
-WHERE l.account_id = $1
-  AND ($2::uuid IS NULL OR l.product_id = $2)
-  AND ($3::uuid IS NULL OR l.policy_id = $3)
-  AND ($4::uuid IS NULL OR l.user_id = $4)
-  AND ($5::text IS NULL OR u.email = $5)
-  AND ($6::text IS NULL OR u.email ILIKE '%' || $6 || '%')
-  AND (
-    $7::uuid IS NULL OR l.user_id = $7 OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      WHERE lu.license_id = l.id AND lu.user_id = $7
-    )
-  )
-  AND (
-    $8::text IS NULL
-    OR l.user_id IN (
-      SELECT id FROM lic.users WHERE account_id = l.account_id AND email = $8
-    )
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      JOIN lic.users luu ON luu.id = lu.user_id
-      WHERE lu.license_id = l.id AND luu.email = $8
-    )
-  )
-  AND (
-    $9::text IS NULL
-    OR l.user_id IN (
-      SELECT id FROM lic.users
-      WHERE account_id = l.account_id AND email ILIKE '%' || $9 || '%'
-    )
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      JOIN lic.users luu ON luu.id = lu.user_id
-      WHERE lu.license_id = l.id AND luu.email ILIKE '%' || $9 || '%'
-    )
-  )
-  AND (
-    $10::uuid IS NULL OR EXISTS (
-      SELECT 1 FROM lic.machines m WHERE m.license_id = l.id AND m.id = $10
-    )
-  )
-  AND ($11::uuid IS NULL OR l.group_id = $11)
-  AND (
-    $12::text IS NULL
-    OR CASE
-      WHEN l.user_id IS NOT NULL AND u.banned_at IS NOT NULL THEN 'BANNED'
-      WHEN l.suspended THEN 'SUSPENDED'
-      WHEN l.expiry IS NOT NULL AND l.expiry < $13 THEN 'EXPIRED'
-      WHEN l.expiry IS NOT NULL AND l.expiry > $13 AND l.expiry < $14 THEN 'EXPIRING'
-      WHEN NOT (
-        l.created_at >= $15
-        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $15)
-        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $15)
-        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $15)
-      ) THEN 'INACTIVE'
-      ELSE 'ACTIVE'
-    END = $12
-  )
-  AND ($16::boolean IS NULL OR l.suspended = $16)
-  AND (
-    $17::boolean IS NULL
-    OR (l.expiry IS NOT NULL AND l.expiry > $13 AND l.expiry < $14) = $17
-  )
-  AND (
-    $18::boolean IS NULL
-    OR (l.expiry IS NOT NULL AND l.expiry < $13) = $18
-  )
-  AND (
-    $19::boolean IS NULL
-    OR (l.expiry IS NULL OR l.expiry >= $13) = $19
-  )
-  AND (
-    $20::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $20)
-  )
-  AND (
-    $21::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $21)
-  )
-  AND (
-    $22::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry <= $22)
-  )
-  AND (
-    $23::timestamptz IS NULL
-    OR (
-      (l.user_id IS NULL OR u.banned_at IS NULL)
-      AND (
-        l.created_at >= $23
-        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $23)
-        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $23)
-        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $23)
-      )
-    )
-  )
-  AND (
-    $24::timestamptz IS NULL
-    OR (
-      (l.user_id IS NULL OR u.banned_at IS NULL)
-      AND l.created_at < $24
-      AND (l.last_validated_at IS NULL OR l.last_validated_at < $24)
-      AND (l.last_check_out_at IS NULL OR l.last_check_out_at < $24)
-      AND (l.last_check_in_at IS NULL OR l.last_check_in_at < $24)
-    )
-  )
-  AND (
-    $25::jsonb IS NULL
-    OR l.metadata @> $25
-    OR l.metadata @> $26
-  )
-  AND (
-    $27::boolean IS NULL
-    OR (
-      l.user_id IS NOT NULL
-      OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)
-    ) = $27
-  )
-  AND (
-    $28::boolean IS NULL
-    OR (
-      l.user_id IS NULL
-      AND NOT EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)
-    ) = $28
-  )
-  AND (
-    $29::boolean IS NULL
-    OR (l.machines_count >= 1) = $29
-  )
-  AND ($30::integer IS NULL OR l.machines_count = $30)
-  AND ($31::integer IS NULL OR l.machines_count > $31)
-  AND ($32::integer IS NULL OR l.machines_count >= $32)
-  AND ($33::integer IS NULL OR l.machines_count < $33)
-  AND ($34::integer IS NULL OR l.machines_count <= $34)
-  AND (
-    $35::text IS NULL
-    OR ($35::text = 'none' AND false)
-    OR ($35::text = 'product' AND l.product_id = $36)
-    OR (
-      $35::text = 'user'
-      AND (
-        l.user_id = $36
-        OR EXISTS (
-          SELECT 1 FROM lic.license_users lu
-          WHERE lu.license_id = l.id AND lu.user_id = $36
-        )
-      )
-    )
-    OR ($35::text = 'group_owner' AND EXISTS (
-      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = $36
-    ))
-    OR ($35::text = 'license' AND l.id = $36)
-  )
-  AND (
-    $37::uuid IS NULL
-    OR (l.created_at, l.id) > (SELECT created_at, id FROM lic.licenses WHERE id = $37)
-  )
-ORDER BY l.created_at ASC, l.id ASC
-LIMIT $38 OFFSET $39;`
-
-type ListLicensesAscParams struct {
-	AccountID             uuid.UUID
-	FilterProductID       *uuid.UUID
-	FilterPolicyID        *uuid.UUID
-	FilterOwnerID         *uuid.UUID
-	FilterOwnerEmail      *string
-	FilterOwnerEmailLike  *string
-	FilterUserID          *uuid.UUID
-	FilterUserEmail       *string
-	FilterUserEmailLike   *string
-	FilterMachineID       *uuid.UUID
-	FilterGroupID         *uuid.UUID
-	FilterStatus          *string
-	Now                   *time.Time
-	ExpiringSoon          *time.Time
-	ActivityCutoff        time.Time
-	FilterSuspended       *bool
-	FilterExpiring        *bool
-	FilterExpired         *bool
-	FilterUnexpired       *bool
-	ExpiryGte1            *time.Time
-	ExpiryGte2            *time.Time
-	ExpiryLte             *time.Time
-	ActivityActiveSince   *time.Time
-	ActivityInactiveSince *time.Time
-	FilterMetadata        json.RawMessage
-	FilterMetadataCast    json.RawMessage
-	FilterAssigned        *bool
-	FilterUnassigned      *bool
-	FilterActivated       *bool
-	ActivationsEq         *int32
-	ActivationsGt         *int32
-	ActivationsGte        *int32
-	ActivationsLt         *int32
-	ActivationsLte        *int32
-	ScopeKind             *string
-	ScopeID               uuid.UUID
-	Cursor                *uuid.UUID
-	Limit                 int64
-	Offset                int64
-}
-
-type ListLicensesAscRow struct {
-	ID                            uuid.UUID
-	AccountID                     uuid.UUID
-	ProductID                     uuid.UUID
-	PolicyID                      uuid.UUID
-	UserID                        *uuid.UUID
-	GroupID                       *uuid.UUID
-	Name                          *string
-	Key                           string
-	Expiry                        *time.Time
-	Uses                          int32
-	Suspended                     bool
-	Protected                     *bool
-	Metadata                      json.RawMessage
-	MaxMachinesOverride           *int32
-	MaxProcessesOverride          *int32
-	MaxUsersOverride              *int32
-	MaxCoresOverride              *int32
-	MaxMemoryOverride             *int64
-	MaxDiskOverride               *int64
-	MaxUsesOverride               *int32
-	MachinesCount                 int32
-	MachinesCoreCount             int32
-	MachinesMemoryCount           int64
-	MachinesDiskCount             int64
-	LicenseUsersCount             int32
-	LastValidatedAt               *time.Time
-	LastValidatedChecksum         *string
-	LastValidatedVersion          *string
-	LastCheckInAt                 *time.Time
-	LastCheckOutAt                *time.Time
-	CreatedAt                     time.Time
-	UpdatedAt                     time.Time
-	OwnerBanned                   bool
-	OwnerEmail                    *string
-	PolicyId2                     uuid.UUID
-	PolicyAccountID               uuid.UUID
-	PolicyProductID               uuid.UUID
-	PolicyName                    string
-	PolicyDuration                *int32
-	PolicyStrict                  bool
-	PolicyFloating                bool
-	PolicyUsePool                 bool
-	PolicyMaxMachines             *int32
-	PolicyMaxProcesses            *int32
-	PolicyMaxUsers                *int32
-	PolicyMaxCores                *int32
-	PolicyMaxMemory               *int64
-	PolicyMaxDisk                 *int64
-	PolicyMaxUses                 *int32
-	MachineUniquenessStrategy     *string
-	MachineMatchingStrategy       *string
-	ComponentUniquenessStrategy   *string
-	ComponentMatchingStrategy     *string
-	ExpirationStrategy            *string
-	ExpirationBasis               *string
-	RenewalBasis                  *string
-	TransferStrategy              *string
-	AuthenticationStrategy        *string
-	MachineLeasingStrategy        *string
-	ProcessLeasingStrategy        *string
-	OverageStrategy               *string
-	PolicyScheme                  *string
-	PolicyEncrypted               bool
-	PolicyProtected               *bool
-	RequireProductScope           bool
-	RequirePolicyScope            bool
-	RequireMachineScope           bool
-	RequireFingerprintScope       bool
-	RequireComponentsScope        bool
-	RequireUserScope              bool
-	RequireChecksumScope          bool
-	RequireVersionScope           bool
-	RequireCheckIn                bool
-	CheckInInterval               *string
-	CheckInIntervalCount          *int32
-	HeartbeatDuration             *int32
-	HeartbeatCullStrategy         *string
-	HeartbeatResurrectionStrategy *string
-	HeartbeatBasis                *string
-	RequireHeartbeat              bool
-	PolicyMetadata                json.RawMessage
-	PolicyCreatedAt               time.Time
-	PolicyUpdatedAt               time.Time
-}
-
-func (q *Queries) ListLicensesAsc(ctx context.Context, arg ListLicensesAscParams) ([]ListLicensesAscRow, error) {
-	rows, err := q.db.Query(ctx, listLicensesAscSQL, arg.AccountID, arg.FilterProductID, arg.FilterPolicyID, arg.FilterOwnerID, arg.FilterOwnerEmail, arg.FilterOwnerEmailLike, arg.FilterUserID, arg.FilterUserEmail, arg.FilterUserEmailLike, arg.FilterMachineID, arg.FilterGroupID, arg.FilterStatus, arg.Now, arg.ExpiringSoon, arg.ActivityCutoff, arg.FilterSuspended, arg.FilterExpiring, arg.FilterExpired, arg.FilterUnexpired, arg.ExpiryGte1, arg.ExpiryGte2, arg.ExpiryLte, arg.ActivityActiveSince, arg.ActivityInactiveSince, arg.FilterMetadata, arg.FilterMetadataCast, arg.FilterAssigned, arg.FilterUnassigned, arg.FilterActivated, arg.ActivationsEq, arg.ActivationsGt, arg.ActivationsGte, arg.ActivationsLt, arg.ActivationsLte, arg.ScopeKind, arg.ScopeID, arg.Cursor, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListLicensesAscRow
-	for rows.Next() {
-		var i ListLicensesAscRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.PolicyID, &i.UserID, &i.GroupID, &i.Name, &i.Key, &i.Expiry, &i.Uses, &i.Suspended, &i.Protected, &i.Metadata, &i.MaxMachinesOverride, &i.MaxProcessesOverride, &i.MaxUsersOverride, &i.MaxCoresOverride, &i.MaxMemoryOverride, &i.MaxDiskOverride, &i.MaxUsesOverride, &i.MachinesCount, &i.MachinesCoreCount, &i.MachinesMemoryCount, &i.MachinesDiskCount, &i.LicenseUsersCount, &i.LastValidatedAt, &i.LastValidatedChecksum, &i.LastValidatedVersion, &i.LastCheckInAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.OwnerBanned, &i.OwnerEmail, &i.PolicyId2, &i.PolicyAccountID, &i.PolicyProductID, &i.PolicyName, &i.PolicyDuration, &i.PolicyStrict, &i.PolicyFloating, &i.PolicyUsePool, &i.PolicyMaxMachines, &i.PolicyMaxProcesses, &i.PolicyMaxUsers, &i.PolicyMaxCores, &i.PolicyMaxMemory, &i.PolicyMaxDisk, &i.PolicyMaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.PolicyScheme, &i.PolicyEncrypted, &i.PolicyProtected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.PolicyMetadata, &i.PolicyCreatedAt, &i.PolicyUpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const countLicensesSQL = `SELECT count(*) AS count
-FROM lic.licenses l
-LEFT JOIN lic.users u ON u.id = l.user_id
-WHERE l.account_id = $1
-  AND ($2::uuid IS NULL OR l.product_id = $2)
-  AND ($3::uuid IS NULL OR l.policy_id = $3)
-  AND ($4::uuid IS NULL OR l.user_id = $4)
-  AND ($5::text IS NULL OR u.email = $5)
-  AND ($6::text IS NULL OR u.email ILIKE '%' || $6 || '%')
-  AND (
-    $7::uuid IS NULL OR l.user_id = $7 OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      WHERE lu.license_id = l.id AND lu.user_id = $7
-    )
-  )
-  AND (
-    $8::text IS NULL
-    OR l.user_id IN (
-      SELECT id FROM lic.users WHERE account_id = l.account_id AND email = $8
-    )
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      JOIN lic.users luu ON luu.id = lu.user_id
-      WHERE lu.license_id = l.id AND luu.email = $8
-    )
-  )
-  AND (
-    $9::text IS NULL
-    OR l.user_id IN (
-      SELECT id FROM lic.users
-      WHERE account_id = l.account_id AND email ILIKE '%' || $9 || '%'
-    )
-    OR EXISTS (
-      SELECT 1 FROM lic.license_users lu
-      JOIN lic.users luu ON luu.id = lu.user_id
-      WHERE lu.license_id = l.id AND luu.email ILIKE '%' || $9 || '%'
-    )
-  )
-  AND (
-    $10::uuid IS NULL OR EXISTS (
-      SELECT 1 FROM lic.machines m WHERE m.license_id = l.id AND m.id = $10
-    )
-  )
-  AND ($11::uuid IS NULL OR l.group_id = $11)
-  AND (
-    $12::text IS NULL
-    OR CASE
-      WHEN l.user_id IS NOT NULL AND u.banned_at IS NOT NULL THEN 'BANNED'
-      WHEN l.suspended THEN 'SUSPENDED'
-      WHEN l.expiry IS NOT NULL AND l.expiry < $13 THEN 'EXPIRED'
-      WHEN l.expiry IS NOT NULL AND l.expiry > $13 AND l.expiry < $14 THEN 'EXPIRING'
-      WHEN NOT (
-        l.created_at >= $15
-        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $15)
-        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $15)
-        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $15)
-      ) THEN 'INACTIVE'
-      ELSE 'ACTIVE'
-    END = $12
-  )
-  AND ($16::boolean IS NULL OR l.suspended = $16)
-  AND (
-    $17::boolean IS NULL
-    OR (l.expiry IS NOT NULL AND l.expiry > $13 AND l.expiry < $14) = $17
-  )
-  AND (
-    $18::boolean IS NULL
-    OR (l.expiry IS NOT NULL AND l.expiry < $13) = $18
-  )
-  AND (
-    $19::boolean IS NULL
-    OR (l.expiry IS NULL OR l.expiry >= $13) = $19
-  )
-  AND (
-    $20::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $20)
-  )
-  AND (
-    $21::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $21)
-  )
-  AND (
-    $22::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry <= $22)
-  )
-  AND (
-    $23::timestamptz IS NULL
-    OR (
-      (l.user_id IS NULL OR u.banned_at IS NULL)
-      AND (
-        l.created_at >= $23
-        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $23)
-        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $23)
-        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $23)
-      )
-    )
-  )
-  AND (
-    $24::timestamptz IS NULL
-    OR (
-      (l.user_id IS NULL OR u.banned_at IS NULL)
-      AND l.created_at < $24
-      AND (l.last_validated_at IS NULL OR l.last_validated_at < $24)
-      AND (l.last_check_out_at IS NULL OR l.last_check_out_at < $24)
-      AND (l.last_check_in_at IS NULL OR l.last_check_in_at < $24)
-    )
-  )
-  AND (
-    $25::jsonb IS NULL
-    OR l.metadata @> $25
-    OR l.metadata @> $26
-  )
-  AND (
-    $27::boolean IS NULL
-    OR (
-      l.user_id IS NOT NULL
-      OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)
-    ) = $27
-  )
-  AND (
-    $28::boolean IS NULL
-    OR (
-      l.user_id IS NULL
-      AND NOT EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)
-    ) = $28
-  )
-  AND (
-    $29::boolean IS NULL
-    OR (l.machines_count >= 1) = $29
-  )
-  AND ($30::integer IS NULL OR l.machines_count = $30)
-  AND ($31::integer IS NULL OR l.machines_count > $31)
-  AND ($32::integer IS NULL OR l.machines_count >= $32)
-  AND ($33::integer IS NULL OR l.machines_count < $33)
-  AND ($34::integer IS NULL OR l.machines_count <= $34)
-  AND (
-    $35::text IS NULL
-    OR ($35::text = 'none' AND false)
-    OR ($35::text = 'product' AND l.product_id = $36)
-    OR (
-      $35::text = 'user'
-      AND (
-        l.user_id = $36
-        OR EXISTS (
-          SELECT 1 FROM lic.license_users lu
-          WHERE lu.license_id = l.id AND lu.user_id = $36
-        )
-      )
-    )
-    OR ($35::text = 'group_owner' AND EXISTS (
-      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = $36
-    ))
-    OR ($35::text = 'license' AND l.id = $36)
-  )
-;
-
--- Validation helpers (LicenseValidationService).`
-
-type CountLicensesParams struct {
-	AccountID             uuid.UUID
-	FilterProductID       *uuid.UUID
-	FilterPolicyID        *uuid.UUID
-	FilterOwnerID         *uuid.UUID
-	FilterOwnerEmail      *string
-	FilterOwnerEmailLike  *string
-	FilterUserID          *uuid.UUID
-	FilterUserEmail       *string
-	FilterUserEmailLike   *string
-	FilterMachineID       *uuid.UUID
-	FilterGroupID         *uuid.UUID
-	FilterStatus          *string
-	Now                   *time.Time
-	ExpiringSoon          *time.Time
-	ActivityCutoff        time.Time
-	FilterSuspended       *bool
-	FilterExpiring        *bool
-	FilterExpired         *bool
-	FilterUnexpired       *bool
-	ExpiryGte1            *time.Time
-	ExpiryGte2            *time.Time
-	ExpiryLte             *time.Time
-	ActivityActiveSince   *time.Time
-	ActivityInactiveSince *time.Time
-	FilterMetadata        json.RawMessage
-	FilterMetadataCast    json.RawMessage
-	FilterAssigned        *bool
-	FilterUnassigned      *bool
-	FilterActivated       *bool
-	ActivationsEq         *int32
-	ActivationsGt         *int32
-	ActivationsGte        *int32
-	ActivationsLt         *int32
-	ActivationsLte        *int32
-	ScopeKind             *string
-	ScopeID               uuid.UUID
-}
-
-type CountLicensesRow struct {
-	Count int64
-}
-
-func (q *Queries) CountLicenses(ctx context.Context, arg CountLicensesParams) (CountLicensesRow, error) {
-	row := q.db.QueryRow(ctx, countLicensesSQL, arg.AccountID, arg.FilterProductID, arg.FilterPolicyID, arg.FilterOwnerID, arg.FilterOwnerEmail, arg.FilterOwnerEmailLike, arg.FilterUserID, arg.FilterUserEmail, arg.FilterUserEmailLike, arg.FilterMachineID, arg.FilterGroupID, arg.FilterStatus, arg.Now, arg.ExpiringSoon, arg.ActivityCutoff, arg.FilterSuspended, arg.FilterExpiring, arg.FilterExpired, arg.FilterUnexpired, arg.ExpiryGte1, arg.ExpiryGte2, arg.ExpiryLte, arg.ActivityActiveSince, arg.ActivityInactiveSince, arg.FilterMetadata, arg.FilterMetadataCast, arg.FilterAssigned, arg.FilterUnassigned, arg.FilterActivated, arg.ActivationsEq, arg.ActivationsGt, arg.ActivationsGte, arg.ActivationsLt, arg.ActivationsLte, arg.ScopeKind, arg.ScopeID)
-	var i CountLicensesRow
-	err := row.Scan(&i.Count)
-	return i, err
-}
-
 const licenseUserMatchesSQL = `SELECT 1 AS found FROM lic.users usr
 WHERE usr.account_id = $1
   AND (usr.id = $2 OR ($3::text IS NOT NULL AND usr.email = $3))
@@ -3944,240 +2848,6 @@ func (q *Queries) DeletePolicy(ctx context.Context, arg DeletePolicyParams) (int
 	return tag.RowsAffected(), err
 }
 
-const listPoliciesDescSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
-  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
-  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
-  component_uniqueness_strategy, component_matching_strategy,
-  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
-  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
-  overage_strategy, scheme, encrypted, protected, require_product_scope,
-  require_policy_scope, require_machine_scope, require_fingerprint_scope,
-  require_components_scope, require_user_scope, require_checksum_scope,
-  require_version_scope, require_check_in, check_in_interval,
-  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
-  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
-  metadata, created_at, updated_at
-FROM lic.policies
-WHERE account_id = $1
-  AND ($2::uuid IS NULL OR product_id = $2)
-  AND (
-    $3::uuid IS NULL
-    OR (created_at, id) < (
-      SELECT p2.created_at, p2.id FROM lic.policies p2
-      WHERE p2.account_id = $1 AND p2.id = $3
-    )
-  )
-ORDER BY created_at DESC, id DESC
-LIMIT $4 OFFSET $5;`
-
-type ListPoliciesDescParams struct {
-	AccountID       uuid.UUID
-	FilterProductID *uuid.UUID
-	CursorID        *uuid.UUID
-	Limit           int64
-	Offset          int64
-}
-
-type ListPoliciesDescRow struct {
-	ID                            uuid.UUID
-	AccountID                     uuid.UUID
-	ProductID                     uuid.UUID
-	Name                          string
-	Duration                      *int32
-	Strict                        bool
-	Floating                      bool
-	UsePool                       bool
-	MaxMachines                   *int32
-	MaxProcesses                  *int32
-	MaxUsers                      *int32
-	MaxCores                      *int32
-	MaxMemory                     *int64
-	MaxDisk                       *int64
-	MaxUses                       *int32
-	MachineUniquenessStrategy     *string
-	MachineMatchingStrategy       *string
-	ComponentUniquenessStrategy   *string
-	ComponentMatchingStrategy     *string
-	ExpirationStrategy            *string
-	ExpirationBasis               *string
-	RenewalBasis                  *string
-	TransferStrategy              *string
-	AuthenticationStrategy        *string
-	MachineLeasingStrategy        *string
-	ProcessLeasingStrategy        *string
-	OverageStrategy               *string
-	Scheme                        *string
-	Encrypted                     bool
-	Protected                     *bool
-	RequireProductScope           bool
-	RequirePolicyScope            bool
-	RequireMachineScope           bool
-	RequireFingerprintScope       bool
-	RequireComponentsScope        bool
-	RequireUserScope              bool
-	RequireChecksumScope          bool
-	RequireVersionScope           bool
-	RequireCheckIn                bool
-	CheckInInterval               *string
-	CheckInIntervalCount          *int32
-	HeartbeatDuration             *int32
-	HeartbeatCullStrategy         *string
-	HeartbeatResurrectionStrategy *string
-	HeartbeatBasis                *string
-	RequireHeartbeat              bool
-	Metadata                      json.RawMessage
-	CreatedAt                     time.Time
-	UpdatedAt                     time.Time
-}
-
-func (q *Queries) ListPoliciesDesc(ctx context.Context, arg ListPoliciesDescParams) ([]ListPoliciesDescRow, error) {
-	rows, err := q.db.Query(ctx, listPoliciesDescSQL, arg.AccountID, arg.FilterProductID, arg.CursorID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListPoliciesDescRow
-	for rows.Next() {
-		var i ListPoliciesDescRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listPoliciesAscSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
-  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
-  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
-  component_uniqueness_strategy, component_matching_strategy,
-  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,
-  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,
-  overage_strategy, scheme, encrypted, protected, require_product_scope,
-  require_policy_scope, require_machine_scope, require_fingerprint_scope,
-  require_components_scope, require_user_scope, require_checksum_scope,
-  require_version_scope, require_check_in, check_in_interval,
-  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,
-  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,
-  metadata, created_at, updated_at
-FROM lic.policies
-WHERE account_id = $1
-  AND ($2::uuid IS NULL OR product_id = $2)
-  AND (
-    $3::uuid IS NULL
-    OR (created_at, id) > (
-      SELECT p2.created_at, p2.id FROM lic.policies p2
-      WHERE p2.account_id = $1 AND p2.id = $3
-    )
-  )
-ORDER BY created_at ASC, id ASC
-LIMIT $4 OFFSET $5;`
-
-type ListPoliciesAscParams struct {
-	AccountID       uuid.UUID
-	FilterProductID *uuid.UUID
-	CursorID        *uuid.UUID
-	Limit           int64
-	Offset          int64
-}
-
-type ListPoliciesAscRow struct {
-	ID                            uuid.UUID
-	AccountID                     uuid.UUID
-	ProductID                     uuid.UUID
-	Name                          string
-	Duration                      *int32
-	Strict                        bool
-	Floating                      bool
-	UsePool                       bool
-	MaxMachines                   *int32
-	MaxProcesses                  *int32
-	MaxUsers                      *int32
-	MaxCores                      *int32
-	MaxMemory                     *int64
-	MaxDisk                       *int64
-	MaxUses                       *int32
-	MachineUniquenessStrategy     *string
-	MachineMatchingStrategy       *string
-	ComponentUniquenessStrategy   *string
-	ComponentMatchingStrategy     *string
-	ExpirationStrategy            *string
-	ExpirationBasis               *string
-	RenewalBasis                  *string
-	TransferStrategy              *string
-	AuthenticationStrategy        *string
-	MachineLeasingStrategy        *string
-	ProcessLeasingStrategy        *string
-	OverageStrategy               *string
-	Scheme                        *string
-	Encrypted                     bool
-	Protected                     *bool
-	RequireProductScope           bool
-	RequirePolicyScope            bool
-	RequireMachineScope           bool
-	RequireFingerprintScope       bool
-	RequireComponentsScope        bool
-	RequireUserScope              bool
-	RequireChecksumScope          bool
-	RequireVersionScope           bool
-	RequireCheckIn                bool
-	CheckInInterval               *string
-	CheckInIntervalCount          *int32
-	HeartbeatDuration             *int32
-	HeartbeatCullStrategy         *string
-	HeartbeatResurrectionStrategy *string
-	HeartbeatBasis                *string
-	RequireHeartbeat              bool
-	Metadata                      json.RawMessage
-	CreatedAt                     time.Time
-	UpdatedAt                     time.Time
-}
-
-func (q *Queries) ListPoliciesAsc(ctx context.Context, arg ListPoliciesAscParams) ([]ListPoliciesAscRow, error) {
-	rows, err := q.db.Query(ctx, listPoliciesAscSQL, arg.AccountID, arg.FilterProductID, arg.CursorID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListPoliciesAscRow
-	for rows.Next() {
-		var i ListPoliciesAscRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const countPoliciesSQL = `SELECT count(*) FROM lic.policies
-WHERE account_id = $1
-  AND ($2::uuid IS NULL OR product_id = $2);
-
--- The product-bearer scope (Policy.for_product): the product's policies.`
-
-type CountPoliciesParams struct {
-	AccountID       uuid.UUID
-	FilterProductID *uuid.UUID
-}
-
-type CountPoliciesRow struct {
-	Count int64
-}
-
-func (q *Queries) CountPolicies(ctx context.Context, arg CountPoliciesParams) (CountPoliciesRow, error) {
-	row := q.db.QueryRow(ctx, countPoliciesSQL, arg.AccountID, arg.FilterProductID)
-	var i CountPoliciesRow
-	err := row.Scan(&i.Count)
-	return i, err
-}
-
 const listPoliciesForProductDescSQL = `SELECT id, account_id, product_id, name, duration, strict, floating,
   use_pool, max_machines, max_processes, max_users, max_cores, max_memory,
   max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,
@@ -4658,130 +3328,6 @@ type DeleteProductParams struct {
 func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (int64, error) {
 	tag, err := q.db.Exec(ctx, deleteProductSQL, arg.AccountID, arg.ID)
 	return tag.RowsAffected(), err
-}
-
-const listProductsDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
-  metadata, created_at, updated_at
-FROM lic.products
-WHERE account_id = $1
-  AND (
-    $2::uuid IS NULL
-    OR (created_at, id) < (
-      SELECT p2.created_at, p2.id FROM lic.products p2
-      WHERE p2.account_id = $1 AND p2.id = $2
-    )
-  )
-ORDER BY created_at DESC, id DESC
-LIMIT $3 OFFSET $4;`
-
-type ListProductsDescParams struct {
-	AccountID uuid.UUID
-	CursorID  *uuid.UUID
-	Limit     int64
-	Offset    int64
-}
-
-type ListProductsDescRow struct {
-	ID                   uuid.UUID
-	AccountID            uuid.UUID
-	Name                 *string
-	Code                 *string
-	DistributionStrategy *string
-	URL                  *string
-	Platforms            json.RawMessage
-	Metadata             json.RawMessage
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-}
-
-func (q *Queries) ListProductsDesc(ctx context.Context, arg ListProductsDescParams) ([]ListProductsDescRow, error) {
-	rows, err := q.db.Query(ctx, listProductsDescSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListProductsDescRow
-	for rows.Next() {
-		var i ListProductsDescRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listProductsAscSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
-  metadata, created_at, updated_at
-FROM lic.products
-WHERE account_id = $1
-  AND (
-    $2::uuid IS NULL
-    OR (created_at, id) > (
-      SELECT p2.created_at, p2.id FROM lic.products p2
-      WHERE p2.account_id = $1 AND p2.id = $2
-    )
-  )
-ORDER BY created_at ASC, id ASC
-LIMIT $3 OFFSET $4;`
-
-type ListProductsAscParams struct {
-	AccountID uuid.UUID
-	CursorID  *uuid.UUID
-	Limit     int64
-	Offset    int64
-}
-
-type ListProductsAscRow struct {
-	ID                   uuid.UUID
-	AccountID            uuid.UUID
-	Name                 *string
-	Code                 *string
-	DistributionStrategy *string
-	URL                  *string
-	Platforms            json.RawMessage
-	Metadata             json.RawMessage
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-}
-
-func (q *Queries) ListProductsAsc(ctx context.Context, arg ListProductsAscParams) ([]ListProductsAscRow, error) {
-	rows, err := q.db.Query(ctx, listProductsAscSQL, arg.AccountID, arg.CursorID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListProductsAscRow
-	for rows.Next() {
-		var i ListProductsAscRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const countProductsSQL = `SELECT count(*) FROM lic.products WHERE account_id = $1;
-
--- The user scope (Product.for_user): open products UNION the products of
--- the user's licenses (owned or attached).`
-
-type CountProductsRow struct {
-	Count int64
-}
-
-func (q *Queries) CountProducts(ctx context.Context, accountID uuid.UUID) (CountProductsRow, error) {
-	row := q.db.QueryRow(ctx, countProductsSQL, accountID)
-	var i CountProductsRow
-	err := row.Scan(&i.Count)
-	return i, err
 }
 
 const listProductsForUserDescSQL = `SELECT id, account_id, name, code, distribution_strategy, url, platforms,
@@ -5418,6 +3964,872 @@ func (q *Queries) GetProductToken(ctx context.Context, arg GetProductTokenParams
 	var i GetProductTokenRow
 	err := row.Scan(&i.ID, &i.AccountID, &i.Digest, &i.BearerID, &i.BearerType, &i.BearerRole, &i.Kind, &i.Name, &i.Expiry, &i.Permissions, &i.CreatedAt, &i.UpdatedAt)
 	return i, err
+}
+
+const searchLicensesByIDSQL = `SELECT id FROM lic.licenses
+WHERE account_id = $1
+  AND (id = $2::uuid OR ($2::uuid IS NULL AND id::text ILIKE '%' || $3::text || '%'));`
+
+type SearchLicensesByIDParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+}
+
+type SearchLicensesByIDRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByID(ctx context.Context, arg SearchLicensesByIDParams) ([]SearchLicensesByIDRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByIDSQL, arg.AccountID, arg.ID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByIDRow
+	for rows.Next() {
+		var i SearchLicensesByIDRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByKeySQL = `SELECT id FROM lic.licenses WHERE account_id = $1 AND key = $2::text;`
+
+type SearchLicensesByKeyParams struct {
+	AccountID uuid.UUID
+	Term      string
+}
+
+type SearchLicensesByKeyRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByKey(ctx context.Context, arg SearchLicensesByKeyParams) ([]SearchLicensesByKeyRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByKeySQL, arg.AccountID, arg.Term)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByKeyRow
+	for rows.Next() {
+		var i SearchLicensesByKeyRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByNameSQL = `SELECT id FROM lic.licenses WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+
+type SearchLicensesByNameParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchLicensesByNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByName(ctx context.Context, arg SearchLicensesByNameParams) ([]SearchLicensesByNameRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByNameRow
+	for rows.Next() {
+		var i SearchLicensesByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByMetadataSQL = `SELECT id FROM lic.licenses
+WHERE account_id = $1 AND (metadata @> $2::jsonb OR metadata @> $3::jsonb);`
+
+type SearchLicensesByMetadataParams struct {
+	AccountID uuid.UUID
+	Raw       json.RawMessage
+	Cast      json.RawMessage
+}
+
+type SearchLicensesByMetadataRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByMetadata(ctx context.Context, arg SearchLicensesByMetadataParams) ([]SearchLicensesByMetadataRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByMetadataSQL, arg.AccountID, arg.Raw, arg.Cast)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByMetadataRow
+	for rows.Next() {
+		var i SearchLicensesByMetadataRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByOwnerSQL = `SELECT l.id FROM lic.licenses l
+LEFT JOIN lic.users u ON u.id = l.user_id
+WHERE l.account_id = $1
+  AND (
+    l.user_id = $2::uuid
+    OR ($2::uuid IS NULL AND u.id IS NOT NULL AND (
+      u.email = $3::text
+      OR u.email ILIKE '%' || $4::text || '%'
+      OR ($5::bool AND to_tsvector('simple', u.id::text) @@ to_tsquery('simple', ''' ' || $6::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchLicensesByOwnerParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Term      *string
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchLicensesByOwnerRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByOwner(ctx context.Context, arg SearchLicensesByOwnerParams) ([]SearchLicensesByOwnerRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByOwnerSQL, arg.AccountID, arg.ID, arg.Term, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByOwnerRow
+	for rows.Next() {
+		var i SearchLicensesByOwnerRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByUserSQL = `-- A license's users are its owner and its licensees.
+SELECT DISTINCT l.id FROM lic.licenses l
+JOIN lic.users u ON u.account_id = l.account_id AND (
+  u.id = l.user_id OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = u.id)
+)
+WHERE l.account_id = $1
+  AND (
+    u.id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      u.email = $3::text
+      OR u.email ILIKE '%' || $4::text || '%'
+      OR ($5::bool AND to_tsvector('simple', u.id::text) @@ to_tsquery('simple', ''' ' || $6::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchLicensesByUserParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Term      *string
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchLicensesByUserRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByUser(ctx context.Context, arg SearchLicensesByUserParams) ([]SearchLicensesByUserRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByUserSQL, arg.AccountID, arg.ID, arg.Term, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByUserRow
+	for rows.Next() {
+		var i SearchLicensesByUserRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByProductSQL = `SELECT l.id FROM lic.licenses l
+JOIN lic.policies p ON p.id = l.policy_id
+JOIN lic.products pr ON pr.id = p.product_id
+WHERE l.account_id = $1
+  AND (
+    p.product_id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      pr.name ILIKE '%' || $3::text || '%'
+      OR ($4::bool AND to_tsvector('simple', pr.id::text) @@ to_tsquery('simple', ''' ' || $5::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchLicensesByProductParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchLicensesByProductRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByProduct(ctx context.Context, arg SearchLicensesByProductParams) ([]SearchLicensesByProductRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByProductSQL, arg.AccountID, arg.ID, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByProductRow
+	for rows.Next() {
+		var i SearchLicensesByProductRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchLicensesByPolicySQL = `SELECT l.id FROM lic.licenses l
+JOIN lic.policies p ON p.id = l.policy_id
+WHERE l.account_id = $1
+  AND (
+    l.policy_id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      p.name ILIKE '%' || $3::text || '%'
+      OR ($4::bool AND to_tsvector('simple', l.policy_id::text) @@ to_tsquery('simple', ''' ' || $5::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchLicensesByPolicyParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchLicensesByPolicyRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchLicensesByPolicy(ctx context.Context, arg SearchLicensesByPolicyParams) ([]SearchLicensesByPolicyRow, error) {
+	rows, err := q.db.Query(ctx, searchLicensesByPolicySQL, arg.AccountID, arg.ID, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchLicensesByPolicyRow
+	for rows.Next() {
+		var i SearchLicensesByPolicyRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByIDSQL = `SELECT id FROM lic.users
+WHERE account_id = $1
+  AND (id = $2::uuid OR ($2::uuid IS NULL AND id::text ILIKE '%' || $3::text || '%'));`
+
+type SearchUsersByIDParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+}
+
+type SearchUsersByIDRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchUsersByID(ctx context.Context, arg SearchUsersByIDParams) ([]SearchUsersByIDRow, error) {
+	rows, err := q.db.Query(ctx, searchUsersByIDSQL, arg.AccountID, arg.ID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByIDRow
+	for rows.Next() {
+		var i SearchUsersByIDRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByEmailSQL = `SELECT id FROM lic.users WHERE account_id = $1 AND email ILIKE '%' || $2::text || '%';`
+
+type SearchUsersByEmailParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchUsersByEmailRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchUsersByEmail(ctx context.Context, arg SearchUsersByEmailParams) ([]SearchUsersByEmailRow, error) {
+	rows, err := q.db.Query(ctx, searchUsersByEmailSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByEmailRow
+	for rows.Next() {
+		var i SearchUsersByEmailRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByFirstNameSQL = `SELECT id FROM lic.users WHERE account_id = $1 AND first_name ILIKE '%' || $2::text || '%';`
+
+type SearchUsersByFirstNameParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchUsersByFirstNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchUsersByFirstName(ctx context.Context, arg SearchUsersByFirstNameParams) ([]SearchUsersByFirstNameRow, error) {
+	rows, err := q.db.Query(ctx, searchUsersByFirstNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByFirstNameRow
+	for rows.Next() {
+		var i SearchUsersByFirstNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByLastNameSQL = `SELECT id FROM lic.users WHERE account_id = $1 AND last_name ILIKE '%' || $2::text || '%';`
+
+type SearchUsersByLastNameParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchUsersByLastNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchUsersByLastName(ctx context.Context, arg SearchUsersByLastNameParams) ([]SearchUsersByLastNameRow, error) {
+	rows, err := q.db.Query(ctx, searchUsersByLastNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByLastNameRow
+	for rows.Next() {
+		var i SearchUsersByLastNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByMetadataSQL = `SELECT id FROM lic.users
+WHERE account_id = $1 AND (metadata @> $2::jsonb OR metadata @> $3::jsonb);`
+
+type SearchUsersByMetadataParams struct {
+	AccountID uuid.UUID
+	Raw       json.RawMessage
+	Cast      json.RawMessage
+}
+
+type SearchUsersByMetadataRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchUsersByMetadata(ctx context.Context, arg SearchUsersByMetadataParams) ([]SearchUsersByMetadataRow, error) {
+	rows, err := q.db.Query(ctx, searchUsersByMetadataSQL, arg.AccountID, arg.Raw, arg.Cast)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByMetadataRow
+	for rows.Next() {
+		var i SearchUsersByMetadataRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByRoleSQL = `SELECT id FROM lic.users WHERE account_id = $1 AND role ILIKE '%' || $2::text || '%';`
+
+type SearchUsersByRoleParams struct {
+	AccountID uuid.UUID
+	Like      string
+}
+
+type SearchUsersByRoleRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchUsersByRole(ctx context.Context, arg SearchUsersByRoleParams) ([]SearchUsersByRoleRow, error) {
+	rows, err := q.db.Query(ctx, searchUsersByRoleSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByRoleRow
+	for rows.Next() {
+		var i SearchUsersByRoleRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchProductsByIDSQL = `SELECT id FROM lic.products
+WHERE account_id = $1
+  AND (id = $2::uuid OR ($2::uuid IS NULL AND id::text ILIKE '%' || $3::text || '%'));`
+
+type SearchProductsByIDParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+}
+
+type SearchProductsByIDRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchProductsByID(ctx context.Context, arg SearchProductsByIDParams) ([]SearchProductsByIDRow, error) {
+	rows, err := q.db.Query(ctx, searchProductsByIDSQL, arg.AccountID, arg.ID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchProductsByIDRow
+	for rows.Next() {
+		var i SearchProductsByIDRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchProductsByNameSQL = `SELECT id FROM lic.products WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+
+type SearchProductsByNameParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchProductsByNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchProductsByName(ctx context.Context, arg SearchProductsByNameParams) ([]SearchProductsByNameRow, error) {
+	rows, err := q.db.Query(ctx, searchProductsByNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchProductsByNameRow
+	for rows.Next() {
+		var i SearchProductsByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchProductsByMetadataSQL = `SELECT id FROM lic.products
+WHERE account_id = $1 AND (metadata @> $2::jsonb OR metadata @> $3::jsonb);`
+
+type SearchProductsByMetadataParams struct {
+	AccountID uuid.UUID
+	Raw       json.RawMessage
+	Cast      json.RawMessage
+}
+
+type SearchProductsByMetadataRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchProductsByMetadata(ctx context.Context, arg SearchProductsByMetadataParams) ([]SearchProductsByMetadataRow, error) {
+	rows, err := q.db.Query(ctx, searchProductsByMetadataSQL, arg.AccountID, arg.Raw, arg.Cast)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchProductsByMetadataRow
+	for rows.Next() {
+		var i SearchProductsByMetadataRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPoliciesByIDSQL = `SELECT id FROM lic.policies
+WHERE account_id = $1
+  AND (id = $2::uuid OR ($2::uuid IS NULL AND id::text ILIKE '%' || $3::text || '%'));`
+
+type SearchPoliciesByIDParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+}
+
+type SearchPoliciesByIDRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchPoliciesByID(ctx context.Context, arg SearchPoliciesByIDParams) ([]SearchPoliciesByIDRow, error) {
+	rows, err := q.db.Query(ctx, searchPoliciesByIDSQL, arg.AccountID, arg.ID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchPoliciesByIDRow
+	for rows.Next() {
+		var i SearchPoliciesByIDRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPoliciesByNameSQL = `SELECT id FROM lic.policies WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+
+type SearchPoliciesByNameParams struct {
+	AccountID uuid.UUID
+	Like      string
+}
+
+type SearchPoliciesByNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchPoliciesByName(ctx context.Context, arg SearchPoliciesByNameParams) ([]SearchPoliciesByNameRow, error) {
+	rows, err := q.db.Query(ctx, searchPoliciesByNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchPoliciesByNameRow
+	for rows.Next() {
+		var i SearchPoliciesByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPoliciesByMetadataSQL = `SELECT id FROM lic.policies
+WHERE account_id = $1 AND (metadata @> $2::jsonb OR metadata @> $3::jsonb);`
+
+type SearchPoliciesByMetadataParams struct {
+	AccountID uuid.UUID
+	Raw       json.RawMessage
+	Cast      json.RawMessage
+}
+
+type SearchPoliciesByMetadataRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchPoliciesByMetadata(ctx context.Context, arg SearchPoliciesByMetadataParams) ([]SearchPoliciesByMetadataRow, error) {
+	rows, err := q.db.Query(ctx, searchPoliciesByMetadataSQL, arg.AccountID, arg.Raw, arg.Cast)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchPoliciesByMetadataRow
+	for rows.Next() {
+		var i SearchPoliciesByMetadataRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPoliciesByProductSQL = `SELECT p.id FROM lic.policies p
+JOIN lic.products pr ON pr.id = p.product_id
+WHERE p.account_id = $1
+  AND (
+    p.product_id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      pr.name ILIKE '%' || $3::text || '%'
+      OR ($4::bool AND to_tsvector('simple', p.product_id::text) @@ to_tsquery('simple', ''' ' || $5::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchPoliciesByProductParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchPoliciesByProductRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchPoliciesByProduct(ctx context.Context, arg SearchPoliciesByProductParams) ([]SearchPoliciesByProductRow, error) {
+	rows, err := q.db.Query(ctx, searchPoliciesByProductSQL, arg.AccountID, arg.ID, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchPoliciesByProductRow
+	for rows.Next() {
+		var i SearchPoliciesByProductRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchGroupsByNameSQL = `SELECT id FROM lic.groups WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+
+type SearchGroupsByNameParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchGroupsByNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchGroupsByName(ctx context.Context, arg SearchGroupsByNameParams) ([]SearchGroupsByNameRow, error) {
+	rows, err := q.db.Query(ctx, searchGroupsByNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchGroupsByNameRow
+	for rows.Next() {
+		var i SearchGroupsByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchEntitlementsByIDSQL = `SELECT id FROM lic.entitlements
+WHERE account_id = $1
+  AND (id = $2::uuid OR ($2::uuid IS NULL AND id::text ILIKE '%' || $3::text || '%'));`
+
+type SearchEntitlementsByIDParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+}
+
+type SearchEntitlementsByIDRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchEntitlementsByID(ctx context.Context, arg SearchEntitlementsByIDParams) ([]SearchEntitlementsByIDRow, error) {
+	rows, err := q.db.Query(ctx, searchEntitlementsByIDSQL, arg.AccountID, arg.ID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchEntitlementsByIDRow
+	for rows.Next() {
+		var i SearchEntitlementsByIDRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchEntitlementsByCodeSQL = `SELECT id FROM lic.entitlements WHERE account_id = $1 AND code ILIKE '%' || $2::text || '%';`
+
+type SearchEntitlementsByCodeParams struct {
+	AccountID uuid.UUID
+	Like      string
+}
+
+type SearchEntitlementsByCodeRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchEntitlementsByCode(ctx context.Context, arg SearchEntitlementsByCodeParams) ([]SearchEntitlementsByCodeRow, error) {
+	rows, err := q.db.Query(ctx, searchEntitlementsByCodeSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchEntitlementsByCodeRow
+	for rows.Next() {
+		var i SearchEntitlementsByCodeRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchEntitlementsByNameSQL = `SELECT id FROM lic.entitlements WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+
+type SearchEntitlementsByNameParams struct {
+	AccountID uuid.UUID
+	Like      string
+}
+
+type SearchEntitlementsByNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchEntitlementsByName(ctx context.Context, arg SearchEntitlementsByNameParams) ([]SearchEntitlementsByNameRow, error) {
+	rows, err := q.db.Query(ctx, searchEntitlementsByNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchEntitlementsByNameRow
+	for rows.Next() {
+		var i SearchEntitlementsByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getSecondFactorByIDSQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
@@ -6720,15 +6132,15 @@ func (q *Queries) SetWebhookEventExhausted(ctx context.Context, arg SetWebhookEv
 	return err
 }
 
-type ListEntitlementsByIdsDescParams struct {
+type ListEntitlementsDescParams struct {
 	AccountID uuid.UUID
-	Ids       []uuid.UUID
+	FilterIds []uuid.UUID
 	CursorID  *uuid.UUID
 	Limit     int64
 	Offset    int64
 }
 
-type ListEntitlementsByIdsDescRow struct {
+type ListEntitlementsDescRow struct {
 	ID        uuid.UUID
 	AccountID uuid.UUID
 	Name      string
@@ -6738,7 +6150,7 @@ type ListEntitlementsByIdsDescRow struct {
 	UpdatedAt time.Time
 }
 
-func (q *Queries) ListEntitlementsByIdsDesc(ctx context.Context, arg ListEntitlementsByIdsDescParams) ([]ListEntitlementsByIdsDescRow, error) {
+func (q *Queries) ListEntitlementsDesc(ctx context.Context, arg ListEntitlementsDescParams) ([]ListEntitlementsDescRow, error) {
 	var b strings.Builder
 	var args []any
 	positions := make(map[uint32]int)
@@ -6747,7 +6159,7 @@ func (q *Queries) ListEntitlementsByIdsDesc(ctx context.Context, arg ListEntitle
 		positions[1] = len(args)
 	}
 	if positions[2] == 0 {
-		args = append(args, arg.Ids)
+		args = append(args, arg.FilterIds)
 		positions[2] = len(args)
 	}
 	if positions[3] == 0 {
@@ -6762,15 +6174,15 @@ func (q *Queries) ListEntitlementsByIdsDesc(ctx context.Context, arg ListEntitle
 		args = append(args, arg.Offset)
 		positions[5] = len(args)
 	}
-	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, metadata, created_at, updated_at\nFROM lic.entitlements\nWHERE account_id = $%d AND id = ANY($%d::uuid[])\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) < (\n      SELECT e2.created_at, e2.id FROM lic.entitlements e2\n      WHERE e2.account_id = $%d AND e2.id = $%d\n    )\n  )\nORDER BY created_at DESC, id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, metadata, created_at, updated_at\nFROM lic.entitlements\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) < (\n      SELECT e2.created_at, e2.id FROM lic.entitlements e2\n      WHERE e2.account_id = $%d AND e2.id = $%d\n    )\n  )\nORDER BY created_at DESC, id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
 	rows, err := q.db.Query(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListEntitlementsByIdsDescRow
+	var items []ListEntitlementsDescRow
 	for rows.Next() {
-		var i ListEntitlementsByIdsDescRow
+		var i ListEntitlementsDescRow
 		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -6779,15 +6191,15 @@ func (q *Queries) ListEntitlementsByIdsDesc(ctx context.Context, arg ListEntitle
 	return items, rows.Err()
 }
 
-type ListEntitlementsByIdsAscParams struct {
+type ListEntitlementsAscParams struct {
 	AccountID uuid.UUID
-	Ids       []uuid.UUID
+	FilterIds []uuid.UUID
 	CursorID  *uuid.UUID
 	Limit     int64
 	Offset    int64
 }
 
-type ListEntitlementsByIdsAscRow struct {
+type ListEntitlementsAscRow struct {
 	ID        uuid.UUID
 	AccountID uuid.UUID
 	Name      string
@@ -6797,7 +6209,7 @@ type ListEntitlementsByIdsAscRow struct {
 	UpdatedAt time.Time
 }
 
-func (q *Queries) ListEntitlementsByIdsAsc(ctx context.Context, arg ListEntitlementsByIdsAscParams) ([]ListEntitlementsByIdsAscRow, error) {
+func (q *Queries) ListEntitlementsAsc(ctx context.Context, arg ListEntitlementsAscParams) ([]ListEntitlementsAscRow, error) {
 	var b strings.Builder
 	var args []any
 	positions := make(map[uint32]int)
@@ -6806,7 +6218,7 @@ func (q *Queries) ListEntitlementsByIdsAsc(ctx context.Context, arg ListEntitlem
 		positions[1] = len(args)
 	}
 	if positions[2] == 0 {
-		args = append(args, arg.Ids)
+		args = append(args, arg.FilterIds)
 		positions[2] = len(args)
 	}
 	if positions[3] == 0 {
@@ -6821,15 +6233,15 @@ func (q *Queries) ListEntitlementsByIdsAsc(ctx context.Context, arg ListEntitlem
 		args = append(args, arg.Offset)
 		positions[5] = len(args)
 	}
-	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, metadata, created_at, updated_at\nFROM lic.entitlements\nWHERE account_id = $%d AND id = ANY($%d::uuid[])\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) > (\n      SELECT e2.created_at, e2.id FROM lic.entitlements e2\n      WHERE e2.account_id = $%d AND e2.id = $%d\n    )\n  )\nORDER BY created_at ASC, id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, metadata, created_at, updated_at\nFROM lic.entitlements\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) > (\n      SELECT e2.created_at, e2.id FROM lic.entitlements e2\n      WHERE e2.account_id = $%d AND e2.id = $%d\n    )\n  )\nORDER BY created_at ASC, id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
 	rows, err := q.db.Query(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListEntitlementsByIdsAscRow
+	var items []ListEntitlementsAscRow
 	for rows.Next() {
-		var i ListEntitlementsByIdsAscRow
+		var i ListEntitlementsAscRow
 		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -6838,16 +6250,16 @@ func (q *Queries) ListEntitlementsByIdsAsc(ctx context.Context, arg ListEntitlem
 	return items, rows.Err()
 }
 
-type CountEntitlementsByIdsParams struct {
+type CountEntitlementsParams struct {
 	AccountID uuid.UUID
-	Ids       []uuid.UUID
+	FilterIds []uuid.UUID
 }
 
-type CountEntitlementsByIdsRow struct {
+type CountEntitlementsRow struct {
 	Count int64
 }
 
-func (q *Queries) CountEntitlementsByIds(ctx context.Context, arg CountEntitlementsByIdsParams) (CountEntitlementsByIdsRow, error) {
+func (q *Queries) CountEntitlements(ctx context.Context, arg CountEntitlementsParams) (CountEntitlementsRow, error) {
 	var b strings.Builder
 	var args []any
 	positions := make(map[uint32]int)
@@ -6856,14 +6268,123 @@ func (q *Queries) CountEntitlementsByIds(ctx context.Context, arg CountEntitleme
 		positions[1] = len(args)
 	}
 	if positions[2] == 0 {
-		args = append(args, arg.Ids)
+		args = append(args, arg.FilterIds)
 		positions[2] = len(args)
 	}
-	b.WriteString(fmt.Sprintf("SELECT count(*) FROM lic.entitlements\nWHERE account_id = $%d AND id = ANY($%d::uuid[]);\n\n-- The entitlements of a user's licenses (owned or attached): the union\n-- of policy entitlements and license entitlements.", positions[1], positions[2]))
+	b.WriteString(fmt.Sprintf("SELECT count(*) FROM lic.entitlements WHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]));\n\n-- The entitlements of a user's licenses (owned or attached): the union\n-- of policy entitlements and license entitlements.", positions[1], positions[2], positions[2]))
 	row := q.db.QueryRow(ctx, b.String(), args...)
-	var i CountEntitlementsByIdsRow
+	var i CountEntitlementsRow
 	err := row.Scan(&i.Count)
 	return i, err
+}
+
+type CountGroupsParams struct {
+	AccountID  uuid.UUID
+	FilterIds  []uuid.UUID
+	MemberUser *uuid.UUID
+}
+
+type CountGroupsRow struct {
+	Total int32
+}
+
+func (q *Queries) CountGroups(ctx context.Context, arg CountGroupsParams) (CountGroupsRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.MemberUser)
+		positions[3] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*)::int AS total FROM lic.groups\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = $%d)\n    OR EXISTS (\n      SELECT 1 FROM lic.group_owners go\n      WHERE go.account_id = $%d AND go.group_id = lic.groups.id AND go.user_id = $%d\n    )\n  );", positions[1], positions[2], positions[2], positions[3], positions[3], positions[1], positions[3]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountGroupsRow
+	err := row.Scan(&i.Total)
+	return i, err
+}
+
+type ListGroupsParams struct {
+	AccountID     uuid.UUID
+	FilterIds     []uuid.UUID
+	MemberUser    *uuid.UUID
+	MemberLicense *uuid.UUID
+	Cursor        *uuid.UUID
+	Asc           bool
+	Limit         int64
+	Offset        int64
+}
+
+type ListGroupsRow struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	Name        *string
+	MaxUsers    *int32
+	MaxLicenses *int32
+	MaxMachines *int32
+	Metadata    json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (q *Queries) ListGroups(ctx context.Context, arg ListGroupsParams) ([]ListGroupsRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.MemberUser)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.MemberLicense)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Cursor)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.Asc)
+		positions[6] = len(args)
+	}
+	if positions[7] == 0 {
+		args = append(args, arg.Limit)
+		positions[7] = len(args)
+	}
+	if positions[8] == 0 {
+		args = append(args, arg.Offset)
+		positions[8] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, max_users, max_licenses, max_machines, metadata,\n  created_at, updated_at\nFROM lic.groups\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = $%d)\n    OR EXISTS (\n      SELECT 1 FROM lic.group_owners go\n      WHERE go.account_id = $%d AND go.group_id = lic.groups.id AND go.user_id = $%d\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l WHERE l.group_id = lic.groups.id AND l.id = $%d\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR CASE\n      WHEN $%d::boolean THEN\n        (created_at, id) > (SELECT c.created_at, c.id FROM lic.groups c WHERE c.id = $%d)\n      ELSE\n        (created_at, id) < (SELECT c.created_at, c.id FROM lic.groups c WHERE c.id = $%d)\n    END\n  )\nORDER BY\n  CASE WHEN $%d::boolean THEN created_at END ASC,\n  CASE WHEN $%d::boolean THEN id END ASC,\n  created_at DESC,\n  id DESC\nLIMIT $%d\nOFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[1], positions[3], positions[4], positions[4], positions[5], positions[6], positions[5], positions[5], positions[6], positions[6], positions[7], positions[8]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListGroupsRow
+	for rows.Next() {
+		var i ListGroupsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.MaxUsers, &i.MaxLicenses, &i.MaxMachines, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
 }
 
 type DeleteGroupOwnersByUsersParams struct {
@@ -7142,6 +6663,829 @@ func (q *Queries) CountPolicyEntitlementsOf(ctx context.Context, arg CountPolicy
 	return i, err
 }
 
+type ListLicensesParams struct {
+	AccountID             uuid.UUID
+	FilterIds             []uuid.UUID
+	FilterProductID       *uuid.UUID
+	FilterPolicyID        *uuid.UUID
+	FilterOwnerID         *uuid.UUID
+	FilterOwnerEmail      *string
+	FilterOwnerEmailLike  *string
+	FilterUserID          *uuid.UUID
+	FilterUserEmail       *string
+	FilterUserEmailLike   *string
+	FilterMachineID       *uuid.UUID
+	FilterGroupID         *uuid.UUID
+	FilterStatus          *string
+	Now                   *time.Time
+	ExpiringSoon          *time.Time
+	ActivityCutoff        time.Time
+	FilterSuspended       *bool
+	FilterExpiring        *bool
+	FilterExpired         *bool
+	FilterUnexpired       *bool
+	ExpiryGte1            *time.Time
+	ExpiryGte2            *time.Time
+	ExpiryLte             *time.Time
+	ActivityActiveSince   *time.Time
+	ActivityInactiveSince *time.Time
+	FilterMetadata        json.RawMessage
+	FilterMetadataCast    json.RawMessage
+	FilterAssigned        *bool
+	FilterUnassigned      *bool
+	FilterActivated       *bool
+	ActivationsEq         *int32
+	ActivationsGt         *int32
+	ActivationsGte        *int32
+	ActivationsLt         *int32
+	ActivationsLte        *int32
+	ScopeKind             *string
+	ScopeID               uuid.UUID
+	Cursor                *uuid.UUID
+	Limit                 int64
+	Offset                int64
+}
+
+type ListLicensesRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	PolicyID                      uuid.UUID
+	UserID                        *uuid.UUID
+	GroupID                       *uuid.UUID
+	Name                          *string
+	Key                           string
+	Expiry                        *time.Time
+	Uses                          int32
+	Suspended                     bool
+	Protected                     *bool
+	Metadata                      json.RawMessage
+	MaxMachinesOverride           *int32
+	MaxProcessesOverride          *int32
+	MaxUsersOverride              *int32
+	MaxCoresOverride              *int32
+	MaxMemoryOverride             *int64
+	MaxDiskOverride               *int64
+	MaxUsesOverride               *int32
+	MachinesCount                 int32
+	MachinesCoreCount             int32
+	MachinesMemoryCount           int64
+	MachinesDiskCount             int64
+	LicenseUsersCount             int32
+	LastValidatedAt               *time.Time
+	LastValidatedChecksum         *string
+	LastValidatedVersion          *string
+	LastCheckInAt                 *time.Time
+	LastCheckOutAt                *time.Time
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+	OwnerBanned                   bool
+	OwnerEmail                    *string
+	PolicyId2                     uuid.UUID
+	PolicyAccountID               uuid.UUID
+	PolicyProductID               uuid.UUID
+	PolicyName                    string
+	PolicyDuration                *int32
+	PolicyStrict                  bool
+	PolicyFloating                bool
+	PolicyUsePool                 bool
+	PolicyMaxMachines             *int32
+	PolicyMaxProcesses            *int32
+	PolicyMaxUsers                *int32
+	PolicyMaxCores                *int32
+	PolicyMaxMemory               *int64
+	PolicyMaxDisk                 *int64
+	PolicyMaxUses                 *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	PolicyScheme                  *string
+	PolicyEncrypted               bool
+	PolicyProtected               *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	PolicyMetadata                json.RawMessage
+	PolicyCreatedAt               time.Time
+	PolicyUpdatedAt               time.Time
+}
+
+func (q *Queries) ListLicenses(ctx context.Context, arg ListLicensesParams) ([]ListLicensesRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.FilterPolicyID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.FilterOwnerID)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.FilterOwnerEmail)
+		positions[6] = len(args)
+	}
+	if positions[7] == 0 {
+		args = append(args, arg.FilterOwnerEmailLike)
+		positions[7] = len(args)
+	}
+	if positions[8] == 0 {
+		args = append(args, arg.FilterUserID)
+		positions[8] = len(args)
+	}
+	if positions[9] == 0 {
+		args = append(args, arg.FilterUserEmail)
+		positions[9] = len(args)
+	}
+	if positions[10] == 0 {
+		args = append(args, arg.FilterUserEmailLike)
+		positions[10] = len(args)
+	}
+	if positions[11] == 0 {
+		args = append(args, arg.FilterMachineID)
+		positions[11] = len(args)
+	}
+	if positions[12] == 0 {
+		args = append(args, arg.FilterGroupID)
+		positions[12] = len(args)
+	}
+	if positions[13] == 0 {
+		args = append(args, arg.FilterStatus)
+		positions[13] = len(args)
+	}
+	if positions[14] == 0 {
+		args = append(args, arg.Now)
+		positions[14] = len(args)
+	}
+	if positions[15] == 0 {
+		args = append(args, arg.ExpiringSoon)
+		positions[15] = len(args)
+	}
+	if positions[16] == 0 {
+		args = append(args, arg.ActivityCutoff)
+		positions[16] = len(args)
+	}
+	if positions[17] == 0 {
+		args = append(args, arg.FilterSuspended)
+		positions[17] = len(args)
+	}
+	if positions[18] == 0 {
+		args = append(args, arg.FilterExpiring)
+		positions[18] = len(args)
+	}
+	if positions[19] == 0 {
+		args = append(args, arg.FilterExpired)
+		positions[19] = len(args)
+	}
+	if positions[20] == 0 {
+		args = append(args, arg.FilterUnexpired)
+		positions[20] = len(args)
+	}
+	if positions[21] == 0 {
+		args = append(args, arg.ExpiryGte1)
+		positions[21] = len(args)
+	}
+	if positions[22] == 0 {
+		args = append(args, arg.ExpiryGte2)
+		positions[22] = len(args)
+	}
+	if positions[23] == 0 {
+		args = append(args, arg.ExpiryLte)
+		positions[23] = len(args)
+	}
+	if positions[24] == 0 {
+		args = append(args, arg.ActivityActiveSince)
+		positions[24] = len(args)
+	}
+	if positions[25] == 0 {
+		args = append(args, arg.ActivityInactiveSince)
+		positions[25] = len(args)
+	}
+	if positions[26] == 0 {
+		args = append(args, arg.FilterMetadata)
+		positions[26] = len(args)
+	}
+	if positions[27] == 0 {
+		args = append(args, arg.FilterMetadataCast)
+		positions[27] = len(args)
+	}
+	if positions[28] == 0 {
+		args = append(args, arg.FilterAssigned)
+		positions[28] = len(args)
+	}
+	if positions[29] == 0 {
+		args = append(args, arg.FilterUnassigned)
+		positions[29] = len(args)
+	}
+	if positions[30] == 0 {
+		args = append(args, arg.FilterActivated)
+		positions[30] = len(args)
+	}
+	if positions[31] == 0 {
+		args = append(args, arg.ActivationsEq)
+		positions[31] = len(args)
+	}
+	if positions[32] == 0 {
+		args = append(args, arg.ActivationsGt)
+		positions[32] = len(args)
+	}
+	if positions[33] == 0 {
+		args = append(args, arg.ActivationsGte)
+		positions[33] = len(args)
+	}
+	if positions[34] == 0 {
+		args = append(args, arg.ActivationsLt)
+		positions[34] = len(args)
+	}
+	if positions[35] == 0 {
+		args = append(args, arg.ActivationsLte)
+		positions[35] = len(args)
+	}
+	if positions[36] == 0 {
+		args = append(args, arg.ScopeKind)
+		positions[36] = len(args)
+	}
+	if positions[37] == 0 {
+		args = append(args, arg.ScopeID)
+		positions[37] = len(args)
+	}
+	if positions[38] == 0 {
+		args = append(args, arg.Cursor)
+		positions[38] = len(args)
+	}
+	if positions[39] == 0 {
+		args = append(args, arg.Limit)
+		positions[39] = len(args)
+	}
+	if positions[40] == 0 {
+		args = append(args, arg.Offset)
+		positions[40] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT l.id, l.account_id, l.product_id, l.policy_id, l.user_id, l.group_id,\n  l.name, l.key, l.expiry, l.uses, l.suspended, l.protected, l.metadata,\n  l.max_machines_override, l.max_processes_override, l.max_users_override,\n  l.max_cores_override, l.max_memory_override, l.max_disk_override,\n  l.max_uses_override, l.machines_count, l.machines_core_count,\n  l.machines_memory_count, l.machines_disk_count, l.license_users_count,\n  l.last_validated_at, l.last_validated_checksum, l.last_validated_version,\n  l.last_check_in_at, l.last_check_out_at, l.created_at, l.updated_at,\n  (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,\n  u.email AS owner_email,\n  p.id AS policy_id2, p.account_id AS policy_account_id, p.product_id AS policy_product_id,\n  p.name AS policy_name, p.duration AS policy_duration, p.strict AS policy_strict,\n  p.floating AS policy_floating, p.use_pool AS policy_use_pool,\n  p.max_machines AS policy_max_machines, p.max_processes AS policy_max_processes,\n  p.max_users AS policy_max_users, p.max_cores AS policy_max_cores,\n  p.max_memory AS policy_max_memory, p.max_disk AS policy_max_disk,\n  p.max_uses AS policy_max_uses,\n  p.machine_uniqueness_strategy, p.machine_matching_strategy,\n  p.component_uniqueness_strategy, p.component_matching_strategy,\n  p.expiration_strategy, p.expiration_basis, p.renewal_basis, p.transfer_strategy,\n  p.authentication_strategy, p.machine_leasing_strategy, p.process_leasing_strategy,\n  p.overage_strategy, p.scheme AS policy_scheme, p.encrypted AS policy_encrypted,\n  p.protected AS policy_protected,\n  p.require_product_scope, p.require_policy_scope, p.require_machine_scope,\n  p.require_fingerprint_scope, p.require_components_scope, p.require_user_scope,\n  p.require_checksum_scope, p.require_version_scope, p.require_check_in,\n  p.check_in_interval, p.check_in_interval_count, p.heartbeat_duration,\n  p.heartbeat_cull_strategy, p.heartbeat_resurrection_strategy, p.heartbeat_basis,\n  p.require_heartbeat, p.metadata AS policy_metadata,\n  p.created_at AS policy_created_at, p.updated_at AS policy_updated_at\nFROM lic.licenses l\nJOIN lic.policies p ON p.id = l.policy_id\nLEFT JOIN lic.users u ON u.id = l.user_id\nWHERE l.account_id = $%d\n  AND ($%d::uuid[] IS NULL OR l.id = ANY($%d::uuid[]))\n  AND ($%d::uuid IS NULL OR l.product_id = $%d)\n  AND ($%d::uuid IS NULL OR l.policy_id = $%d)\n  AND ($%d::uuid IS NULL OR l.user_id = $%d)\n  AND ($%d::text IS NULL OR u.email = $%d)\n  AND ($%d::text IS NULL OR u.email ILIKE '%%' || $%d || '%%')\n  AND (\n    $%d::uuid IS NULL OR l.user_id = $%d OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = l.id AND lu.user_id = $%d\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR l.user_id IN (\n      SELECT id FROM lic.users WHERE account_id = l.account_id AND email = $%d\n    )\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      JOIN lic.users luu ON luu.id = lu.user_id\n      WHERE lu.license_id = l.id AND luu.email = $%d\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR l.user_id IN (\n      SELECT id FROM lic.users\n      WHERE account_id = l.account_id AND email ILIKE '%%' || $%d || '%%'\n    )\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      JOIN lic.users luu ON luu.id = lu.user_id\n      WHERE lu.license_id = l.id AND luu.email ILIKE '%%' || $%d || '%%'\n    )\n  )\n  AND (\n    $%d::uuid IS NULL OR EXISTS (\n      SELECT 1 FROM lic.machines m WHERE m.license_id = l.id AND m.id = $%d\n    )\n  )\n  AND ($%d::uuid IS NULL OR l.group_id = $%d)\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN l.user_id IS NOT NULL AND u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN l.suspended THEN 'SUSPENDED'\n      WHEN l.expiry IS NOT NULL AND l.expiry < $%d THEN 'EXPIRED'\n      WHEN l.expiry IS NOT NULL AND l.expiry > $%d AND l.expiry < $%d THEN 'EXPIRING'\n      WHEN NOT (\n        l.created_at >= $%d\n        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $%d)\n        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $%d)\n        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $%d)\n      ) THEN 'INACTIVE'\n      ELSE 'ACTIVE'\n    END = $%d\n  )\n  AND ($%d::boolean IS NULL OR l.suspended = $%d)\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NOT NULL AND l.expiry > $%d AND l.expiry < $%d) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NOT NULL AND l.expiry < $%d) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NULL OR l.expiry >= $%d) = $%d\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry <= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL\n    OR (\n      (l.user_id IS NULL OR u.banned_at IS NULL)\n      AND (\n        l.created_at >= $%d\n        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $%d)\n        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $%d)\n        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $%d)\n      )\n    )\n  )\n  AND (\n    $%d::timestamptz IS NULL\n    OR (\n      (l.user_id IS NULL OR u.banned_at IS NULL)\n      AND l.created_at < $%d\n      AND (l.last_validated_at IS NULL OR l.last_validated_at < $%d)\n      AND (l.last_check_out_at IS NULL OR l.last_check_out_at < $%d)\n      AND (l.last_check_in_at IS NULL OR l.last_check_in_at < $%d)\n    )\n  )\n  AND (\n    $%d::jsonb IS NULL\n    OR l.metadata @> $%d\n    OR l.metadata @> $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (\n      l.user_id IS NOT NULL\n      OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)\n    ) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (\n      l.user_id IS NULL\n      AND NOT EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)\n    ) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.machines_count >= 1) = $%d\n  )\n  AND ($%d::integer IS NULL OR l.machines_count = $%d)\n  AND ($%d::integer IS NULL OR l.machines_count > $%d)\n  AND ($%d::integer IS NULL OR l.machines_count >= $%d)\n  AND ($%d::integer IS NULL OR l.machines_count < $%d)\n  AND ($%d::integer IS NULL OR l.machines_count <= $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND l.product_id = $%d)\n    OR (\n      $%d::text = 'user'\n      AND (\n        l.user_id = $%d\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = l.id AND lu.user_id = $%d\n        )\n      )\n    )\n    OR ($%d::text = 'group_owner' AND EXISTS (\n      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = $%d\n    ))\n    OR ($%d::text = 'license' AND l.id = $%d)\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR (l.created_at, l.id) < (SELECT created_at, id FROM lic.licenses WHERE id = $%d)\n  )\nORDER BY l.created_at DESC, l.id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[6], positions[6], positions[7], positions[7], positions[8], positions[8], positions[8], positions[9], positions[9], positions[9], positions[10], positions[10], positions[10], positions[11], positions[11], positions[12], positions[12], positions[13], positions[14], positions[14], positions[15], positions[16], positions[16], positions[16], positions[16], positions[13], positions[17], positions[17], positions[18], positions[14], positions[15], positions[18], positions[19], positions[14], positions[19], positions[20], positions[14], positions[20], positions[21], positions[21], positions[22], positions[22], positions[23], positions[23], positions[24], positions[24], positions[24], positions[24], positions[24], positions[25], positions[25], positions[25], positions[25], positions[25], positions[26], positions[26], positions[27], positions[28], positions[28], positions[29], positions[29], positions[30], positions[30], positions[31], positions[31], positions[32], positions[32], positions[33], positions[33], positions[34], positions[34], positions[35], positions[35], positions[36], positions[36], positions[36], positions[37], positions[36], positions[37], positions[37], positions[36], positions[37], positions[36], positions[37], positions[38], positions[38], positions[39], positions[40]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListLicensesRow
+	for rows.Next() {
+		var i ListLicensesRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.PolicyID, &i.UserID, &i.GroupID, &i.Name, &i.Key, &i.Expiry, &i.Uses, &i.Suspended, &i.Protected, &i.Metadata, &i.MaxMachinesOverride, &i.MaxProcessesOverride, &i.MaxUsersOverride, &i.MaxCoresOverride, &i.MaxMemoryOverride, &i.MaxDiskOverride, &i.MaxUsesOverride, &i.MachinesCount, &i.MachinesCoreCount, &i.MachinesMemoryCount, &i.MachinesDiskCount, &i.LicenseUsersCount, &i.LastValidatedAt, &i.LastValidatedChecksum, &i.LastValidatedVersion, &i.LastCheckInAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.OwnerBanned, &i.OwnerEmail, &i.PolicyId2, &i.PolicyAccountID, &i.PolicyProductID, &i.PolicyName, &i.PolicyDuration, &i.PolicyStrict, &i.PolicyFloating, &i.PolicyUsePool, &i.PolicyMaxMachines, &i.PolicyMaxProcesses, &i.PolicyMaxUsers, &i.PolicyMaxCores, &i.PolicyMaxMemory, &i.PolicyMaxDisk, &i.PolicyMaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.PolicyScheme, &i.PolicyEncrypted, &i.PolicyProtected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.PolicyMetadata, &i.PolicyCreatedAt, &i.PolicyUpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type ListLicensesAscParams struct {
+	AccountID             uuid.UUID
+	FilterIds             []uuid.UUID
+	FilterProductID       *uuid.UUID
+	FilterPolicyID        *uuid.UUID
+	FilterOwnerID         *uuid.UUID
+	FilterOwnerEmail      *string
+	FilterOwnerEmailLike  *string
+	FilterUserID          *uuid.UUID
+	FilterUserEmail       *string
+	FilterUserEmailLike   *string
+	FilterMachineID       *uuid.UUID
+	FilterGroupID         *uuid.UUID
+	FilterStatus          *string
+	Now                   *time.Time
+	ExpiringSoon          *time.Time
+	ActivityCutoff        time.Time
+	FilterSuspended       *bool
+	FilterExpiring        *bool
+	FilterExpired         *bool
+	FilterUnexpired       *bool
+	ExpiryGte1            *time.Time
+	ExpiryGte2            *time.Time
+	ExpiryLte             *time.Time
+	ActivityActiveSince   *time.Time
+	ActivityInactiveSince *time.Time
+	FilterMetadata        json.RawMessage
+	FilterMetadataCast    json.RawMessage
+	FilterAssigned        *bool
+	FilterUnassigned      *bool
+	FilterActivated       *bool
+	ActivationsEq         *int32
+	ActivationsGt         *int32
+	ActivationsGte        *int32
+	ActivationsLt         *int32
+	ActivationsLte        *int32
+	ScopeKind             *string
+	ScopeID               uuid.UUID
+	Cursor                *uuid.UUID
+	Limit                 int64
+	Offset                int64
+}
+
+type ListLicensesAscRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	PolicyID                      uuid.UUID
+	UserID                        *uuid.UUID
+	GroupID                       *uuid.UUID
+	Name                          *string
+	Key                           string
+	Expiry                        *time.Time
+	Uses                          int32
+	Suspended                     bool
+	Protected                     *bool
+	Metadata                      json.RawMessage
+	MaxMachinesOverride           *int32
+	MaxProcessesOverride          *int32
+	MaxUsersOverride              *int32
+	MaxCoresOverride              *int32
+	MaxMemoryOverride             *int64
+	MaxDiskOverride               *int64
+	MaxUsesOverride               *int32
+	MachinesCount                 int32
+	MachinesCoreCount             int32
+	MachinesMemoryCount           int64
+	MachinesDiskCount             int64
+	LicenseUsersCount             int32
+	LastValidatedAt               *time.Time
+	LastValidatedChecksum         *string
+	LastValidatedVersion          *string
+	LastCheckInAt                 *time.Time
+	LastCheckOutAt                *time.Time
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+	OwnerBanned                   bool
+	OwnerEmail                    *string
+	PolicyId2                     uuid.UUID
+	PolicyAccountID               uuid.UUID
+	PolicyProductID               uuid.UUID
+	PolicyName                    string
+	PolicyDuration                *int32
+	PolicyStrict                  bool
+	PolicyFloating                bool
+	PolicyUsePool                 bool
+	PolicyMaxMachines             *int32
+	PolicyMaxProcesses            *int32
+	PolicyMaxUsers                *int32
+	PolicyMaxCores                *int32
+	PolicyMaxMemory               *int64
+	PolicyMaxDisk                 *int64
+	PolicyMaxUses                 *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	PolicyScheme                  *string
+	PolicyEncrypted               bool
+	PolicyProtected               *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	PolicyMetadata                json.RawMessage
+	PolicyCreatedAt               time.Time
+	PolicyUpdatedAt               time.Time
+}
+
+func (q *Queries) ListLicensesAsc(ctx context.Context, arg ListLicensesAscParams) ([]ListLicensesAscRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.FilterPolicyID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.FilterOwnerID)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.FilterOwnerEmail)
+		positions[6] = len(args)
+	}
+	if positions[7] == 0 {
+		args = append(args, arg.FilterOwnerEmailLike)
+		positions[7] = len(args)
+	}
+	if positions[8] == 0 {
+		args = append(args, arg.FilterUserID)
+		positions[8] = len(args)
+	}
+	if positions[9] == 0 {
+		args = append(args, arg.FilterUserEmail)
+		positions[9] = len(args)
+	}
+	if positions[10] == 0 {
+		args = append(args, arg.FilterUserEmailLike)
+		positions[10] = len(args)
+	}
+	if positions[11] == 0 {
+		args = append(args, arg.FilterMachineID)
+		positions[11] = len(args)
+	}
+	if positions[12] == 0 {
+		args = append(args, arg.FilterGroupID)
+		positions[12] = len(args)
+	}
+	if positions[13] == 0 {
+		args = append(args, arg.FilterStatus)
+		positions[13] = len(args)
+	}
+	if positions[14] == 0 {
+		args = append(args, arg.Now)
+		positions[14] = len(args)
+	}
+	if positions[15] == 0 {
+		args = append(args, arg.ExpiringSoon)
+		positions[15] = len(args)
+	}
+	if positions[16] == 0 {
+		args = append(args, arg.ActivityCutoff)
+		positions[16] = len(args)
+	}
+	if positions[17] == 0 {
+		args = append(args, arg.FilterSuspended)
+		positions[17] = len(args)
+	}
+	if positions[18] == 0 {
+		args = append(args, arg.FilterExpiring)
+		positions[18] = len(args)
+	}
+	if positions[19] == 0 {
+		args = append(args, arg.FilterExpired)
+		positions[19] = len(args)
+	}
+	if positions[20] == 0 {
+		args = append(args, arg.FilterUnexpired)
+		positions[20] = len(args)
+	}
+	if positions[21] == 0 {
+		args = append(args, arg.ExpiryGte1)
+		positions[21] = len(args)
+	}
+	if positions[22] == 0 {
+		args = append(args, arg.ExpiryGte2)
+		positions[22] = len(args)
+	}
+	if positions[23] == 0 {
+		args = append(args, arg.ExpiryLte)
+		positions[23] = len(args)
+	}
+	if positions[24] == 0 {
+		args = append(args, arg.ActivityActiveSince)
+		positions[24] = len(args)
+	}
+	if positions[25] == 0 {
+		args = append(args, arg.ActivityInactiveSince)
+		positions[25] = len(args)
+	}
+	if positions[26] == 0 {
+		args = append(args, arg.FilterMetadata)
+		positions[26] = len(args)
+	}
+	if positions[27] == 0 {
+		args = append(args, arg.FilterMetadataCast)
+		positions[27] = len(args)
+	}
+	if positions[28] == 0 {
+		args = append(args, arg.FilterAssigned)
+		positions[28] = len(args)
+	}
+	if positions[29] == 0 {
+		args = append(args, arg.FilterUnassigned)
+		positions[29] = len(args)
+	}
+	if positions[30] == 0 {
+		args = append(args, arg.FilterActivated)
+		positions[30] = len(args)
+	}
+	if positions[31] == 0 {
+		args = append(args, arg.ActivationsEq)
+		positions[31] = len(args)
+	}
+	if positions[32] == 0 {
+		args = append(args, arg.ActivationsGt)
+		positions[32] = len(args)
+	}
+	if positions[33] == 0 {
+		args = append(args, arg.ActivationsGte)
+		positions[33] = len(args)
+	}
+	if positions[34] == 0 {
+		args = append(args, arg.ActivationsLt)
+		positions[34] = len(args)
+	}
+	if positions[35] == 0 {
+		args = append(args, arg.ActivationsLte)
+		positions[35] = len(args)
+	}
+	if positions[36] == 0 {
+		args = append(args, arg.ScopeKind)
+		positions[36] = len(args)
+	}
+	if positions[37] == 0 {
+		args = append(args, arg.ScopeID)
+		positions[37] = len(args)
+	}
+	if positions[38] == 0 {
+		args = append(args, arg.Cursor)
+		positions[38] = len(args)
+	}
+	if positions[39] == 0 {
+		args = append(args, arg.Limit)
+		positions[39] = len(args)
+	}
+	if positions[40] == 0 {
+		args = append(args, arg.Offset)
+		positions[40] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT l.id, l.account_id, l.product_id, l.policy_id, l.user_id, l.group_id,\n  l.name, l.key, l.expiry, l.uses, l.suspended, l.protected, l.metadata,\n  l.max_machines_override, l.max_processes_override, l.max_users_override,\n  l.max_cores_override, l.max_memory_override, l.max_disk_override,\n  l.max_uses_override, l.machines_count, l.machines_core_count,\n  l.machines_memory_count, l.machines_disk_count, l.license_users_count,\n  l.last_validated_at, l.last_validated_checksum, l.last_validated_version,\n  l.last_check_in_at, l.last_check_out_at, l.created_at, l.updated_at,\n  (l.user_id IS NOT NULL AND u.banned_at IS NOT NULL) AS owner_banned,\n  u.email AS owner_email,\n  p.id AS policy_id2, p.account_id AS policy_account_id, p.product_id AS policy_product_id,\n  p.name AS policy_name, p.duration AS policy_duration, p.strict AS policy_strict,\n  p.floating AS policy_floating, p.use_pool AS policy_use_pool,\n  p.max_machines AS policy_max_machines, p.max_processes AS policy_max_processes,\n  p.max_users AS policy_max_users, p.max_cores AS policy_max_cores,\n  p.max_memory AS policy_max_memory, p.max_disk AS policy_max_disk,\n  p.max_uses AS policy_max_uses,\n  p.machine_uniqueness_strategy, p.machine_matching_strategy,\n  p.component_uniqueness_strategy, p.component_matching_strategy,\n  p.expiration_strategy, p.expiration_basis, p.renewal_basis, p.transfer_strategy,\n  p.authentication_strategy, p.machine_leasing_strategy, p.process_leasing_strategy,\n  p.overage_strategy, p.scheme AS policy_scheme, p.encrypted AS policy_encrypted,\n  p.protected AS policy_protected,\n  p.require_product_scope, p.require_policy_scope, p.require_machine_scope,\n  p.require_fingerprint_scope, p.require_components_scope, p.require_user_scope,\n  p.require_checksum_scope, p.require_version_scope, p.require_check_in,\n  p.check_in_interval, p.check_in_interval_count, p.heartbeat_duration,\n  p.heartbeat_cull_strategy, p.heartbeat_resurrection_strategy, p.heartbeat_basis,\n  p.require_heartbeat, p.metadata AS policy_metadata,\n  p.created_at AS policy_created_at, p.updated_at AS policy_updated_at\nFROM lic.licenses l\nJOIN lic.policies p ON p.id = l.policy_id\nLEFT JOIN lic.users u ON u.id = l.user_id\nWHERE l.account_id = $%d\n  AND ($%d::uuid[] IS NULL OR l.id = ANY($%d::uuid[]))\n  AND ($%d::uuid IS NULL OR l.product_id = $%d)\n  AND ($%d::uuid IS NULL OR l.policy_id = $%d)\n  AND ($%d::uuid IS NULL OR l.user_id = $%d)\n  AND ($%d::text IS NULL OR u.email = $%d)\n  AND ($%d::text IS NULL OR u.email ILIKE '%%' || $%d || '%%')\n  AND (\n    $%d::uuid IS NULL OR l.user_id = $%d OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = l.id AND lu.user_id = $%d\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR l.user_id IN (\n      SELECT id FROM lic.users WHERE account_id = l.account_id AND email = $%d\n    )\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      JOIN lic.users luu ON luu.id = lu.user_id\n      WHERE lu.license_id = l.id AND luu.email = $%d\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR l.user_id IN (\n      SELECT id FROM lic.users\n      WHERE account_id = l.account_id AND email ILIKE '%%' || $%d || '%%'\n    )\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      JOIN lic.users luu ON luu.id = lu.user_id\n      WHERE lu.license_id = l.id AND luu.email ILIKE '%%' || $%d || '%%'\n    )\n  )\n  AND (\n    $%d::uuid IS NULL OR EXISTS (\n      SELECT 1 FROM lic.machines m WHERE m.license_id = l.id AND m.id = $%d\n    )\n  )\n  AND ($%d::uuid IS NULL OR l.group_id = $%d)\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN l.user_id IS NOT NULL AND u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN l.suspended THEN 'SUSPENDED'\n      WHEN l.expiry IS NOT NULL AND l.expiry < $%d THEN 'EXPIRED'\n      WHEN l.expiry IS NOT NULL AND l.expiry > $%d AND l.expiry < $%d THEN 'EXPIRING'\n      WHEN NOT (\n        l.created_at >= $%d\n        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $%d)\n        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $%d)\n        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $%d)\n      ) THEN 'INACTIVE'\n      ELSE 'ACTIVE'\n    END = $%d\n  )\n  AND ($%d::boolean IS NULL OR l.suspended = $%d)\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NOT NULL AND l.expiry > $%d AND l.expiry < $%d) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NOT NULL AND l.expiry < $%d) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NULL OR l.expiry >= $%d) = $%d\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry <= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL\n    OR (\n      (l.user_id IS NULL OR u.banned_at IS NULL)\n      AND (\n        l.created_at >= $%d\n        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $%d)\n        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $%d)\n        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $%d)\n      )\n    )\n  )\n  AND (\n    $%d::timestamptz IS NULL\n    OR (\n      (l.user_id IS NULL OR u.banned_at IS NULL)\n      AND l.created_at < $%d\n      AND (l.last_validated_at IS NULL OR l.last_validated_at < $%d)\n      AND (l.last_check_out_at IS NULL OR l.last_check_out_at < $%d)\n      AND (l.last_check_in_at IS NULL OR l.last_check_in_at < $%d)\n    )\n  )\n  AND (\n    $%d::jsonb IS NULL\n    OR l.metadata @> $%d\n    OR l.metadata @> $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (\n      l.user_id IS NOT NULL\n      OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)\n    ) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (\n      l.user_id IS NULL\n      AND NOT EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)\n    ) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.machines_count >= 1) = $%d\n  )\n  AND ($%d::integer IS NULL OR l.machines_count = $%d)\n  AND ($%d::integer IS NULL OR l.machines_count > $%d)\n  AND ($%d::integer IS NULL OR l.machines_count >= $%d)\n  AND ($%d::integer IS NULL OR l.machines_count < $%d)\n  AND ($%d::integer IS NULL OR l.machines_count <= $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND l.product_id = $%d)\n    OR (\n      $%d::text = 'user'\n      AND (\n        l.user_id = $%d\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = l.id AND lu.user_id = $%d\n        )\n      )\n    )\n    OR ($%d::text = 'group_owner' AND EXISTS (\n      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = $%d\n    ))\n    OR ($%d::text = 'license' AND l.id = $%d)\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR (l.created_at, l.id) > (SELECT created_at, id FROM lic.licenses WHERE id = $%d)\n  )\nORDER BY l.created_at ASC, l.id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[6], positions[6], positions[7], positions[7], positions[8], positions[8], positions[8], positions[9], positions[9], positions[9], positions[10], positions[10], positions[10], positions[11], positions[11], positions[12], positions[12], positions[13], positions[14], positions[14], positions[15], positions[16], positions[16], positions[16], positions[16], positions[13], positions[17], positions[17], positions[18], positions[14], positions[15], positions[18], positions[19], positions[14], positions[19], positions[20], positions[14], positions[20], positions[21], positions[21], positions[22], positions[22], positions[23], positions[23], positions[24], positions[24], positions[24], positions[24], positions[24], positions[25], positions[25], positions[25], positions[25], positions[25], positions[26], positions[26], positions[27], positions[28], positions[28], positions[29], positions[29], positions[30], positions[30], positions[31], positions[31], positions[32], positions[32], positions[33], positions[33], positions[34], positions[34], positions[35], positions[35], positions[36], positions[36], positions[36], positions[37], positions[36], positions[37], positions[37], positions[36], positions[37], positions[36], positions[37], positions[38], positions[38], positions[39], positions[40]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListLicensesAscRow
+	for rows.Next() {
+		var i ListLicensesAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.PolicyID, &i.UserID, &i.GroupID, &i.Name, &i.Key, &i.Expiry, &i.Uses, &i.Suspended, &i.Protected, &i.Metadata, &i.MaxMachinesOverride, &i.MaxProcessesOverride, &i.MaxUsersOverride, &i.MaxCoresOverride, &i.MaxMemoryOverride, &i.MaxDiskOverride, &i.MaxUsesOverride, &i.MachinesCount, &i.MachinesCoreCount, &i.MachinesMemoryCount, &i.MachinesDiskCount, &i.LicenseUsersCount, &i.LastValidatedAt, &i.LastValidatedChecksum, &i.LastValidatedVersion, &i.LastCheckInAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.OwnerBanned, &i.OwnerEmail, &i.PolicyId2, &i.PolicyAccountID, &i.PolicyProductID, &i.PolicyName, &i.PolicyDuration, &i.PolicyStrict, &i.PolicyFloating, &i.PolicyUsePool, &i.PolicyMaxMachines, &i.PolicyMaxProcesses, &i.PolicyMaxUsers, &i.PolicyMaxCores, &i.PolicyMaxMemory, &i.PolicyMaxDisk, &i.PolicyMaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.PolicyScheme, &i.PolicyEncrypted, &i.PolicyProtected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.PolicyMetadata, &i.PolicyCreatedAt, &i.PolicyUpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type CountLicensesParams struct {
+	AccountID             uuid.UUID
+	FilterIds             []uuid.UUID
+	FilterProductID       *uuid.UUID
+	FilterPolicyID        *uuid.UUID
+	FilterOwnerID         *uuid.UUID
+	FilterOwnerEmail      *string
+	FilterOwnerEmailLike  *string
+	FilterUserID          *uuid.UUID
+	FilterUserEmail       *string
+	FilterUserEmailLike   *string
+	FilterMachineID       *uuid.UUID
+	FilterGroupID         *uuid.UUID
+	FilterStatus          *string
+	Now                   *time.Time
+	ExpiringSoon          *time.Time
+	ActivityCutoff        time.Time
+	FilterSuspended       *bool
+	FilterExpiring        *bool
+	FilterExpired         *bool
+	FilterUnexpired       *bool
+	ExpiryGte1            *time.Time
+	ExpiryGte2            *time.Time
+	ExpiryLte             *time.Time
+	ActivityActiveSince   *time.Time
+	ActivityInactiveSince *time.Time
+	FilterMetadata        json.RawMessage
+	FilterMetadataCast    json.RawMessage
+	FilterAssigned        *bool
+	FilterUnassigned      *bool
+	FilterActivated       *bool
+	ActivationsEq         *int32
+	ActivationsGt         *int32
+	ActivationsGte        *int32
+	ActivationsLt         *int32
+	ActivationsLte        *int32
+	ScopeKind             *string
+	ScopeID               uuid.UUID
+}
+
+type CountLicensesRow struct {
+	Count int64
+}
+
+func (q *Queries) CountLicenses(ctx context.Context, arg CountLicensesParams) (CountLicensesRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.FilterPolicyID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.FilterOwnerID)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.FilterOwnerEmail)
+		positions[6] = len(args)
+	}
+	if positions[7] == 0 {
+		args = append(args, arg.FilterOwnerEmailLike)
+		positions[7] = len(args)
+	}
+	if positions[8] == 0 {
+		args = append(args, arg.FilterUserID)
+		positions[8] = len(args)
+	}
+	if positions[9] == 0 {
+		args = append(args, arg.FilterUserEmail)
+		positions[9] = len(args)
+	}
+	if positions[10] == 0 {
+		args = append(args, arg.FilterUserEmailLike)
+		positions[10] = len(args)
+	}
+	if positions[11] == 0 {
+		args = append(args, arg.FilterMachineID)
+		positions[11] = len(args)
+	}
+	if positions[12] == 0 {
+		args = append(args, arg.FilterGroupID)
+		positions[12] = len(args)
+	}
+	if positions[13] == 0 {
+		args = append(args, arg.FilterStatus)
+		positions[13] = len(args)
+	}
+	if positions[14] == 0 {
+		args = append(args, arg.Now)
+		positions[14] = len(args)
+	}
+	if positions[15] == 0 {
+		args = append(args, arg.ExpiringSoon)
+		positions[15] = len(args)
+	}
+	if positions[16] == 0 {
+		args = append(args, arg.ActivityCutoff)
+		positions[16] = len(args)
+	}
+	if positions[17] == 0 {
+		args = append(args, arg.FilterSuspended)
+		positions[17] = len(args)
+	}
+	if positions[18] == 0 {
+		args = append(args, arg.FilterExpiring)
+		positions[18] = len(args)
+	}
+	if positions[19] == 0 {
+		args = append(args, arg.FilterExpired)
+		positions[19] = len(args)
+	}
+	if positions[20] == 0 {
+		args = append(args, arg.FilterUnexpired)
+		positions[20] = len(args)
+	}
+	if positions[21] == 0 {
+		args = append(args, arg.ExpiryGte1)
+		positions[21] = len(args)
+	}
+	if positions[22] == 0 {
+		args = append(args, arg.ExpiryGte2)
+		positions[22] = len(args)
+	}
+	if positions[23] == 0 {
+		args = append(args, arg.ExpiryLte)
+		positions[23] = len(args)
+	}
+	if positions[24] == 0 {
+		args = append(args, arg.ActivityActiveSince)
+		positions[24] = len(args)
+	}
+	if positions[25] == 0 {
+		args = append(args, arg.ActivityInactiveSince)
+		positions[25] = len(args)
+	}
+	if positions[26] == 0 {
+		args = append(args, arg.FilterMetadata)
+		positions[26] = len(args)
+	}
+	if positions[27] == 0 {
+		args = append(args, arg.FilterMetadataCast)
+		positions[27] = len(args)
+	}
+	if positions[28] == 0 {
+		args = append(args, arg.FilterAssigned)
+		positions[28] = len(args)
+	}
+	if positions[29] == 0 {
+		args = append(args, arg.FilterUnassigned)
+		positions[29] = len(args)
+	}
+	if positions[30] == 0 {
+		args = append(args, arg.FilterActivated)
+		positions[30] = len(args)
+	}
+	if positions[31] == 0 {
+		args = append(args, arg.ActivationsEq)
+		positions[31] = len(args)
+	}
+	if positions[32] == 0 {
+		args = append(args, arg.ActivationsGt)
+		positions[32] = len(args)
+	}
+	if positions[33] == 0 {
+		args = append(args, arg.ActivationsGte)
+		positions[33] = len(args)
+	}
+	if positions[34] == 0 {
+		args = append(args, arg.ActivationsLt)
+		positions[34] = len(args)
+	}
+	if positions[35] == 0 {
+		args = append(args, arg.ActivationsLte)
+		positions[35] = len(args)
+	}
+	if positions[36] == 0 {
+		args = append(args, arg.ScopeKind)
+		positions[36] = len(args)
+	}
+	if positions[37] == 0 {
+		args = append(args, arg.ScopeID)
+		positions[37] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*) AS count\nFROM lic.licenses l\nLEFT JOIN lic.users u ON u.id = l.user_id\nWHERE l.account_id = $%d\n  AND ($%d::uuid[] IS NULL OR l.id = ANY($%d::uuid[]))\n  AND ($%d::uuid IS NULL OR l.product_id = $%d)\n  AND ($%d::uuid IS NULL OR l.policy_id = $%d)\n  AND ($%d::uuid IS NULL OR l.user_id = $%d)\n  AND ($%d::text IS NULL OR u.email = $%d)\n  AND ($%d::text IS NULL OR u.email ILIKE '%%' || $%d || '%%')\n  AND (\n    $%d::uuid IS NULL OR l.user_id = $%d OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = l.id AND lu.user_id = $%d\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR l.user_id IN (\n      SELECT id FROM lic.users WHERE account_id = l.account_id AND email = $%d\n    )\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      JOIN lic.users luu ON luu.id = lu.user_id\n      WHERE lu.license_id = l.id AND luu.email = $%d\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR l.user_id IN (\n      SELECT id FROM lic.users\n      WHERE account_id = l.account_id AND email ILIKE '%%' || $%d || '%%'\n    )\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      JOIN lic.users luu ON luu.id = lu.user_id\n      WHERE lu.license_id = l.id AND luu.email ILIKE '%%' || $%d || '%%'\n    )\n  )\n  AND (\n    $%d::uuid IS NULL OR EXISTS (\n      SELECT 1 FROM lic.machines m WHERE m.license_id = l.id AND m.id = $%d\n    )\n  )\n  AND ($%d::uuid IS NULL OR l.group_id = $%d)\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN l.user_id IS NOT NULL AND u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN l.suspended THEN 'SUSPENDED'\n      WHEN l.expiry IS NOT NULL AND l.expiry < $%d THEN 'EXPIRED'\n      WHEN l.expiry IS NOT NULL AND l.expiry > $%d AND l.expiry < $%d THEN 'EXPIRING'\n      WHEN NOT (\n        l.created_at >= $%d\n        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $%d)\n        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $%d)\n        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $%d)\n      ) THEN 'INACTIVE'\n      ELSE 'ACTIVE'\n    END = $%d\n  )\n  AND ($%d::boolean IS NULL OR l.suspended = $%d)\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NOT NULL AND l.expiry > $%d AND l.expiry < $%d) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NOT NULL AND l.expiry < $%d) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.expiry IS NULL OR l.expiry >= $%d) = $%d\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry >= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL OR (l.expiry IS NOT NULL AND l.expiry <= $%d)\n  )\n  AND (\n    $%d::timestamptz IS NULL\n    OR (\n      (l.user_id IS NULL OR u.banned_at IS NULL)\n      AND (\n        l.created_at >= $%d\n        OR (l.last_validated_at IS NOT NULL AND l.last_validated_at >= $%d)\n        OR (l.last_check_out_at IS NOT NULL AND l.last_check_out_at >= $%d)\n        OR (l.last_check_in_at IS NOT NULL AND l.last_check_in_at >= $%d)\n      )\n    )\n  )\n  AND (\n    $%d::timestamptz IS NULL\n    OR (\n      (l.user_id IS NULL OR u.banned_at IS NULL)\n      AND l.created_at < $%d\n      AND (l.last_validated_at IS NULL OR l.last_validated_at < $%d)\n      AND (l.last_check_out_at IS NULL OR l.last_check_out_at < $%d)\n      AND (l.last_check_in_at IS NULL OR l.last_check_in_at < $%d)\n    )\n  )\n  AND (\n    $%d::jsonb IS NULL\n    OR l.metadata @> $%d\n    OR l.metadata @> $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (\n      l.user_id IS NOT NULL\n      OR EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)\n    ) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (\n      l.user_id IS NULL\n      AND NOT EXISTS (SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id)\n    ) = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR (l.machines_count >= 1) = $%d\n  )\n  AND ($%d::integer IS NULL OR l.machines_count = $%d)\n  AND ($%d::integer IS NULL OR l.machines_count > $%d)\n  AND ($%d::integer IS NULL OR l.machines_count >= $%d)\n  AND ($%d::integer IS NULL OR l.machines_count < $%d)\n  AND ($%d::integer IS NULL OR l.machines_count <= $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND l.product_id = $%d)\n    OR (\n      $%d::text = 'user'\n      AND (\n        l.user_id = $%d\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = l.id AND lu.user_id = $%d\n        )\n      )\n    )\n    OR ($%d::text = 'group_owner' AND EXISTS (\n      SELECT 1 FROM lic.group_owners go WHERE go.group_id = l.group_id AND go.user_id = $%d\n    ))\n    OR ($%d::text = 'license' AND l.id = $%d)\n  )\n;\n\n-- Validation helpers (LicenseValidationService).", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[6], positions[6], positions[7], positions[7], positions[8], positions[8], positions[8], positions[9], positions[9], positions[9], positions[10], positions[10], positions[10], positions[11], positions[11], positions[12], positions[12], positions[13], positions[14], positions[14], positions[15], positions[16], positions[16], positions[16], positions[16], positions[13], positions[17], positions[17], positions[18], positions[14], positions[15], positions[18], positions[19], positions[14], positions[19], positions[20], positions[14], positions[20], positions[21], positions[21], positions[22], positions[22], positions[23], positions[23], positions[24], positions[24], positions[24], positions[24], positions[24], positions[25], positions[25], positions[25], positions[25], positions[25], positions[26], positions[26], positions[27], positions[28], positions[28], positions[29], positions[29], positions[30], positions[30], positions[31], positions[31], positions[32], positions[32], positions[33], positions[33], positions[34], positions[34], positions[35], positions[35], positions[36], positions[36], positions[36], positions[37], positions[36], positions[37], positions[37], positions[36], positions[37], positions[36], positions[37]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountLicensesRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
 type CountMachineComponentsOfParams struct {
 	MachineID    uuid.UUID
 	Fingerprints []string
@@ -7232,6 +7576,403 @@ func (q *Queries) CountMachinesByFingerprints(ctx context.Context, arg CountMach
 	b.WriteString(fmt.Sprintf("SELECT count(*) AS count\nFROM lic.machines\nWHERE license_id = $%d AND fingerprint = ANY($%d::text[]);", positions[1], positions[2]))
 	row := q.db.QueryRow(ctx, b.String(), args...)
 	var i CountMachinesByFingerprintsRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+type ListPoliciesDescParams struct {
+	AccountID       uuid.UUID
+	FilterIds       []uuid.UUID
+	FilterProductID *uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListPoliciesDescRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) ListPoliciesDesc(ctx context.Context, arg ListPoliciesDescParams) ([]ListPoliciesDescRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.CursorID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Limit)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.Offset)
+		positions[6] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, product_id, name, duration, strict, floating,\n  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,\n  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,\n  component_uniqueness_strategy, component_matching_strategy,\n  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,\n  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,\n  overage_strategy, scheme, encrypted, protected, require_product_scope,\n  require_policy_scope, require_machine_scope, require_fingerprint_scope,\n  require_components_scope, require_user_scope, require_checksum_scope,\n  require_version_scope, require_check_in, check_in_interval,\n  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,\n  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,\n  metadata, created_at, updated_at\nFROM lic.policies\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND ($%d::uuid IS NULL OR product_id = $%d)\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) < (\n      SELECT p2.created_at, p2.id FROM lic.policies p2\n      WHERE p2.account_id = $%d AND p2.id = $%d\n    )\n  )\nORDER BY created_at DESC, id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[1], positions[4], positions[5], positions[6]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPoliciesDescRow
+	for rows.Next() {
+		var i ListPoliciesDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type ListPoliciesAscParams struct {
+	AccountID       uuid.UUID
+	FilterIds       []uuid.UUID
+	FilterProductID *uuid.UUID
+	CursorID        *uuid.UUID
+	Limit           int64
+	Offset          int64
+}
+
+type ListPoliciesAscRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	ProductID                     uuid.UUID
+	Name                          string
+	Duration                      *int32
+	Strict                        bool
+	Floating                      bool
+	UsePool                       bool
+	MaxMachines                   *int32
+	MaxProcesses                  *int32
+	MaxUsers                      *int32
+	MaxCores                      *int32
+	MaxMemory                     *int64
+	MaxDisk                       *int64
+	MaxUses                       *int32
+	MachineUniquenessStrategy     *string
+	MachineMatchingStrategy       *string
+	ComponentUniquenessStrategy   *string
+	ComponentMatchingStrategy     *string
+	ExpirationStrategy            *string
+	ExpirationBasis               *string
+	RenewalBasis                  *string
+	TransferStrategy              *string
+	AuthenticationStrategy        *string
+	MachineLeasingStrategy        *string
+	ProcessLeasingStrategy        *string
+	OverageStrategy               *string
+	Scheme                        *string
+	Encrypted                     bool
+	Protected                     *bool
+	RequireProductScope           bool
+	RequirePolicyScope            bool
+	RequireMachineScope           bool
+	RequireFingerprintScope       bool
+	RequireComponentsScope        bool
+	RequireUserScope              bool
+	RequireChecksumScope          bool
+	RequireVersionScope           bool
+	RequireCheckIn                bool
+	CheckInInterval               *string
+	CheckInIntervalCount          *int32
+	HeartbeatDuration             *int32
+	HeartbeatCullStrategy         *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatBasis                *string
+	RequireHeartbeat              bool
+	Metadata                      json.RawMessage
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+}
+
+func (q *Queries) ListPoliciesAsc(ctx context.Context, arg ListPoliciesAscParams) ([]ListPoliciesAscRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.CursorID)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Limit)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.Offset)
+		positions[6] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, product_id, name, duration, strict, floating,\n  use_pool, max_machines, max_processes, max_users, max_cores, max_memory,\n  max_disk, max_uses, machine_uniqueness_strategy, machine_matching_strategy,\n  component_uniqueness_strategy, component_matching_strategy,\n  expiration_strategy, expiration_basis, renewal_basis, transfer_strategy,\n  authentication_strategy, machine_leasing_strategy, process_leasing_strategy,\n  overage_strategy, scheme, encrypted, protected, require_product_scope,\n  require_policy_scope, require_machine_scope, require_fingerprint_scope,\n  require_components_scope, require_user_scope, require_checksum_scope,\n  require_version_scope, require_check_in, check_in_interval,\n  check_in_interval_count, heartbeat_duration, heartbeat_cull_strategy,\n  heartbeat_resurrection_strategy, heartbeat_basis, require_heartbeat,\n  metadata, created_at, updated_at\nFROM lic.policies\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND ($%d::uuid IS NULL OR product_id = $%d)\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) > (\n      SELECT p2.created_at, p2.id FROM lic.policies p2\n      WHERE p2.account_id = $%d AND p2.id = $%d\n    )\n  )\nORDER BY created_at ASC, id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[1], positions[4], positions[5], positions[6]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPoliciesAscRow
+	for rows.Next() {
+		var i ListPoliciesAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type CountPoliciesParams struct {
+	AccountID       uuid.UUID
+	FilterIds       []uuid.UUID
+	FilterProductID *uuid.UUID
+}
+
+type CountPoliciesRow struct {
+	Count int64
+}
+
+func (q *Queries) CountPolicies(ctx context.Context, arg CountPoliciesParams) (CountPoliciesRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[3] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*) FROM lic.policies\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND ($%d::uuid IS NULL OR product_id = $%d);\n\n-- The product-bearer scope (Policy.for_product): the product's policies.", positions[1], positions[2], positions[2], positions[3], positions[3]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountPoliciesRow
+	err := row.Scan(&i.Count)
+	return i, err
+}
+
+type ListProductsDescParams struct {
+	AccountID uuid.UUID
+	FilterIds []uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsDescRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsDesc(ctx context.Context, arg ListProductsDescParams) ([]ListProductsDescRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.CursorID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.Limit)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Offset)
+		positions[5] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, distribution_strategy, url, platforms,\n  metadata, created_at, updated_at\nFROM lic.products\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) < (\n      SELECT p2.created_at, p2.id FROM lic.products p2\n      WHERE p2.account_id = $%d AND p2.id = $%d\n    )\n  )\nORDER BY created_at DESC, id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsDescRow
+	for rows.Next() {
+		var i ListProductsDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type ListProductsAscParams struct {
+	AccountID uuid.UUID
+	FilterIds []uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListProductsAscRow struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	Name                 *string
+	Code                 *string
+	DistributionStrategy *string
+	URL                  *string
+	Platforms            json.RawMessage
+	Metadata             json.RawMessage
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) ListProductsAsc(ctx context.Context, arg ListProductsAscParams) ([]ListProductsAscRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.CursorID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.Limit)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Offset)
+		positions[5] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, distribution_strategy, url, platforms,\n  metadata, created_at, updated_at\nFROM lic.products\nWHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]))\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) > (\n      SELECT p2.created_at, p2.id FROM lic.products p2\n      WHERE p2.account_id = $%d AND p2.id = $%d\n    )\n  )\nORDER BY created_at ASC, id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsAscRow
+	for rows.Next() {
+		var i ListProductsAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.DistributionStrategy, &i.URL, &i.Platforms, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type CountProductsParams struct {
+	AccountID uuid.UUID
+	FilterIds []uuid.UUID
+}
+
+type CountProductsRow struct {
+	Count int64
+}
+
+func (q *Queries) CountProducts(ctx context.Context, arg CountProductsParams) (CountProductsRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*) FROM lic.products WHERE account_id = $%d\n  AND ($%d::uuid[] IS NULL OR id = ANY($%d::uuid[]));\n\n-- The user scope (Product.for_user): open products UNION the products of\n-- the user's licenses (owned or attached).", positions[1], positions[2], positions[2]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountProductsRow
 	err := row.Scan(&i.Count)
 	return i, err
 }
@@ -7657,6 +8398,7 @@ func (q *Queries) ListTokens(ctx context.Context, arg ListTokensParams) ([]ListT
 
 type CountUsersParams struct {
 	AccountID uuid.UUID
+	FilterIds []uuid.UUID
 	Roles     []string
 	GroupID   *uuid.UUID
 	ProductID *uuid.UUID
@@ -7682,46 +8424,50 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (CountUs
 		positions[1] = len(args)
 	}
 	if positions[2] == 0 {
-		args = append(args, arg.Roles)
+		args = append(args, arg.FilterIds)
 		positions[2] = len(args)
 	}
 	if positions[3] == 0 {
-		args = append(args, arg.GroupID)
+		args = append(args, arg.Roles)
 		positions[3] = len(args)
 	}
 	if positions[4] == 0 {
-		args = append(args, arg.ProductID)
+		args = append(args, arg.GroupID)
 		positions[4] = len(args)
 	}
 	if positions[5] == 0 {
-		args = append(args, arg.LicenseID)
+		args = append(args, arg.ProductID)
 		positions[5] = len(args)
 	}
 	if positions[6] == 0 {
-		args = append(args, arg.Status)
+		args = append(args, arg.LicenseID)
 		positions[6] = len(args)
 	}
 	if positions[7] == 0 {
-		args = append(args, arg.Cutoff)
+		args = append(args, arg.Status)
 		positions[7] = len(args)
 	}
 	if positions[8] == 0 {
-		args = append(args, arg.Assigned)
+		args = append(args, arg.Cutoff)
 		positions[8] = len(args)
 	}
 	if positions[9] == 0 {
-		args = append(args, arg.Metadata)
+		args = append(args, arg.Assigned)
 		positions[9] = len(args)
 	}
 	if positions[10] == 0 {
-		args = append(args, arg.ScopeKind)
+		args = append(args, arg.Metadata)
 		positions[10] = len(args)
 	}
 	if positions[11] == 0 {
-		args = append(args, arg.ScopeID)
+		args = append(args, arg.ScopeKind)
 		positions[11] = len(args)
 	}
-	b.WriteString(fmt.Sprintf("SELECT count(*)::int AS total FROM lic.users u\nWHERE u.account_id = $%d\n  AND ($%d::text[] IS NULL OR u.role = ANY($%d::text[]))\n  AND ($%d::uuid IS NULL OR u.group_id = $%d)\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l\n      WHERE l.account_id = u.account_id AND l.user_id = u.id AND l.product_id = $%d\n    )\n    OR EXISTS (\n      SELECT 1\n      FROM lic.license_users lu\n      JOIN lic.licenses l ON l.id = lu.license_id\n      WHERE lu.user_id = u.id AND l.product_id = $%d\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = $%d AND lu.user_id = u.id\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN u.created_at >= $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (l.user_id = u.id OR EXISTS (\n              SELECT 1 FROM lic.license_users lu\n              WHERE lu.license_id = l.id AND lu.user_id = u.id\n            ))\n            AND GREATEST(\n              l.created_at,\n              COALESCE(l.last_validated_at, l.created_at),\n              COALESCE(l.last_check_in_at, l.created_at),\n              COALESCE(l.last_check_out_at, l.created_at)\n            ) >= $%d\n        )\n      THEN 'ACTIVE'\n      ELSE 'INACTIVE'\n    END = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l WHERE l.account_id = u.account_id AND l.user_id = u.id\n    ) = $%d\n  )\n  AND ($%d::jsonb IS NULL OR u.metadata @> $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND u.role = 'user')\n    OR (\n      $%d::text = 'user'\n      AND (\n        u.id = $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (\n              (l.user_id = $%d AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = u.id\n              ))\n              OR (l.user_id = u.id AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = $%d\n              ))\n            )\n        )\n      )\n    )\n    OR (\n      $%d::text = 'license'\n      AND (\n        EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = $%d AND lu.user_id = u.id\n        )\n      )\n    )\n  )\n;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[4], positions[4], positions[5], positions[5], positions[5], positions[6], positions[7], positions[7], positions[6], positions[8], positions[8], positions[9], positions[9], positions[10], positions[10], positions[10], positions[10], positions[11], positions[11], positions[11], positions[10], positions[11], positions[11]))
+	if positions[12] == 0 {
+		args = append(args, arg.ScopeID)
+		positions[12] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*)::int AS total FROM lic.users u\nWHERE u.account_id = $%d\n  AND ($%d::uuid[] IS NULL OR u.id = ANY($%d::uuid[]))\n  AND ($%d::text[] IS NULL OR u.role = ANY($%d::text[]))\n  AND ($%d::uuid IS NULL OR u.group_id = $%d)\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l\n      WHERE l.account_id = u.account_id AND l.user_id = u.id AND l.product_id = $%d\n    )\n    OR EXISTS (\n      SELECT 1\n      FROM lic.license_users lu\n      JOIN lic.licenses l ON l.id = lu.license_id\n      WHERE lu.user_id = u.id AND l.product_id = $%d\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = $%d AND lu.user_id = u.id\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN u.created_at >= $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (l.user_id = u.id OR EXISTS (\n              SELECT 1 FROM lic.license_users lu\n              WHERE lu.license_id = l.id AND lu.user_id = u.id\n            ))\n            AND GREATEST(\n              l.created_at,\n              COALESCE(l.last_validated_at, l.created_at),\n              COALESCE(l.last_check_in_at, l.created_at),\n              COALESCE(l.last_check_out_at, l.created_at)\n            ) >= $%d\n        )\n      THEN 'ACTIVE'\n      ELSE 'INACTIVE'\n    END = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l WHERE l.account_id = u.account_id AND l.user_id = u.id\n    ) = $%d\n  )\n  AND ($%d::jsonb IS NULL OR u.metadata @> $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND u.role = 'user')\n    OR (\n      $%d::text = 'user'\n      AND (\n        u.id = $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (\n              (l.user_id = $%d AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = u.id\n              ))\n              OR (l.user_id = u.id AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = $%d\n              ))\n            )\n        )\n      )\n    )\n    OR (\n      $%d::text = 'license'\n      AND (\n        EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = $%d AND lu.user_id = u.id\n        )\n      )\n    )\n  )\n;", positions[1], positions[2], positions[2], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[5], positions[6], positions[6], positions[6], positions[7], positions[8], positions[8], positions[7], positions[9], positions[9], positions[10], positions[10], positions[11], positions[11], positions[11], positions[11], positions[12], positions[12], positions[12], positions[11], positions[12], positions[12]))
 	row := q.db.QueryRow(ctx, b.String(), args...)
 	var i CountUsersRow
 	err := row.Scan(&i.Total)
@@ -7731,6 +8477,7 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (CountUs
 type ListUsersParams struct {
 	Cutoff    time.Time
 	AccountID uuid.UUID
+	FilterIds []uuid.UUID
 	Roles     []string
 	GroupID   *uuid.UUID
 	ProductID *uuid.UUID
@@ -7776,58 +8523,62 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 		positions[2] = len(args)
 	}
 	if positions[3] == 0 {
-		args = append(args, arg.Roles)
+		args = append(args, arg.FilterIds)
 		positions[3] = len(args)
 	}
 	if positions[4] == 0 {
-		args = append(args, arg.GroupID)
+		args = append(args, arg.Roles)
 		positions[4] = len(args)
 	}
 	if positions[5] == 0 {
-		args = append(args, arg.ProductID)
+		args = append(args, arg.GroupID)
 		positions[5] = len(args)
 	}
 	if positions[6] == 0 {
-		args = append(args, arg.LicenseID)
+		args = append(args, arg.ProductID)
 		positions[6] = len(args)
 	}
 	if positions[7] == 0 {
-		args = append(args, arg.Status)
+		args = append(args, arg.LicenseID)
 		positions[7] = len(args)
 	}
 	if positions[8] == 0 {
-		args = append(args, arg.Assigned)
+		args = append(args, arg.Status)
 		positions[8] = len(args)
 	}
 	if positions[9] == 0 {
-		args = append(args, arg.Metadata)
+		args = append(args, arg.Assigned)
 		positions[9] = len(args)
 	}
 	if positions[10] == 0 {
-		args = append(args, arg.ScopeKind)
+		args = append(args, arg.Metadata)
 		positions[10] = len(args)
 	}
 	if positions[11] == 0 {
-		args = append(args, arg.ScopeID)
+		args = append(args, arg.ScopeKind)
 		positions[11] = len(args)
 	}
 	if positions[12] == 0 {
-		args = append(args, arg.Cursor)
+		args = append(args, arg.ScopeID)
 		positions[12] = len(args)
 	}
 	if positions[13] == 0 {
-		args = append(args, arg.Asc)
+		args = append(args, arg.Cursor)
 		positions[13] = len(args)
 	}
 	if positions[14] == 0 {
-		args = append(args, arg.Limit)
+		args = append(args, arg.Asc)
 		positions[14] = len(args)
 	}
 	if positions[15] == 0 {
-		args = append(args, arg.Offset)
+		args = append(args, arg.Limit)
 		positions[15] = len(args)
 	}
-	b.WriteString(fmt.Sprintf("SELECT\n  u.id, u.account_id, u.first_name, u.last_name, u.email, u.password_digest,\n  u.role, u.permissions, u.group_id, u.metadata, u.banned_at, u.created_at, u.updated_at,\n  CASE\n    WHEN u.banned_at IS NOT NULL THEN 'BANNED'\n    WHEN u.created_at >= $%d\n      OR EXISTS (\n        SELECT 1\n        FROM lic.licenses l\n        WHERE l.account_id = u.account_id\n          AND (l.user_id = u.id OR EXISTS (\n            SELECT 1 FROM lic.license_users lu\n            WHERE lu.license_id = l.id AND lu.user_id = u.id\n          ))\n          AND GREATEST(\n            l.created_at,\n            COALESCE(l.last_validated_at, l.created_at),\n            COALESCE(l.last_check_in_at, l.created_at),\n            COALESCE(l.last_check_out_at, l.created_at)\n          ) >= $%d\n      )\n    THEN 'ACTIVE'\n    ELSE 'INACTIVE'\n  END AS status\nFROM lic.users u\nWHERE u.account_id = $%d\n  AND ($%d::text[] IS NULL OR u.role = ANY($%d::text[]))\n  AND ($%d::uuid IS NULL OR u.group_id = $%d)\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l\n      WHERE l.account_id = u.account_id AND l.user_id = u.id AND l.product_id = $%d\n    )\n    OR EXISTS (\n      SELECT 1\n      FROM lic.license_users lu\n      JOIN lic.licenses l ON l.id = lu.license_id\n      WHERE lu.user_id = u.id AND l.product_id = $%d\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = $%d AND lu.user_id = u.id\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN u.created_at >= $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (l.user_id = u.id OR EXISTS (\n              SELECT 1 FROM lic.license_users lu\n              WHERE lu.license_id = l.id AND lu.user_id = u.id\n            ))\n            AND GREATEST(\n              l.created_at,\n              COALESCE(l.last_validated_at, l.created_at),\n              COALESCE(l.last_check_in_at, l.created_at),\n              COALESCE(l.last_check_out_at, l.created_at)\n            ) >= $%d\n        )\n      THEN 'ACTIVE'\n      ELSE 'INACTIVE'\n    END = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l WHERE l.account_id = u.account_id AND l.user_id = u.id\n    ) = $%d\n  )\n  AND ($%d::jsonb IS NULL OR u.metadata @> $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND u.role = 'user')\n    OR (\n      $%d::text = 'user'\n      AND (\n        u.id = $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (\n              (l.user_id = $%d AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = u.id\n              ))\n              OR (l.user_id = u.id AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = $%d\n              ))\n            )\n        )\n      )\n    )\n    OR (\n      $%d::text = 'license'\n      AND (\n        EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = $%d AND lu.user_id = u.id\n        )\n      )\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR CASE\n      WHEN $%d::boolean THEN\n        (u.created_at, u.id) > (SELECT c.created_at, c.id FROM lic.users c WHERE c.id = $%d)\n      ELSE\n        (u.created_at, u.id) < (SELECT c.created_at, c.id FROM lic.users c WHERE c.id = $%d)\n    END\n  )\nORDER BY\n  CASE WHEN $%d::boolean THEN u.created_at END ASC,\n  CASE WHEN $%d::boolean THEN u.id END ASC,\n  u.created_at DESC,\n  u.id DESC\nLIMIT $%d\nOFFSET $%d;", positions[1], positions[1], positions[2], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[5], positions[6], positions[6], positions[6], positions[7], positions[1], positions[1], positions[7], positions[8], positions[8], positions[9], positions[9], positions[10], positions[10], positions[10], positions[10], positions[11], positions[11], positions[11], positions[10], positions[11], positions[11], positions[12], positions[13], positions[12], positions[12], positions[13], positions[13], positions[14], positions[15]))
+	if positions[16] == 0 {
+		args = append(args, arg.Offset)
+		positions[16] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT\n  u.id, u.account_id, u.first_name, u.last_name, u.email, u.password_digest,\n  u.role, u.permissions, u.group_id, u.metadata, u.banned_at, u.created_at, u.updated_at,\n  CASE\n    WHEN u.banned_at IS NOT NULL THEN 'BANNED'\n    WHEN u.created_at >= $%d\n      OR EXISTS (\n        SELECT 1\n        FROM lic.licenses l\n        WHERE l.account_id = u.account_id\n          AND (l.user_id = u.id OR EXISTS (\n            SELECT 1 FROM lic.license_users lu\n            WHERE lu.license_id = l.id AND lu.user_id = u.id\n          ))\n          AND GREATEST(\n            l.created_at,\n            COALESCE(l.last_validated_at, l.created_at),\n            COALESCE(l.last_check_in_at, l.created_at),\n            COALESCE(l.last_check_out_at, l.created_at)\n          ) >= $%d\n      )\n    THEN 'ACTIVE'\n    ELSE 'INACTIVE'\n  END AS status\nFROM lic.users u\nWHERE u.account_id = $%d\n  AND ($%d::uuid[] IS NULL OR u.id = ANY($%d::uuid[]))\n  AND ($%d::text[] IS NULL OR u.role = ANY($%d::text[]))\n  AND ($%d::uuid IS NULL OR u.group_id = $%d)\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l\n      WHERE l.account_id = u.account_id AND l.user_id = u.id AND l.product_id = $%d\n    )\n    OR EXISTS (\n      SELECT 1\n      FROM lic.license_users lu\n      JOIN lic.licenses l ON l.id = lu.license_id\n      WHERE lu.user_id = u.id AND l.product_id = $%d\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n    OR EXISTS (\n      SELECT 1 FROM lic.license_users lu\n      WHERE lu.license_id = $%d AND lu.user_id = u.id\n    )\n  )\n  AND (\n    $%d::text IS NULL\n    OR CASE\n      WHEN u.banned_at IS NOT NULL THEN 'BANNED'\n      WHEN u.created_at >= $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (l.user_id = u.id OR EXISTS (\n              SELECT 1 FROM lic.license_users lu\n              WHERE lu.license_id = l.id AND lu.user_id = u.id\n            ))\n            AND GREATEST(\n              l.created_at,\n              COALESCE(l.last_validated_at, l.created_at),\n              COALESCE(l.last_check_in_at, l.created_at),\n              COALESCE(l.last_check_out_at, l.created_at)\n            ) >= $%d\n        )\n      THEN 'ACTIVE'\n      ELSE 'INACTIVE'\n    END = $%d\n  )\n  AND (\n    $%d::boolean IS NULL\n    OR EXISTS (\n      SELECT 1 FROM lic.licenses l WHERE l.account_id = u.account_id AND l.user_id = u.id\n    ) = $%d\n  )\n  AND ($%d::jsonb IS NULL OR u.metadata @> $%d)\n  AND (\n    $%d::text IS NULL\n    OR ($%d::text = 'none' AND false)\n    OR ($%d::text = 'product' AND u.role = 'user')\n    OR (\n      $%d::text = 'user'\n      AND (\n        u.id = $%d\n        OR EXISTS (\n          SELECT 1\n          FROM lic.licenses l\n          WHERE l.account_id = u.account_id\n            AND (\n              (l.user_id = $%d AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = u.id\n              ))\n              OR (l.user_id = u.id AND EXISTS (\n                SELECT 1 FROM lic.license_users lu\n                WHERE lu.license_id = l.id AND lu.user_id = $%d\n              ))\n            )\n        )\n      )\n    )\n    OR (\n      $%d::text = 'license'\n      AND (\n        EXISTS (SELECT 1 FROM lic.licenses l WHERE l.id = $%d AND l.user_id = u.id)\n        OR EXISTS (\n          SELECT 1 FROM lic.license_users lu\n          WHERE lu.license_id = $%d AND lu.user_id = u.id\n        )\n      )\n    )\n  )\n  AND (\n    $%d::uuid IS NULL\n    OR CASE\n      WHEN $%d::boolean THEN\n        (u.created_at, u.id) > (SELECT c.created_at, c.id FROM lic.users c WHERE c.id = $%d)\n      ELSE\n        (u.created_at, u.id) < (SELECT c.created_at, c.id FROM lic.users c WHERE c.id = $%d)\n    END\n  )\nORDER BY\n  CASE WHEN $%d::boolean THEN u.created_at END ASC,\n  CASE WHEN $%d::boolean THEN u.id END ASC,\n  u.created_at DESC,\n  u.id DESC\nLIMIT $%d\nOFFSET $%d;", positions[1], positions[1], positions[2], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[6], positions[6], positions[6], positions[7], positions[7], positions[7], positions[8], positions[1], positions[1], positions[8], positions[9], positions[9], positions[10], positions[10], positions[11], positions[11], positions[11], positions[11], positions[12], positions[12], positions[12], positions[11], positions[12], positions[12], positions[13], positions[14], positions[13], positions[13], positions[14], positions[14], positions[15], positions[16]))
 	rows, err := q.db.Query(ctx, b.String(), args...)
 	if err != nil {
 		return nil, err

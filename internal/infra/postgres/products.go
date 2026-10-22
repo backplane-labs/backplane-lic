@@ -92,10 +92,11 @@ func (r ProductsRepo) DeleteProduct(ctx context.Context, accountID, id uuid.UUID
 }
 
 // ListAllProducts pages the account's products (the admin-side scope).
-func (r ProductsRepo) ListAllProducts(ctx context.Context, accountID uuid.UUID, page Page) ([]domain.Product, error) {
+// ids narrows the scope to a search's matches; nil keeps the whole account.
+func (r ProductsRepo) ListAllProducts(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page Page) ([]domain.Product, error) { //nolint:lll // the scope's arguments
 	if page.Asc {
 		rows, err := r.q.ListProductsAsc(ctx, db.ListProductsAscParams{
-			AccountID: accountID, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
+			AccountID: accountID, FilterIds: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
 		})
 
 		return productList(rows, func(row db.ListProductsAscRow) db.GetProductByIDRow {
@@ -108,15 +109,15 @@ func (r ProductsRepo) ListAllProducts(ctx context.Context, accountID uuid.UUID, 
 	}
 
 	rows, err := r.q.ListProductsDesc(ctx, db.ListProductsDescParams{
-		AccountID: accountID, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
+		AccountID: accountID, FilterIds: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
 	})
 
 	return productListDesc(rows, err)
 }
 
 // CountAllProducts counts the admin-side scope.
-func (r ProductsRepo) CountAllProducts(ctx context.Context, accountID uuid.UUID) (int, error) {
-	row, err := r.q.CountProducts(ctx, accountID)
+func (r ProductsRepo) CountAllProducts(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID) (int, error) {
+	row, err := r.q.CountProducts(ctx, db.CountProductsParams{AccountID: accountID, FilterIds: ids})
 	if err != nil {
 		return 0, fmt.Errorf("postgres: count products: %w", err)
 	}

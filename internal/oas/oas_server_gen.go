@@ -4,6 +4,8 @@ package oas
 
 import (
 	"context"
+
+	"github.com/go-faster/jx"
 )
 
 // Handler handles operations described by OpenAPI v3 specification.
@@ -529,6 +531,13 @@ type Handler interface {
 	//
 	// DELETE /v1/accounts/{account}/tokens/{tokenId}
 	RevokeToken(ctx context.Context, params RevokeTokenParams) error
+	// Search implements search operation.
+	//
+	// Matches licenses, users, products, policies, groups, entitlements or machines by attribute terms
+	// combined with AND or OR. The response is the resource type's list document.
+	//
+	// POST /v1/accounts/{account}/search
+	Search(ctx context.Context, req SearchReq, params SearchParams) (jx.Raw, error)
 	// ShowEntitlement implements showEntitlement operation.
 	//
 	// Retrieve an entitlement (by id or code).

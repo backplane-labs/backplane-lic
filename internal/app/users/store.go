@@ -19,6 +19,8 @@ var ErrEmailTaken = errors.New("users: email taken")
 
 // Filter is the users index filter set (every field optional).
 type Filter struct {
+	// IDs narrows the scope to a search's matches; nil keeps it whole.
+	IDs []uuid.UUID
 	// Roles defaults to ["user"] on the wire (the handler applies the
 	// default before calling).
 	Roles []string

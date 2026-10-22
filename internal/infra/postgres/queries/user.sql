@@ -61,6 +61,7 @@ SELECT EXISTS (
 -- name: CountUsers :one
 SELECT count(*)::int AS total FROM lic.users u
 WHERE u.account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR u.id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@roles::text[] IS NULL OR u.role = ANY(@roles::text[]))
   AND (@group_id::uuid IS NULL OR u.group_id = @group_id)
   AND (
@@ -180,6 +181,7 @@ SELECT
   END AS status
 FROM lic.users u
 WHERE u.account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR u.id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@roles::text[] IS NULL OR u.role = ANY(@roles::text[]))
   AND (@group_id::uuid IS NULL OR u.group_id = @group_id)
   AND (

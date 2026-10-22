@@ -117,6 +117,10 @@ type RetryWebhookEventReq interface {
 	retryWebhookEventReq()
 }
 
+type SearchReq interface {
+	searchReq()
+}
+
 type UpdateEntitlementReq interface {
 	updateEntitlementReq()
 }

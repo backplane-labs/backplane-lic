@@ -7238,6 +7238,36 @@ type RevokeLicenseNoContent struct{}
 // RevokeTokenNoContent is response for RevokeToken operation.
 type RevokeTokenNoContent struct{}
 
+type SearchReqApplicationJSON map[string]jx.Raw
+
+func (s *SearchReqApplicationJSON) init() SearchReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*SearchReqApplicationJSON) searchReq() {}
+
+type SearchReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *SearchReqApplicationVndAPIJSON) init() SearchReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*SearchReqApplicationVndAPIJSON) searchReq() {}
+
+type SearchReqEmptyBody struct{}
+
+func (*SearchReqEmptyBody) searchReq() {}
+
 // Ref: #/components/schemas/SecondFactorAttributes
 type SecondFactorAttributes struct {
 	URI     OptString `json:"uri"`

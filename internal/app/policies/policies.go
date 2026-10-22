@@ -42,9 +42,9 @@ type Store interface { //nolint:interfacebloat // one port per scenario is the a
 	// DeletePolicy destroys the row; false when gone.
 	DeletePolicy(ctx context.Context, accountID, id uuid.UUID) (bool, error)
 	// ListPolicies pages the admin-side scope (with the product filter).
-	ListPolicies(ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID, page paging.Page) ([]domain.Policy, error) //nolint:lll // the wire name is long
+	ListPolicies(ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID, ids []uuid.UUID, page paging.Page) ([]domain.Policy, error) //nolint:lll // the wire name is long
 	// CountPolicies counts the same scope.
-	CountPolicies(ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID) (int, error)
+	CountPolicies(ctx context.Context, accountID uuid.UUID, filterProductID *uuid.UUID, ids []uuid.UUID) (int, error)
 	// ListProductPolicies pages the product-bearer scope.
 	ListProductPolicies(ctx context.Context, accountID, productID uuid.UUID, page paging.Page) ([]domain.Policy, error)
 	// CountProductPolicies counts the product-bearer scope.
@@ -198,8 +198,20 @@ type List struct {
 // Index answers the policies page (user and license bearers load the
 // same page the admin does and fail the post-check unless everything
 // on it is theirs).
-func (s Scenario) Index( //nolint:cyclop // one branch per rule
+func (s Scenario) Index(
 	ctx context.Context, account domain.Account, filterProductID *uuid.UUID, params paging.Params,
+) (List, error) {
+	return s.index(ctx, account, filterProductID, nil, params)
+}
+
+// Search pages the account's policies among a search's matches.
+func (s Scenario) Search(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
+	return s.index(ctx, account, nil, matches, params)
+}
+
+// index pages the bearer's scope; matches (nil: all) narrows the admin side.
+func (s Scenario) index( //nolint:cyclop // one branch per rule
+	ctx context.Context, account domain.Account, filterProductID *uuid.UUID, matches []uuid.UUID, params paging.Params,
 ) (List, error) {
 	if err := access.Require(ctx, "policy.read"); err != nil {
 		return List{}, err //nolint:wrapcheck // the authorization's own error
@@ -243,7 +255,7 @@ func (s Scenario) Index( //nolint:cyclop // one branch per rule
 	if principal.Role == domain.RoleProduct {
 		items, err = s.store.ListProductPolicies(ctx, account.ID, principal.BearerID, window)
 	} else {
-		items, err = s.store.ListPolicies(ctx, account.ID, filterProductID, window)
+		items, err = s.store.ListPolicies(ctx, account.ID, filterProductID, matches, window)
 	}
 
 	if err != nil {
@@ -260,7 +272,7 @@ func (s Scenario) Index( //nolint:cyclop // one branch per rule
 		if principal.Role == domain.RoleProduct {
 			count, err = s.store.CountProductPolicies(ctx, account.ID, principal.BearerID)
 		} else {
-			count, err = s.store.CountPolicies(ctx, account.ID, filterProductID)
+			count, err = s.store.CountPolicies(ctx, account.ID, filterProductID, matches)
 		}
 
 		if err != nil {

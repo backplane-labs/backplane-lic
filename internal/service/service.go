@@ -38,6 +38,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/port"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
+	"github.com/backplane-labs/backplane-lic/internal/app/search"
 	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
@@ -259,6 +260,7 @@ func handler(
 		Passwords:     passwords.New(store, publisher, rand.Reader, clock),
 		Throttle:      throttler,
 		Webhooks:      webhooks.New(store, resolver, allow, queue, clock),
+		Search:        search.New(store),
 		Accounts:      store.Accounts,
 		Authn:         authn.New(store, clock),
 		Users:         users.New(store, publisher, clock),

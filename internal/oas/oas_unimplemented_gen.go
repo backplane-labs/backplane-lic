@@ -5,6 +5,7 @@ package oas
 import (
 	"context"
 
+	"github.com/go-faster/jx"
 	ht "github.com/ogen-go/ogen/http"
 )
 
@@ -790,6 +791,16 @@ func (UnimplementedHandler) RevokeLicense(ctx context.Context, params RevokeLice
 // DELETE /v1/accounts/{account}/tokens/{tokenId}
 func (UnimplementedHandler) RevokeToken(ctx context.Context, params RevokeTokenParams) error {
 	return ht.ErrNotImplemented
+}
+
+// Search implements search operation.
+//
+// Matches licenses, users, products, policies, groups, entitlements or machines by attribute terms
+// combined with AND or OR. The response is the resource type's list document.
+//
+// POST /v1/accounts/{account}/search
+func (UnimplementedHandler) Search(ctx context.Context, req SearchReq, params SearchParams) (r jx.Raw, _ error) {
+	return r, ht.ErrNotImplemented
 }
 
 // ShowEntitlement implements showEntitlement operation.

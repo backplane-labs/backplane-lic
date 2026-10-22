@@ -29,6 +29,7 @@ DELETE FROM lic.groups WHERE account_id = @account_id AND id = @id;
 -- name: CountGroups :one
 SELECT count(*)::int AS total FROM lic.groups
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (
     @member_user::uuid IS NULL
     OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = @member_user)
@@ -43,6 +44,7 @@ SELECT id, account_id, name, max_users, max_licenses, max_machines, metadata,
   created_at, updated_at
 FROM lic.groups
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (
     @member_user::uuid IS NULL
     OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = @member_user)

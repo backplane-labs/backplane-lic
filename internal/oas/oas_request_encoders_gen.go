@@ -910,6 +910,37 @@ func encodeRetryWebhookEventRequest(
 	}
 }
 
+func encodeSearchRequest(
+	req SearchReq,
+	r *http.Request,
+) error {
+	switch req := req.(type) {
+	case *SearchReqEmptyBody:
+		// Empty body case.
+		return nil
+	case *SearchReqApplicationJSON:
+		const contentType = "application/json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	case *SearchReqApplicationVndAPIJSON:
+		const contentType = "application/vnd.api+json"
+		e := new(jx.Encoder)
+		{
+			req.Encode(e)
+		}
+		encoded := e.Bytes()
+		ht.SetBody(r, bytes.NewReader(encoded), contentType)
+		return nil
+	default:
+		return errors.Errorf("unexpected request type: %T", req)
+	}
+}
+
 func encodeUpdateEntitlementRequest(
 	req UpdateEntitlementReq,
 	r *http.Request,

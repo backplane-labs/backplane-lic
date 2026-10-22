@@ -1,0 +1,32 @@
+# Search: POST a typed query, receive the matching resources of one type as
+# that type's index document (pagination applies from the query string).
+paths:
+  /v1/accounts/{account}/search:
+    post:
+      operationId: search
+      summary: Search resources
+      description: >
+        Matches licenses, users, products, policies, groups, entitlements or
+        machines by attribute terms combined with AND or OR. The response is
+        the resource type's list document.
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: The matching resources as the type's list document.
+          content:
+            application/vnd.api+json:
+              schema: {}
+        default:
+          $ref: "#/components/responses/Error"

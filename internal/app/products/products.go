@@ -44,9 +44,9 @@ type Store interface { //nolint:interfacebloat // the scenario's full storage po
 	// DeleteProduct destroys the row; false when gone.
 	DeleteProduct(ctx context.Context, accountID, id uuid.UUID) (bool, error)
 	// ListAllProducts pages the admin-side scope.
-	ListAllProducts(ctx context.Context, accountID uuid.UUID, page paging.Page) ([]domain.Product, error)
+	ListAllProducts(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page paging.Page) ([]domain.Product, error)
 	// CountAllProducts counts the admin-side scope.
-	CountAllProducts(ctx context.Context, accountID uuid.UUID) (int, error)
+	CountAllProducts(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID) (int, error)
 	// ListUserProducts pages the user scope.
 	ListUserProducts(ctx context.Context, accountID, userID uuid.UUID, page paging.Page) ([]domain.Product, error)
 	// CountUserProducts counts the user scope.
@@ -148,7 +148,18 @@ type List struct {
 }
 
 // Index answers the products page within the principal's scope.
+// Index pages the bearer's products.
 func (s Scenario) Index(ctx context.Context, account domain.Account, params paging.Params) (List, error) {
+	return s.index(ctx, account, nil, params)
+}
+
+// Search pages the account's products among a search's matches.
+func (s Scenario) Search(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
+	return s.index(ctx, account, matches, params)
+}
+
+// index pages the bearer's scope; matches (nil: all) narrows the admin side.
+func (s Scenario) index(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
 	if err := access.Require(ctx, "product.read"); err != nil {
 		return List{}, err //nolint:wrapcheck // the authorization's own error
 	}
@@ -174,7 +185,7 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 	case domain.RoleProduct:
 		items, err = s.store.ListOwnProducts(ctx, account.ID, principal.BearerID, page)
 	default:
-		items, err = s.store.ListAllProducts(ctx, account.ID, page)
+		items, err = s.store.ListAllProducts(ctx, account.ID, matches, page)
 	}
 
 	if err != nil {
@@ -191,7 +202,7 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 
 	switch params.Mode { //nolint:exhaustive // the default branch covers the rest
 	case paging.ModeOffset:
-		count, err := s.countScope(ctx, account.ID, principal)
+		count, err := s.countScope(ctx, account.ID, principal, matches)
 		if err != nil {
 			return List{}, err
 		}
@@ -546,7 +557,7 @@ func (s Scenario) licenseProductID(ctx context.Context, accountID uuid.UUID, pri
 	return productID, nil
 }
 
-func (s Scenario) countScope(ctx context.Context, accountID uuid.UUID, principal access.Principal) (int, error) {
+func (s Scenario) countScope(ctx context.Context, accountID uuid.UUID, principal access.Principal, matches []uuid.UUID) (int, error) { //nolint:lll // the scope's arguments
 	var (
 		count int
 		err   error
@@ -567,7 +578,7 @@ func (s Scenario) countScope(ctx context.Context, accountID uuid.UUID, principal
 	case domain.RoleProduct:
 		count, err = s.store.CountOwnProducts(ctx, accountID, principal.BearerID)
 	default:
-		count, err = s.store.CountAllProducts(ctx, accountID)
+		count, err = s.store.CountAllProducts(ctx, accountID, matches)
 	}
 
 	if err != nil {

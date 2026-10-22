@@ -114,6 +114,7 @@ SELECT id, account_id, product_id, name, duration, strict, floating,
   metadata, created_at, updated_at
 FROM lic.policies
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@filter_product_id::uuid IS NULL OR product_id = @filter_product_id)
   AND (
     @cursor_id::uuid IS NULL
@@ -141,6 +142,7 @@ SELECT id, account_id, product_id, name, duration, strict, floating,
   metadata, created_at, updated_at
 FROM lic.policies
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@filter_product_id::uuid IS NULL OR product_id = @filter_product_id)
   AND (
     @cursor_id::uuid IS NULL
@@ -155,6 +157,7 @@ LIMIT @limit OFFSET @offset;
 -- name: CountPolicies :one
 SELECT count(*) FROM lic.policies
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (@filter_product_id::uuid IS NULL OR product_id = @filter_product_id);
 
 -- The product-bearer scope (Policy.for_product): the product's policies.

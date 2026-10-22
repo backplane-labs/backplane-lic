@@ -119,6 +119,7 @@ func scenarios() []conformance.Scenario {
 		secondFactorsScenarios(),
 		passwordsScenarios(),
 		authScenarios(),
+		searchScenarios(),
 	)
 
 	return scenarios

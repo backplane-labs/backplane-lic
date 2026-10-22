@@ -213,14 +213,14 @@ func (p *pipeline) serveAccountScoped(
 	cred := authn.Parse(r.Header.Get("Authorization"), queryCredential(r))
 
 	if hasBody(r.Method) {
-		body, err := decodeBody(r)
+		body, raw, err := decodeBody(r)
 		if err != nil {
 			p.middlewareError(w, req.id, errJSONInvalid)
 
 			return
 		}
 
-		req.body = body
+		req.body, req.raw = body, raw
 	}
 
 	var (
@@ -568,33 +568,34 @@ func (p *pipeline) docsBase(r *http.Request) string {
 }
 
 // decodeBody reads, decodes and key-underscored-transforms the request
-// body (any non-empty body is JSON, whatever its content type).
-func decodeBody(r *http.Request) (map[string]any, error) {
+// body (any non-empty body is JSON, whatever its content type); it also
+// answers the bytes as sent, for handlers that need the key order.
+func decodeBody(r *http.Request) (map[string]any, []byte, error) {
 	if r.Body == nil {
-		return map[string]any{}, nil
+		return map[string]any{}, nil, nil
 	}
 
 	raw, err := io.ReadAll(io.LimitReader(r.Body, maxBodyBytes))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // read failures are the transport's
+		return nil, nil, err //nolint:wrapcheck // read failures are the transport's
 	}
 
 	r.Body = io.NopCloser(bytes.NewReader(raw))
 
 	if len(bytes.TrimSpace(raw)) == 0 {
-		return map[string]any{}, nil
+		return map[string]any{}, raw, nil
 	}
 
 	var decoded any
 	if !json.Valid(raw) {
-		return nil, json.Unmarshal(raw, &decoded) //nolint:wrapcheck // maps to JSON_INVALID
+		return nil, nil, json.Unmarshal(raw, &decoded) //nolint:wrapcheck // maps to JSON_INVALID
 	}
 
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.UseNumber()
 
 	if err := decoder.Decode(&decoded); err != nil {
-		return nil, err //nolint:wrapcheck // the decode error maps to JSON_INVALID
+		return nil, nil, err //nolint:wrapcheck // the decode error maps to JSON_INVALID
 	}
 
 	obj, ok := decoded.(map[string]any)
@@ -603,10 +604,10 @@ func decodeBody(r *http.Request) (map[string]any, error) {
 	}
 
 	if under, transformed := jsonapi.UnderscoreDeep(obj).(map[string]any); transformed {
-		return under, nil
+		return under, raw, nil
 	}
 
-	return obj, nil
+	return obj, raw, nil
 }
 
 // bodyOTP pulls meta.otp out of the decoded body (already underscored).

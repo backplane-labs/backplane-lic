@@ -31,6 +31,7 @@ WHERE account_id = @account_id AND id = @id;
 SELECT id, account_id, name, code, metadata, created_at, updated_at
 FROM lic.entitlements
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (
     @cursor_id::uuid IS NULL
     OR (created_at, id) < (
@@ -45,6 +46,7 @@ LIMIT @limit OFFSET @offset;
 SELECT id, account_id, name, code, metadata, created_at, updated_at
 FROM lic.entitlements
 WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]))
   AND (
     @cursor_id::uuid IS NULL
     OR (created_at, id) > (
@@ -56,40 +58,8 @@ ORDER BY created_at ASC, id ASC
 LIMIT @limit OFFSET @offset;
 
 -- name: CountEntitlements :one
-SELECT count(*) FROM lic.entitlements WHERE account_id = @account_id;
-
--- Authorized user/license scopes are applied before pagination and counts.
--- name: ListEntitlementsByIDsDesc :many
-SELECT id, account_id, name, code, metadata, created_at, updated_at
-FROM lic.entitlements
-WHERE account_id = @account_id AND id = ANY(@ids::uuid[])
-  AND (
-    @cursor_id::uuid IS NULL
-    OR (created_at, id) < (
-      SELECT e2.created_at, e2.id FROM lic.entitlements e2
-      WHERE e2.account_id = @account_id AND e2.id = @cursor_id
-    )
-  )
-ORDER BY created_at DESC, id DESC
-LIMIT @limit OFFSET @offset;
-
--- name: ListEntitlementsByIDsAsc :many
-SELECT id, account_id, name, code, metadata, created_at, updated_at
-FROM lic.entitlements
-WHERE account_id = @account_id AND id = ANY(@ids::uuid[])
-  AND (
-    @cursor_id::uuid IS NULL
-    OR (created_at, id) > (
-      SELECT e2.created_at, e2.id FROM lic.entitlements e2
-      WHERE e2.account_id = @account_id AND e2.id = @cursor_id
-    )
-  )
-ORDER BY created_at ASC, id ASC
-LIMIT @limit OFFSET @offset;
-
--- name: CountEntitlementsByIDs :one
-SELECT count(*) FROM lic.entitlements
-WHERE account_id = @account_id AND id = ANY(@ids::uuid[]);
+SELECT count(*) FROM lic.entitlements WHERE account_id = @account_id
+  AND (sqlc.narg(filter_ids)::uuid[] IS NULL OR id = ANY(sqlc.narg(filter_ids)::uuid[]));
 
 -- The entitlements of a user's licenses (owned or attached): the union
 -- of policy entitlements and license entitlements.
