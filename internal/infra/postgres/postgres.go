@@ -7,6 +7,7 @@ package postgres
 import (
 	"context"
 	"embed"
+	"time"
 
 	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/deps"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
@@ -61,6 +62,8 @@ type Store struct {
 	Keys KeysRepo
 	// Groups is the groups repository.
 	Groups GroupsRepo
+	// SecondFactors is the second-factors repository.
+	SecondFactors SecondFactorsRepo
 	// Webhooks is the webhook endpoints and events repository.
 	Webhooks WebhooksRepo
 	// Jobs is the periodic-jobs repository.
@@ -105,18 +108,19 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 	runner := txRunner{trm: pg.Trm}
 
 	return &Store{
-		DB:           pg,
-		Q:            queries,
-		Accounts:     AccountsRepo{q: queries},
-		Users:        UsersRepo{q: queries},
-		Tokens:       TokensRepo{q: queries},
-		Licenses:     LicensesRepo{q: queries},
-		Groups:       GroupsRepo{q: queries},
-		Products:     ProductsRepo{q: queries, txRunner: runner},
-		Policies:     PoliciesRepo{q: queries, txRunner: runner},
-		Entitlements: EntitlementsRepo{q: queries, txRunner: runner},
-		Keys:         KeysRepo{q: queries, txRunner: runner},
-		Webhooks:     WebhooksRepo{q: queries},
+		DB:            pg,
+		Q:             queries,
+		Accounts:      AccountsRepo{q: queries},
+		Users:         UsersRepo{q: queries},
+		Tokens:        TokensRepo{q: queries},
+		Licenses:      LicensesRepo{q: queries},
+		Groups:        GroupsRepo{q: queries},
+		Products:      ProductsRepo{q: queries, txRunner: runner},
+		Policies:      PoliciesRepo{q: queries, txRunner: runner},
+		Entitlements:  EntitlementsRepo{q: queries, txRunner: runner},
+		Keys:          KeysRepo{q: queries, txRunner: runner},
+		Webhooks:      WebhooksRepo{q: queries},
+		SecondFactors: SecondFactorsRepo{q: queries, txRunner: runner},
 	}, nil
 }
 
@@ -183,4 +187,14 @@ func (s *Store) Account(ctx context.Context, id uuid.UUID) (domain.Account, erro
 // InsertAccount writes a new account row.
 func (s *Store) InsertAccount(ctx context.Context, account domain.Account) error {
 	return s.Accounts.InsertAccount(ctx, account)
+}
+
+// EnabledSecondFactorSecret loads the user's enabled TOTP secret.
+func (s *Store) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (string, bool, error) {
+	return s.Users.EnabledSecondFactorSecret(ctx, userID)
+}
+
+// VerifySecondFactor atomically checks and consumes an enabled factor's code.
+func (s *Store) VerifySecondFactor(ctx context.Context, userID uuid.UUID, otp string, now time.Time) (bool, error) {
+	return s.SecondFactors.VerifySecondFactor(ctx, userID, otp, now)
 }

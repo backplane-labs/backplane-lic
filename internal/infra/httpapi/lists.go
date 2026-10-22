@@ -89,7 +89,7 @@ func offsetDoc(req *request, params paging.Params, pages, count int) *paging.Doc
 		return listPath(req) + "?" + q.Encode()
 	}
 
-	first, last := link(1), link(max(pages, 1))
+	first, last := link(1), link(max(pages, 0))
 
 	doc := paging.Doc{
 		Self:  link(params.Number),
@@ -140,10 +140,6 @@ func linksDoc(req *request, params paging.Params, count int, next uuid.NullUUID)
 	switch params.Mode {
 	case paging.ModeOffset:
 		pages := (count + params.SizeOrDefault() - 1) / params.SizeOrDefault()
-		if pages < 1 {
-			pages = 1
-		}
-
 		return offsetDoc(req, params, pages, count)
 	case paging.ModeCursor:
 		return cursorDoc(req, params, next)

@@ -25,7 +25,7 @@ var ErrNotFound = domain.ErrNotFound // one sentinel across the scenario ports
 var ErrCodeTaken = errors.New("entitlements: code taken")
 
 // Store is the scenario's consumer-side storage port.
-type Store interface {
+type Store interface { //nolint:interfacebloat // one port per scenario, including authorized list scopes
 	// Do runs fn in one transaction; the writes and the webhook
 	// events of one action commit together.
 	Do(ctx context.Context, fn func(ctx context.Context) error) error
@@ -43,6 +43,12 @@ type Store interface {
 	ListEntitlements(ctx context.Context, accountID uuid.UUID, page paging.Page) ([]domain.Entitlement, error)
 	// CountEntitlements counts the account's entitlements.
 	CountEntitlements(ctx context.Context, accountID uuid.UUID) (int, error)
+	// ListEntitlementsByIDs applies the authorized scope before pagination.
+	ListEntitlementsByIDs(
+		ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page paging.Page,
+	) ([]domain.Entitlement, error)
+	// CountEntitlementsByIDs counts the authorized scope.
+	CountEntitlementsByIDs(ctx context.Context, accountID uuid.UUID, ids []uuid.UUID) (int, error)
 	// UserEntitlementIDs answers the entitlements of the user's licenses.
 	UserEntitlementIDs(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error)
 	// LicenseEntitlementIDs answers the entitlements of one license.
@@ -89,27 +95,22 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 
 	principal := access.PrincipalOf(ctx)
 
-	owned := map[uuid.UUID]struct{}{}
-	switch { //nolint:wsl_v5 // dense by design
-	case principal.Role == domain.RoleUser:
-		ids, err := s.store.UserEntitlementIDs(ctx, account.ID, principal.BearerID)
-		if err != nil {
-			return List{}, fmt.Errorf("entitlements: index: %w", err)
-		}
-
-		owned = idSet(ids)
-	case principal.Role == domain.RoleLicense && principal.License != nil:
-		ids, err := s.store.LicenseEntitlementIDs(ctx, account.ID, principal.License.ID)
-		if err != nil {
-			return List{}, fmt.Errorf("entitlements: index: %w", err)
-		}
-
-		owned = idSet(ids)
+	ids, err := s.scopeIDs(ctx, account.ID, principal)
+	if err != nil {
+		return List{}, err
 	}
 
+	owned := idSet(ids)
+	scoped := principal.Role == domain.RoleUser || principal.Role == domain.RoleLicense
 	page := params.Window()
 
-	items, err := s.store.ListEntitlements(ctx, account.ID, page)
+	var items []domain.Entitlement
+	if scoped {
+		items, err = s.store.ListEntitlementsByIDs(ctx, account.ID, ids, page)
+	} else {
+		items, err = s.store.ListEntitlements(ctx, account.ID, page)
+	}
+
 	if err != nil {
 		return List{}, fmt.Errorf("entitlements: index: %w", err)
 	}
@@ -124,7 +125,13 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 
 	switch params.Mode { //nolint:exhaustive // the default branch covers the rest
 	case paging.ModeOffset:
-		count, err := s.store.CountEntitlements(ctx, account.ID)
+		var count int
+		if scoped {
+			count, err = s.store.CountEntitlementsByIDs(ctx, account.ID, ids)
+		} else {
+			count, err = s.store.CountEntitlements(ctx, account.ID)
+		}
+
 		if err != nil {
 			return List{}, fmt.Errorf("entitlements: index count: %w", err)
 		}
@@ -160,23 +167,12 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 
 	principal := access.PrincipalOf(ctx)
 
-	owned := map[uuid.UUID]struct{}{}
-	switch { //nolint:wsl_v5 // dense by design
-	case principal.Role == domain.RoleUser:
-		ids, err := s.store.UserEntitlementIDs(ctx, account.ID, principal.BearerID)
-		if err != nil {
-			return domain.Entitlement{}, fmt.Errorf("entitlements: show: %w", err)
-		}
-
-		owned = idSet(ids)
-	case principal.Role == domain.RoleLicense && principal.License != nil:
-		ids, err := s.store.LicenseEntitlementIDs(ctx, account.ID, principal.License.ID)
-		if err != nil {
-			return domain.Entitlement{}, fmt.Errorf("entitlements: show: %w", err)
-		}
-
-		owned = idSet(ids)
+	ids, err := s.scopeIDs(ctx, account.ID, principal)
+	if err != nil {
+		return domain.Entitlement{}, err
 	}
+
+	owned := idSet(ids)
 
 	if err := access.EntitlementShow(principal, entitlement.ID, owned); err != nil {
 		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
@@ -306,8 +302,56 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 	return nil
 }
 
-// load resolves the id-or-code alias.
+// load resolves the id-or-code alias within the authorized scope before
+// permission checks, like EntitlementsController#set_entitlement.
 func (s Scenario) load(ctx context.Context, accountID uuid.UUID, alias string) (domain.Entitlement, error) {
+	entitlement, err := s.loadUnscoped(ctx, accountID, alias)
+	if err != nil {
+		return domain.Entitlement{}, err
+	}
+
+	principal := access.PrincipalOf(ctx)
+
+	if principal.Role != domain.RoleUser && principal.Role != domain.RoleLicense {
+		return entitlement, nil
+	}
+
+	ids, err := s.scopeIDs(ctx, accountID, principal)
+	if err != nil {
+		return domain.Entitlement{}, err
+	}
+
+	if _, ok := idSet(ids)[entitlement.ID]; !ok {
+		return domain.Entitlement{}, apperr.NotFound("entitlement", alias)
+	}
+
+	return entitlement, nil
+}
+
+func (s Scenario) scopeIDs(ctx context.Context, accountID uuid.UUID, principal access.Principal) ([]uuid.UUID, error) {
+	ids := []uuid.UUID{}
+
+	var err error
+
+	switch principal.Role {
+	case domain.RoleUser:
+		ids, err = s.store.UserEntitlementIDs(ctx, accountID, principal.BearerID)
+	case domain.RoleLicense:
+		if principal.License != nil {
+			ids, err = s.store.LicenseEntitlementIDs(ctx, accountID, principal.License.ID)
+		}
+	default:
+		return ids, nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("entitlements: scope: %w", err)
+	}
+
+	return ids, nil
+}
+
+func (s Scenario) loadUnscoped(ctx context.Context, accountID uuid.UUID, alias string) (domain.Entitlement, error) {
 	if id, err := uuid.Parse(alias); err == nil {
 		entitlement, err := s.store.EntitlementByID(ctx, accountID, id)
 		if errors.Is(err, ErrNotFound) {

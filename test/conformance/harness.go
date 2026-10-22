@@ -16,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -80,6 +81,7 @@ func NewReferenceTarget(baseURL string) *HTTPTarget {
 	target := NewTarget(baseURL)
 	target.Header.Set("Host", referenceHost)
 	target.Header.Set("X-Forwarded-Proto", "https")
+	target.adminToken = os.Getenv("LIC_CONFORMANCE_REFERENCE_TOKEN")
 
 	return target
 }
@@ -133,8 +135,8 @@ type HandlerTarget struct {
 	Handler http.Handler
 
 	// AdminToken is the raw admin token the test seeded directly in
-	// the database (the email:password mint is retired); the harness
-	// authenticates with it.
+	// the database; the harness authenticates with it without spending
+	// the password-login throttle budget.
 	AdminToken string
 }
 
@@ -228,7 +230,18 @@ func (h *HandlerTarget) Do(req *http.Request) (*http.Response, error) {
 	rec := httptest.NewRecorder()
 	h.Handler.ServeHTTP(rec, req)
 
-	return rec.Result(), nil
+	resp := rec.Result()
+	// A real net/http client canonicalizes names while parsing the response.
+	// Do the same for this socket-free target, including intentionally spelled
+	// reference headers such as X-RateLimit-*.
+	resp.Header = make(http.Header)
+	for name, values := range rec.Header() {
+		for _, value := range values {
+			resp.Header.Add(name, value)
+		}
+	}
+
+	return resp, nil
 }
 
 // AuthKind selects the authentication scheme of a step.
@@ -309,6 +322,10 @@ func recordedHeaderNames() []string {
 		"Keygen-Edition",
 		"Keygen-Mode",
 		"WWW-Authenticate",
+		"X-RateLimit-Window",
+		"X-RateLimit-Count",
+		"X-RateLimit-Limit",
+		"X-RateLimit-Remaining",
 	}
 }
 

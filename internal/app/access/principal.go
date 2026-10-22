@@ -25,6 +25,8 @@ type principalKey struct{}
 // Principal is the authenticated caller: what every scenario authorizes
 // against.
 type Principal struct {
+	// UserBanned is the live password-authenticated user state for TokenPolicy.
+	UserBanned bool
 	// BearerType is the wire type: users, products or licenses.
 	BearerType string
 	BearerID   uuid.UUID

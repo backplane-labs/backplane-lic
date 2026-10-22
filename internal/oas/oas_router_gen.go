@@ -79,6 +79,7 @@ var (
 	rn28AllowedHeaders = map[string]string{
 		"DELETE": "Content-Type",
 		"PATCH":  "Content-Type",
+		"PUT":    "Content-Type",
 	}
 	rn25AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
@@ -2303,9 +2304,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 													args[1],
 													args[2],
 												}, elemIsEscaped, w, r)
+											case "PUT":
+												s.handleReplaceUserSecondFactorRequest([3]string{
+													args[0],
+													args[1],
+													args[2],
+												}, elemIsEscaped, w, r)
 											default:
 												s.notAllowed(w, r, notAllowedParams{
-													allowedMethods: "DELETE,GET,PATCH",
+													allowedMethods: "DELETE,GET,PATCH,PUT",
 													allowedHeaders: rn28AllowedHeaders,
 													acceptPost:     "",
 													acceptPatch:    "application/json,application/vnd.api+json",
@@ -4856,6 +4863,15 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 												r.name = UpdateUserSecondFactorOperation
 												r.summary = "Enable or disable a second factor (requires meta.otp)"
 												r.operationID = "updateUserSecondFactor"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}"
+												r.args = args
+												r.count = 3
+												return r, true
+											case "PUT":
+												r.name = ReplaceUserSecondFactorOperation
+												r.summary = "Enable or disable a second factor (requires meta.otp)"
+												r.operationID = "replaceUserSecondFactor"
 												r.operationGroup = ""
 												r.pathPattern = "/v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}"
 												r.args = args

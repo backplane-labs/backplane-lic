@@ -78,21 +78,17 @@ func (r UsersRepo) InsertUser(ctx context.Context, user domain.User) error {
 	return nil
 }
 
-// UpdateUser writes every mutable column of the row.
-func (r UsersRepo) UpdateUser(ctx context.Context, user domain.User) error {
+// UpdateUser writes only addressed fields, never stale reset or ban state.
+func (r UsersRepo) UpdateUser(ctx context.Context, user domain.User, attrs users.Attrs) error {
 	err := r.q.UpdateUserColumns(ctx, db.UpdateUserColumnsParams{
-		ID:                  user.ID,
-		AccountID:           user.AccountID,
-		FirstName:           ref(user.FirstName),
-		LastName:            ref(user.LastName),
-		Email:               ref(user.Email),
-		PasswordDigest:      ref(user.PasswordDigest),
-		Role:                string(user.Role),
-		GroupID:             nullUUIDPtr(user.GroupID),
-		Metadata:            jsonMap(user.Metadata),
-		PasswordResetToken:  ref(user.PasswordResetToken),
-		PasswordResetSentAt: user.PasswordResetSentAt,
-		BannedAt:            user.BannedAt,
+		ID: user.ID, AccountID: user.AccountID,
+		FirstName: ref(user.FirstName), FirstNameSet: boolRef(attrs.FirstName != nil),
+		LastName: ref(user.LastName), LastNameSet: boolRef(attrs.LastName != nil),
+		Email: ref(user.Email), EmailSet: boolRef(attrs.Email != nil),
+		PasswordDigest: ref(user.PasswordDigest), PasswordSet: boolRef(attrs.PasswordSet || attrs.Password != nil),
+		Role: string(user.Role), RoleSet: boolRef(attrs.Role != ""),
+		GroupID: nullUUIDPtr(user.GroupID), GroupSet: boolRef(attrs.GroupSet),
+		Metadata: jsonMap(user.Metadata), MetadataSet: boolRef(attrs.Metadata != nil),
 	})
 	if err != nil {
 		return mapUserWrite(user.ID, err)
@@ -123,6 +119,20 @@ func (r UsersRepo) UserHasActiveLicense(ctx context.Context, accountID, id uuid.
 	}
 
 	return row.Active, nil
+}
+
+// EnabledSecondFactorSecret loads the user's enabled TOTP secret.
+func (r UsersRepo) EnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (string, bool, error) {
+	row, err := r.q.GetEnabledSecondFactorSecret(ctx, userID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", false, nil
+	}
+
+	if err != nil {
+		return "", false, fmt.Errorf("postgres: second factor of %s: %w", userID, err)
+	}
+
+	return row.Secret, true, nil
 }
 
 // ListUsers answers the filtered, paginated page with each row's
@@ -483,3 +493,6 @@ func toPermissionSet(list []string) map[string]struct{} {
 
 	return set
 }
+
+// boolRef makes the explicitly supplied CASE guard non-null.
+func boolRef(value bool) *bool { return &value }

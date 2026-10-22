@@ -19,6 +19,7 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/config"
 	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gopherex/xlog"
 
@@ -26,6 +27,8 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/authn"
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
+	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
+	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -40,12 +43,10 @@ const (
 	adminPassword = "ci-password-123"
 )
 
-var meID string
-
 // TestEndToEnd exercises the whole pipeline against the compose
-// PostgreSQL: bootstrap, the seeded admin token, Bearer authentication,
-// response signing and the me and profile reads, and the 501 of the
-// retired end-user authentication. Requires make up; skipped without
+// PostgreSQL: bootstrap, the admin seed, Basic password token
+// generation, Bearer authentication, response signing and the me and
+// profile reads. Requires make up; skipped without
 // LIC_TEST_DATABASE_URL.
 func TestEndToEnd(t *testing.T) {
 	t.Parallel()
@@ -73,9 +74,22 @@ func TestEndToEnd(t *testing.T) {
 
 	clock := time.Now
 
-	adminToken, err := testkit.SeedAdmin(ctx, store, id, adminEmail)
-	if err != nil {
+	if _, err := testkit.SeedAdmin(ctx, store, id, adminEmail); err != nil {
 		t.Fatalf("seed admin: %v", err)
+	}
+
+	admin, err := store.UserByEmail(ctx, id, adminEmail)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	digest, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.UpdateUserPassword(ctx, id, admin.ID, string(digest)); err != nil {
+		t.Fatal(err)
 	}
 
 	account, err := store.Accounts.Account(ctx, id)
@@ -84,14 +98,17 @@ func TestEndToEnd(t *testing.T) {
 	}
 
 	handler := httpapi.New(httpapi.Deps{
-		Accounts: store.Accounts,
-		Authn:    authn.New(store, clock),
-		Users:    users.New(store, events.None{}, clock),
-		Tokens:   tokens.New(store, events.None{}, rand.Reader, clock),
-		Groups:   groups.New(store, events.None{}, clock),
-		Spec:     httpapi.Spec{ID: id, Slug: spec.Slug},
-		Revision: "deadbeef",
-		Clock:    clock,
+		Accounts:      store.Accounts,
+		Authn:         authn.New(store, clock),
+		Users:         users.New(store, events.None{}, clock),
+		Tokens:        tokens.New(store, events.None{}, rand.Reader, clock),
+		Groups:        groups.New(store, events.None{}, clock),
+		SecondFactors: secondfactors.New(store, events.None{}, rand.Reader, clock),
+		Passwords:     passwords.New(store, events.None{}, rand.Reader, clock),
+		Spec:          httpapi.Spec{ID: id, Slug: spec.Slug},
+		Revision:      "deadbeef",
+		Throttle:      httpapi.NewMemoryThrottler(),
+		Clock:         clock,
 	})
 
 	base := "/v1/accounts/" + id.String()
@@ -111,24 +128,49 @@ func TestEndToEnd(t *testing.T) {
 		t.Errorf("anonymous: code %q want TOKEN_MISSING", code)
 	}
 
-	// 2. The Basic email:password credential answers the 501
-	// everywhere (end-user authentication is out of scope).
+	// 2. Generate an admin token with the Basic password flow.
 	basic := "Basic " + base64.StdEncoding.EncodeToString([]byte(adminEmail+":"+adminPassword))
 	body := `{"data":{"type":"tokens","attributes":{"name":"ci"}}}`
-
 	rec = do(t, handler, http.MethodPost, base+"/tokens", basic, strings.NewReader(body))
 
-	if rec.Code != http.StatusNotImplemented {
-		t.Fatalf("basic tokens: status %d: %s", rec.Code, rec.Body.String())
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("tokens: status %d: %s", rec.Code, rec.Body.String())
 	}
 
-	// 3. The seeded admin token authenticates; POST /tokens still
-	// answers the 501 (user-bearer tokens are retired).
-	bearer := "Bearer " + adminToken
-	rec = do(t, handler, http.MethodPost, base+"/tokens", bearer, strings.NewReader(body))
+	var created struct {
+		Data struct {
+			ID         string `json:"id"`
+			Type       string `json:"type"`
+			Attributes struct {
+				Name  string `json:"name"`
+				Token string `json:"token"`
+				Kind  string `json:"kind"`
+			} `json:"attributes"`
+			Relationships struct {
+				Bearer struct {
+					Data struct {
+						Type string `json:"type"`
+					} `json:"data"`
+				} `json:"bearer"`
+			} `json:"relationships"`
+		} `json:"data"`
+	}
 
-	if rec.Code != http.StatusNotImplemented {
-		t.Fatalf("tokens: status %d: %s", rec.Code, rec.Body.String())
+	decode(t, rec.Body.Bytes(), &created)
+
+	if created.Data.Type != "tokens" || !strings.HasPrefix(created.Data.Attributes.Token, "admin-") ||
+		created.Data.Attributes.Kind != "admin-token" ||
+		created.Data.Relationships.Bearer.Data.Type != "users" {
+		t.Errorf("token document: %+v", created.Data)
+	}
+
+	if loc := rec.Header().Get("Location"); !strings.HasPrefix(loc, "https://") ||
+		!strings.HasSuffix(loc, base+"/tokens/"+created.Data.ID) {
+		t.Errorf("location: %q", loc)
+	}
+
+	if kt := rec.Header().Get("Keygen-Token"); kt != created.Data.ID {
+		t.Errorf("Keygen-Token: %q want %q", kt, created.Data.ID)
 	}
 
 	if rec.Header().Get("Keygen-Bearer") == "" {
@@ -137,9 +179,9 @@ func TestEndToEnd(t *testing.T) {
 
 	verifySignature(t, rec, account, http.MethodPost, base+"/tokens")
 
-	raw := adminToken
+	raw := created.Data.Attributes.Token
 
-	// 4. Read the account with the seeded token; verify the signature.
+	// 3. Read the account with the minted token; verify the signature.
 	rec = do(t, handler, http.MethodGet, base, "Bearer "+raw, http.NoBody)
 
 	if rec.Code != http.StatusOK {
@@ -175,7 +217,6 @@ func TestEndToEnd(t *testing.T) {
 
 	var meDoc struct {
 		Data struct {
-			ID         string `json:"id"`
 			Type       string `json:"type"`
 			Attributes struct {
 				Email string `json:"email"`
@@ -193,19 +234,15 @@ func TestEndToEnd(t *testing.T) {
 
 	decode(t, rec.Body.Bytes(), &meDoc)
 
-	meID = meDoc.Data.ID
-
 	if meDoc.Data.Type != "users" || meDoc.Data.Attributes.Email != adminEmail ||
 		meDoc.Data.Attributes.Role != "admin" {
 		t.Errorf("me document: %+v", meDoc.Data)
 	}
 
 	if len(meDoc.Included) != 1 || meDoc.Included[0].Type != "tokens" ||
-		meDoc.Included[0].Attributes.Token != nil {
+		meDoc.Included[0].ID != created.Data.ID || meDoc.Included[0].Attributes.Token != nil {
 		t.Errorf("me included: %+v", meDoc.Included)
 	}
-
-	tokenID := meDoc.Included[0].ID
 
 	// 5. /profile: meta.tokenId carries the current token's id.
 	rec = do(t, handler, http.MethodGet, "/v1/profile", "Bearer "+raw, http.NoBody)
@@ -222,28 +259,43 @@ func TestEndToEnd(t *testing.T) {
 
 	decode(t, rec.Body.Bytes(), &profile)
 
-	if profile.Meta.TokenID != tokenID {
-		t.Errorf("profile meta.tokenId: %q want %q", profile.Meta.TokenID, tokenID)
+	if profile.Meta.TokenID != created.Data.ID {
+		t.Errorf("profile meta.tokenId: %q want %q", profile.Meta.TokenID, created.Data.ID)
 	}
 
-	// 6. The retired end-user authentication routes answer the 501.
-	for _, path := range []string{
-		base + "/passwords",
-		base + "/users/" + meID + "/actions/update-password",
-		base + "/users/" + meID + "/actions/reset-password",
-		base + "/users/" + meID + "/second-factors",
-		base + "/users/" + meID + "/tokens",
-	} {
-		rec = do(t, handler, http.MethodPost, path, bearer, strings.NewReader(`{"data":{}}`))
+	// 6. Password throttle: five Basic attempts on /tokens within the
+	// window pass (the one above plus these four wrong passwords), the
+	// sixth is a 429.
+	for range 4 {
+		rec = do(t, handler, http.MethodPost, base+"/tokens",
+			"Basic "+base64.StdEncoding.EncodeToString([]byte(adminEmail+":wrong")), strings.NewReader(body))
 
-		if rec.Code != http.StatusNotImplemented {
-			t.Errorf("%s: status %d want 501: %s", path, rec.Code, rec.Body.String())
-		}
-
-		if code := errorCode(t, rec.Body.Bytes()); code != "NOT_IMPLEMENTED" {
-			t.Errorf("%s: code %q want NOT_IMPLEMENTED", path, code)
+		if rec.Code != http.StatusUnauthorized {
+			t.Fatalf("wrong password: status %d: %s", rec.Code, rec.Body.String())
 		}
 	}
+
+	rec = do(t, handler, http.MethodPost, base+"/tokens", basic, strings.NewReader(body))
+
+	if rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("throttle: status %d: %s", rec.Code, rec.Body.String())
+	}
+
+	// The rate-limit headers are written with their exact reference
+	// bytes (non-canonical), so the lookup goes through the map.
+	limit := first(rec.Header()["X-RateLimit-Limit"]) //nolint:staticcheck // the reference's exact bytes, not Go's canonical form
+	if ra := rec.Header().Get("Retry-After"); ra == "" || limit != "5" {
+		t.Errorf("throttle headers: Retry-After %q, Limit %q", ra, limit)
+	}
+}
+
+// first answers a header value slice's first element.
+func first(values []string) string {
+	if len(values) == 0 {
+		return ""
+	}
+
+	return values[0]
 }
 
 // do runs one request through the handler.

@@ -293,8 +293,7 @@ func (q *Queries) ListEntitlementsAsc(ctx context.Context, arg ListEntitlementsA
 
 const countEntitlementsSQL = `SELECT count(*) FROM lic.entitlements WHERE account_id = $1;
 
--- The entitlements of a user's licenses (owned or attached): the union
--- of policy entitlements and license entitlements.`
+-- Authorized user/license scopes are applied before pagination and counts.`
 
 type CountEntitlementsRow struct {
 	Count int64
@@ -597,6 +596,10 @@ WHERE account_id = $1
   AND (
     $2::uuid IS NULL
     OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = $2)
+    OR EXISTS (
+      SELECT 1 FROM lic.group_owners go
+      WHERE go.account_id = $1 AND go.group_id = lic.groups.id AND go.user_id = $2
+    )
   );`
 
 type CountGroupsParams struct {
@@ -622,6 +625,10 @@ WHERE account_id = $1
   AND (
     $2::uuid IS NULL
     OR EXISTS (SELECT 1 FROM lic.users u WHERE u.group_id = lic.groups.id AND u.id = $2)
+    OR EXISTS (
+      SELECT 1 FROM lic.group_owners go
+      WHERE go.account_id = $1 AND go.group_id = lic.groups.id AND go.user_id = $2
+    )
   )
   AND (
     $3::uuid IS NULL
@@ -678,6 +685,38 @@ func (q *Queries) ListGroups(ctx context.Context, arg ListGroupsParams) ([]ListG
 	for rows.Next() {
 		var i ListGroupsRow
 		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.MaxUsers, &i.MaxLicenses, &i.MaxMachines, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const ownedGroupIdsForUserSQL = `SELECT group_id FROM lic.group_owners
+WHERE account_id = $1 AND user_id = $2;`
+
+type OwnedGroupIdsForUserParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+}
+
+type OwnedGroupIdsForUserRow struct {
+	GroupID uuid.UUID
+}
+
+func (q *Queries) OwnedGroupIdsForUser(ctx context.Context, arg OwnedGroupIdsForUserParams) ([]OwnedGroupIdsForUserRow, error) {
+	rows, err := q.db.Query(ctx, ownedGroupIdsForUserSQL, arg.AccountID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OwnedGroupIdsForUserRow
+	for rows.Next() {
+		var i OwnedGroupIdsForUserRow
+		if err := rows.Scan(&i.GroupID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -3206,6 +3245,163 @@ func (q *Queries) GetProductToken(ctx context.Context, arg GetProductTokenParams
 	return i, err
 }
 
+const getSecondFactorByIDSQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
+FROM lic.second_factors
+WHERE account_id = $1 AND user_id = $2 AND id = $3
+FOR UPDATE;`
+
+type GetSecondFactorByIDParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+	ID        uuid.UUID
+}
+
+type GetSecondFactorByIDRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	UserID         uuid.UUID
+	Secret         string
+	Enabled        bool
+	LastVerifiedAt *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetSecondFactorByID(ctx context.Context, arg GetSecondFactorByIDParams) (GetSecondFactorByIDRow, error) {
+	row := q.db.QueryRow(ctx, getSecondFactorByIDSQL, arg.AccountID, arg.UserID, arg.ID)
+	var i GetSecondFactorByIDRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.UserID, &i.Secret, &i.Enabled, &i.LastVerifiedAt, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const getSecondFactorAnySQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
+FROM lic.second_factors
+WHERE user_id = $1
+LIMIT 1 FOR UPDATE;`
+
+type GetSecondFactorAnyRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	UserID         uuid.UUID
+	Secret         string
+	Enabled        bool
+	LastVerifiedAt *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetSecondFactorAny(ctx context.Context, userID uuid.UUID) (GetSecondFactorAnyRow, error) {
+	row := q.db.QueryRow(ctx, getSecondFactorAnySQL, userID)
+	var i GetSecondFactorAnyRow
+	err := row.Scan(&i.ID, &i.AccountID, &i.UserID, &i.Secret, &i.Enabled, &i.LastVerifiedAt, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const insertSecondFactorSQL = `INSERT INTO lic.second_factors (id, account_id, user_id, secret)
+VALUES ($1, $2, $3, $4);`
+
+type InsertSecondFactorParams struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+	Secret    string
+}
+
+func (q *Queries) InsertSecondFactor(ctx context.Context, arg InsertSecondFactorParams) error {
+	_, err := q.db.Exec(ctx, insertSecondFactorSQL, arg.ID, arg.AccountID, arg.UserID, arg.Secret)
+	return err
+}
+
+const updateSecondFactorSQL = `UPDATE lic.second_factors
+SET enabled = $1, last_verified_at = $2, updated_at = now()
+WHERE account_id = $3 AND user_id = $4 AND id = $5;`
+
+type UpdateSecondFactorParams struct {
+	Enabled        bool
+	LastVerifiedAt *time.Time
+	AccountID      uuid.UUID
+	UserID         uuid.UUID
+	ID             uuid.UUID
+}
+
+func (q *Queries) UpdateSecondFactor(ctx context.Context, arg UpdateSecondFactorParams) error {
+	_, err := q.db.Exec(ctx, updateSecondFactorSQL, arg.Enabled, arg.LastVerifiedAt, arg.AccountID, arg.UserID, arg.ID)
+	return err
+}
+
+const deleteSecondFactorSQL = `DELETE FROM lic.second_factors
+WHERE account_id = $1 AND user_id = $2 AND id = $3;`
+
+type DeleteSecondFactorParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteSecondFactor(ctx context.Context, arg DeleteSecondFactorParams) error {
+	_, err := q.db.Exec(ctx, deleteSecondFactorSQL, arg.AccountID, arg.UserID, arg.ID)
+	return err
+}
+
+const listSecondFactorsSQL = `SELECT id, account_id, user_id, secret, enabled, last_verified_at, created_at, updated_at
+FROM lic.second_factors
+WHERE account_id = $1 AND user_id = $2
+ORDER BY created_at DESC, id DESC
+LIMIT $3;`
+
+type ListSecondFactorsParams struct {
+	AccountID uuid.UUID
+	UserID    uuid.UUID
+	Limit     int64
+}
+
+type ListSecondFactorsRow struct {
+	ID             uuid.UUID
+	AccountID      uuid.UUID
+	UserID         uuid.UUID
+	Secret         string
+	Enabled        bool
+	LastVerifiedAt *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) ListSecondFactors(ctx context.Context, arg ListSecondFactorsParams) ([]ListSecondFactorsRow, error) {
+	rows, err := q.db.Query(ctx, listSecondFactorsSQL, arg.AccountID, arg.UserID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListSecondFactorsRow
+	for rows.Next() {
+		var i ListSecondFactorsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.UserID, &i.Secret, &i.Enabled, &i.LastVerifiedAt, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEnabledSecondFactorSecretSQL = `SELECT secret
+FROM lic.second_factors
+WHERE user_id = $1 AND enabled
+LIMIT 1;`
+
+type GetEnabledSecondFactorSecretRow struct {
+	Secret string
+}
+
+func (q *Queries) GetEnabledSecondFactorSecret(ctx context.Context, userID uuid.UUID) (GetEnabledSecondFactorSecretRow, error) {
+	row := q.db.QueryRow(ctx, getEnabledSecondFactorSecretSQL, userID)
+	var i GetEnabledSecondFactorSecretRow
+	err := row.Scan(&i.Secret)
+	return i, err
+}
+
 const getTokenByDigestSQL = `SELECT id, account_id, digest, bearer_id, bearer_type, bearer_role, kind,
   name, expiry, permissions, max_activations, activations, max_deactivations,
   deactivations, created_at, updated_at
@@ -3487,36 +3683,37 @@ func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) error {
 }
 
 const updateUserColumnsSQL = `UPDATE lic.users SET
-  first_name = $1,
-  last_name = $2,
-  email = $3,
-  password_digest = $4,
-  role = $5,
-  group_id = $6,
-  metadata = $7,
-  password_reset_token = $8,
-  password_reset_sent_at = $9,
-  banned_at = $10,
-  updated_at = now()
-WHERE account_id = $11 AND id = $12;`
+ first_name = CASE WHEN $1 THEN $2 ELSE first_name END,
+ last_name = CASE WHEN $3 THEN $4 ELSE last_name END,
+ email = CASE WHEN $5 THEN $6 ELSE email END,
+ password_digest = CASE WHEN $7 THEN $8 ELSE password_digest END,
+ role = CASE WHEN $9 THEN $10 ELSE role END,
+ group_id = CASE WHEN $11 THEN $12 ELSE group_id END,
+ metadata = CASE WHEN $13 THEN $14 ELSE metadata END,
+ updated_at = now()
+WHERE account_id = $15 AND id = $16;`
 
 type UpdateUserColumnsParams struct {
-	FirstName           *string
-	LastName            *string
-	Email               *string
-	PasswordDigest      *string
-	Role                string
-	GroupID             *uuid.UUID
-	Metadata            json.RawMessage
-	PasswordResetToken  *string
-	PasswordResetSentAt *time.Time
-	BannedAt            *time.Time
-	AccountID           uuid.UUID
-	ID                  uuid.UUID
+	FirstNameSet   *bool
+	FirstName      *string
+	LastNameSet    *bool
+	LastName       *string
+	EmailSet       *bool
+	Email          *string
+	PasswordSet    *bool
+	PasswordDigest *string
+	RoleSet        *bool
+	Role           string
+	GroupSet       *bool
+	GroupID        *uuid.UUID
+	MetadataSet    *bool
+	Metadata       json.RawMessage
+	AccountID      uuid.UUID
+	ID             uuid.UUID
 }
 
 func (q *Queries) UpdateUserColumns(ctx context.Context, arg UpdateUserColumnsParams) error {
-	_, err := q.db.Exec(ctx, updateUserColumnsSQL, arg.FirstName, arg.LastName, arg.Email, arg.PasswordDigest, arg.Role, arg.GroupID, arg.Metadata, arg.PasswordResetToken, arg.PasswordResetSentAt, arg.BannedAt, arg.AccountID, arg.ID)
+	_, err := q.db.Exec(ctx, updateUserColumnsSQL, arg.FirstNameSet, arg.FirstName, arg.LastNameSet, arg.LastName, arg.EmailSet, arg.Email, arg.PasswordSet, arg.PasswordDigest, arg.RoleSet, arg.Role, arg.GroupSet, arg.GroupID, arg.MetadataSet, arg.Metadata, arg.AccountID, arg.ID)
 	return err
 }
 
@@ -4367,6 +4564,152 @@ type SetWebhookEventFailureParams struct {
 func (q *Queries) SetWebhookEventFailure(ctx context.Context, arg SetWebhookEventFailureParams) error {
 	_, err := q.db.Exec(ctx, setWebhookEventFailureSQL, arg.Status, arg.LastResponseCode, arg.LastResponseBody, arg.NextAttemptAt, arg.AccountID, arg.ID)
 	return err
+}
+
+type ListEntitlementsByIdsDescParams struct {
+	AccountID uuid.UUID
+	Ids       []uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListEntitlementsByIdsDescRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListEntitlementsByIdsDesc(ctx context.Context, arg ListEntitlementsByIdsDescParams) ([]ListEntitlementsByIdsDescRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.Ids)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.CursorID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.Limit)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Offset)
+		positions[5] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, metadata, created_at, updated_at\nFROM lic.entitlements\nWHERE account_id = $%d AND id = ANY($%d::uuid[])\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) < (\n      SELECT e2.created_at, e2.id FROM lic.entitlements e2\n      WHERE e2.account_id = $%d AND e2.id = $%d\n    )\n  )\nORDER BY created_at DESC, id DESC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListEntitlementsByIdsDescRow
+	for rows.Next() {
+		var i ListEntitlementsByIdsDescRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type ListEntitlementsByIdsAscParams struct {
+	AccountID uuid.UUID
+	Ids       []uuid.UUID
+	CursorID  *uuid.UUID
+	Limit     int64
+	Offset    int64
+}
+
+type ListEntitlementsByIdsAscRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	Name      string
+	Code      string
+	Metadata  json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) ListEntitlementsByIdsAsc(ctx context.Context, arg ListEntitlementsByIdsAscParams) ([]ListEntitlementsByIdsAscRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.Ids)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.CursorID)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.Limit)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.Offset)
+		positions[5] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT id, account_id, name, code, metadata, created_at, updated_at\nFROM lic.entitlements\nWHERE account_id = $%d AND id = ANY($%d::uuid[])\n  AND (\n    $%d::uuid IS NULL\n    OR (created_at, id) > (\n      SELECT e2.created_at, e2.id FROM lic.entitlements e2\n      WHERE e2.account_id = $%d AND e2.id = $%d\n    )\n  )\nORDER BY created_at ASC, id ASC\nLIMIT $%d OFFSET $%d;", positions[1], positions[2], positions[3], positions[1], positions[3], positions[4], positions[5]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListEntitlementsByIdsAscRow
+	for rows.Next() {
+		var i ListEntitlementsByIdsAscRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.Name, &i.Code, &i.Metadata, &i.CreatedAt, &i.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
+}
+
+type CountEntitlementsByIdsParams struct {
+	AccountID uuid.UUID
+	Ids       []uuid.UUID
+}
+
+type CountEntitlementsByIdsRow struct {
+	Count int64
+}
+
+func (q *Queries) CountEntitlementsByIds(ctx context.Context, arg CountEntitlementsByIdsParams) (CountEntitlementsByIdsRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.Ids)
+		positions[2] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT count(*) FROM lic.entitlements\nWHERE account_id = $%d AND id = ANY($%d::uuid[]);\n\n-- The entitlements of a user's licenses (owned or attached): the union\n-- of policy entitlements and license entitlements.", positions[1], positions[2]))
+	row := q.db.QueryRow(ctx, b.String(), args...)
+	var i CountEntitlementsByIdsRow
+	err := row.Scan(&i.Count)
+	return i, err
 }
 
 type DeleteGroupOwnersByUsersParams struct {

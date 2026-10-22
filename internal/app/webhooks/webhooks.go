@@ -166,13 +166,13 @@ func (s Scenario) Update(
 	id uuid.UUID,
 	in Input,
 ) (domain.WebhookEndpoint, error) {
-	if err := access.Require(ctx, "webhook-endpoint.update"); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
-	}
-
 	endpoint, err := s.show(ctx, account.ID, principal, id)
 	if err != nil {
 		return domain.WebhookEndpoint{}, err
+	}
+
+	if err := access.Require(ctx, "webhook-endpoint.update"); err != nil {
+		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
 	applyInput(&endpoint, in)
@@ -198,18 +198,24 @@ func (s Scenario) Update(
 func (s Scenario) Show(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) (domain.WebhookEndpoint, error) {
+	endpoint, err := s.show(ctx, account.ID, principal, id)
+	if err != nil {
+		return domain.WebhookEndpoint{}, err
+	}
+
 	if err := access.Require(ctx, "webhook-endpoint.read"); err != nil {
 		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
-	return s.show(ctx, account.ID, principal, id)
+	return endpoint, nil
 }
 
 func (s Scenario) show(
 	ctx context.Context, accountID uuid.UUID, principal access.Principal, id uuid.UUID,
 ) (domain.WebhookEndpoint, error) {
-	// The product bearer's scoped find misses everything (the 404).
-	if principal.Role == domain.RoleProduct {
+	// Endpoint has no for_user/for_license/for_product scope in CE, so
+	// these bearers' member lookups miss before permissions are checked.
+	if principal.Role == domain.RoleProduct || principal.Role == domain.RoleUser || principal.Role == domain.RoleLicense {
 		return domain.WebhookEndpoint{}, apperr.NotFound("webhook endpoint", id.String())
 	}
 
@@ -264,13 +270,13 @@ func (s Scenario) Index(
 func (s Scenario) Destroy(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) error {
-	if err := access.Require(ctx, "webhook-endpoint.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
-	}
-
 	endpoint, err := s.show(ctx, account.ID, principal, id)
 	if err != nil {
 		return err
+	}
+
+	if err := access.Require(ctx, "webhook-endpoint.delete"); err != nil {
+		return err //nolint:wrapcheck // the authorization's own error
 	}
 
 	if err := access.WebhookEndpointWrite(principal, endpoint); err != nil {
@@ -325,13 +331,13 @@ func (s Scenario) EventsIndex(
 func (s Scenario) EventShow(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) (domain.WebhookEvent, error) {
-	if err := access.Require(ctx, "webhook-event.read"); err != nil {
-		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
-	}
-
-	event, err := s.load(ctx, account.ID, id)
+	event, err := s.loadEventScoped(ctx, account.ID, principal, id)
 	if err != nil {
 		return domain.WebhookEvent{}, err
+	}
+
+	if err := access.Require(ctx, "webhook-event.read"); err != nil {
+		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
 	product, err := s.eventProduct(ctx, account.ID, event)
@@ -350,17 +356,17 @@ func (s Scenario) EventShow(
 func (s Scenario) EventDestroy(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) error {
+	event, err := s.loadEventScoped(ctx, account.ID, principal, id)
+	if err != nil {
+		return err
+	}
+
 	if err := access.Require(ctx, "webhook-event.delete"); err != nil {
 		return err //nolint:wrapcheck // the authorization's own error
 	}
 
 	if err := access.WebhookEventManage(principal); err != nil {
 		return err //nolint:wrapcheck // the authorization's own error
-	}
-
-	event, err := s.load(ctx, account.ID, id)
-	if err != nil {
-		return err
 	}
 
 	if err := s.store.DeleteWebhookEvent(ctx, account.ID, event.ID); err != nil {
@@ -377,17 +383,17 @@ func (s Scenario) EventDestroy(
 func (s Scenario) Retry(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) (domain.WebhookEvent, error) {
+	original, err := s.loadEventScoped(ctx, account.ID, principal, id)
+	if err != nil {
+		return domain.WebhookEvent{}, err
+	}
+
 	if err := access.Require(ctx, "webhook-event.retry"); err != nil {
 		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
 	if err := access.WebhookEventManage(principal); err != nil {
 		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
-	}
-
-	original, err := s.load(ctx, account.ID, id)
-	if err != nil {
-		return domain.WebhookEvent{}, err
 	}
 
 	endpoint, err := s.retryEndpoint(ctx, account.ID, original)
@@ -436,6 +442,18 @@ func (s Scenario) retryEndpoint(
 	}
 
 	return s.store.WebhookEndpointByURL(ctx, accountID, event.Endpoint) //nolint:wrapcheck // the store's own error
+}
+
+func (s Scenario) loadEventScoped(
+	ctx context.Context, accountID uuid.UUID, principal access.Principal, id uuid.UUID,
+) (domain.WebhookEvent, error) {
+	// Webhook events have no user/license scope; member lookups miss
+	// before the action-specific permission check runs.
+	if principal.Role == domain.RoleUser || principal.Role == domain.RoleLicense {
+		return domain.WebhookEvent{}, apperr.NotFound("webhook event", id.String())
+	}
+
+	return s.load(ctx, accountID, id)
 }
 
 func (s Scenario) load(ctx context.Context, accountID, id uuid.UUID) (domain.WebhookEvent, error) {

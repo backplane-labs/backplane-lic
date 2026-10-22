@@ -366,6 +366,12 @@ type Handler interface {
 	//
 	// PUT /v1/accounts/{account}/tokens/{tokenId}
 	RegenerateToken(ctx context.Context, params RegenerateTokenParams) (*TokenDocument, error)
+	// ReplaceUserSecondFactor implements replaceUserSecondFactor operation.
+	//
+	// Enable or disable a second factor (requires meta.otp).
+	//
+	// PUT /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
+	ReplaceUserSecondFactor(ctx context.Context, req ReplaceUserSecondFactorReq, params ReplaceUserSecondFactorParams) (*SecondFactorDocument, error)
 	// RequestPasswordReset implements requestPasswordReset operation.
 	//
 	// Always answers 204; unknown emails trigger nothing.

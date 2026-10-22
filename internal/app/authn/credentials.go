@@ -33,6 +33,8 @@ type Credentials struct {
 	// value for the "license:"/"token:" prefixed forms, or the user's
 	// password for the email form).
 	Secret string
+	// PasswordPresent distinguishes a Basic username from username: (empty password).
+	PasswordPresent bool
 }
 
 // The recognized Authorization schemes (case-insensitive, like the
@@ -60,12 +62,14 @@ func Parse(authorization, queryValue string) Credentials {
 	case schemeLicense:
 		return Credentials{Kind: CredentialLicense, Scheme: canonicalScheme(scheme), Value: value}
 	case schemeBasic:
-		user, pass, ok := decodeBasic(value)
+		user, pass, present, ok := decodeBasic(value)
 		if !ok {
 			return Credentials{Kind: CredentialNone}
 		}
 
-		return Credentials{Kind: CredentialBasic, Scheme: canonicalScheme(scheme), Value: user, Secret: pass}
+		return Credentials{
+			Kind: CredentialBasic, Scheme: canonicalScheme(scheme), Value: user, Secret: pass, PasswordPresent: present,
+		}
 	case "":
 		if queryValue == "" {
 			return Credentials{Kind: CredentialNone}
@@ -144,7 +148,7 @@ func (c Credentials) Resolve(mode Mode) Resolved {
 			return Resolved{Flow: FlowToken, TokenValue: c.Secret}
 		}
 
-		if mode == ModePasswordOrToken && emailRe.MatchString(c.Value) {
+		if mode == ModePasswordOrToken && strings.Contains(c.Value, "@") && c.PasswordPresent {
 			return Resolved{Flow: FlowPassword, Email: c.Value, Password: c.Secret}
 		}
 
@@ -182,13 +186,13 @@ func canonicalScheme(scheme string) string {
 	return strings.ToUpper(scheme[:1]) + strings.ToLower(scheme[1:])
 }
 
-func decodeBasic(value string) (string, string, bool) {
+func decodeBasic(value string) (string, string, bool, bool) {
 	raw, err := base64.StdEncoding.DecodeString(value)
 	if err != nil {
-		return "", "", false
+		return "", "", false, false
 	}
 
-	user, pass, _ := strings.Cut(string(raw), ":")
+	user, pass, present := strings.Cut(string(raw), ":")
 
-	return user, pass, true
+	return user, pass, present, true
 }

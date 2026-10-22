@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -62,6 +63,8 @@ type Store interface {
 	UserByID(ctx context.Context, accountID, id uuid.UUID) (domain.User, error)
 	// GroupIDsOfUser answers the group ids the user belongs to or owns.
 	GroupIDsOfUser(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error)
+	// OwnedGroupIDsOfUser excludes membership-only groups.
+	OwnedGroupIDsOfUser(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error)
 	// UserLicenseIDs answers the user's license ids.
 	UserLicenseIDs(ctx context.Context, accountID, userID uuid.UUID) ([]uuid.UUID, error)
 	// UserProductIDs answers the product ids behind the user's licenses.
@@ -324,8 +327,13 @@ func (s Scenario) Delete(
 func (s Scenario) Users(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID, limit int,
 ) ([]domain.User, error) {
-	if err := s.readRelationship(ctx, account, principal, id, "group.users.read"); err != nil {
+	visible, err := s.readRelationship(ctx, account, principal, id, "group.users.read")
+	if err != nil {
 		return nil, err
+	}
+
+	if !visible {
+		return []domain.User{}, nil
 	}
 
 	return s.store.ListGroupUsers(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
@@ -335,8 +343,13 @@ func (s Scenario) Users(
 func (s Scenario) LicenseIDs(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID, limit int,
 ) ([]uuid.UUID, error) {
-	if err := s.readRelationship(ctx, account, principal, id, "group.licenses.read"); err != nil {
+	visible, err := s.readRelationship(ctx, account, principal, id, "group.licenses.read")
+	if err != nil {
 		return nil, err
+	}
+
+	if !visible {
+		return []uuid.UUID{}, nil
 	}
 
 	return s.store.ListGroupLicenseIDs(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
@@ -346,8 +359,13 @@ func (s Scenario) LicenseIDs(
 func (s Scenario) MachineIDs(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID, limit int,
 ) ([]uuid.UUID, error) {
-	if err := s.readRelationship(ctx, account, principal, id, "group.machines.read"); err != nil {
+	visible, err := s.readRelationship(ctx, account, principal, id, "group.machines.read")
+	if err != nil {
 		return nil, err
+	}
+
+	if !visible {
+		return []uuid.UUID{}, nil
 	}
 
 	return s.store.ListGroupMachineIDs(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
@@ -516,10 +534,10 @@ func (s Scenario) DetachOwners(
 	return nil
 }
 
-// load resolves the group inside the principal's scope (an invisible
-// group is the record 404).
+// load mirrors GroupsController#set_group's account-wide find. Existing
+// unrelated groups reach the policy and return 403, not a scoped-find 404.
 func (s Scenario) load(
-	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
+	ctx context.Context, account domain.Account, _ access.Principal, id uuid.UUID,
 ) (domain.Group, error) {
 	group, err := s.store.GroupByID(ctx, account.ID, id)
 	if errors.Is(err, ErrNotFound) || errors.Is(err, pgx.ErrNoRows) {
@@ -530,38 +548,7 @@ func (s Scenario) load(
 		return domain.Group{}, fmt.Errorf("groups: load: %w", err)
 	}
 
-	if !s.inScope(ctx, account, principal, group) {
-		return domain.Group{}, apperr.NotFound("group", id.String())
-	}
-
 	return group, nil
-}
-
-// inScope answers the authorized_scope visibility: the admin family and
-// products see everything; a user her groups; a license its group.
-func (s Scenario) inScope(
-	ctx context.Context, account domain.Account, principal access.Principal, group domain.Group,
-) bool {
-	switch access.UserScopeKind(principal) {
-	case "", "product":
-		return true
-	case "user":
-		ids, err := s.store.GroupIDsOfUser(ctx, account.ID, principal.BearerID)
-		if err != nil {
-			return false
-		}
-
-		for _, id := range ids {
-			if id == group.ID {
-				return true
-			}
-		}
-
-		return false
-	default:
-		return principal.IsLicense() && principal.License != nil &&
-			principal.License.GroupID.Valid && principal.License.GroupID.UUID == group.ID
-	}
 }
 
 // memberOrOwner answers the user-bearer membership-or-ownership test of
@@ -585,25 +572,61 @@ func (s Scenario) memberOrOwner(
 	}
 }
 
-// readRelationship runs the permission check and loads the group.
+// readRelationship authorizes a contents index. Plain users see only
+// groups they own, not groups they merely belong to. An owner querying a
+// membership-only group sees an empty scoped relation, like the reference.
 func (s Scenario) readRelationship(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID, permission string,
-) error {
-	if err := access.Require(ctx, permission); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+) (bool, error) {
+	if _, err := s.readRelationshipGroup(ctx, account, principal, id, permission); err != nil {
+		return false, err
 	}
 
-	_, err := s.load(ctx, account, principal, id)
+	if principal.Role != domain.RoleUser {
+		return true, nil
+	}
 
-	return err
+	owned, err := s.store.OwnedGroupIDsOfUser(ctx, account.ID, principal.BearerID)
+	if err != nil {
+		return false, fmt.Errorf("groups: owned groups: %w", err)
+	}
+
+	if len(owned) == 0 {
+		return false, apperr.ForbiddenReason(access.ReasonAllResources)
+	}
+
+	return slices.Contains(owned, id), nil
 }
 
 func (s Scenario) readRelationshipGroup(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID, permission string,
 ) (domain.Group, error) {
+	group, err := s.load(ctx, account, principal, id)
+	if err != nil {
+		return domain.Group{}, err
+	}
+	// Relationship controllers use authorized_scope for their parent group;
+	// GroupsController's direct member routes intentionally do not.
+	if principal.Role == domain.RoleUser {
+		ids, err := s.store.GroupIDsOfUser(ctx, account.ID, principal.BearerID)
+		if err != nil {
+			return domain.Group{}, fmt.Errorf("groups: scope: %w", err)
+		}
+
+		if !slices.Contains(ids, id) {
+			return domain.Group{}, apperr.NotFound("group", id.String())
+		}
+	}
+
+	if principal.IsLicense() {
+		if principal.License == nil || !principal.License.GroupID.Valid || principal.License.GroupID.UUID != id {
+			return domain.Group{}, apperr.NotFound("group", id.String())
+		}
+	}
+
 	if err := access.Require(ctx, permission); err != nil {
 		return domain.Group{}, err //nolint:wrapcheck // the port's own error
 	}
 
-	return s.load(ctx, account, principal, id)
+	return group, nil
 }

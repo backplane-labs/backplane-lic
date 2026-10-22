@@ -65,6 +65,7 @@ const (
 	ProfileOperation                  OperationName = "Profile"
 	RegenerateCurrentTokenOperation   OperationName = "RegenerateCurrentToken"
 	RegenerateTokenOperation          OperationName = "RegenerateToken"
+	ReplaceUserSecondFactorOperation  OperationName = "ReplaceUserSecondFactor"
 	RequestPasswordResetOperation     OperationName = "RequestPasswordReset"
 	ResetUserPasswordOperation        OperationName = "ResetUserPassword"
 	RetryWebhookEventOperation        OperationName = "RetryWebhookEvent"

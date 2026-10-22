@@ -1701,6 +1701,41 @@ paths:
                 $ref: '#/components/schemas/SecondFactorDocument'
         default:
           $ref: '#/components/responses/Error'
+    put:
+      operationId: replaceUserSecondFactor
+      summary: Enable or disable a second factor (requires meta.otp)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: secondFactorId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Second-factor document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SecondFactorDocument'
+        default:
+          $ref: '#/components/responses/Error'
     delete:
       operationId: deleteUserSecondFactor
       summary: Delete a second factor
@@ -2513,6 +2548,13 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/UserResource'
+        meta:
+          type: object
+          required:
+          - passwordResetToken
+          properties:
+            passwordResetToken:
+              type: string
     TokenAttributes:
       type: object
       required:

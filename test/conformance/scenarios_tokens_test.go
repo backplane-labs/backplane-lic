@@ -8,86 +8,77 @@ import (
 
 // tokensScenarios covers the tokens resource: index, show, regenerate
 // (member and the deprecated collection form) and revoke, with the
-// bearer filters and per-bearer authorization. The tokens are product
-// tokens (user-bearer tokens are retired with end-user authentication).
+// bearer filters and per-bearer authorization.
 func tokensScenarios() []conformance.Scenario {
 	admin := conformance.Auth{Kind: conformance.AuthAdmin}
 	account := "/v1/accounts/" + conformance.AccountSlug
 	tokens := account + "/tokens"
 
-	createProduct := func(name string) conformance.Step {
-		return conformance.Step{
-			Name:   "create " + name,
-			Method: http.MethodPost,
-			Path:   account + "/products",
-			Auth:   admin,
-			Body: `{"data":{"type":"product","attributes":` +
-				`{"name":"Tokens ` + name + ` {{run}}"}}}`,
-			Capture: map[string]string{name + "Id": "data.id"},
-		}
-	}
-
-	mint := func(name string) conformance.Step {
-		return conformance.Step{
-			Name:   "mint " + name + " token",
-			Method: http.MethodPost,
-			Path:   account + "/products/{{" + name + "Id}}/tokens",
-			Auth:   admin,
-			Body:   `{"data":{"type":"tokens","attributes":{"name":"scenario"}}}`,
-			Capture: map[string]string{
-				name + "Token":   "data.attributes.token",
-				name + "TokenId": "data.id",
-			},
-		}
-	}
-
 	return []conformance.Scenario{
 		{
 			Name: "tokens_lifecycle",
 			Steps: []conformance.Step{
-				createProduct("tok"),
-				mint("tok"),
+				{
+					Name:   "create user",
+					Method: http.MethodPost,
+					Path:   account + "/users",
+					Auth:   admin,
+					Body: `{"data":{"type":"users","attributes":` +
+						`{"email":"tok-{{run}}@example.com","password":"password-{{run}}"}}}`,
+					Capture: map[string]string{"userId": "data.id"},
+				},
+				{
+					Name:   "mint token for user",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{userId}}/tokens",
+					Auth:   admin,
+					Body:   `{"data":{"type":"tokens","attributes":{"name":"scenario"}}}`,
+					Capture: map[string]string{
+						"tokenId": "data.id",
+						"secret":  "data.attributes.token",
+					},
+				},
 				{
 					Name:   "index filtered by bearer",
 					Method: http.MethodGet,
-					Path:   tokens + "?bearer[type]=product&bearer[id]={{tokId}}&limit=100",
+					Path:   tokens + "?bearer[type]=user&bearer[id]={{userId}}&limit=100",
 					Auth:   admin,
 				},
 				{
 					Name:   "index filtered by role",
 					Method: http.MethodGet,
-					Path:   tokens + "?bearer[role][]=product&bearer[id]={{tokId}}",
+					Path:   tokens + "?bearer[role][]=user&bearer[id]={{userId}}",
 					Auth:   admin,
 				},
 				{
 					Name:   "show without secret",
 					Method: http.MethodGet,
-					Path:   tokens + "/{{tokTokenId}}",
+					Path:   tokens + "/{{tokenId}}",
 					Auth:   admin,
 				},
 				{
 					Name:    "regenerate member",
 					Method:  http.MethodPut,
-					Path:    tokens + "/{{tokTokenId}}",
+					Path:    tokens + "/{{tokenId}}",
 					Auth:    admin,
-					Capture: map[string]string{"tokToken2": "data.attributes.token"},
+					Capture: map[string]string{"secret2": "data.attributes.token"},
 				},
 				{
 					Name:   "show after regenerate",
 					Method: http.MethodGet,
-					Path:   tokens + "/{{tokTokenId}}",
+					Path:   tokens + "/{{tokenId}}",
 					Auth:   admin,
 				},
 				{
 					Name:   "revoke",
 					Method: http.MethodDelete,
-					Path:   tokens + "/{{tokTokenId}}",
+					Path:   tokens + "/{{tokenId}}",
 					Auth:   admin,
 				},
 				{
 					Name:   "show after revoke",
 					Method: http.MethodGet,
-					Path:   tokens + "/{{tokTokenId}}",
+					Path:   tokens + "/{{tokenId}}",
 					Auth:   admin,
 				},
 				{
@@ -101,36 +92,69 @@ func tokensScenarios() []conformance.Scenario {
 		{
 			Name: "tokens_authz",
 			Steps: []conformance.Step{
-				createProduct("one"),
-				createProduct("two"),
-				mint("one"),
-				mint("two"),
 				{
-					Name:   "product one lists its tokens",
+					Name:   "create user one",
+					Method: http.MethodPost,
+					Path:   account + "/users",
+					Auth:   admin,
+					Body: `{"data":{"type":"users","attributes":` +
+						`{"email":"one-{{run}}@example.com","password":"password-{{run}}"}}}`,
+					Capture: map[string]string{"oneId": "data.id"},
+				},
+				{
+					Name:   "create user two",
+					Method: http.MethodPost,
+					Path:   account + "/users",
+					Auth:   admin,
+					Body: `{"data":{"type":"users","attributes":` +
+						`{"email":"two-{{run}}@example.com","password":"password-{{run}}"}}}`,
+					Capture: map[string]string{"twoId": "data.id"},
+				},
+				{
+					Name:   "mint token for one",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{oneId}}/tokens",
+					Auth:   admin,
+					Body:   `{"data":{"type":"tokens"}}`,
+					Capture: map[string]string{
+						"oneToken":   "data.attributes.token",
+						"oneTokenId": "data.id",
+					},
+				},
+				{
+					Name:    "mint token for two",
+					Method:  http.MethodPost,
+					Path:    account + "/users/{{twoId}}/tokens",
+					Auth:    admin,
+					Body:    `{"data":{"type":"tokens"}}`,
+					Capture: map[string]string{"twoToken": "data.attributes.token"},
+				},
+				{
+					Name:   "user one lists own tokens",
 					Method: http.MethodGet,
-					Path:   account + "/products/{{oneId}}/tokens?limit=100",
+					Path:   account + "/users/{{oneId}}/tokens?limit=100",
 					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "oneToken"},
 				},
 				{
-					Name:   "product one cannot list product two tokens",
+					Name:   "user one lists user two tokens",
 					Method: http.MethodGet,
-					Path:   account + "/products/{{twoId}}/tokens",
+					Path:   account + "/users/{{twoId}}/tokens",
 					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "oneToken"},
 				},
 				{
-					Name:   "product two regenerates one's token",
+					Name:   "user one regenerates two's token",
 					Method: http.MethodPut,
 					Path:   tokens + "/{{oneTokenId}}",
 					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "twoToken"},
 				},
 				{
-					Name:   "product regenerates its own token",
+					Name:   "user two regenerates own token",
 					Method: http.MethodPut,
 					Path:   tokens + "/{{oneTokenId}}",
 					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "oneToken"},
 				},
 				{
-					Name:   "product revokes its own token",
+					Name:   "user revokes own token",
 					Method: http.MethodDelete,
 					Path:   tokens + "/{{oneTokenId}}",
 					Auth:   conformance.Auth{Kind: conformance.AuthTokenVar, Var: "oneToken"},

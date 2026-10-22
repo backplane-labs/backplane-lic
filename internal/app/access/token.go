@@ -95,20 +95,20 @@ func TokenRevoke(p Principal, token domain.Token, userOfProduct, licenseOfProduc
 }
 
 // TokenGenerateForUser authorizes minting a token for the target user
-// (the /users/{id}/tokens route): admin, developer (any user), product
-// (a user licensed to it); user and license bearers are denied.
-func TokenGenerateForUser(p Principal, _ domain.User, licensedTo func() bool) error {
+// (the /users/{id}/tokens route): admin/developer for self or a plain
+// user, product for a plain user licensed to it; other bearers are denied.
+func TokenGenerateForUser(p Principal, user domain.User, licensedTo func() bool) error {
 	if !p.Allows("user.tokens.generate") {
 		return apperr.ForbiddenReason(ReasonLacksPermission(p.Role))
 	}
 
 	switch {
 	case p.Role == domain.RoleAdmin || p.Role == domain.RoleDeveloper:
-		if p.IsUser() {
+		if p.IsUser() && (user.ID == p.BearerID || user.Role == domain.RoleUser) {
 			return nil
 		}
 	case p.IsProduct():
-		if licensedTo() {
+		if user.Role == domain.RoleUser && licensedTo() {
 			return nil
 		}
 	}

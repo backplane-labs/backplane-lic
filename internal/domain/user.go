@@ -4,7 +4,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
+
+	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 )
 
 // User is an account's user: a license owner or an admin bearer.
@@ -72,5 +73,12 @@ func (u User) Status(activeLicense bool, now time.Time) string {
 // Authenticates reports whether the password matches the digest
 // (bcrypt, like the reference's has_secure_password).
 func (u User) Authenticates(password string) bool {
-	return u.HasPassword() && bcrypt.CompareHashAndPassword([]byte(u.PasswordDigest), []byte(password)) == nil
+	return u.HasPassword() && crypto.PasswordMatches(u.PasswordDigest, password)
+}
+
+// PasswordReset is the password-reset event's user and one-time plaintext claim.
+// The claim belongs only to webhook document metadata, never user attributes.
+type PasswordReset struct {
+	User  User
+	Token string
 }

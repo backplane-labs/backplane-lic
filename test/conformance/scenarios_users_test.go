@@ -28,6 +28,24 @@ func usersScenarios() []conformance.Scenario {
 		}
 	}
 
+	// mintUserToken creates a token for the user via the admin.
+	mintUserToken := func(name string) conformance.Step {
+		return conformance.Step{
+			Name:   "mint " + name + " token",
+			Method: http.MethodPost,
+			Path:   account + "/users/{{" + name + "Id}}/tokens",
+			Auth:   admin,
+			Body:   `{"data":{"type":"tokens","attributes":{"name":"` + name + `"}}}`,
+			Capture: map[string]string{
+				name + "Token": "data.attributes.token",
+			},
+		}
+	}
+
+	asUser := func(name string) conformance.Auth {
+		return conformance.Auth{Kind: conformance.AuthTokenVar, Var: name + "Token"}
+	}
+
 	return []conformance.Scenario{
 		{
 			Name: "users_crud",
@@ -160,6 +178,30 @@ func usersScenarios() []conformance.Scenario {
 			Name: "users_role_gating",
 			Steps: []conformance.Step{
 				createUser("plain"),
+				mintUserToken("plain"),
+				{
+					Name:   "user cannot send role",
+					Method: http.MethodPost,
+					Path:   account + "/users",
+					Auth:   asUser("plain"),
+					Body: `{"data":{"type":"users","attributes":` +
+						`{"email":"roleless-{{run}}@example.com","role":"admin"}}}`,
+				},
+				{
+					Name:   "user cannot send password for self",
+					Method: http.MethodPatch,
+					Path:   account + "/users/{{plainId}}",
+					Auth:   asUser("plain"),
+					Body: `{"data":{"type":"users","attributes":` +
+						`{"firstName":"SelfName","password":"newpassword-1"}}}`,
+				},
+				{
+					Name:   "user patches own name",
+					Method: http.MethodPatch,
+					Path:   account + "/users/{{plainId}}",
+					Auth:   asUser("plain"),
+					Body:   `{"data":{"type":"users","attributes":{"firstName":"SelfName"}}}`,
+				},
 				{
 					Name:   "admin patches user password",
 					Method: http.MethodPatch,
@@ -244,11 +286,19 @@ func usersScenarios() []conformance.Scenario {
 			Name: "users_actions",
 			Steps: []conformance.Step{
 				createUser("banme"),
+				mintUserToken("banme"),
 				{
 					Name:   "ban",
 					Method: http.MethodPost,
 					Path:   account + "/users/{{banmeId}}/actions/ban",
 					Auth:   admin,
+				},
+				{
+					Name:    "banned user token is rejected",
+					Method:  http.MethodGet,
+					Path:    account + "/users/{{banmeId}}",
+					Auth:    asUser("banme"),
+					Headers: map[string]string{},
 				},
 				{
 					Name:   "unban",
@@ -277,9 +327,125 @@ func usersScenarios() []conformance.Scenario {
 			},
 		},
 		{
+			Name: "users_passwords",
+			Steps: []conformance.Step{
+				createUser("pw"),
+				mintUserToken("pw"),
+				{
+					Name:   "update-password wrong old",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{pwId}}/actions/update-password",
+					Auth:   asUser("pw"),
+					Body:   `{"meta":{"oldPassword":"wrong-{{run}}","newPassword":"rotated-{{run}}"}}`,
+				},
+				{
+					Name:   "update-password missing meta",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{pwId}}/actions/update-password",
+					Auth:   asUser("pw"),
+					Body:   `{}`,
+				},
+				{
+					Name:   "update-password right old",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{pwId}}/actions/update-password",
+					Auth:   asUser("pw"),
+					Body:   `{"meta":{"oldPassword":"password-{{run}}","newPassword":"rotated-{{run}}"}}`,
+				},
+				{
+					Name:   "old token revoked",
+					Method: http.MethodGet,
+					Path:   account + "/users/{{pwId}}",
+					Auth:   asUser("pw"),
+				},
+				{
+					Name:   "reset-password with bogus token",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{pwId}}/actions/reset-password",
+					Auth:   conformance.Auth{Kind: conformance.AuthNone},
+					Body:   `{"meta":{"passwordResetToken":"bogus","newPassword":"newerpass-1"}}`,
+				},
+				{
+					Name:   "update-password as admin for other user",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{pwId}}/actions/update-password",
+					Auth:   admin,
+					Body:   `{"meta":{"oldPassword":"x","newPassword":"newerpass-1"}}`,
+				},
+			},
+		},
+		{
+			Name: "users_group_relationship",
+			Steps: []conformance.Step{
+				{
+					Name:   "group show without group",
+					Method: http.MethodGet,
+					Path:   account + "/users/admin@example.com/group",
+					Auth:   admin,
+				},
+				{
+					Name:    "create group max one user",
+					Method:  http.MethodPost,
+					Path:    account + "/groups",
+					Auth:    admin,
+					Body:    `{"data":{"type":"groups","attributes":{"name":"gr-{{run}}","maxUsers":1}}}`,
+					Capture: map[string]string{"groupId": "data.id"},
+				},
+				createUser("grone"),
+				createUser("grtwo"),
+				{
+					Name:   "attach first",
+					Method: http.MethodPut,
+					Path:   account + "/users/{{groneId}}/group",
+					Auth:   admin,
+					Body:   `{"data":{"type":"groups","id":"{{groupId}}"}}`,
+				},
+				{
+					Name:   "attach second exceeds limit",
+					Method: http.MethodPut,
+					Path:   account + "/users/{{grtwoId}}/group",
+					Auth:   admin,
+					Body:   `{"data":{"type":"groups","id":"{{groupId}}"}}`,
+				},
+				{
+					Name:   "group show",
+					Method: http.MethodGet,
+					Path:   account + "/users/{{groneId}}/group",
+					Auth:   admin,
+				},
+				{
+					Name:   "attach unknown group",
+					Method: http.MethodPut,
+					Path:   account + "/users/{{groneId}}/group",
+					Auth:   admin,
+					Body:   `{"data":{"type":"groups","id":"00000000-0000-0000-0000-000000000001"}}`,
+				},
+				{
+					Name:   "remove group",
+					Method: http.MethodPut,
+					Path:   account + "/users/{{groneId}}/group",
+					Auth:   admin,
+					Body:   `{"data":null}`,
+				},
+				{
+					Name:   "delete group",
+					Method: http.MethodDelete,
+					Path:   account + "/groups/{{groupId}}",
+					Auth:   admin,
+				},
+				{
+					Name:   "group show after delete",
+					Method: http.MethodGet,
+					Path:   account + "/groups/{{groupId}}",
+					Auth:   admin,
+				},
+			},
+		},
+		{
 			Name: "users_relationship_indexes",
 			Steps: []conformance.Step{
 				createUser("rel"),
+				mintUserToken("rel"),
 				{
 					Name:   "products empty",
 					Method: http.MethodGet,
@@ -309,6 +475,51 @@ func usersScenarios() []conformance.Scenario {
 					Method: http.MethodGet,
 					Path:   account + "/users/{{relId}}/tokens",
 					Auth:   admin,
+				},
+				mintUserToken("rel"),
+				{
+					Name:    "tokens index has the minted token",
+					Method:  http.MethodGet,
+					Path:    account + "/users/{{relId}}/tokens?limit=100",
+					Auth:    admin,
+					Capture: map[string]string{"relTokenId": "data.0.id"},
+				},
+				{
+					Name:   "token show without secret",
+					Method: http.MethodGet,
+					Path:   account + "/users/{{relId}}/tokens/{{relTokenId}}",
+					Auth:   admin,
+				},
+				{
+					Name:   "user token create by user is denied",
+					Method: http.MethodPost,
+					Path:   account + "/users/{{relId}}/tokens",
+					Auth:   asUser("rel"),
+					Body:   `{"data":{"type":"tokens"}}`,
+				},
+				{
+					Name:   "tokens index of another user is denied",
+					Method: http.MethodGet,
+					Path:   account + "/users/{{relId}}/tokens",
+					Auth:   asUser("rel"),
+				},
+				{
+					Name:   "user sees self",
+					Method: http.MethodGet,
+					Path:   account + "/users/{{relId}}",
+					Auth:   asUser("rel"),
+				},
+				{
+					Name:   "me",
+					Method: http.MethodGet,
+					Path:   account + "/me",
+					Auth:   asUser("rel"),
+				},
+				{
+					Name:   "profile",
+					Method: http.MethodGet,
+					Path:   account + "/profile",
+					Auth:   asUser("rel"),
 				},
 			},
 		},

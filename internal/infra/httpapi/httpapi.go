@@ -18,8 +18,10 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/entitlements"
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
+	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
@@ -44,17 +46,20 @@ type Spec struct {
 
 // Deps is everything the HTTP face is built from.
 type Deps struct {
-	Accounts     Accounts
-	Authn        authn.Scenario
-	Users        users.Scenario
-	Tokens       tokens.Scenario
-	Groups       groups.Scenario
-	Products     products.Scenario
-	Policies     policies.Scenario
-	Entitlements entitlements.Scenario
-	Keys         keys.Scenario
-	Webhooks     webhooks.Scenario
-	Spec         Spec
+	SecondFactors secondfactors.Scenario
+	Passwords     passwords.Scenario
+	Throttle      Throttler
+	Accounts      Accounts
+	Authn         authn.Scenario
+	Users         users.Scenario
+	Tokens        tokens.Scenario
+	Groups        groups.Scenario
+	Products      products.Scenario
+	Policies      policies.Scenario
+	Entitlements  entitlements.Scenario
+	Keys          keys.Scenario
+	Webhooks      webhooks.Scenario
+	Spec          Spec
 	// Revision feeds the Keygen-Revision header (the build's commit).
 	Revision string
 	// DocsHost overrides the docs origin of error links; when empty it
@@ -69,6 +74,8 @@ type Deps struct {
 // API implements the ogen handler over the app's scenarios. The
 // unimplemented base answers the routes whose groups have not landed.
 type API struct {
+	secondFactors secondfactors.Scenario
+	passwords     passwords.Scenario
 	oas.UnimplementedHandler
 
 	accounts     Accounts
@@ -88,16 +95,18 @@ type API struct {
 // routing and the platform's HTTP mounting.
 func New(deps Deps) http.Handler {
 	api := &API{
-		accounts:     deps.Accounts,
-		users:        deps.Users,
-		tokens:       deps.Tokens,
-		groups:       deps.Groups,
-		products:     deps.Products,
-		policies:     deps.Policies,
-		entitlements: deps.Entitlements,
-		keys:         deps.Keys,
-		webhooks:     deps.Webhooks,
-		spec:         deps.Spec,
+		secondFactors: deps.SecondFactors,
+		passwords:     deps.Passwords,
+		accounts:      deps.Accounts,
+		users:         deps.Users,
+		tokens:        deps.Tokens,
+		groups:        deps.Groups,
+		products:      deps.Products,
+		policies:      deps.Policies,
+		entitlements:  deps.Entitlements,
+		keys:          deps.Keys,
+		webhooks:      deps.Webhooks,
+		spec:          deps.Spec,
 	}
 
 	server, err := oas.NewServer(api)
@@ -112,13 +121,15 @@ func New(deps Deps) http.Handler {
 	}
 
 	return &pipeline{
-		server:   server,
-		accounts: deps.Accounts,
-		authn:    deps.Authn,
-		spec:     deps.Spec,
-		revision: deps.Revision,
-		docsHost: deps.DocsHost,
-		clock:    clock,
+		throttle:       deps.Throttle,
+		trustedProxies: parseCIDRs(deps.TrustedProxies),
+		server:         server,
+		accounts:       deps.Accounts,
+		authn:          deps.Authn,
+		spec:           deps.Spec,
+		revision:       deps.Revision,
+		docsHost:       deps.DocsHost,
+		clock:          clock,
 	}
 }
 

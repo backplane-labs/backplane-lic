@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,6 +23,10 @@ import (
 )
 
 // basic base64-encodes a Basic credential.
+func basic(user, pass string) string {
+	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+}
+
 // pipeStore answers the authn port with one admin user and her token
 // (digest-addressed).
 type pipeStore struct {
@@ -112,6 +117,7 @@ func pipeSetup(t *testing.T) (http.Handler, string, string) {
 		Tokens:   tokens.New(tokenStore{}, events.None{}, rand.Reader, clock),
 		Spec:     httpapi.Spec{ID: account.ID, Slug: account.Slug},
 		Revision: "deadbeef",
+		Throttle: httpapi.NewMemoryThrottler(),
 		Clock:    clock,
 	})
 
@@ -277,8 +283,8 @@ func TestGenerateBodyValidation(t *testing.T) {
 		},
 		{"missing type", `{"data":{}}`, 400, "", "/data/type"},
 		{"invalid type", `{"data":{"type":"licenses"}}`, 400, "", "/data/type"},
-		{"otp is unpermitted", `{"meta":{"otp":"123456"}}`, 400, "", "/meta/otp"},
-		{"ok (user bearer is retired)", `{"data":{"type":"tokens"}}`, 501, "NOT_IMPLEMENTED", ""},
+		{"missing otp", `{"meta":{}}`, 400, "", "/meta/otp"},
+		{"ok", `{"data":{"type":"tokens"}}`, 201, "", ""},
 	} {
 		rec := do(t, handler, http.MethodPost, base+"/tokens", "Bearer "+raw,
 			strings.NewReader(tc.body))
@@ -307,4 +313,89 @@ func TestGenerateBodyValidation(t *testing.T) {
 			}
 		}
 	}
+}
+
+// TestThrottleKeying pins the throttle's security properties: the
+// bucket follows the remote address (a rotating spoofed
+// X-Forwarded-For from an untrusted peer never resets it) and the
+// resolved account (the id and the slug spellings share one bucket).
+func TestThrottleKeying(t *testing.T) {
+	t.Parallel()
+
+	handler, id, _ := pipeSetup(t)
+	slugPath := "/v1/accounts/example-com/tokens"
+	idPath := "/v1/accounts/" + id + "/tokens"
+
+	// A rotating XFF must not reset the counter: five wrong passwords
+	// from one remote address (each with a different spoofed hop) and
+	// the sixth attempt is throttled.
+	for i := range 6 {
+		req := httptest.NewRequest(http.MethodPost, idPath,
+			strings.NewReader(`{"data":{"type":"tokens"}}`))
+		req.Header.Set("Accept", "application/vnd.api+json")
+		req.Header.Set("Authorization", "Basic "+basic("admin@example.com", "wrong"))
+		req.Header.Set("X-Forwarded-For", fmt.Sprintf("198.51.100.%d", i))
+
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		want := http.StatusUnauthorized
+		if i == 5 {
+			want = http.StatusTooManyRequests
+		}
+
+		if rec.Code != want {
+			t.Fatalf("xff rotation %d: status %d want %d", i, rec.Code, want)
+		}
+	}
+
+	// The slug spelling shares the id spelling's bucket: a fresh
+	// handler is not needed, the counter must already be full.
+	handler2, _, _ := pipeSetup(t)
+	req := httptest.NewRequest(http.MethodPost, slugPath,
+		strings.NewReader(`{"data":{"type":"tokens"}}`))
+	req.Header.Set("Accept", "application/vnd.api+json")
+	req.Header.Set("Authorization", "Basic "+basic("admin@example.com", "wrong"))
+
+	rec := httptest.NewRecorder()
+	handler2.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("slug sanity: status %d", rec.Code)
+	}
+
+	// Same account on the SAME handler through both spellings: three
+	// attempts each cross the limit at the sixth, proving one bucket.
+	handler3, id3, _ := pipeSetup(t)
+
+	for i := range 6 {
+		path := "/v1/accounts/" + id3 + "/tokens"
+		if i%2 == 0 {
+			path = "/v1/accounts/example-com/tokens"
+		}
+
+		mixedReq := httptest.NewRequest(http.MethodPost, path,
+			strings.NewReader(`{"data":{"type":"tokens"}}`))
+		mixedReq.Header.Set("Accept", "application/vnd.api+json")
+		mixedReq.Header.Set("Authorization", "Basic "+basic("admin@example.com", "wrong"))
+
+		mixedRec := httptest.NewRecorder()
+		handler3.ServeHTTP(mixedRec, mixedReq)
+
+		want := http.StatusUnauthorized
+		if i == 5 {
+			want = http.StatusTooManyRequests
+		}
+
+		if mixedRec.Code != want {
+			t.Fatalf("shared bucket %d (%s): status %d want %d", i, path, mixedRec.Code, want)
+		}
+	}
+}
+
+func (tokenStore) Do(ctx context.Context, fn func(context.Context) error) error { return fn(ctx) }
+func (userStore) Do(ctx context.Context, fn func(context.Context) error) error  { return fn(ctx) }
+
+func (pipeStore) VerifySecondFactor(context.Context, uuid.UUID, string, time.Time) (bool, error) {
+	return false, nil
 }

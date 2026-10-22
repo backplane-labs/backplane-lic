@@ -74,9 +74,7 @@ func (r EntitlementsRepo) DeleteEntitlement(ctx context.Context, accountID, id u
 	return n > 0, nil
 }
 
-// ListEntitlements pages the account's entitlements (user and license
-// bearers load the same page and pass the post-check only when every
-// loaded row is theirs).
+// ListEntitlements pages the account-wide entitlement scope.
 func (r EntitlementsRepo) ListEntitlements(ctx context.Context, accountID uuid.UUID, page Page) ([]domain.Entitlement, error) { //nolint:lll // the wire name is long
 	if page.Asc {
 		rows, err := r.q.ListEntitlementsAsc(ctx, db.ListEntitlementsAscParams{
@@ -102,6 +100,41 @@ func (r EntitlementsRepo) CountEntitlements(ctx context.Context, accountID uuid.
 	row, err := r.q.CountEntitlements(ctx, accountID)
 	if err != nil {
 		return 0, fmt.Errorf("postgres: count entitlements: %w", err)
+	}
+
+	return int(row.Count), nil
+}
+
+// ListEntitlementsByIDs pages only the authorized entitlement IDs.
+func (r EntitlementsRepo) ListEntitlementsByIDs(
+	ctx context.Context, accountID uuid.UUID, ids []uuid.UUID, page Page,
+) ([]domain.Entitlement, error) {
+	if page.Asc {
+		rows, err := r.q.ListEntitlementsByIdsAsc(ctx, db.ListEntitlementsByIdsAscParams{
+			AccountID: accountID, Ids: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
+		})
+
+		return entitlementList(rows, func(row db.ListEntitlementsByIdsAscRow) db.GetEntitlementByIDRow {
+			return db.GetEntitlementByIDRow(row)
+		}, err)
+	}
+
+	rows, err := r.q.ListEntitlementsByIdsDesc(ctx, db.ListEntitlementsByIdsDescParams{
+		AccountID: accountID, Ids: ids, CursorID: page.Cursor, Limit: page.Fetch, Offset: page.Offset,
+	})
+
+	return entitlementList(rows, func(row db.ListEntitlementsByIdsDescRow) db.GetEntitlementByIDRow {
+		return db.GetEntitlementByIDRow(row)
+	}, err)
+}
+
+// CountEntitlementsByIDs counts only the authorized entitlement IDs.
+func (r EntitlementsRepo) CountEntitlementsByIDs(
+	ctx context.Context, accountID uuid.UUID, ids []uuid.UUID,
+) (int, error) {
+	row, err := r.q.CountEntitlementsByIds(ctx, db.CountEntitlementsByIdsParams{AccountID: accountID, Ids: ids})
+	if err != nil {
+		return 0, fmt.Errorf("postgres: count scoped entitlements: %w", err)
 	}
 
 	return int(row.Count), nil
@@ -232,7 +265,8 @@ func (r EntitlementsRepo) DeletePolicyEntitlements(
 	return ids, nil
 }
 
-func entitlementList[T db.ListEntitlementsDescRow | db.ListEntitlementsAscRow](
+func entitlementList[T db.ListEntitlementsDescRow | db.ListEntitlementsAscRow |
+	db.ListEntitlementsByIdsDescRow | db.ListEntitlementsByIdsAscRow](
 	rows []T, conv func(T) db.GetEntitlementByIDRow, err error,
 ) ([]domain.Entitlement, error) {
 	if err != nil {

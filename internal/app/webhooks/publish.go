@@ -127,6 +127,22 @@ func (p *Publisher) payload(ctx context.Context, resource any) (string, error) {
 	var document any
 
 	switch v := resource.(type) {
+	case domain.PasswordReset:
+		active, err := p.store.UserHasActiveLicense(ctx, p.accountID, v.User.ID)
+		if err != nil {
+			return "", fmt.Errorf("user status: %w", err)
+		}
+
+		document = oas.UserDocument{
+			Data: render.User(p.accountID, v.User, v.User.Status(active, p.clock())),
+			Meta: oas.NewOptUserDocumentMeta(oas.UserDocumentMeta{PasswordResetToken: v.Token}),
+		}
+	case domain.SecondFactor:
+		factor := render.SecondFactor(p.accountID, v, "")
+		factor.Attributes.URI = oas.OptString{}
+		factor.Attributes.Secret = oas.OptString{}
+		document = oas.SecondFactorDocument{Data: factor}
+
 	case domain.User:
 		active, err := p.store.UserHasActiveLicense(ctx, p.accountID, v.ID)
 		if err != nil {
@@ -163,11 +179,21 @@ func (p *Publisher) productMayRead(
 	product := endpoint.ProductID.UUID
 
 	switch v := resource.(type) {
+	case domain.PasswordReset:
+		return v.User.Role == domain.RoleUser, nil
+	case domain.SecondFactor:
+		return false, nil
+	}
+
+	switch v := resource.(type) {
 	case domain.Token:
 		if v.BearerType == "User" {
 			licensed, err := p.store.UserLicensedToProduct(ctx, p.accountID, v.BearerID, product)
+			if err != nil {
+				return false, fmt.Errorf("token bearer licensed: %w", err)
+			}
 
-			return licensed, fmt.Errorf("token bearer licensed: %w", err)
+			return licensed, nil
 		}
 	case domain.PolicyEntitlement:
 		policy, err := p.store.PolicyByID(ctx, p.accountID, v.PolicyID)

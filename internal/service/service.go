@@ -26,8 +26,10 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/jobs"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
+	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
+	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
@@ -70,7 +72,12 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			return fmt.Errorf("bootstrap: %w", err)
 		}
 
-		late.set(Handler(store.Get(), spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit))
+		throttler := httpapi.Throttler(httpapi.NewMemoryThrottler())
+		if client, ok := cache.Get(); ok {
+			throttler = httpapi.NewValkeyThrottler(client.Client())
+		}
+
+		late.set(handler(store.Get(), throttler, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit))
 
 		return nil
 	})
@@ -135,18 +142,27 @@ func allowPrivate(cidrs []string) []*net.IPNet {
 func Handler(
 	store *postgres.Store, spec accounts.Spec, cfg HTTP, docsHost, revision string,
 ) http.Handler {
+	return handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision)
+}
+
+func handler(
+	store *postgres.Store, throttler httpapi.Throttler, spec accounts.Spec, cfg HTTP, docsHost, revision string,
+) http.Handler {
 	clock := time.Now
 	publisher := events.Publisher(webhooks.NewPublisher(store, spec.ID, rand.Reader, clock))
 	resolver := domain.Resolver(domain.NetResolver{})
 	allow := allowPrivate(cfg.WebhookAllowPrivate)
 
 	return httpapi.New(httpapi.Deps{
-		Webhooks: webhooks.New(store, resolver, allow, rand.Reader, clock),
-		Accounts: store.Accounts,
-		Authn:    authn.New(store, clock),
-		Users:    users.New(store, publisher, clock),
-		Tokens:   tokens.New(store, publisher, rand.Reader, clock),
-		Groups:   groups.New(store, publisher, clock),
+		SecondFactors: secondfactors.New(store, publisher, rand.Reader, clock),
+		Passwords:     passwords.New(store, publisher, rand.Reader, clock),
+		Throttle:      throttler,
+		Webhooks:      webhooks.New(store, resolver, allow, rand.Reader, clock),
+		Accounts:      store.Accounts,
+		Authn:         authn.New(store, clock),
+		Users:         users.New(store, publisher, clock),
+		Tokens:        tokens.New(store, publisher, rand.Reader, clock),
+		Groups:        groups.New(store, publisher, clock),
 		Products: products.New(store.Products, store.Tokens, store.Users,
 			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),

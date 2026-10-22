@@ -280,13 +280,13 @@ func (s Scenario) Index( //nolint:cyclop // one branch per rule
 
 // Show answers one policy by id.
 func (s Scenario) Show(ctx context.Context, account domain.Account, id uuid.UUID) (domain.Policy, error) {
-	if err := access.Require(ctx, "policy.read"); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
-	}
-
 	policy, err := s.load(ctx, account.ID, id)
 	if err != nil {
 		return domain.Policy{}, err
+	}
+
+	if err := access.Require(ctx, "policy.read"); err != nil {
+		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
 	if err := s.showCheck(ctx, account.ID, policy); err != nil {

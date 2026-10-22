@@ -94,6 +94,7 @@ func validateAttributes(attrs any, in *tokens.GenerateInput) error {
 		return err
 	}
 
+	_, in.ExpirySet = attrObj["expiry"]
 	if raw, present := attrObj["expiry"]; present && raw != nil {
 		s, err := str(raw, "/data/attributes/expiry")
 		if err != nil {
@@ -139,8 +140,7 @@ func validateRelationships(rels any, in *tokens.GenerateInput) error {
 	return nil
 }
 
-// validateMeta checks the body's meta: with second factors retired it
-// permits nothing.
+// validateMeta checks the top-level meta: only otp, required string.
 func validateMeta(body map[string]any) error {
 	raw, ok := body["meta"]
 	if !ok {
@@ -152,9 +152,20 @@ func validateMeta(body map[string]any) error {
 		return err
 	}
 
-	return unpermitted(obj, "/meta/")
+	if err := unpermitted(obj, "/meta/", "otp"); err != nil {
+		return err
+	}
+
+	if _, present := obj["otp"]; !present {
+		return apperr.BadRequestSource("is missing", "/meta/otp")
+	}
+
+	_, err = str(obj["otp"], "/meta/otp")
+
+	return err
 }
 
+// validateBearer checks relationships.bearer: a required data object of
 // {type, id} where type is one of the bearer resource types and id a
 // UUID.
 func validateBearer(raw any) (string, uuid.UUID, error) {

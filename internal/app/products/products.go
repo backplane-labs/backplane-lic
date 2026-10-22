@@ -181,8 +181,9 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 		return List{}, fmt.Errorf("products: index: %w", err)
 	}
 
-	// The scoped queries already satisfy the user/license post-checks.
-	if err := access.ProductIndex(principal, true); err != nil {
+	// The user scope may include a CLOSED product through an owned
+	// license, but the policy still denies a page containing that product.
+	if err := access.ProductIndex(principal, allOpenOrLicensed(items)); err != nil {
 		return List{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
@@ -206,15 +207,25 @@ func (s Scenario) Index(ctx context.Context, account domain.Account, params pagi
 	return out, nil
 }
 
-// Show answers one product by id or code alias, within scope.
-func (s Scenario) Show(ctx context.Context, account domain.Account, alias string) (domain.Product, error) {
-	if err := access.Require(ctx, "product.read"); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+func allOpenOrLicensed(items []domain.Product) bool {
+	for i := range items {
+		if !items[i].Open() && !items[i].Licensed() {
+			return false
+		}
 	}
 
+	return true
+}
+
+// Show answers one product by id or code alias, within scope.
+func (s Scenario) Show(ctx context.Context, account domain.Account, alias string) (domain.Product, error) {
 	product, err := s.loadScoped(ctx, account, alias)
 	if err != nil {
 		return domain.Product{}, err
+	}
+
+	if err := access.Require(ctx, "product.read"); err != nil {
+		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)

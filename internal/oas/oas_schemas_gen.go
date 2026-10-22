@@ -3102,6 +3102,52 @@ func (o OptToManyRelationshipMeta) Or(d ToManyRelationshipMeta) ToManyRelationsh
 	return d
 }
 
+// NewOptUserDocumentMeta returns new OptUserDocumentMeta with value set to v.
+func NewOptUserDocumentMeta(v UserDocumentMeta) OptUserDocumentMeta {
+	return OptUserDocumentMeta{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUserDocumentMeta is optional UserDocumentMeta.
+type OptUserDocumentMeta struct {
+	Value UserDocumentMeta
+	Set   bool
+}
+
+// IsSet returns true if OptUserDocumentMeta was set.
+func (o OptUserDocumentMeta) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUserDocumentMeta) Reset() {
+	var v UserDocumentMeta
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUserDocumentMeta) SetTo(v UserDocumentMeta) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUserDocumentMeta) Get() (v UserDocumentMeta, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUserDocumentMeta) Or(d UserDocumentMeta) UserDocumentMeta {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptUserLicenseResourceRelationships returns new OptUserLicenseResourceRelationships with value set to v.
 func NewOptUserLicenseResourceRelationships(v UserLicenseResourceRelationships) OptUserLicenseResourceRelationships {
 	return OptUserLicenseResourceRelationships{
@@ -4656,6 +4702,36 @@ func (s *RelationshipLinks) SetRelated(val NilString) {
 	s.Related = val
 }
 
+type ReplaceUserSecondFactorReqApplicationJSON map[string]jx.Raw
+
+func (s *ReplaceUserSecondFactorReqApplicationJSON) init() ReplaceUserSecondFactorReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ReplaceUserSecondFactorReqApplicationJSON) replaceUserSecondFactorReq() {}
+
+type ReplaceUserSecondFactorReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *ReplaceUserSecondFactorReqApplicationVndAPIJSON) init() ReplaceUserSecondFactorReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ReplaceUserSecondFactorReqApplicationVndAPIJSON) replaceUserSecondFactorReq() {}
+
+type ReplaceUserSecondFactorReqEmptyBody struct{}
+
+func (*ReplaceUserSecondFactorReqEmptyBody) replaceUserSecondFactorReq() {}
+
 // RequestPasswordResetNoContent is response for RequestPasswordReset operation.
 type RequestPasswordResetNoContent struct{}
 
@@ -5866,7 +5942,8 @@ func (s *UserCollectionDocument) SetLinks(val OptListLinks) {
 
 // Ref: #/components/schemas/UserDocument
 type UserDocument struct {
-	Data UserResource `json:"data"`
+	Data UserResource        `json:"data"`
+	Meta OptUserDocumentMeta `json:"meta"`
 }
 
 // GetData returns the value of Data.
@@ -5874,9 +5951,19 @@ func (s *UserDocument) GetData() UserResource {
 	return s.Data
 }
 
+// GetMeta returns the value of Meta.
+func (s *UserDocument) GetMeta() OptUserDocumentMeta {
+	return s.Meta
+}
+
 // SetData sets the value of Data.
 func (s *UserDocument) SetData(val UserResource) {
 	s.Data = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *UserDocument) SetMeta(val OptUserDocumentMeta) {
+	s.Meta = val
 }
 
 // UserDocumentHeaders wraps UserDocument with response headers.
@@ -5903,6 +5990,20 @@ func (s *UserDocumentHeaders) SetLocation(val OptString) {
 // SetResponse sets the value of Response.
 func (s *UserDocumentHeaders) SetResponse(val UserDocument) {
 	s.Response = val
+}
+
+type UserDocumentMeta struct {
+	PasswordResetToken string `json:"passwordResetToken"`
+}
+
+// GetPasswordResetToken returns the value of PasswordResetToken.
+func (s *UserDocumentMeta) GetPasswordResetToken() string {
+	return s.PasswordResetToken
+}
+
+// SetPasswordResetToken sets the value of PasswordResetToken.
+func (s *UserDocumentMeta) SetPasswordResetToken(val string) {
+	s.PasswordResetToken = val
 }
 
 // Ref: #/components/schemas/UserLicenseCollectionDocument

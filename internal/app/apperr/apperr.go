@@ -165,19 +165,6 @@ func Unprocessable(code, detail, pointer string) *T {
 	}
 }
 
-// NotImplemented is the 501 the retired end-user authentication
-// routes answer (email:password login, second factors, password
-// changes and resets are out of scope: bearers are admin, product and
-// license only).
-func NotImplemented() *T {
-	return &T{
-		Status: http.StatusNotImplemented,
-		Title:  "Not implemented",
-		Detail: "end-user authentication is not supported",
-		Code:   "NOT_IMPLEMENTED",
-	}
-}
-
 // Internal is the 500.
 func Internal() *T {
 	return &T{Status: http.StatusInternalServerError, Title: TitleInternalServerError, Detail: detailInternal}

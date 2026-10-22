@@ -11,6 +11,7 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/config"
 	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gopherex/xlog"
 
@@ -111,6 +112,20 @@ func serverUnderTest(t *testing.T) conformance.Target {
 	adminToken, err := testkit.SeedAdmin(ctx, store, spec.ID, conformance.AdminEmail)
 	if err != nil {
 		t.Fatalf("conformance: seed admin: %v", err)
+	}
+
+	admin, err := store.UserByEmail(ctx, spec.ID, conformance.AdminEmail)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	digest, err := bcrypt.GenerateFromPassword([]byte(conformance.AdminPass), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.UpdateUserPassword(ctx, spec.ID, admin.ID, string(digest)); err != nil {
+		t.Fatal(err)
 	}
 
 	handler := service.Handler(store, spec, service.HTTP{}, "keygen.test", "conformance")

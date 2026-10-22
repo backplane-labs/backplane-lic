@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
@@ -18,8 +19,10 @@ import (
 
 // fakeStore answers the authn port from maps.
 type fakeStore struct {
-	tokens map[string]domain.Token // digest → row
-	users  map[uuid.UUID]domain.User
+	tokens        map[string]domain.Token // digest → row
+	factorEnabled bool
+	codeValid     bool
+	users         map[uuid.UUID]domain.User
 }
 
 func (f fakeStore) TokenByDigest(
@@ -64,8 +67,8 @@ func (f fakeStore) LicenseByID(
 	return domain.LicenseAuth{}, authn.ErrNotFound
 }
 
-func (fakeStore) EnabledSecondFactorSecret(context.Context, uuid.UUID) (string, bool, error) {
-	return "", false, nil
+func (f fakeStore) EnabledSecondFactorSecret(context.Context, uuid.UUID) (string, bool, error) {
+	return "test-secret", f.factorEnabled, nil
 }
 
 // basicAuth base64-encodes a Basic payload.
@@ -210,7 +213,7 @@ func TestDemotedUserLosesAccess(t *testing.T) {
 	}
 
 	principal, result, err := scenario.Authenticate(
-		ctx, account, authn.Parse("Bearer "+raw, ""), authn.ModeToken,
+		ctx, account, authn.Parse("Bearer "+raw, ""), authn.ModeToken, nil,
 	)
 	if err != nil {
 		t.Fatalf("authenticate: %v", err)
@@ -260,7 +263,7 @@ func TestTokenShapeErrors(t *testing.T) {
 		{"Bearer admin-nonexistent", "TOKEN_INVALID"},
 	} {
 		_, _, err := scenario.Authenticate(
-			ctx, account, authn.Parse(tc.header, ""), authn.ModeToken,
+			ctx, account, authn.Parse(tc.header, ""), authn.ModeToken, nil,
 		)
 		if err == nil {
 			t.Errorf("%q: expected an error", tc.header)
@@ -272,5 +275,52 @@ func TestTokenShapeErrors(t *testing.T) {
 		if e.Code != tc.code || e.Status != 401 {
 			t.Errorf("%q: %v (code %q status %d)", tc.header, err, e.Code, e.Status)
 		}
+	}
+}
+
+func (f fakeStore) VerifySecondFactor(context.Context, uuid.UUID, string, time.Time) (bool, error) {
+	return f.codeValid, nil
+}
+
+func TestPasswordErrorOrder(t *testing.T) {
+	t.Parallel()
+
+	digest, err := bcrypt.GenerateFromPassword([]byte("correct-password"), bcrypt.DefaultCost)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	account := testAccount(t)
+	id := uuid.New()
+	emptyOTP := ""
+	suppliedOTP := "123456"
+
+	for _, tc := range []struct {
+		name, email, password, digest, code string
+		enabled, validOTP                   bool
+		otp                                 *string
+	}{
+		{name: "malformed password-flow email", email: "broken@", password: "wrong", code: "EMAIL_REQUIRED"},
+		{name: "unknown email", email: "unknown@example.com", password: "wrong", code: "EMAIL_INVALID"},
+		{name: "unsupported before required", email: "user@example.com", code: "PASSWORD_NOT_SUPPORTED"},
+		{name: "required before OTP", email: "user@example.com", digest: string(digest), enabled: true, code: "PASSWORD_REQUIRED"},
+		{name: "missing OTP before password", email: "user@example.com", password: "wrong", digest: string(digest), enabled: true, code: "OTP_REQUIRED"},
+		{name: "empty supplied OTP", email: "user@example.com", password: "wrong", digest: string(digest), enabled: true, otp: &emptyOTP, code: "OTP_INVALID"},
+		{name: "invalid OTP before password", email: "user@example.com", password: "wrong", digest: string(digest), enabled: true, otp: &suppliedOTP, code: "OTP_INVALID"},
+		{name: "password after OTP", email: "user@example.com", password: "wrong", digest: string(digest), enabled: true, validOTP: true, otp: &suppliedOTP, code: "PASSWORD_INVALID"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			store := fakeStore{factorEnabled: tc.enabled, codeValid: tc.validOTP, users: map[uuid.UUID]domain.User{
+				id: {ID: id, AccountID: account.ID, Email: "user@example.com", PasswordDigest: tc.digest, Role: domain.RoleUser},
+			}}
+			scenario := authn.New(store, time.Now)
+
+			_, _, err := scenario.Authenticate(t.Context(), account, authn.Parse("Basic "+basicAuth(tc.email, tc.password), ""), authn.ModePasswordOrToken, tc.otp)
+			if got := apperr.From(err).Code; got != tc.code {
+				t.Errorf("code %q, want %q; %v", got, tc.code, err)
+			}
+		})
 	}
 }
