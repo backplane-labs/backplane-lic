@@ -51,8 +51,7 @@ function Footer() {
   return <footer className="portal-footer"><div className="footer-inner"><span>© {new Date().getFullYear()} {brand.name}</span>{links.length > 0 && <nav aria-label={t('support')}>{links}</nav>}</div></footer>;
 }
 function AuthLayout() {
-  const { t } = useLocale();
-  return <div className="auth-page"><header className="auth-header"><Brand /><Preferences /></header><main className="auth-main"><aside className="auth-story"><div className="license-illustration" aria-hidden="true"><span /><span /><span /><i /></div><h2>{config.brand.tagline || t('welcome')}</h2><p>{t('welcomeDetail')}</p></aside><Outlet /></main><Footer /></div>;
+  return <div className="auth-page"><header className="auth-header"><Brand /><Preferences /></header><main className="auth-main"><Outlet /></main><Footer /></div>;
 }
 function RequireAuth() {
   const { t } = useLocale();

@@ -36,7 +36,7 @@ export function Login() {
       else setError(cause);
     } finally { setBusy(false); }
   }
-  return <div className="auth-form"><h1>{t('loginHeading')}</h1><p className="intro">{t('loginDetail')}</p>
+  return <div className="auth-form"><h1>{t('loginHeading')}</h1><p className="intro">{config.brand.tagline || t('loginDetail')}</p>
     <ErrorNotice error={error ?? (attempted ? null : auth.error)} />
     <form onSubmit={submit}>
       <fieldset disabled={busy}>
