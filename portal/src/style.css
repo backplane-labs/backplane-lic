@@ -248,3 +248,5 @@ dl dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
 .footer-inner a:hover { color: var(--foreground); text-decoration: underline; }
 .customer-page { min-height: 100dvh; display: flex; flex-direction: column; }
 .customer-page > main { flex: 1; width: 100%; }
+@media (max-width: 760px) { .footer-inner { padding: 18px 20px; flex-direction: column; } }
+@media (max-width: 480px) { .footer-inner { padding: 16px; } }
