@@ -69,7 +69,7 @@ export function ResetPassword() {
   const { t } = useLocale();
   const auth = useAuth();
   // Keep the reset credential in memory and remove it from the address bar/history.
-  const [params] = useState(() => resetParameters(window.location.search, window.location.hash));
+  const [params] = useState(() => resetParameters(window.location.hash));
   useEffect(() => { window.history.replaceState(window.history.state, '', window.location.pathname); }, []);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

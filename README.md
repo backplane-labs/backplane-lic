@@ -108,8 +108,8 @@ Password reset links must point to
 `/portal/reset#account=<account-id>&user=<user-id>&token=<reset-token>` (replace `/portal` if you
 configure a different base path). Parameters belong in the URL fragment so
 HTTP requests and access logs never contain the reset token. The page clears
-the fragment immediately after loading. Legacy query links also work. The
-reset form uses the public
+the fragment immediately after loading. Query-string reset credentials are
+not accepted. The reset form uses the public
 `POST /users/{user-id}/actions/reset-password` action with the reset token
 and new password. Configure your password-reset email sender to produce
 these links; serving the SPA doesn't add an email delivery endpoint.

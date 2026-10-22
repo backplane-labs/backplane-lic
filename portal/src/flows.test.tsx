@@ -125,8 +125,8 @@ describe('customer authentication', () => {
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined();
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ meta: { email: 'unknown@example.test' } });
   });
-  it.each(['/portal/reset?user=user-1&token=reset-secret', '/portal/reset#account=default&user=user-1&token=reset-secret'])('consumes reset credentials and removes them from %s', async link => {
-    window.history.replaceState({}, '', link);
+  it('consumes fragment credentials and immediately removes them from the URL', async () => {
+    window.history.replaceState({}, '', '/portal/reset#account=default&user=user-1&token=reset-secret');
     fetchMock.mockResolvedValue(json(user));
     route('/test', <ResetPassword />);
     expect(window.location.search).toBe('');
@@ -138,8 +138,14 @@ describe('customer authentication', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('/v1/accounts/default/users/user-1/actions/reset-password');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ meta: { passwordResetToken: 'reset-secret', newPassword: 'new-password' } });
   });
+  it('rejects reset credentials supplied in the query string', () => {
+    window.history.replaceState({}, '', '/portal/reset?account=default&user=user-1&token=reset-secret');
+    route('/test', <ResetPassword />);
+    expect(screen.getByRole('alert').textContent).toContain('incomplete');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
   it('rejects reset links with no user id instead of guessing an endpoint', () => {
-    window.history.replaceState({}, '', '/portal/reset?token=reset-secret');
+    window.history.replaceState({}, '', '/portal/reset#account=default&token=reset-secret');
     route('/test', <ResetPassword />);
     expect(screen.getByRole('alert').textContent).toContain('incomplete');
     expect(fetchMock).not.toHaveBeenCalled();

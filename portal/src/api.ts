@@ -100,10 +100,9 @@ export function secretSession(resource: Resource): Session {
   return { token: resource.attributes.token, tokenId: resource.id };
 }
 
-export function resetParameters(search: string, hash = '') {
-  // Delivery links use a fragment so the reset secret never reaches HTTP logs.
-  // Query links remain supported for existing vendor email templates.
-  const params = new URLSearchParams(hash ? hash.replace(/^#/, '') : search);
+export function resetParameters(hash: string) {
+  // Accept only fragments: reset secrets must never be sent in HTTP URLs or logs.
+  const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : '');
   return {
     account: params.get('account') ?? '',
     userId: params.get('user') ?? params.get('userId') ?? params.get('id') ?? '',

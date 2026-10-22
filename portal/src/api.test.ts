@@ -68,13 +68,13 @@ describe('credentials and reset links', () => {
     sessionStorage.setItem('lic.portal:default:/portal', '{'); expect(readSession()).toBeNull();
     sessionStorage.setItem('lic.portal:default:/portal', JSON.stringify({ token: 42 })); expect(readSession()).toBeNull();
   });
-  it('accepts vendor reset links with a user id and reset token', () => {
-    expect(resetParameters('?user=user-1&token=reset-secret')).toEqual({ account: '', userId: 'user-1', token: 'reset-secret' });
-    expect(resetParameters('?userId=user-1&passwordResetToken=reset-secret')).toEqual({ account: '', userId: 'user-1', token: 'reset-secret' });
-    expect(resetParameters('?token=only-token')).toEqual({ account: '', userId: '', token: 'only-token' });
+  it('accepts delivery fragments with account, user id, and reset token', () => {
+    expect(resetParameters('#account=default&user=user-1&token=reset-secret')).toEqual({ account: 'default', userId: 'user-1', token: 'reset-secret' });
+    expect(resetParameters('#token=only-token')).toEqual({ account: '', userId: '', token: 'only-token' });
   });
-  it('reads delivery fragment parameters ahead of legacy query parameters', () => {
-    expect(resetParameters('?user=wrong&token=wrong', '#account=default&user=user-1&token=reset-secret')).toEqual({ account: 'default', userId: 'user-1', token: 'reset-secret' });
+  it('rejects query-string reset credentials', () => {
+    expect(resetParameters('?account=default&user=user-1&token=reset-secret')).toEqual({ account: '', userId: '', token: '' });
+    expect(resetParameters('user=user-1&token=reset-secret')).toEqual({ account: '', userId: '', token: '' });
   });
   it('does not pretend a token was created if the secret is missing', () => {
     expect(() => secretSession({ id: 'id', type: 'tokens', attributes: {} })).toThrow('did not include');
