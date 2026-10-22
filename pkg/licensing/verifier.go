@@ -249,13 +249,17 @@ func (v Verifier) VerifyLicenseKey(scheme Scheme, key string) ([]byte, error) {
 		return nil, err
 	}
 
-	// v2 schemes and the prefix-based schemes sign "key/"+enc; v1 RSA
-	// schemes sign the raw enc.
+	dataset, err := decodeURLBase64(encDataset)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrLicenseKeyNotGenuine, err)
+	}
+
+	// v2 schemes sign "key/"+enc; v1 RSA schemes sign the decoded seed.
 	msg := []byte(keyPrefix + encDataset)
 	algorithm, prefixSigned := keySchemeAlgorithm(scheme)
 
 	if !prefixSigned {
-		msg = []byte(encDataset)
+		msg = dataset
 	}
 
 	sig, err := decodeURLBase64(encSig)
@@ -264,11 +268,6 @@ func (v Verifier) VerifyLicenseKey(scheme Scheme, key string) ([]byte, error) {
 	}
 
 	if err := v.verify(algorithm, msg, sig); err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrLicenseKeyNotGenuine, err)
-	}
-
-	dataset, err := decodeURLBase64(encDataset)
-	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrLicenseKeyNotGenuine, err)
 	}
 

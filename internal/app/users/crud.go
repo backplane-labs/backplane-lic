@@ -495,6 +495,10 @@ func validateUser(user domain.User) error {
 		return unprocessable("EMAIL_INVALID", "is invalid", "attributes/email")
 	}
 
+	if detail := domain.MetadataViolation(user.Metadata); detail != "" {
+		return unprocessable("METADATA_TOO_LONG", detail, "attributes/metadata")
+	}
+
 	return nil
 }
 

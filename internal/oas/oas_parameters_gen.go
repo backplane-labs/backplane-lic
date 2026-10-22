@@ -133,6 +133,246 @@ func decodeAttachGroupOwnersParams(args [2]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
+// AttachLicenseEntitlementsParams is parameters of attachLicenseEntitlements operation.
+type AttachLicenseEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackAttachLicenseEntitlementsParams(packed middleware.Parameters) (params AttachLicenseEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeAttachLicenseEntitlementsParams(args [2]string, argsEscaped bool, r *http.Request) (params AttachLicenseEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// AttachLicenseUsersParams is parameters of attachLicenseUsers operation.
+type AttachLicenseUsersParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackAttachLicenseUsersParams(packed middleware.Parameters) (params AttachLicenseUsersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeAttachLicenseUsersParams(args [2]string, argsEscaped bool, r *http.Request) (params AttachLicenseUsersParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // AttachPolicyEntitlementsParams is parameters of attachPolicyEntitlements operation.
 type AttachPolicyEntitlementsParams struct {
 	// Account id (UUID) or slug.
@@ -372,6 +612,366 @@ func decodeBanUserParams(args [2]string, argsEscaped bool, r *http.Request) (par
 	return params, nil
 }
 
+// CheckInLicenseParams is parameters of checkInLicense operation.
+type CheckInLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackCheckInLicenseParams(packed middleware.Parameters) (params CheckInLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCheckInLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params CheckInLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CheckoutLicenseParams is parameters of checkoutLicense operation.
+type CheckoutLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackCheckoutLicenseParams(packed middleware.Parameters) (params CheckoutLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCheckoutLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params CheckoutLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CheckoutLicenseFileParams is parameters of checkoutLicenseFile operation.
+type CheckoutLicenseFileParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackCheckoutLicenseFileParams(packed middleware.Parameters) (params CheckoutLicenseFileParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCheckoutLicenseFileParams(args [2]string, argsEscaped bool, r *http.Request) (params CheckoutLicenseFileParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // CreateEntitlementParams is parameters of createEntitlement operation.
 type CreateEntitlementParams struct {
 	// Account id (UUID) or slug.
@@ -563,6 +1163,192 @@ func decodeCreateKeyParams(args [1]string, argsEscaped bool, r *http.Request) (p
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateLicenseParams is parameters of createLicense operation.
+type CreateLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackCreateLicenseParams(packed middleware.Parameters) (params CreateLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateLicenseParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateLicenseTokenParams is parameters of createLicenseToken operation.
+type CreateLicenseTokenParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackCreateLicenseTokenParams(packed middleware.Parameters) (params CreateLicenseTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateLicenseTokenParams(args [2]string, argsEscaped bool, r *http.Request) (params CreateLicenseTokenParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
 			In:   "path",
 			Err:  err,
 		}
@@ -1185,6 +1971,126 @@ func decodeCreateWebhookEndpointParams(args [1]string, argsEscaped bool, r *http
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DecrementLicenseUsageParams is parameters of decrementLicenseUsage operation.
+type DecrementLicenseUsageParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackDecrementLicenseUsageParams(packed middleware.Parameters) (params DecrementLicenseUsageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDecrementLicenseUsageParams(args [2]string, argsEscaped bool, r *http.Request) (params DecrementLicenseUsageParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
 			In:   "path",
 			Err:  err,
 		}
@@ -1842,6 +2748,126 @@ func decodeDestroyKeyParams(args [2]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// DestroyLicenseParams is parameters of destroyLicense operation.
+type DestroyLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackDestroyLicenseParams(packed middleware.Parameters) (params DestroyLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDestroyLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params DestroyLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DestroyPolicyParams is parameters of destroyPolicy operation.
 type DestroyPolicyParams struct {
 	// Account id (UUID) or slug.
@@ -2439,6 +3465,246 @@ func decodeDetachGroupOwnersParams(args [2]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
+// DetachLicenseEntitlementsParams is parameters of detachLicenseEntitlements operation.
+type DetachLicenseEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackDetachLicenseEntitlementsParams(packed middleware.Parameters) (params DetachLicenseEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDetachLicenseEntitlementsParams(args [2]string, argsEscaped bool, r *http.Request) (params DetachLicenseEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DetachLicenseUsersParams is parameters of detachLicenseUsers operation.
+type DetachLicenseUsersParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackDetachLicenseUsersParams(packed middleware.Parameters) (params DetachLicenseUsersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDetachLicenseUsersParams(args [2]string, argsEscaped bool, r *http.Request) (params DetachLicenseUsersParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DetachPolicyEntitlementsParams is parameters of detachPolicyEntitlements operation.
 type DetachPolicyEntitlementsParams struct {
 	// Account id (UUID) or slug.
@@ -2691,6 +3957,126 @@ func decodeGetAccountParams(args [1]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
+// IncrementLicenseUsageParams is parameters of incrementLicenseUsage operation.
+type IncrementLicenseUsageParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackIncrementLicenseUsageParams(packed middleware.Parameters) (params IncrementLicenseUsageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIncrementLicenseUsageParams(args [2]string, argsEscaped bool, r *http.Request) (params IncrementLicenseUsageParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // IndexEntitlementsParams is parameters of indexEntitlements operation.
 type IndexEntitlementsParams struct {
 	// Account id (UUID) or slug.
@@ -2775,6 +4161,552 @@ func unpackIndexKeysParams(packed middleware.Parameters) (params IndexKeysParams
 }
 
 func decodeIndexKeysParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexKeysParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexLicenseEntitlementsParams is parameters of indexLicenseEntitlements operation.
+type IndexLicenseEntitlementsParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackIndexLicenseEntitlementsParams(packed middleware.Parameters) (params IndexLicenseEntitlementsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexLicenseEntitlementsParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexLicenseEntitlementsParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexLicenseMachinesParams is parameters of indexLicenseMachines operation.
+type IndexLicenseMachinesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackIndexLicenseMachinesParams(packed middleware.Parameters) (params IndexLicenseMachinesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexLicenseMachinesParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexLicenseMachinesParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexLicenseTokensParams is parameters of indexLicenseTokens operation.
+type IndexLicenseTokensParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackIndexLicenseTokensParams(packed middleware.Parameters) (params IndexLicenseTokensParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexLicenseTokensParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexLicenseTokensParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexLicenseUsersParams is parameters of indexLicenseUsers operation.
+type IndexLicenseUsersParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackIndexLicenseUsersParams(packed middleware.Parameters) (params IndexLicenseUsersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexLicenseUsersParams(args [2]string, argsEscaped bool, r *http.Request) (params IndexLicenseUsersParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// IndexLicensesParams is parameters of indexLicenses operation.
+type IndexLicensesParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackIndexLicensesParams(packed middleware.Parameters) (params IndexLicensesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeIndexLicensesParams(args [1]string, argsEscaped bool, r *http.Request) (params IndexLicensesParams, _ error) {
 	// Decode path: account.
 	if err := func() error {
 		param := args[0]
@@ -5568,6 +7500,126 @@ func decodeProfileParams(args [1]string, argsEscaped bool, r *http.Request) (par
 	return params, nil
 }
 
+// QuickValidateLicenseParams is parameters of quickValidateLicense operation.
+type QuickValidateLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackQuickValidateLicenseParams(packed middleware.Parameters) (params QuickValidateLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeQuickValidateLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params QuickValidateLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // RegenerateCurrentTokenParams is parameters of regenerateCurrentToken operation.
 type RegenerateCurrentTokenParams struct {
 	// Account id (UUID) or slug.
@@ -5746,6 +7798,246 @@ func decodeRegenerateTokenParams(args [2]string, argsEscaped bool, r *http.Reque
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "tokenId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ReinstateLicenseParams is parameters of reinstateLicense operation.
+type ReinstateLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackReinstateLicenseParams(packed middleware.Parameters) (params ReinstateLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeReinstateLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params ReinstateLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// RenewLicenseParams is parameters of renewLicense operation.
+type RenewLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackRenewLicenseParams(packed middleware.Parameters) (params RenewLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeRenewLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params RenewLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
 			In:   "path",
 			Err:  err,
 		}
@@ -5991,6 +8283,126 @@ func decodeRequestPasswordResetParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// ResetLicenseUsageParams is parameters of resetLicenseUsage operation.
+type ResetLicenseUsageParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackResetLicenseUsageParams(packed middleware.Parameters) (params ResetLicenseUsageParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeResetLicenseUsageParams(args [2]string, argsEscaped bool, r *http.Request) (params ResetLicenseUsageParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ResetUserPasswordParams is parameters of resetUserPassword operation.
 type ResetUserPasswordParams struct {
 	// Account id (UUID) or slug.
@@ -6222,6 +8634,126 @@ func decodeRetryWebhookEventParams(args [2]string, argsEscaped bool, r *http.Req
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "webhookEventId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// RevokeLicenseParams is parameters of revokeLicense operation.
+type RevokeLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackRevokeLicenseParams(packed middleware.Parameters) (params RevokeLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeRevokeLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params RevokeLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
 			In:   "path",
 			Err:  err,
 		}
@@ -7628,6 +10160,1422 @@ func decodeShowKeyProductParams(args [2]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseParams is parameters of showLicense operation.
+type ShowLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowLicenseParams(packed middleware.Parameters) (params ShowLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseEntitlementParams is parameters of showLicenseEntitlement operation.
+type ShowLicenseEntitlementParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+	// Entitlement id (UUID) or code.
+	EntitlementId string
+}
+
+func unpackShowLicenseEntitlementParams(packed middleware.Parameters) (params ShowLicenseEntitlementParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "entitlementId",
+			In:   "path",
+		}
+		params.EntitlementId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseEntitlementParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowLicenseEntitlementParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: entitlementId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "entitlementId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EntitlementId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "entitlementId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseGroupParams is parameters of showLicenseGroup operation.
+type ShowLicenseGroupParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowLicenseGroupParams(packed middleware.Parameters) (params ShowLicenseGroupParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseGroupParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowLicenseGroupParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseMachineParams is parameters of showLicenseMachine operation.
+type ShowLicenseMachineParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+	// Machine id (UUID) or fingerprint.
+	MachineId string
+}
+
+func unpackShowLicenseMachineParams(packed middleware.Parameters) (params ShowLicenseMachineParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "machineId",
+			In:   "path",
+		}
+		params.MachineId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseMachineParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowLicenseMachineParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: machineId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "machineId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.MachineId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "machineId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseOwnerParams is parameters of showLicenseOwner operation.
+type ShowLicenseOwnerParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowLicenseOwnerParams(packed middleware.Parameters) (params ShowLicenseOwnerParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseOwnerParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowLicenseOwnerParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicensePolicyParams is parameters of showLicensePolicy operation.
+type ShowLicensePolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowLicensePolicyParams(packed middleware.Parameters) (params ShowLicensePolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicensePolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowLicensePolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseProductParams is parameters of showLicenseProduct operation.
+type ShowLicenseProductParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowLicenseProductParams(packed middleware.Parameters) (params ShowLicenseProductParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseProductParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowLicenseProductParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseTokenParams is parameters of showLicenseToken operation.
+type ShowLicenseTokenParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+	// Token id (UUID).
+	TokenId string
+}
+
+func unpackShowLicenseTokenParams(packed middleware.Parameters) (params ShowLicenseTokenParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "tokenId",
+			In:   "path",
+		}
+		params.TokenId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseTokenParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowLicenseTokenParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: tokenId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "tokenId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.TokenId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "tokenId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseUserParams is parameters of showLicenseUser operation.
+type ShowLicenseUserParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+	// User id (UUID) or email.
+	UserId string
+}
+
+func unpackShowLicenseUserParams(packed middleware.Parameters) (params ShowLicenseUserParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "userId",
+			In:   "path",
+		}
+		params.UserId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseUserParams(args [3]string, argsEscaped bool, r *http.Request) (params ShowLicenseUserParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: userId.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "userId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.UserId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "userId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ShowLicenseUserAliasParams is parameters of showLicenseUserAlias operation.
+type ShowLicenseUserAliasParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackShowLicenseUserAliasParams(packed middleware.Parameters) (params ShowLicenseUserAliasParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeShowLicenseUserAliasParams(args [2]string, argsEscaped bool, r *http.Request) (params ShowLicenseUserAliasParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
 			In:   "path",
 			Err:  err,
 		}
@@ -10843,6 +14791,126 @@ func decodeShowWebhookEventParams(args [2]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
+// SuspendLicenseParams is parameters of suspendLicense operation.
+type SuspendLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackSuspendLicenseParams(packed middleware.Parameters) (params SuspendLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeSuspendLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params SuspendLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UnbanUserParams is parameters of unbanUser operation.
 type UnbanUserParams struct {
 	// Account id (UUID) or slug.
@@ -11314,6 +15382,606 @@ func decodeUpdateKeyParams(args [2]string, argsEscaped bool, r *http.Request) (p
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "keyId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateLicenseParams is parameters of updateLicense operation.
+type UpdateLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackUpdateLicenseParams(packed middleware.Parameters) (params UpdateLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateLicenseGroupParams is parameters of updateLicenseGroup operation.
+type UpdateLicenseGroupParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackUpdateLicenseGroupParams(packed middleware.Parameters) (params UpdateLicenseGroupParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateLicenseGroupParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateLicenseGroupParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateLicenseOwnerParams is parameters of updateLicenseOwner operation.
+type UpdateLicenseOwnerParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackUpdateLicenseOwnerParams(packed middleware.Parameters) (params UpdateLicenseOwnerParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateLicenseOwnerParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateLicenseOwnerParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateLicensePolicyParams is parameters of updateLicensePolicy operation.
+type UpdateLicensePolicyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackUpdateLicensePolicyParams(packed middleware.Parameters) (params UpdateLicensePolicyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateLicensePolicyParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateLicensePolicyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateLicenseUserAliasParams is parameters of updateLicenseUserAlias operation.
+type UpdateLicenseUserAliasParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackUpdateLicenseUserAliasParams(packed middleware.Parameters) (params UpdateLicenseUserAliasParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateLicenseUserAliasParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateLicenseUserAliasParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
 			In:   "path",
 			Err:  err,
 		}
@@ -12202,6 +16870,192 @@ func decodeUpdateWebhookEndpointParams(args [2]string, argsEscaped bool, r *http
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "webhookEndpointId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ValidateLicenseParams is parameters of validateLicense operation.
+type ValidateLicenseParams struct {
+	// Account id (UUID) or slug.
+	Account string
+	// License id (UUID) or key.
+	LicenseId string
+}
+
+func unpackValidateLicenseParams(packed middleware.Parameters) (params ValidateLicenseParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "licenseId",
+			In:   "path",
+		}
+		params.LicenseId = packed[key].(string)
+	}
+	return params
+}
+
+func decodeValidateLicenseParams(args [2]string, argsEscaped bool, r *http.Request) (params ValidateLicenseParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: licenseId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "licenseId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.LicenseId = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "licenseId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ValidateLicenseKeyParams is parameters of validateLicenseKey operation.
+type ValidateLicenseKeyParams struct {
+	// Account id (UUID) or slug.
+	Account string
+}
+
+func unpackValidateLicenseKeyParams(packed middleware.Parameters) (params ValidateLicenseKeyParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "account",
+			In:   "path",
+		}
+		params.Account = packed[key].(string)
+	}
+	return params
+}
+
+func decodeValidateLicenseKeyParams(args [1]string, argsEscaped bool, r *http.Request) (params ValidateLicenseKeyParams, _ error) {
+	// Decode path: account.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "account",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.Account = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "account",
 			In:   "path",
 			Err:  err,
 		}

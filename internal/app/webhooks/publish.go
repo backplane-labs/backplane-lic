@@ -139,6 +139,12 @@ func (p *Publisher) payload(ctx context.Context, resource any) (string, error) {
 		}
 
 		document = oas.UserDocument{Data: render.User(p.accountID, v, v.Status(active, p.clock()))}
+	case domain.LicenseValidationEvent:
+		document = render.LicenseValidation(p.accountID, v)
+	case domain.License:
+		document = oas.LicenseDocument{
+			Data: oas.NilLicenseResource{Value: render.License(p.accountID, v, p.clock(), nil)},
+		}
 	default:
 		doc, err := render.PayloadDocument(p.accountID, resource)
 		if err != nil {
@@ -201,7 +207,7 @@ func (p *Publisher) productMayRead(
 
 // encode writes the document with its generated encoder (the stdlib
 // MarshalJSON of the oas wrappers cannot express an unset optional).
-func encode(document any, encoder *jx.Encoder) error {
+func encode(document any, encoder *jx.Encoder) error { //nolint:cyclop // one encoder per resource document
 	switch doc := document.(type) {
 	case oas.UserDocument:
 		doc.Encode(encoder)
@@ -222,6 +228,14 @@ func encode(document any, encoder *jx.Encoder) error {
 	case oas.KeyDocument:
 		doc.Encode(encoder)
 	case oas.TokenDocument:
+		doc.Encode(encoder)
+	case oas.LicenseValidateDocument:
+		doc.Encode(encoder)
+	case oas.LicenseDocument:
+		doc.Encode(encoder)
+	case oas.LicenseUserListDocument:
+		doc.Encode(encoder)
+	case oas.LicenseEntitlementListDocument:
 		doc.Encode(encoder)
 	default:
 		return fmt.Errorf("unsupported document %T: %w", document, ErrNoResource)

@@ -1,0 +1,828 @@
+# Licenses: CRUD with the full attribute surface, relationships
+# (machines, tokens, product, policy/group/owner + the v1.5 user alias,
+# users, entitlements), the actions (validate, validate-key, revoke,
+# renew, suspend, reinstate, check-in, usage counters, check-out) and
+# license files.
+paths:
+  /v1/accounts/{account}/licenses:
+    get:
+      operationId: indexLicenses
+      summary: List licenses
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: License collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createLicense
+      summary: Create a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: License document.
+          headers:
+            Location:
+              description: The new license's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}:
+    get:
+      operationId: showLicense
+      summary: Retrieve a license (by id or key)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateLicense
+      summary: Update a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: destroyLicense
+      summary: Delete a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/machines:
+    get:
+      operationId: indexLicenseMachines
+      summary: List a license's machines
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/machines/{machineId}:
+    get:
+      operationId: showLicenseMachine
+      summary: Retrieve one of a license's machines (by id or fingerprint)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/tokens:
+    get:
+      operationId: indexLicenseTokens
+      summary: List a license's tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: Token collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createLicenseToken
+      summary: Generate an activation token for a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Token document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/tokens/{tokenId}:
+    get:
+      operationId: showLicenseToken
+      summary: Retrieve one of a license's tokens
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+        - $ref: "#/components/parameters/TokenPath"
+      responses:
+        "200":
+          description: Token document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/TokenDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/product:
+    get:
+      operationId: showLicenseProduct
+      summary: Retrieve a license's product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/policy:
+    get:
+      operationId: showLicensePolicy
+      summary: Retrieve a license's policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: Policy document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/PolicyDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateLicensePolicy
+      summary: Transfer a license to a policy
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document (the response is the license, not the policy).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/group:
+    get:
+      operationId: showLicenseGroup
+      summary: Retrieve a license's group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateLicenseGroup
+      summary: Set a license's group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/owner:
+    get:
+      operationId: showLicenseOwner
+      summary: Retrieve a license's owner
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseOwnerDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateLicenseOwner
+      summary: Set a license's owner
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/user:
+    get:
+      operationId: showLicenseUserAlias
+      summary: Retrieve a license's owner (v1.5 alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseOwnerDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateLicenseUserAlias
+      summary: Set a license's owner (v1.5 alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/users:
+    get:
+      operationId: indexLicenseUsers
+      summary: List a license's users (owner and licensees)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: User collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/UserCollectionDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: attachLicenseUsers
+      summary: Attach users to a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License-user collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseUserListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: detachLicenseUsers
+      summary: Detach users from a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/users/{userId}:
+    get:
+      operationId: showLicenseUser
+      summary: Retrieve one of a license's users (by id or email)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+        - $ref: "#/components/parameters/UserPath"
+      responses:
+        "200":
+          description: User document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseOwnerDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/entitlements:
+    get:
+      operationId: indexLicenseEntitlements
+      summary: List a license's entitlements (policy and license attached)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: Entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: attachLicenseEntitlements
+      summary: Attach entitlements to a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License-entitlement collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseEntitlementListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: detachLicenseEntitlements
+      summary: Detach entitlements from a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/entitlements/{entitlementId}:
+    get:
+      operationId: showLicenseEntitlement
+      summary: Retrieve one of a license's entitlements
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+        - $ref: "#/components/parameters/EntitlementPath"
+      responses:
+        "200":
+          description: Entitlement document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/EntitlementDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/validate:
+    get:
+      operationId: quickValidateLicense
+      summary: Quickly validate a license (no scope checks)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document with validation meta.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseValidateDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: validateLicense
+      summary: Validate a license (with meta.scope)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document with validation meta.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseValidateDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/actions/validate-key:
+    post:
+      operationId: validateLicenseKey
+      summary: Validate a license by key (authentication optional)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document (or null) with validation meta.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseValidateDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/revoke:
+    delete:
+      operationId: revokeLicense
+      summary: Revoke a license (destroys it)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "204":
+          description: No content.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/renew:
+    post:
+      operationId: renewLicense
+      summary: Renew a license's expiry
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/suspend:
+    post:
+      operationId: suspendLicense
+      summary: Suspend a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/reinstate:
+    post:
+      operationId: reinstateLicense
+      summary: Reinstate a suspended license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/check-in:
+    post:
+      operationId: checkInLicense
+      summary: Check in a license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage:
+    post:
+      operationId: incrementLicenseUsage
+      summary: Increment a license's usage counter
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage:
+    post:
+      operationId: decrementLicenseUsage
+      summary: Decrement a license's usage counter
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage:
+    post:
+      operationId: resetLicenseUsage
+      summary: Reset a license's usage counter
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/licenses/{licenseId}/actions/check-out:
+    get:
+      operationId: checkoutLicenseFile
+      summary: Check out a license file (binary certificate)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      responses:
+        "200":
+          description: The raw license file certificate.
+          headers:
+            Content-Disposition:
+              description: attachment; filename="<license-id>.lic"
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: checkoutLicense
+      summary: Check out a license file (JSON:API document)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/LicensePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: License-file document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseFileDocument"
+        default:
+          $ref: "#/components/responses/Error"

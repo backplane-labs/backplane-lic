@@ -147,6 +147,25 @@ func NotFound(resource, id string) *T {
 	}
 }
 
+// ForbiddenIndex is the codeless indexed-pointer 403 of the detach
+// guards ("cannot detach user '<uuid>' (…)").
+func ForbiddenIndex(detail, pointer string) *T {
+	return &T{
+		Status: http.StatusForbidden, Title: TitleForbidden, Detail: detail,
+		Source: Source{Pointer: pointer},
+	}
+}
+
+// UnprocessableNoCode is the codeless 422 of the detach guards
+// ("cannot detach entitlement '<uuid>' (…)", title "Unprocessable
+// entity").
+func UnprocessableNoCode(detail, pointer string) *T {
+	return &T{
+		Status: http.StatusUnprocessableEntity, Title: TitleUnprocessable, Detail: detail,
+		Source: Source{Pointer: pointer},
+	}
+}
+
 // Conflict is a 409.
 func Conflict(detail string) *T {
 	return &T{Status: http.StatusConflict, Title: TitleConflict, Detail: detail}

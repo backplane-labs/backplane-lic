@@ -33,6 +33,18 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/groups/{groupId}/owners
 	AttachGroupOwners(ctx context.Context, request AttachGroupOwnersReq, params AttachGroupOwnersParams) (*GroupOwnerCollectionDocument, error)
+	// AttachLicenseEntitlements invokes attachLicenseEntitlements operation.
+	//
+	// Attach entitlements to a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/entitlements
+	AttachLicenseEntitlements(ctx context.Context, request AttachLicenseEntitlementsReq, params AttachLicenseEntitlementsParams) (*LicenseEntitlementListDocument, error)
+	// AttachLicenseUsers invokes attachLicenseUsers operation.
+	//
+	// Attach users to a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/users
+	AttachLicenseUsers(ctx context.Context, request AttachLicenseUsersReq, params AttachLicenseUsersParams) (*LicenseUserListDocument, error)
 	// AttachPolicyEntitlements invokes attachPolicyEntitlements operation.
 	//
 	// Attach entitlements to a policy.
@@ -45,6 +57,24 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/ban
 	BanUser(ctx context.Context, params BanUserParams) (*UserDocument, error)
+	// CheckInLicense invokes checkInLicense operation.
+	//
+	// Check in a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-in
+	CheckInLicense(ctx context.Context, params CheckInLicenseParams) (*LicenseDocument, error)
+	// CheckoutLicense invokes checkoutLicense operation.
+	//
+	// Check out a license file (JSON:API document).
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+	CheckoutLicense(ctx context.Context, request CheckoutLicenseReq, params CheckoutLicenseParams) (*LicenseFileDocument, error)
+	// CheckoutLicenseFile invokes checkoutLicenseFile operation.
+	//
+	// Check out a license file (binary certificate).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+	CheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (*CheckoutLicenseFileOKHeaders, error)
 	// CreateEntitlement invokes createEntitlement operation.
 	//
 	// Create an entitlement.
@@ -63,6 +93,18 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/keys
 	CreateKey(ctx context.Context, request CreateKeyReq, params CreateKeyParams) (*KeyDocumentHeaders, error)
+	// CreateLicense invokes createLicense operation.
+	//
+	// Create a license.
+	//
+	// POST /v1/accounts/{account}/licenses
+	CreateLicense(ctx context.Context, request CreateLicenseReq, params CreateLicenseParams) (*LicenseDocumentHeaders, error)
+	// CreateLicenseToken invokes createLicenseToken operation.
+	//
+	// Generate an activation token for a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/tokens
+	CreateLicenseToken(ctx context.Context, request CreateLicenseTokenReq, params CreateLicenseTokenParams) (*TokenDocument, error)
 	// CreatePolicy invokes createPolicy operation.
 	//
 	// Create a policy.
@@ -106,6 +148,12 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/webhook-endpoints
 	CreateWebhookEndpoint(ctx context.Context, request CreateWebhookEndpointReq, params CreateWebhookEndpointParams) (*WebhookEndpointDocumentHeaders, error)
+	// DecrementLicenseUsage invokes decrementLicenseUsage operation.
+	//
+	// Decrement a license's usage counter.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage
+	DecrementLicenseUsage(ctx context.Context, request DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (*LicenseDocument, error)
 	// DeleteGroup invokes deleteGroup operation.
 	//
 	// Delete a group (members keep existing, group nulled).
@@ -136,6 +184,12 @@ type Invoker interface {
 	//
 	// DELETE /v1/accounts/{account}/keys/{keyId}
 	DestroyKey(ctx context.Context, params DestroyKeyParams) error
+	// DestroyLicense invokes destroyLicense operation.
+	//
+	// Delete a license.
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}
+	DestroyLicense(ctx context.Context, params DestroyLicenseParams) error
 	// DestroyPolicy invokes destroyPolicy operation.
 	//
 	// Delete a policy.
@@ -166,6 +220,18 @@ type Invoker interface {
 	//
 	// DELETE /v1/accounts/{account}/groups/{groupId}/owners
 	DetachGroupOwners(ctx context.Context, request DetachGroupOwnersReq, params DetachGroupOwnersParams) error
+	// DetachLicenseEntitlements invokes detachLicenseEntitlements operation.
+	//
+	// Detach entitlements from a license.
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}/entitlements
+	DetachLicenseEntitlements(ctx context.Context, request DetachLicenseEntitlementsReq, params DetachLicenseEntitlementsParams) error
+	// DetachLicenseUsers invokes detachLicenseUsers operation.
+	//
+	// Detach users from a license.
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}/users
+	DetachLicenseUsers(ctx context.Context, request DetachLicenseUsersReq, params DetachLicenseUsersParams) error
 	// DetachPolicyEntitlements invokes detachPolicyEntitlements operation.
 	//
 	// Detach entitlements from a policy.
@@ -191,6 +257,12 @@ type Invoker interface {
 	//
 	// GET /v1/health
 	Health(ctx context.Context) error
+	// IncrementLicenseUsage invokes incrementLicenseUsage operation.
+	//
+	// Increment a license's usage counter.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
+	IncrementLicenseUsage(ctx context.Context, request IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (*LicenseDocument, error)
 	// IndexEntitlements invokes indexEntitlements operation.
 	//
 	// List entitlements.
@@ -203,6 +275,36 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/keys
 	IndexKeys(ctx context.Context, params IndexKeysParams) (*KeyListDocument, error)
+	// IndexLicenseEntitlements invokes indexLicenseEntitlements operation.
+	//
+	// List a license's entitlements (policy and license attached).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements
+	IndexLicenseEntitlements(ctx context.Context, params IndexLicenseEntitlementsParams) (*EntitlementListDocument, error)
+	// IndexLicenseMachines invokes indexLicenseMachines operation.
+	//
+	// List a license's machines.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/machines
+	IndexLicenseMachines(ctx context.Context, params IndexLicenseMachinesParams) (*MachineListDocument, error)
+	// IndexLicenseTokens invokes indexLicenseTokens operation.
+	//
+	// List a license's tokens.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/tokens
+	IndexLicenseTokens(ctx context.Context, params IndexLicenseTokensParams) (*TokenCollectionDocument, error)
+	// IndexLicenseUsers invokes indexLicenseUsers operation.
+	//
+	// List a license's users (owner and licensees).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/users
+	IndexLicenseUsers(ctx context.Context, params IndexLicenseUsersParams) (*UserCollectionDocument, error)
+	// IndexLicenses invokes indexLicenses operation.
+	//
+	// List licenses.
+	//
+	// GET /v1/accounts/{account}/licenses
+	IndexLicenses(ctx context.Context, params IndexLicensesParams) (*LicenseListDocument, error)
 	// IndexPolicies invokes indexPolicies operation.
 	//
 	// List policies.
@@ -220,7 +322,7 @@ type Invoker interface {
 	// List a policy's licenses.
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/licenses
-	IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseStubListDocument, error)
+	IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseListDocument, error)
 	// IndexPolicyPool invokes indexPolicyPool operation.
 	//
 	// List a policy's key pool.
@@ -232,7 +334,7 @@ type Invoker interface {
 	// List a product's licenses.
 	//
 	// GET /v1/accounts/{account}/products/{productId}/licenses
-	IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseStubListDocument, error)
+	IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseListDocument, error)
 	// IndexProductMachines invokes indexProductMachines operation.
 	//
 	// List a product's machines.
@@ -268,7 +370,7 @@ type Invoker interface {
 	// List a group's licenses.
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/licenses
-	ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*UserLicenseCollectionDocument, error)
+	ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*LicenseListDocument, error)
 	// ListGroupMachines invokes listGroupMachines operation.
 	//
 	// List a group's machines.
@@ -304,7 +406,7 @@ type Invoker interface {
 	// List a user's licenses.
 	//
 	// GET /v1/accounts/{account}/users/{userId}/licenses
-	ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*UserLicenseCollectionDocument, error)
+	ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*LicenseListDocument, error)
 	// ListUserMachines invokes listUserMachines operation.
 	//
 	// List a user's machines.
@@ -373,6 +475,12 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/profile
 	Profile(ctx context.Context, params ProfileParams) (*ProfileDocument, error)
+	// QuickValidateLicense invokes quickValidateLicense operation.
+	//
+	// Quickly validate a license (no scope checks).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+	QuickValidateLicense(ctx context.Context, params QuickValidateLicenseParams) (*LicenseValidateDocument, error)
 	// RegenerateCurrentToken invokes regenerateCurrentToken operation.
 	//
 	// 404 unless the request itself is token-authenticated.
@@ -385,6 +493,18 @@ type Invoker interface {
 	//
 	// PUT /v1/accounts/{account}/tokens/{tokenId}
 	RegenerateToken(ctx context.Context, params RegenerateTokenParams) (*TokenDocument, error)
+	// ReinstateLicense invokes reinstateLicense operation.
+	//
+	// Reinstate a suspended license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reinstate
+	ReinstateLicense(ctx context.Context, params ReinstateLicenseParams) (*LicenseDocument, error)
+	// RenewLicense invokes renewLicense operation.
+	//
+	// Renew a license's expiry.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/renew
+	RenewLicense(ctx context.Context, params RenewLicenseParams) (*LicenseDocument, error)
 	// ReplaceUserSecondFactor invokes replaceUserSecondFactor operation.
 	//
 	// Enable or disable a second factor (requires meta.otp).
@@ -397,6 +517,12 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/passwords
 	RequestPasswordReset(ctx context.Context, request RequestPasswordResetReq, params RequestPasswordResetParams) error
+	// ResetLicenseUsage invokes resetLicenseUsage operation.
+	//
+	// Reset a license's usage counter.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
+	ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (*LicenseDocument, error)
 	// ResetUserPassword invokes resetUserPassword operation.
 	//
 	// Reset a user's password with a reset token.
@@ -410,6 +536,12 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/webhook-events/{webhookEventId}/actions/retry
 	RetryWebhookEvent(ctx context.Context, request RetryWebhookEventReq, params RetryWebhookEventParams) (*WebhookEventDocumentHeaders, error)
+	// RevokeLicense invokes revokeLicense operation.
+	//
+	// Revoke a license (destroys it).
+	//
+	// DELETE /v1/accounts/{account}/licenses/{licenseId}/actions/revoke
+	RevokeLicense(ctx context.Context, params RevokeLicenseParams) error
 	// RevokeToken invokes revokeToken operation.
 	//
 	// Revoke a token.
@@ -433,7 +565,7 @@ type Invoker interface {
 	// Show one of a group's licenses (id or key alias).
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}
-	ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*UserLicenseDocument, error)
+	ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*LicenseDocument, error)
 	// ShowGroupMachine invokes showGroupMachine operation.
 	//
 	// Show one of a group's machines (id or fingerprint alias).
@@ -470,6 +602,66 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/keys/{keyId}/product
 	ShowKeyProduct(ctx context.Context, params ShowKeyProductParams) (*ProductDocument, error)
+	// ShowLicense invokes showLicense operation.
+	//
+	// Retrieve a license (by id or key).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}
+	ShowLicense(ctx context.Context, params ShowLicenseParams) (*LicenseDocument, error)
+	// ShowLicenseEntitlement invokes showLicenseEntitlement operation.
+	//
+	// Retrieve one of a license's entitlements.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements/{entitlementId}
+	ShowLicenseEntitlement(ctx context.Context, params ShowLicenseEntitlementParams) (*EntitlementDocument, error)
+	// ShowLicenseGroup invokes showLicenseGroup operation.
+	//
+	// Retrieve a license's group.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/group
+	ShowLicenseGroup(ctx context.Context, params ShowLicenseGroupParams) (*GroupDocument, error)
+	// ShowLicenseMachine invokes showLicenseMachine operation.
+	//
+	// Retrieve one of a license's machines (by id or fingerprint).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/machines/{machineId}
+	ShowLicenseMachine(ctx context.Context, params ShowLicenseMachineParams) (*MachineDocument, error)
+	// ShowLicenseOwner invokes showLicenseOwner operation.
+	//
+	// Retrieve a license's owner.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/owner
+	ShowLicenseOwner(ctx context.Context, params ShowLicenseOwnerParams) (*LicenseOwnerDocument, error)
+	// ShowLicensePolicy invokes showLicensePolicy operation.
+	//
+	// Retrieve a license's policy.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/policy
+	ShowLicensePolicy(ctx context.Context, params ShowLicensePolicyParams) (*PolicyDocument, error)
+	// ShowLicenseProduct invokes showLicenseProduct operation.
+	//
+	// Retrieve a license's product.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/product
+	ShowLicenseProduct(ctx context.Context, params ShowLicenseProductParams) (*ProductDocument, error)
+	// ShowLicenseToken invokes showLicenseToken operation.
+	//
+	// Retrieve one of a license's tokens.
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/tokens/{tokenId}
+	ShowLicenseToken(ctx context.Context, params ShowLicenseTokenParams) (*TokenDocument, error)
+	// ShowLicenseUser invokes showLicenseUser operation.
+	//
+	// Retrieve one of a license's users (by id or email).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/users/{userId}
+	ShowLicenseUser(ctx context.Context, params ShowLicenseUserParams) (*LicenseOwnerDocument, error)
+	// ShowLicenseUserAlias invokes showLicenseUserAlias operation.
+	//
+	// Retrieve a license's owner (v1.5 alias).
+	//
+	// GET /v1/accounts/{account}/licenses/{licenseId}/user
+	ShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (*LicenseOwnerDocument, error)
 	// ShowPolicy invokes showPolicy operation.
 	//
 	// Retrieve a policy.
@@ -487,7 +679,7 @@ type Invoker interface {
 	// Retrieve one of a policy's licenses.
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
-	ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (ShowPolicyLicenseOK, error)
+	ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (*LicenseDocument, error)
 	// ShowPolicyPoolKey invokes showPolicyPoolKey operation.
 	//
 	// Retrieve one of a policy's pooled keys.
@@ -511,7 +703,7 @@ type Invoker interface {
 	// Retrieve one of a product's licenses.
 	//
 	// GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}
-	ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (ShowProductLicenseOK, error)
+	ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (*LicenseDocument, error)
 	// ShowProductMachine invokes showProductMachine operation.
 	//
 	// Retrieve one of a product's machines.
@@ -559,7 +751,7 @@ type Invoker interface {
 	// Show one of a user's licenses (id or key alias).
 	//
 	// GET /v1/accounts/{account}/users/{userId}/licenses/{licenseId}
-	ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*UserLicenseDocument, error)
+	ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*LicenseDocument, error)
 	// ShowUserMachine invokes showUserMachine operation.
 	//
 	// Show one of a user's machines (id or fingerprint alias).
@@ -596,6 +788,12 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/webhook-events/{webhookEventId}
 	ShowWebhookEvent(ctx context.Context, params ShowWebhookEventParams) (*WebhookEventDocument, error)
+	// SuspendLicense invokes suspendLicense operation.
+	//
+	// Suspend a license.
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/suspend
+	SuspendLicense(ctx context.Context, params SuspendLicenseParams) (*LicenseDocument, error)
 	// UnbanUser invokes unbanUser operation.
 	//
 	// Unban a user.
@@ -620,6 +818,36 @@ type Invoker interface {
 	//
 	// PATCH /v1/accounts/{account}/keys/{keyId}
 	UpdateKey(ctx context.Context, request UpdateKeyReq, params UpdateKeyParams) (*KeyDocument, error)
+	// UpdateLicense invokes updateLicense operation.
+	//
+	// Update a license.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}
+	UpdateLicense(ctx context.Context, request UpdateLicenseReq, params UpdateLicenseParams) (*LicenseDocument, error)
+	// UpdateLicenseGroup invokes updateLicenseGroup operation.
+	//
+	// Set a license's group.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/group
+	UpdateLicenseGroup(ctx context.Context, request UpdateLicenseGroupReq, params UpdateLicenseGroupParams) (*LicenseDocument, error)
+	// UpdateLicenseOwner invokes updateLicenseOwner operation.
+	//
+	// Set a license's owner.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/owner
+	UpdateLicenseOwner(ctx context.Context, request UpdateLicenseOwnerReq, params UpdateLicenseOwnerParams) (*LicenseDocument, error)
+	// UpdateLicensePolicy invokes updateLicensePolicy operation.
+	//
+	// Transfer a license to a policy.
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/policy
+	UpdateLicensePolicy(ctx context.Context, request UpdateLicensePolicyReq, params UpdateLicensePolicyParams) (*LicenseDocument, error)
+	// UpdateLicenseUserAlias invokes updateLicenseUserAlias operation.
+	//
+	// Set a license's owner (v1.5 alias).
+	//
+	// PATCH /v1/accounts/{account}/licenses/{licenseId}/user
+	UpdateLicenseUserAlias(ctx context.Context, request UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (*LicenseDocument, error)
 	// UpdatePolicy invokes updatePolicy operation.
 	//
 	// Scheme, encrypted and usePool are immutable; relationships are not accepted.
@@ -662,6 +890,18 @@ type Invoker interface {
 	//
 	// PATCH /v1/accounts/{account}/webhook-endpoints/{webhookEndpointId}
 	UpdateWebhookEndpoint(ctx context.Context, request UpdateWebhookEndpointReq, params UpdateWebhookEndpointParams) (*WebhookEndpointDocument, error)
+	// ValidateLicense invokes validateLicense operation.
+	//
+	// Validate a license (with meta.scope).
+	//
+	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+	ValidateLicense(ctx context.Context, request ValidateLicenseReq, params ValidateLicenseParams) (*LicenseValidateDocument, error)
+	// ValidateLicenseKey invokes validateLicenseKey operation.
+	//
+	// Validate a license by key (authentication optional).
+	//
+	// POST /v1/accounts/{account}/licenses/actions/validate-key
+	ValidateLicenseKey(ctx context.Context, request ValidateLicenseKeyReq, params ValidateLicenseKeyParams) (*LicenseValidateDocument, error)
 }
 
 // Client implements OAS client.
@@ -811,6 +1051,236 @@ func (c *Client) sendAttachGroupOwners(ctx context.Context, request AttachGroupO
 
 	stage = "DecodeResponse"
 	result, err := decodeAttachGroupOwnersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AttachLicenseEntitlements invokes attachLicenseEntitlements operation.
+//
+// Attach entitlements to a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/entitlements
+func (c *Client) AttachLicenseEntitlements(ctx context.Context, request AttachLicenseEntitlementsReq, params AttachLicenseEntitlementsParams) (*LicenseEntitlementListDocument, error) {
+	res, err := c.sendAttachLicenseEntitlements(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAttachLicenseEntitlements(ctx context.Context, request AttachLicenseEntitlementsReq, params AttachLicenseEntitlementsParams) (res *LicenseEntitlementListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("attachLicenseEntitlements"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/entitlements"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AttachLicenseEntitlementsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/entitlements"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAttachLicenseEntitlementsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAttachLicenseEntitlementsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AttachLicenseUsers invokes attachLicenseUsers operation.
+//
+// Attach users to a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/users
+func (c *Client) AttachLicenseUsers(ctx context.Context, request AttachLicenseUsersReq, params AttachLicenseUsersParams) (*LicenseUserListDocument, error) {
+	res, err := c.sendAttachLicenseUsers(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAttachLicenseUsers(ctx context.Context, request AttachLicenseUsersReq, params AttachLicenseUsersParams) (res *LicenseUserListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("attachLicenseUsers"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/users"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, AttachLicenseUsersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/users"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAttachLicenseUsersRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeAttachLicenseUsersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1038,6 +1508,345 @@ func (c *Client) sendBanUser(ctx context.Context, params BanUserParams) (res *Us
 
 	stage = "DecodeResponse"
 	result, err := decodeBanUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CheckInLicense invokes checkInLicense operation.
+//
+// Check in a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-in
+func (c *Client) CheckInLicense(ctx context.Context, params CheckInLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendCheckInLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendCheckInLicense(ctx context.Context, params CheckInLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkInLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/check-in"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckInLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/check-in"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckInLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CheckoutLicense invokes checkoutLicense operation.
+//
+// Check out a license file (JSON:API document).
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+func (c *Client) CheckoutLicense(ctx context.Context, request CheckoutLicenseReq, params CheckoutLicenseParams) (*LicenseFileDocument, error) {
+	res, err := c.sendCheckoutLicense(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCheckoutLicense(ctx context.Context, request CheckoutLicenseReq, params CheckoutLicenseParams) (res *LicenseFileDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkoutLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/check-out"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckoutLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/check-out"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCheckoutLicenseRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckoutLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CheckoutLicenseFile invokes checkoutLicenseFile operation.
+//
+// Check out a license file (binary certificate).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
+func (c *Client) CheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (*CheckoutLicenseFileOKHeaders, error) {
+	res, err := c.sendCheckoutLicenseFile(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendCheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (res *CheckoutLicenseFileOKHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkoutLicenseFile"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/check-out"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckoutLicenseFileOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/check-out"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckoutLicenseFileResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1326,6 +2135,217 @@ func (c *Client) sendCreateKey(ctx context.Context, request CreateKeyReq, params
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateKeyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateLicense invokes createLicense operation.
+//
+// Create a license.
+//
+// POST /v1/accounts/{account}/licenses
+func (c *Client) CreateLicense(ctx context.Context, request CreateLicenseReq, params CreateLicenseParams) (*LicenseDocumentHeaders, error) {
+	res, err := c.sendCreateLicense(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateLicense(ctx context.Context, request CreateLicenseReq, params CreateLicenseParams) (res *LicenseDocumentHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateLicenseRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateLicenseToken invokes createLicenseToken operation.
+//
+// Generate an activation token for a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/tokens
+func (c *Client) CreateLicenseToken(ctx context.Context, request CreateLicenseTokenReq, params CreateLicenseTokenParams) (*TokenDocument, error) {
+	res, err := c.sendCreateLicenseToken(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateLicenseToken(ctx context.Context, request CreateLicenseTokenReq, params CreateLicenseTokenParams) (res *TokenDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createLicenseToken"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/tokens"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateLicenseTokenOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/tokens"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateLicenseTokenRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateLicenseTokenResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2063,6 +3083,121 @@ func (c *Client) sendCreateWebhookEndpoint(ctx context.Context, request CreateWe
 	return result, nil
 }
 
+// DecrementLicenseUsage invokes decrementLicenseUsage operation.
+//
+// Decrement a license's usage counter.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage
+func (c *Client) DecrementLicenseUsage(ctx context.Context, request DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (*LicenseDocument, error) {
+	res, err := c.sendDecrementLicenseUsage(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendDecrementLicenseUsage(ctx context.Context, request DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("decrementLicenseUsage"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DecrementLicenseUsageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/decrement-usage"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDecrementLicenseUsageRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDecrementLicenseUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteGroup invokes deleteGroup operation.
 //
 // Delete a group (members keep existing, group nulled).
@@ -2640,6 +3775,117 @@ func (c *Client) sendDestroyKey(ctx context.Context, params DestroyKeyParams) (r
 	return result, nil
 }
 
+// DestroyLicense invokes destroyLicense operation.
+//
+// Delete a license.
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}
+func (c *Client) DestroyLicense(ctx context.Context, params DestroyLicenseParams) error {
+	_, err := c.sendDestroyLicense(ctx, params)
+	return err
+}
+
+func (c *Client) sendDestroyLicense(ctx context.Context, params DestroyLicenseParams) (res *DestroyLicenseNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("destroyLicense"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DestroyLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDestroyLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DestroyPolicy invokes destroyPolicy operation.
 //
 // Delete a policy.
@@ -3199,6 +4445,236 @@ func (c *Client) sendDetachGroupOwners(ctx context.Context, request DetachGroupO
 	return result, nil
 }
 
+// DetachLicenseEntitlements invokes detachLicenseEntitlements operation.
+//
+// Detach entitlements from a license.
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}/entitlements
+func (c *Client) DetachLicenseEntitlements(ctx context.Context, request DetachLicenseEntitlementsReq, params DetachLicenseEntitlementsParams) error {
+	_, err := c.sendDetachLicenseEntitlements(ctx, request, params)
+	return err
+}
+
+func (c *Client) sendDetachLicenseEntitlements(ctx context.Context, request DetachLicenseEntitlementsReq, params DetachLicenseEntitlementsParams) (res *DetachLicenseEntitlementsNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("detachLicenseEntitlements"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/entitlements"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DetachLicenseEntitlementsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/entitlements"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDetachLicenseEntitlementsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDetachLicenseEntitlementsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DetachLicenseUsers invokes detachLicenseUsers operation.
+//
+// Detach users from a license.
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}/users
+func (c *Client) DetachLicenseUsers(ctx context.Context, request DetachLicenseUsersReq, params DetachLicenseUsersParams) error {
+	_, err := c.sendDetachLicenseUsers(ctx, request, params)
+	return err
+}
+
+func (c *Client) sendDetachLicenseUsers(ctx context.Context, request DetachLicenseUsersReq, params DetachLicenseUsersParams) (res *DetachLicenseUsersNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("detachLicenseUsers"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/users"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DetachLicenseUsersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/users"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDetachLicenseUsersRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDetachLicenseUsersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DetachPolicyEntitlements invokes detachPolicyEntitlements operation.
 //
 // Detach entitlements from a policy.
@@ -3577,6 +5053,121 @@ func (c *Client) sendHealth(ctx context.Context) (res *HealthNoContent, err erro
 	return result, nil
 }
 
+// IncrementLicenseUsage invokes incrementLicenseUsage operation.
+//
+// Increment a license's usage counter.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
+func (c *Client) IncrementLicenseUsage(ctx context.Context, request IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (*LicenseDocument, error) {
+	res, err := c.sendIncrementLicenseUsage(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendIncrementLicenseUsage(ctx context.Context, request IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("incrementLicenseUsage"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IncrementLicenseUsageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/increment-usage"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeIncrementLicenseUsageRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIncrementLicenseUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // IndexEntitlements invokes indexEntitlements operation.
 //
 // List entitlements.
@@ -3756,6 +5347,547 @@ func (c *Client) sendIndexKeys(ctx context.Context, params IndexKeysParams) (res
 
 	stage = "DecodeResponse"
 	result, err := decodeIndexKeysResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexLicenseEntitlements invokes indexLicenseEntitlements operation.
+//
+// List a license's entitlements (policy and license attached).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements
+func (c *Client) IndexLicenseEntitlements(ctx context.Context, params IndexLicenseEntitlementsParams) (*EntitlementListDocument, error) {
+	res, err := c.sendIndexLicenseEntitlements(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexLicenseEntitlements(ctx context.Context, params IndexLicenseEntitlementsParams) (res *EntitlementListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexLicenseEntitlements"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/entitlements"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexLicenseEntitlementsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/entitlements"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexLicenseEntitlementsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexLicenseMachines invokes indexLicenseMachines operation.
+//
+// List a license's machines.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/machines
+func (c *Client) IndexLicenseMachines(ctx context.Context, params IndexLicenseMachinesParams) (*MachineListDocument, error) {
+	res, err := c.sendIndexLicenseMachines(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexLicenseMachines(ctx context.Context, params IndexLicenseMachinesParams) (res *MachineListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexLicenseMachines"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/machines"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexLicenseMachinesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/machines"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexLicenseMachinesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexLicenseTokens invokes indexLicenseTokens operation.
+//
+// List a license's tokens.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/tokens
+func (c *Client) IndexLicenseTokens(ctx context.Context, params IndexLicenseTokensParams) (*TokenCollectionDocument, error) {
+	res, err := c.sendIndexLicenseTokens(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexLicenseTokens(ctx context.Context, params IndexLicenseTokensParams) (res *TokenCollectionDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexLicenseTokens"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/tokens"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexLicenseTokensOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/tokens"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexLicenseTokensResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexLicenseUsers invokes indexLicenseUsers operation.
+//
+// List a license's users (owner and licensees).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/users
+func (c *Client) IndexLicenseUsers(ctx context.Context, params IndexLicenseUsersParams) (*UserCollectionDocument, error) {
+	res, err := c.sendIndexLicenseUsers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexLicenseUsers(ctx context.Context, params IndexLicenseUsersParams) (res *UserCollectionDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexLicenseUsers"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/users"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexLicenseUsersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/users"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexLicenseUsersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexLicenses invokes indexLicenses operation.
+//
+// List licenses.
+//
+// GET /v1/accounts/{account}/licenses
+func (c *Client) IndexLicenses(ctx context.Context, params IndexLicensesParams) (*LicenseListDocument, error) {
+	res, err := c.sendIndexLicenses(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexLicenses(ctx context.Context, params IndexLicensesParams) (res *LicenseListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexLicenses"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexLicensesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexLicensesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3973,12 +6105,12 @@ func (c *Client) sendIndexPolicyEntitlements(ctx context.Context, params IndexPo
 // List a policy's licenses.
 //
 // GET /v1/accounts/{account}/policies/{policyId}/licenses
-func (c *Client) IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseStubListDocument, error) {
+func (c *Client) IndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (*LicenseListDocument, error) {
 	res, err := c.sendIndexPolicyLicenses(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendIndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (res *LicenseStubListDocument, err error) {
+func (c *Client) sendIndexPolicyLicenses(ctx context.Context, params IndexPolicyLicensesParams) (res *LicenseListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("indexPolicyLicenses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -4197,12 +6329,12 @@ func (c *Client) sendIndexPolicyPool(ctx context.Context, params IndexPolicyPool
 // List a product's licenses.
 //
 // GET /v1/accounts/{account}/products/{productId}/licenses
-func (c *Client) IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseStubListDocument, error) {
+func (c *Client) IndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (*LicenseListDocument, error) {
 	res, err := c.sendIndexProductLicenses(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendIndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (res *LicenseStubListDocument, err error) {
+func (c *Client) sendIndexProductLicenses(ctx context.Context, params IndexProductLicensesParams) (res *LicenseListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("indexProductLicenses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -4850,12 +6982,12 @@ func (c *Client) sendIndexProducts(ctx context.Context, params IndexProductsPara
 // List a group's licenses.
 //
 // GET /v1/accounts/{account}/groups/{groupId}/licenses
-func (c *Client) ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*UserLicenseCollectionDocument, error) {
+func (c *Client) ListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (*LicenseListDocument, error) {
 	res, err := c.sendListGroupLicenses(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (res *UserLicenseCollectionDocument, err error) {
+func (c *Client) sendListGroupLicenses(ctx context.Context, params ListGroupLicensesParams) (res *LicenseListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listGroupLicenses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -5484,12 +7616,12 @@ func (c *Client) sendListTokens(ctx context.Context, params ListTokensParams) (r
 // List a user's licenses.
 //
 // GET /v1/accounts/{account}/users/{userId}/licenses
-func (c *Client) ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*UserLicenseCollectionDocument, error) {
+func (c *Client) ListUserLicenses(ctx context.Context, params ListUserLicensesParams) (*LicenseListDocument, error) {
 	res, err := c.sendListUserLicenses(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListUserLicenses(ctx context.Context, params ListUserLicensesParams) (res *UserLicenseCollectionDocument, err error) {
+func (c *Client) sendListUserLicenses(ctx context.Context, params ListUserLicensesParams) (res *LicenseListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listUserLicenses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -6692,6 +8824,118 @@ func (c *Client) sendProfile(ctx context.Context, params ProfileParams) (res *Pr
 	return result, nil
 }
 
+// QuickValidateLicense invokes quickValidateLicense operation.
+//
+// Quickly validate a license (no scope checks).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+func (c *Client) QuickValidateLicense(ctx context.Context, params QuickValidateLicenseParams) (*LicenseValidateDocument, error) {
+	res, err := c.sendQuickValidateLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendQuickValidateLicense(ctx context.Context, params QuickValidateLicenseParams) (res *LicenseValidateDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("quickValidateLicense"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/validate"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, QuickValidateLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/validate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeQuickValidateLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RegenerateCurrentToken invokes regenerateCurrentToken operation.
 //
 // 404 unless the request itself is token-authenticated.
@@ -6889,6 +9133,230 @@ func (c *Client) sendRegenerateToken(ctx context.Context, params RegenerateToken
 
 	stage = "DecodeResponse"
 	result, err := decodeRegenerateTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ReinstateLicense invokes reinstateLicense operation.
+//
+// Reinstate a suspended license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reinstate
+func (c *Client) ReinstateLicense(ctx context.Context, params ReinstateLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendReinstateLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendReinstateLicense(ctx context.Context, params ReinstateLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("reinstateLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/reinstate"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ReinstateLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/reinstate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeReinstateLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RenewLicense invokes renewLicense operation.
+//
+// Renew a license's expiry.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/renew
+func (c *Client) RenewLicense(ctx context.Context, params RenewLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendRenewLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRenewLicense(ctx context.Context, params RenewLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("renewLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/renew"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RenewLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/renew"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeRenewLicenseResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7125,6 +9593,118 @@ func (c *Client) sendRequestPasswordReset(ctx context.Context, request RequestPa
 	return result, nil
 }
 
+// ResetLicenseUsage invokes resetLicenseUsage operation.
+//
+// Reset a license's usage counter.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
+func (c *Client) ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (*LicenseDocument, error) {
+	res, err := c.sendResetLicenseUsage(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("resetLicenseUsage"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ResetLicenseUsageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/reset-usage"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeResetLicenseUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ResetUserPassword invokes resetUserPassword operation.
 //
 // Reset a user's password with a reset token.
@@ -7349,6 +9929,118 @@ func (c *Client) sendRetryWebhookEvent(ctx context.Context, request RetryWebhook
 
 	stage = "DecodeResponse"
 	result, err := decodeRetryWebhookEventResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RevokeLicense invokes revokeLicense operation.
+//
+// Revoke a license (destroys it).
+//
+// DELETE /v1/accounts/{account}/licenses/{licenseId}/actions/revoke
+func (c *Client) RevokeLicense(ctx context.Context, params RevokeLicenseParams) error {
+	_, err := c.sendRevokeLicense(ctx, params)
+	return err
+}
+
+func (c *Client) sendRevokeLicense(ctx context.Context, params RevokeLicenseParams) (res *RevokeLicenseNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("revokeLicense"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/revoke"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RevokeLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/revoke"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeRevokeLicenseResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7694,12 +10386,12 @@ func (c *Client) sendShowGroup(ctx context.Context, params ShowGroupParams) (res
 // Show one of a group's licenses (id or key alias).
 //
 // GET /v1/accounts/{account}/groups/{groupId}/licenses/{licenseId}
-func (c *Client) ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*UserLicenseDocument, error) {
+func (c *Client) ShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (*LicenseDocument, error) {
 	res, err := c.sendShowGroupLicense(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (res *UserLicenseDocument, err error) {
+func (c *Client) sendShowGroupLicense(ctx context.Context, params ShowGroupLicenseParams) (res *LicenseDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("showGroupLicense"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -8544,6 +11236,1197 @@ func (c *Client) sendShowKeyProduct(ctx context.Context, params ShowKeyProductPa
 	return result, nil
 }
 
+// ShowLicense invokes showLicense operation.
+//
+// Retrieve a license (by id or key).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}
+func (c *Client) ShowLicense(ctx context.Context, params ShowLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendShowLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicense(ctx context.Context, params ShowLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicense"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseEntitlement invokes showLicenseEntitlement operation.
+//
+// Retrieve one of a license's entitlements.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/entitlements/{entitlementId}
+func (c *Client) ShowLicenseEntitlement(ctx context.Context, params ShowLicenseEntitlementParams) (*EntitlementDocument, error) {
+	res, err := c.sendShowLicenseEntitlement(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseEntitlement(ctx context.Context, params ShowLicenseEntitlementParams) (res *EntitlementDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseEntitlement"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/entitlements/{entitlementId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseEntitlementOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/entitlements/"
+	{
+		// Encode "entitlementId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "entitlementId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.EntitlementId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseEntitlementResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseGroup invokes showLicenseGroup operation.
+//
+// Retrieve a license's group.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/group
+func (c *Client) ShowLicenseGroup(ctx context.Context, params ShowLicenseGroupParams) (*GroupDocument, error) {
+	res, err := c.sendShowLicenseGroup(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseGroup(ctx context.Context, params ShowLicenseGroupParams) (res *GroupDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseGroup"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/group"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseGroupOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/group"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseMachine invokes showLicenseMachine operation.
+//
+// Retrieve one of a license's machines (by id or fingerprint).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/machines/{machineId}
+func (c *Client) ShowLicenseMachine(ctx context.Context, params ShowLicenseMachineParams) (*MachineDocument, error) {
+	res, err := c.sendShowLicenseMachine(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseMachine(ctx context.Context, params ShowLicenseMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseMachine"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/machines/{machineId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseOwner invokes showLicenseOwner operation.
+//
+// Retrieve a license's owner.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/owner
+func (c *Client) ShowLicenseOwner(ctx context.Context, params ShowLicenseOwnerParams) (*LicenseOwnerDocument, error) {
+	res, err := c.sendShowLicenseOwner(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseOwner(ctx context.Context, params ShowLicenseOwnerParams) (res *LicenseOwnerDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseOwner"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/owner"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseOwnerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/owner"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseOwnerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicensePolicy invokes showLicensePolicy operation.
+//
+// Retrieve a license's policy.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/policy
+func (c *Client) ShowLicensePolicy(ctx context.Context, params ShowLicensePolicyParams) (*PolicyDocument, error) {
+	res, err := c.sendShowLicensePolicy(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicensePolicy(ctx context.Context, params ShowLicensePolicyParams) (res *PolicyDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicensePolicy"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/policy"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicensePolicyOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/policy"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicensePolicyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseProduct invokes showLicenseProduct operation.
+//
+// Retrieve a license's product.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/product
+func (c *Client) ShowLicenseProduct(ctx context.Context, params ShowLicenseProductParams) (*ProductDocument, error) {
+	res, err := c.sendShowLicenseProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseProduct(ctx context.Context, params ShowLicenseProductParams) (res *ProductDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseProduct"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/product"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseProductOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/product"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseToken invokes showLicenseToken operation.
+//
+// Retrieve one of a license's tokens.
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/tokens/{tokenId}
+func (c *Client) ShowLicenseToken(ctx context.Context, params ShowLicenseTokenParams) (*TokenDocument, error) {
+	res, err := c.sendShowLicenseToken(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseToken(ctx context.Context, params ShowLicenseTokenParams) (res *TokenDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseToken"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/tokens/{tokenId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseTokenOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/tokens/"
+	{
+		// Encode "tokenId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tokenId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TokenId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseTokenResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseUser invokes showLicenseUser operation.
+//
+// Retrieve one of a license's users (by id or email).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/users/{userId}
+func (c *Client) ShowLicenseUser(ctx context.Context, params ShowLicenseUserParams) (*LicenseOwnerDocument, error) {
+	res, err := c.sendShowLicenseUser(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseUser(ctx context.Context, params ShowLicenseUserParams) (res *LicenseOwnerDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseUser"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/users/{userId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseUserOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/users/"
+	{
+		// Encode "userId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "userId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.UserId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowLicenseUserAlias invokes showLicenseUserAlias operation.
+//
+// Retrieve a license's owner (v1.5 alias).
+//
+// GET /v1/accounts/{account}/licenses/{licenseId}/user
+func (c *Client) ShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (*LicenseOwnerDocument, error) {
+	res, err := c.sendShowLicenseUserAlias(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (res *LicenseOwnerDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showLicenseUserAlias"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/user"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowLicenseUserAliasOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/user"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowLicenseUserAliasResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ShowPolicy invokes showPolicy operation.
 //
 // Retrieve a policy.
@@ -8790,12 +12673,12 @@ func (c *Client) sendShowPolicyEntitlement(ctx context.Context, params ShowPolic
 // Retrieve one of a policy's licenses.
 //
 // GET /v1/accounts/{account}/policies/{policyId}/licenses/{licenseId}
-func (c *Client) ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (ShowPolicyLicenseOK, error) {
+func (c *Client) ShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (*LicenseDocument, error) {
 	res, err := c.sendShowPolicyLicense(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (res ShowPolicyLicenseOK, err error) {
+func (c *Client) sendShowPolicyLicense(ctx context.Context, params ShowPolicyLicenseParams) (res *LicenseDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("showPolicyLicense"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -9273,12 +13156,12 @@ func (c *Client) sendShowProduct(ctx context.Context, params ShowProductParams) 
 // Retrieve one of a product's licenses.
 //
 // GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}
-func (c *Client) ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (ShowProductLicenseOK, error) {
+func (c *Client) ShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (*LicenseDocument, error) {
 	res, err := c.sendShowProductLicense(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (res ShowProductLicenseOK, err error) {
+func (c *Client) sendShowProductLicense(ctx context.Context, params ShowProductLicenseParams) (res *LicenseDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("showProductLicense"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -10257,12 +14140,12 @@ func (c *Client) sendShowUserGroup(ctx context.Context, params ShowUserGroupPara
 // Show one of a user's licenses (id or key alias).
 //
 // GET /v1/accounts/{account}/users/{userId}/licenses/{licenseId}
-func (c *Client) ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*UserLicenseDocument, error) {
+func (c *Client) ShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (*LicenseDocument, error) {
 	res, err := c.sendShowUserLicense(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (res *UserLicenseDocument, err error) {
+func (c *Client) sendShowUserLicense(ctx context.Context, params ShowUserLicenseParams) (res *LicenseDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("showUserLicense"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -11124,6 +15007,118 @@ func (c *Client) sendShowWebhookEvent(ctx context.Context, params ShowWebhookEve
 	return result, nil
 }
 
+// SuspendLicense invokes suspendLicense operation.
+//
+// Suspend a license.
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/suspend
+func (c *Client) SuspendLicense(ctx context.Context, params SuspendLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendSuspendLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendSuspendLicense(ctx context.Context, params SuspendLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("suspendLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/suspend"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, SuspendLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/suspend"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeSuspendLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UnbanUser invokes unbanUser operation.
 //
 // Unban a user.
@@ -11571,6 +15566,580 @@ func (c *Client) sendUpdateKey(ctx context.Context, request UpdateKeyReq, params
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateKeyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateLicense invokes updateLicense operation.
+//
+// Update a license.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}
+func (c *Client) UpdateLicense(ctx context.Context, request UpdateLicenseReq, params UpdateLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendUpdateLicense(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateLicense(ctx context.Context, request UpdateLicenseReq, params UpdateLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateLicense"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateLicenseRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateLicenseGroup invokes updateLicenseGroup operation.
+//
+// Set a license's group.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/group
+func (c *Client) UpdateLicenseGroup(ctx context.Context, request UpdateLicenseGroupReq, params UpdateLicenseGroupParams) (*LicenseDocument, error) {
+	res, err := c.sendUpdateLicenseGroup(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateLicenseGroup(ctx context.Context, request UpdateLicenseGroupReq, params UpdateLicenseGroupParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateLicenseGroup"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/group"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateLicenseGroupOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/group"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateLicenseGroupRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateLicenseGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateLicenseOwner invokes updateLicenseOwner operation.
+//
+// Set a license's owner.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/owner
+func (c *Client) UpdateLicenseOwner(ctx context.Context, request UpdateLicenseOwnerReq, params UpdateLicenseOwnerParams) (*LicenseDocument, error) {
+	res, err := c.sendUpdateLicenseOwner(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateLicenseOwner(ctx context.Context, request UpdateLicenseOwnerReq, params UpdateLicenseOwnerParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateLicenseOwner"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/owner"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateLicenseOwnerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/owner"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateLicenseOwnerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateLicenseOwnerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateLicensePolicy invokes updateLicensePolicy operation.
+//
+// Transfer a license to a policy.
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/policy
+func (c *Client) UpdateLicensePolicy(ctx context.Context, request UpdateLicensePolicyReq, params UpdateLicensePolicyParams) (*LicenseDocument, error) {
+	res, err := c.sendUpdateLicensePolicy(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateLicensePolicy(ctx context.Context, request UpdateLicensePolicyReq, params UpdateLicensePolicyParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateLicensePolicy"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/policy"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateLicensePolicyOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/policy"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateLicensePolicyRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateLicensePolicyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateLicenseUserAlias invokes updateLicenseUserAlias operation.
+//
+// Set a license's owner (v1.5 alias).
+//
+// PATCH /v1/accounts/{account}/licenses/{licenseId}/user
+func (c *Client) UpdateLicenseUserAlias(ctx context.Context, request UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (*LicenseDocument, error) {
+	res, err := c.sendUpdateLicenseUserAlias(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateLicenseUserAlias(ctx context.Context, request UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateLicenseUserAlias"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/user"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateLicenseUserAliasOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/user"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateLicenseUserAliasRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateLicenseUserAliasResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -12390,6 +16959,217 @@ func (c *Client) sendUpdateWebhookEndpoint(ctx context.Context, request UpdateWe
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateWebhookEndpointResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ValidateLicense invokes validateLicense operation.
+//
+// Validate a license (with meta.scope).
+//
+// POST /v1/accounts/{account}/licenses/{licenseId}/actions/validate
+func (c *Client) ValidateLicense(ctx context.Context, request ValidateLicenseReq, params ValidateLicenseParams) (*LicenseValidateDocument, error) {
+	res, err := c.sendValidateLicense(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendValidateLicense(ctx context.Context, request ValidateLicenseReq, params ValidateLicenseParams) (res *LicenseValidateDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("validateLicense"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/{licenseId}/actions/validate"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ValidateLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/"
+	{
+		// Encode "licenseId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "licenseId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.LicenseId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/validate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeValidateLicenseRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeValidateLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ValidateLicenseKey invokes validateLicenseKey operation.
+//
+// Validate a license by key (authentication optional).
+//
+// POST /v1/accounts/{account}/licenses/actions/validate-key
+func (c *Client) ValidateLicenseKey(ctx context.Context, request ValidateLicenseKeyReq, params ValidateLicenseKeyParams) (*LicenseValidateDocument, error) {
+	res, err := c.sendValidateLicenseKey(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendValidateLicenseKey(ctx context.Context, request ValidateLicenseKeyReq, params ValidateLicenseKeyParams) (res *LicenseValidateDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("validateLicenseKey"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/licenses/actions/validate-key"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ValidateLicenseKeyOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/licenses/actions/validate-key"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeValidateLicenseKeyRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeValidateLicenseKeyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

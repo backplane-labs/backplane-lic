@@ -367,6 +367,7 @@ func Run(tb testing.TB, target Target, scenario Scenario, signer ed25519.PublicK
 		}
 
 		transcript.Steps = append(transcript.Steps, runStep(tb, target, step, vars, signer))
+		settleValidationTouch(tb, target, step, transcript.Steps[index])
 	}
 
 	return transcript
@@ -498,6 +499,33 @@ func applyAuth(tb testing.TB, target Target, req *http.Request, auth Auth, vars 
 		pass := interpolate(tb, auth.BasicPass, vars)
 		req.Header.Set("Authorization", basicAuth(user, pass))
 	}
+}
+
+// UserToken mints a user-bearer fixture through the real API on both servers.
+func UserToken(tb testing.TB, target Target, userID string) string {
+	tb.Helper()
+
+	status, raw := call(tb, target, http.MethodPost,
+		"/v1/accounts/"+AccountSlug+"/users/"+userID+"/tokens", "", map[string]string{
+			"Authorization": "Bearer " + AdminToken(tb, target),
+		})
+	if status != http.StatusOK {
+		tb.Fatalf("conformance: mint user fixture: status %d: %s", status, raw)
+	}
+
+	var doc struct {
+		Data struct {
+			Attributes struct {
+				Token string `json:"token"`
+			} `json:"attributes"`
+		} `json:"data"`
+	}
+
+	if err := json.Unmarshal(raw, &doc); err != nil || doc.Data.Attributes.Token == "" {
+		tb.Fatalf("conformance: decode user fixture: %v: %s", err, raw)
+	}
+
+	return doc.Data.Attributes.Token
 }
 
 // cachedAdminToken mints the admin token at most once per target: password

@@ -1,6 +1,8 @@
 package httpapi
 
 import (
+	"encoding/json"
+	"math"
 	"net/url"
 	"strconv"
 	"strings"
@@ -298,14 +300,15 @@ func boolAttr(attrs map[string]any, name string) (*bool, bool, error) {
 	return &value, true, nil
 }
 
-// metadataAttr reads the metadata hash (nil allowed: clearing).
+// metadataAttr reads the metadata hash (nil allowed: clearing) with
+// the request-layer depth rule.
 func metadataAttr(attrs map[string]any) (map[string]any, bool, error) {
 	raw, ok := attrs["metadata"]
 	if !ok || raw == nil {
 		return nil, ok, nil
 	}
 
-	meta, err := hash(raw, "/data/attributes/metadata")
+	meta, err := metadataOf(raw, "/data/attributes/metadata")
 
 	return meta, true, err
 }
@@ -343,13 +346,19 @@ func stringsAttr(attrs map[string]any, name string) ([]string, bool, error) {
 
 // int64Of coerces a decoded JSON integer.
 func int64Of(raw any, pointer string) (int64, error) {
-	value, ok := raw.(float64)
-	if !ok || value != trunc(value) {
-		return 0, apperr.BadRequestSource(
-			"type mismatch (received "+jsonKind(raw)+" expected integer)", pointer)
+	switch value := raw.(type) {
+	case json.Number:
+		if integer, err := value.Int64(); err == nil {
+			return integer, nil
+		}
+	case float64:
+		if value == math.Trunc(value) && value >= math.MinInt64 && value < -float64(math.MinInt64) {
+			return int64(value), nil
+		}
 	}
 
-	return int64(value), nil
+	return 0, apperr.BadRequestSource(
+		"type mismatch (received "+jsonKind(raw)+" expected integer)", pointer)
 }
 
 // nonBlankStringAttr reads an optional string attribute whose blank

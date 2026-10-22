@@ -189,7 +189,7 @@ func (a *API) ShowProductPolicy(
 // group lands.
 func (a *API) IndexProductLicenses(
 	ctx context.Context, params oas.IndexProductLicensesParams,
-) (*oas.LicenseStubListDocument, error) {
+) (*oas.LicenseListDocument, error) {
 	req := requestOf(ctx)
 
 	if err := checkEnvironment(req); err != nil {
@@ -201,14 +201,17 @@ func (a *API) IndexProductLicenses(
 		return nil, err
 	}
 
-	if _, err := a.products.Relationship(ctx, req.account, params.ProductId, "license.read"); err != nil {
+	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "license.read")
+	if err != nil {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	doc := &oas.LicenseStubListDocument{Data: []oas.LicenseStubListDocumentDataItem{}}
-	doc.Links = render.Links(linksDoc(req, listParams, 0, uuidNil()))
+	page, err := a.licenses.OfProduct(ctx, req.account, product, licenseFilter(req.query), listParams)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
 
-	return doc, nil
+	return a.licenseListDocument(req, page, listParams), nil
 }
 
 // ShowProductLicense implements GET /v1/accounts/{account}/products/{productId}/licenses/{licenseId}:
@@ -216,18 +219,24 @@ func (a *API) IndexProductLicenses(
 // show is the 404.
 func (a *API) ShowProductLicense(
 	ctx context.Context, params oas.ShowProductLicenseParams,
-) (oas.ShowProductLicenseOK, error) {
+) (*oas.LicenseDocument, error) {
 	req := requestOf(ctx)
 
 	if err := checkEnvironment(req); err != nil {
 		return nil, err
 	}
 
-	if _, err := a.products.Relationship(ctx, req.account, params.ProductId, "license.read"); err != nil {
+	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "license.read")
+	if err != nil {
 		return nil, err //nolint:wrapcheck // the scenario's own error
 	}
 
-	return nil, notFound("license", params.LicenseId)
+	license, err := a.licenses.OfProductShow(ctx, req.account, product, params.LicenseId)
+	if err != nil {
+		return nil, err //nolint:wrapcheck // the scenario's own error
+	}
+
+	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
 }
 
 // IndexProductMachines implements GET /v1/accounts/{account}/products/{productId}/machines

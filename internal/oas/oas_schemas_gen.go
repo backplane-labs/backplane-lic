@@ -4,6 +4,7 @@ package oas
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
@@ -497,6 +498,66 @@ type AttachGroupOwnersReqEmptyBody struct{}
 
 func (*AttachGroupOwnersReqEmptyBody) attachGroupOwnersReq() {}
 
+type AttachLicenseEntitlementsReqApplicationJSON map[string]jx.Raw
+
+func (s *AttachLicenseEntitlementsReqApplicationJSON) init() AttachLicenseEntitlementsReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*AttachLicenseEntitlementsReqApplicationJSON) attachLicenseEntitlementsReq() {}
+
+type AttachLicenseEntitlementsReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *AttachLicenseEntitlementsReqApplicationVndAPIJSON) init() AttachLicenseEntitlementsReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*AttachLicenseEntitlementsReqApplicationVndAPIJSON) attachLicenseEntitlementsReq() {}
+
+type AttachLicenseEntitlementsReqEmptyBody struct{}
+
+func (*AttachLicenseEntitlementsReqEmptyBody) attachLicenseEntitlementsReq() {}
+
+type AttachLicenseUsersReqApplicationJSON map[string]jx.Raw
+
+func (s *AttachLicenseUsersReqApplicationJSON) init() AttachLicenseUsersReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*AttachLicenseUsersReqApplicationJSON) attachLicenseUsersReq() {}
+
+type AttachLicenseUsersReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *AttachLicenseUsersReqApplicationVndAPIJSON) init() AttachLicenseUsersReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*AttachLicenseUsersReqApplicationVndAPIJSON) attachLicenseUsersReq() {}
+
+type AttachLicenseUsersReqEmptyBody struct{}
+
+func (*AttachLicenseUsersReqEmptyBody) attachLicenseUsersReq() {}
+
 type AttachPolicyEntitlementsReqApplicationJSON map[string]jx.Raw
 
 func (s *AttachPolicyEntitlementsReqApplicationJSON) init() AttachPolicyEntitlementsReqApplicationJSON {
@@ -526,6 +587,76 @@ func (*AttachPolicyEntitlementsReqApplicationVndAPIJSON) attachPolicyEntitlement
 type AttachPolicyEntitlementsReqEmptyBody struct{}
 
 func (*AttachPolicyEntitlementsReqEmptyBody) attachPolicyEntitlementsReq() {}
+
+type CheckoutLicenseFileOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s CheckoutLicenseFileOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// CheckoutLicenseFileOKHeaders wraps CheckoutLicenseFileOK with response headers.
+type CheckoutLicenseFileOKHeaders struct {
+	ContentDisposition OptString
+	Response           CheckoutLicenseFileOK
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *CheckoutLicenseFileOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetResponse returns the value of Response.
+func (s *CheckoutLicenseFileOKHeaders) GetResponse() CheckoutLicenseFileOK {
+	return s.Response
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *CheckoutLicenseFileOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetResponse sets the value of Response.
+func (s *CheckoutLicenseFileOKHeaders) SetResponse(val CheckoutLicenseFileOK) {
+	s.Response = val
+}
+
+type CheckoutLicenseReqApplicationJSON map[string]jx.Raw
+
+func (s *CheckoutLicenseReqApplicationJSON) init() CheckoutLicenseReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CheckoutLicenseReqApplicationJSON) checkoutLicenseReq() {}
+
+type CheckoutLicenseReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CheckoutLicenseReqApplicationVndAPIJSON) init() CheckoutLicenseReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CheckoutLicenseReqApplicationVndAPIJSON) checkoutLicenseReq() {}
+
+type CheckoutLicenseReqEmptyBody struct{}
+
+func (*CheckoutLicenseReqEmptyBody) checkoutLicenseReq() {}
 
 type CreateEntitlementReqApplicationJSON map[string]jx.Raw
 
@@ -616,6 +747,66 @@ func (*CreateKeyReqApplicationVndAPIJSON) createKeyReq() {}
 type CreateKeyReqEmptyBody struct{}
 
 func (*CreateKeyReqEmptyBody) createKeyReq() {}
+
+type CreateLicenseReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateLicenseReqApplicationJSON) init() CreateLicenseReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateLicenseReqApplicationJSON) createLicenseReq() {}
+
+type CreateLicenseReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateLicenseReqApplicationVndAPIJSON) init() CreateLicenseReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateLicenseReqApplicationVndAPIJSON) createLicenseReq() {}
+
+type CreateLicenseReqEmptyBody struct{}
+
+func (*CreateLicenseReqEmptyBody) createLicenseReq() {}
+
+type CreateLicenseTokenReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateLicenseTokenReqApplicationJSON) init() CreateLicenseTokenReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateLicenseTokenReqApplicationJSON) createLicenseTokenReq() {}
+
+type CreateLicenseTokenReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateLicenseTokenReqApplicationVndAPIJSON) init() CreateLicenseTokenReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateLicenseTokenReqApplicationVndAPIJSON) createLicenseTokenReq() {}
+
+type CreateLicenseTokenReqEmptyBody struct{}
+
+func (*CreateLicenseTokenReqEmptyBody) createLicenseTokenReq() {}
 
 type CreatePolicyReqApplicationJSON map[string]jx.Raw
 
@@ -827,6 +1018,36 @@ type CreateWebhookEndpointReqEmptyBody struct{}
 
 func (*CreateWebhookEndpointReqEmptyBody) createWebhookEndpointReq() {}
 
+type DecrementLicenseUsageReqApplicationJSON map[string]jx.Raw
+
+func (s *DecrementLicenseUsageReqApplicationJSON) init() DecrementLicenseUsageReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DecrementLicenseUsageReqApplicationJSON) decrementLicenseUsageReq() {}
+
+type DecrementLicenseUsageReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *DecrementLicenseUsageReqApplicationVndAPIJSON) init() DecrementLicenseUsageReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DecrementLicenseUsageReqApplicationVndAPIJSON) decrementLicenseUsageReq() {}
+
+type DecrementLicenseUsageReqEmptyBody struct{}
+
+func (*DecrementLicenseUsageReqEmptyBody) decrementLicenseUsageReq() {}
+
 // DeleteGroupNoContent is response for DeleteGroup operation.
 type DeleteGroupNoContent struct{}
 
@@ -872,6 +1093,9 @@ type DestroyEntitlementNoContent struct{}
 // DestroyKeyNoContent is response for DestroyKey operation.
 type DestroyKeyNoContent struct{}
 
+// DestroyLicenseNoContent is response for DestroyLicense operation.
+type DestroyLicenseNoContent struct{}
+
 // DestroyPolicyNoContent is response for DestroyPolicy operation.
 type DestroyPolicyNoContent struct{}
 
@@ -916,6 +1140,72 @@ func (*DetachGroupOwnersReqApplicationVndAPIJSON) detachGroupOwnersReq() {}
 type DetachGroupOwnersReqEmptyBody struct{}
 
 func (*DetachGroupOwnersReqEmptyBody) detachGroupOwnersReq() {}
+
+// DetachLicenseEntitlementsNoContent is response for DetachLicenseEntitlements operation.
+type DetachLicenseEntitlementsNoContent struct{}
+
+type DetachLicenseEntitlementsReqApplicationJSON map[string]jx.Raw
+
+func (s *DetachLicenseEntitlementsReqApplicationJSON) init() DetachLicenseEntitlementsReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DetachLicenseEntitlementsReqApplicationJSON) detachLicenseEntitlementsReq() {}
+
+type DetachLicenseEntitlementsReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *DetachLicenseEntitlementsReqApplicationVndAPIJSON) init() DetachLicenseEntitlementsReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DetachLicenseEntitlementsReqApplicationVndAPIJSON) detachLicenseEntitlementsReq() {}
+
+type DetachLicenseEntitlementsReqEmptyBody struct{}
+
+func (*DetachLicenseEntitlementsReqEmptyBody) detachLicenseEntitlementsReq() {}
+
+// DetachLicenseUsersNoContent is response for DetachLicenseUsers operation.
+type DetachLicenseUsersNoContent struct{}
+
+type DetachLicenseUsersReqApplicationJSON map[string]jx.Raw
+
+func (s *DetachLicenseUsersReqApplicationJSON) init() DetachLicenseUsersReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DetachLicenseUsersReqApplicationJSON) detachLicenseUsersReq() {}
+
+type DetachLicenseUsersReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *DetachLicenseUsersReqApplicationVndAPIJSON) init() DetachLicenseUsersReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*DetachLicenseUsersReqApplicationVndAPIJSON) detachLicenseUsersReq() {}
+
+type DetachLicenseUsersReqEmptyBody struct{}
+
+func (*DetachLicenseUsersReqEmptyBody) detachLicenseUsersReq() {}
 
 // DetachPolicyEntitlementsNoContent is response for DetachPolicyEntitlements operation.
 type DetachPolicyEntitlementsNoContent struct{}
@@ -1888,6 +2178,51 @@ func (s *GroupResourceType) UnmarshalText(data []byte) error {
 // HealthNoContent is response for Health operation.
 type HealthNoContent struct{}
 
+type IncrementLicenseUsageReqApplicationJSON map[string]jx.Raw
+
+func (s *IncrementLicenseUsageReqApplicationJSON) init() IncrementLicenseUsageReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*IncrementLicenseUsageReqApplicationJSON) incrementLicenseUsageReq() {}
+
+type IncrementLicenseUsageReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *IncrementLicenseUsageReqApplicationVndAPIJSON) init() IncrementLicenseUsageReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*IncrementLicenseUsageReqApplicationVndAPIJSON) incrementLicenseUsageReq() {}
+
+type IncrementLicenseUsageReqEmptyBody struct{}
+
+func (*IncrementLicenseUsageReqEmptyBody) incrementLicenseUsageReq() {}
+
+// Ref: #/components/schemas/JoinLinks
+type JoinLinks struct {
+	Related string `json:"related"`
+}
+
+// GetRelated returns the value of Related.
+func (s *JoinLinks) GetRelated() string {
+	return s.Related
+}
+
+// SetRelated sets the value of Related.
+func (s *JoinLinks) SetRelated(val string) {
+	s.Related = val
+}
+
 // Ref: #/components/schemas/KeyAttributes
 type KeyAttributes struct {
 	Key     string    `json:"key"`
@@ -2122,33 +2457,1345 @@ func (s *KeyResourceType) UnmarshalText(data []byte) error {
 	}
 }
 
-// Ref: #/components/schemas/LicenseStubListDocument
-type LicenseStubListDocument struct {
-	Data  []LicenseStubListDocumentDataItem `json:"data"`
-	Links OptListLinks                      `json:"links"`
+// Ref: #/components/schemas/LicenseAttributes
+type LicenseAttributes struct {
+	Name             NilString `json:"name"`
+	Key              OptString `json:"key"`
+	Expiry           NilString `json:"expiry"`
+	Status           string    `json:"status"`
+	Uses             int       `json:"uses"`
+	Suspended        bool      `json:"suspended"`
+	Scheme           NilString `json:"scheme"`
+	Encrypted        bool      `json:"encrypted"`
+	Strict           bool      `json:"strict"`
+	Floating         bool      `json:"floating"`
+	Protected        bool      `json:"protected"`
+	Version          NilString `json:"version"`
+	MaxMachines      NilInt    `json:"maxMachines"`
+	MaxProcesses     NilInt    `json:"maxProcesses"`
+	MaxUsers         NilInt    `json:"maxUsers"`
+	MaxCores         NilInt    `json:"maxCores"`
+	MaxMemory        NilInt    `json:"maxMemory"`
+	MaxDisk          NilInt    `json:"maxDisk"`
+	MaxUses          NilInt    `json:"maxUses"`
+	RequireHeartbeat bool      `json:"requireHeartbeat"`
+	RequireCheckIn   bool      `json:"requireCheckIn"`
+	LastValidated    NilString `json:"lastValidated"`
+	LastCheckIn      NilString `json:"lastCheckIn"`
+	NextCheckIn      NilString `json:"nextCheckIn"`
+	LastCheckOut     NilString `json:"lastCheckOut"`
+	Metadata         Metadata  `json:"metadata"`
+	Created          Timestamp `json:"created"`
+	Updated          Timestamp `json:"updated"`
+}
+
+// GetName returns the value of Name.
+func (s *LicenseAttributes) GetName() NilString {
+	return s.Name
+}
+
+// GetKey returns the value of Key.
+func (s *LicenseAttributes) GetKey() OptString {
+	return s.Key
+}
+
+// GetExpiry returns the value of Expiry.
+func (s *LicenseAttributes) GetExpiry() NilString {
+	return s.Expiry
+}
+
+// GetStatus returns the value of Status.
+func (s *LicenseAttributes) GetStatus() string {
+	return s.Status
+}
+
+// GetUses returns the value of Uses.
+func (s *LicenseAttributes) GetUses() int {
+	return s.Uses
+}
+
+// GetSuspended returns the value of Suspended.
+func (s *LicenseAttributes) GetSuspended() bool {
+	return s.Suspended
+}
+
+// GetScheme returns the value of Scheme.
+func (s *LicenseAttributes) GetScheme() NilString {
+	return s.Scheme
+}
+
+// GetEncrypted returns the value of Encrypted.
+func (s *LicenseAttributes) GetEncrypted() bool {
+	return s.Encrypted
+}
+
+// GetStrict returns the value of Strict.
+func (s *LicenseAttributes) GetStrict() bool {
+	return s.Strict
+}
+
+// GetFloating returns the value of Floating.
+func (s *LicenseAttributes) GetFloating() bool {
+	return s.Floating
+}
+
+// GetProtected returns the value of Protected.
+func (s *LicenseAttributes) GetProtected() bool {
+	return s.Protected
+}
+
+// GetVersion returns the value of Version.
+func (s *LicenseAttributes) GetVersion() NilString {
+	return s.Version
+}
+
+// GetMaxMachines returns the value of MaxMachines.
+func (s *LicenseAttributes) GetMaxMachines() NilInt {
+	return s.MaxMachines
+}
+
+// GetMaxProcesses returns the value of MaxProcesses.
+func (s *LicenseAttributes) GetMaxProcesses() NilInt {
+	return s.MaxProcesses
+}
+
+// GetMaxUsers returns the value of MaxUsers.
+func (s *LicenseAttributes) GetMaxUsers() NilInt {
+	return s.MaxUsers
+}
+
+// GetMaxCores returns the value of MaxCores.
+func (s *LicenseAttributes) GetMaxCores() NilInt {
+	return s.MaxCores
+}
+
+// GetMaxMemory returns the value of MaxMemory.
+func (s *LicenseAttributes) GetMaxMemory() NilInt {
+	return s.MaxMemory
+}
+
+// GetMaxDisk returns the value of MaxDisk.
+func (s *LicenseAttributes) GetMaxDisk() NilInt {
+	return s.MaxDisk
+}
+
+// GetMaxUses returns the value of MaxUses.
+func (s *LicenseAttributes) GetMaxUses() NilInt {
+	return s.MaxUses
+}
+
+// GetRequireHeartbeat returns the value of RequireHeartbeat.
+func (s *LicenseAttributes) GetRequireHeartbeat() bool {
+	return s.RequireHeartbeat
+}
+
+// GetRequireCheckIn returns the value of RequireCheckIn.
+func (s *LicenseAttributes) GetRequireCheckIn() bool {
+	return s.RequireCheckIn
+}
+
+// GetLastValidated returns the value of LastValidated.
+func (s *LicenseAttributes) GetLastValidated() NilString {
+	return s.LastValidated
+}
+
+// GetLastCheckIn returns the value of LastCheckIn.
+func (s *LicenseAttributes) GetLastCheckIn() NilString {
+	return s.LastCheckIn
+}
+
+// GetNextCheckIn returns the value of NextCheckIn.
+func (s *LicenseAttributes) GetNextCheckIn() NilString {
+	return s.NextCheckIn
+}
+
+// GetLastCheckOut returns the value of LastCheckOut.
+func (s *LicenseAttributes) GetLastCheckOut() NilString {
+	return s.LastCheckOut
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *LicenseAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *LicenseAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *LicenseAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetName sets the value of Name.
+func (s *LicenseAttributes) SetName(val NilString) {
+	s.Name = val
+}
+
+// SetKey sets the value of Key.
+func (s *LicenseAttributes) SetKey(val OptString) {
+	s.Key = val
+}
+
+// SetExpiry sets the value of Expiry.
+func (s *LicenseAttributes) SetExpiry(val NilString) {
+	s.Expiry = val
+}
+
+// SetStatus sets the value of Status.
+func (s *LicenseAttributes) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetUses sets the value of Uses.
+func (s *LicenseAttributes) SetUses(val int) {
+	s.Uses = val
+}
+
+// SetSuspended sets the value of Suspended.
+func (s *LicenseAttributes) SetSuspended(val bool) {
+	s.Suspended = val
+}
+
+// SetScheme sets the value of Scheme.
+func (s *LicenseAttributes) SetScheme(val NilString) {
+	s.Scheme = val
+}
+
+// SetEncrypted sets the value of Encrypted.
+func (s *LicenseAttributes) SetEncrypted(val bool) {
+	s.Encrypted = val
+}
+
+// SetStrict sets the value of Strict.
+func (s *LicenseAttributes) SetStrict(val bool) {
+	s.Strict = val
+}
+
+// SetFloating sets the value of Floating.
+func (s *LicenseAttributes) SetFloating(val bool) {
+	s.Floating = val
+}
+
+// SetProtected sets the value of Protected.
+func (s *LicenseAttributes) SetProtected(val bool) {
+	s.Protected = val
+}
+
+// SetVersion sets the value of Version.
+func (s *LicenseAttributes) SetVersion(val NilString) {
+	s.Version = val
+}
+
+// SetMaxMachines sets the value of MaxMachines.
+func (s *LicenseAttributes) SetMaxMachines(val NilInt) {
+	s.MaxMachines = val
+}
+
+// SetMaxProcesses sets the value of MaxProcesses.
+func (s *LicenseAttributes) SetMaxProcesses(val NilInt) {
+	s.MaxProcesses = val
+}
+
+// SetMaxUsers sets the value of MaxUsers.
+func (s *LicenseAttributes) SetMaxUsers(val NilInt) {
+	s.MaxUsers = val
+}
+
+// SetMaxCores sets the value of MaxCores.
+func (s *LicenseAttributes) SetMaxCores(val NilInt) {
+	s.MaxCores = val
+}
+
+// SetMaxMemory sets the value of MaxMemory.
+func (s *LicenseAttributes) SetMaxMemory(val NilInt) {
+	s.MaxMemory = val
+}
+
+// SetMaxDisk sets the value of MaxDisk.
+func (s *LicenseAttributes) SetMaxDisk(val NilInt) {
+	s.MaxDisk = val
+}
+
+// SetMaxUses sets the value of MaxUses.
+func (s *LicenseAttributes) SetMaxUses(val NilInt) {
+	s.MaxUses = val
+}
+
+// SetRequireHeartbeat sets the value of RequireHeartbeat.
+func (s *LicenseAttributes) SetRequireHeartbeat(val bool) {
+	s.RequireHeartbeat = val
+}
+
+// SetRequireCheckIn sets the value of RequireCheckIn.
+func (s *LicenseAttributes) SetRequireCheckIn(val bool) {
+	s.RequireCheckIn = val
+}
+
+// SetLastValidated sets the value of LastValidated.
+func (s *LicenseAttributes) SetLastValidated(val NilString) {
+	s.LastValidated = val
+}
+
+// SetLastCheckIn sets the value of LastCheckIn.
+func (s *LicenseAttributes) SetLastCheckIn(val NilString) {
+	s.LastCheckIn = val
+}
+
+// SetNextCheckIn sets the value of NextCheckIn.
+func (s *LicenseAttributes) SetNextCheckIn(val NilString) {
+	s.NextCheckIn = val
+}
+
+// SetLastCheckOut sets the value of LastCheckOut.
+func (s *LicenseAttributes) SetLastCheckOut(val NilString) {
+	s.LastCheckOut = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *LicenseAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *LicenseAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *LicenseAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/LicenseDocument
+type LicenseDocument struct {
+	Data NilLicenseResource `json:"data"`
 }
 
 // GetData returns the value of Data.
-func (s *LicenseStubListDocument) GetData() []LicenseStubListDocumentDataItem {
+func (s *LicenseDocument) GetData() NilLicenseResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *LicenseDocument) SetData(val NilLicenseResource) {
+	s.Data = val
+}
+
+// LicenseDocumentHeaders wraps LicenseDocument with response headers.
+type LicenseDocumentHeaders struct {
+	Location OptString
+	Response LicenseDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *LicenseDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *LicenseDocumentHeaders) GetResponse() LicenseDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *LicenseDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *LicenseDocumentHeaders) SetResponse(val LicenseDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/LicenseEntitlementListDocument
+type LicenseEntitlementListDocument struct {
+	Data []LicenseEntitlementResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseEntitlementListDocument) GetData() []LicenseEntitlementResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *LicenseEntitlementListDocument) SetData(val []LicenseEntitlementResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/LicenseEntitlementResource
+type LicenseEntitlementResource struct {
+	Type          LicenseEntitlementResourceType          `json:"type"`
+	ID            string                                  `json:"id"`
+	Attributes    LicenseEntitlementResourceAttributes    `json:"attributes"`
+	Relationships LicenseEntitlementResourceRelationships `json:"relationships"`
+	Links         JoinLinks                               `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *LicenseEntitlementResource) GetType() LicenseEntitlementResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *LicenseEntitlementResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *LicenseEntitlementResource) GetAttributes() LicenseEntitlementResourceAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *LicenseEntitlementResource) GetRelationships() LicenseEntitlementResourceRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *LicenseEntitlementResource) GetLinks() JoinLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *LicenseEntitlementResource) SetType(val LicenseEntitlementResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *LicenseEntitlementResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *LicenseEntitlementResource) SetAttributes(val LicenseEntitlementResourceAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *LicenseEntitlementResource) SetRelationships(val LicenseEntitlementResourceRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *LicenseEntitlementResource) SetLinks(val JoinLinks) {
+	s.Links = val
+}
+
+type LicenseEntitlementResourceAttributes struct {
+	Created Timestamp `json:"created"`
+	Updated Timestamp `json:"updated"`
+}
+
+// GetCreated returns the value of Created.
+func (s *LicenseEntitlementResourceAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *LicenseEntitlementResourceAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetCreated sets the value of Created.
+func (s *LicenseEntitlementResourceAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *LicenseEntitlementResourceAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+type LicenseEntitlementResourceRelationships struct {
+	Account     ToOneRelationship `json:"account"`
+	Entitlement ToOneRelationship `json:"entitlement"`
+	License     ToOneRelationship `json:"license"`
+}
+
+// GetAccount returns the value of Account.
+func (s *LicenseEntitlementResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetEntitlement returns the value of Entitlement.
+func (s *LicenseEntitlementResourceRelationships) GetEntitlement() ToOneRelationship {
+	return s.Entitlement
+}
+
+// GetLicense returns the value of License.
+func (s *LicenseEntitlementResourceRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// SetAccount sets the value of Account.
+func (s *LicenseEntitlementResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetEntitlement sets the value of Entitlement.
+func (s *LicenseEntitlementResourceRelationships) SetEntitlement(val ToOneRelationship) {
+	s.Entitlement = val
+}
+
+// SetLicense sets the value of License.
+func (s *LicenseEntitlementResourceRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+type LicenseEntitlementResourceType string
+
+const (
+	LicenseEntitlementResourceTypeLicenseEntitlements LicenseEntitlementResourceType = "license-entitlements"
+)
+
+// AllValues returns all LicenseEntitlementResourceType values.
+func (LicenseEntitlementResourceType) AllValues() []LicenseEntitlementResourceType {
+	return []LicenseEntitlementResourceType{
+		LicenseEntitlementResourceTypeLicenseEntitlements,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LicenseEntitlementResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case LicenseEntitlementResourceTypeLicenseEntitlements:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LicenseEntitlementResourceType) UnmarshalText(data []byte) error {
+	switch LicenseEntitlementResourceType(data) {
+	case LicenseEntitlementResourceTypeLicenseEntitlements:
+		*s = LicenseEntitlementResourceTypeLicenseEntitlements
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/LicenseFileAttributes
+type LicenseFileAttributes struct {
+	Certificate string    `json:"certificate"`
+	Algorithm   string    `json:"algorithm"`
+	Includes    []string  `json:"includes"`
+	TTL         NilInt    `json:"ttl"`
+	Expiry      NilString `json:"expiry"`
+	Issued      Timestamp `json:"issued"`
+}
+
+// GetCertificate returns the value of Certificate.
+func (s *LicenseFileAttributes) GetCertificate() string {
+	return s.Certificate
+}
+
+// GetAlgorithm returns the value of Algorithm.
+func (s *LicenseFileAttributes) GetAlgorithm() string {
+	return s.Algorithm
+}
+
+// GetIncludes returns the value of Includes.
+func (s *LicenseFileAttributes) GetIncludes() []string {
+	return s.Includes
+}
+
+// GetTTL returns the value of TTL.
+func (s *LicenseFileAttributes) GetTTL() NilInt {
+	return s.TTL
+}
+
+// GetExpiry returns the value of Expiry.
+func (s *LicenseFileAttributes) GetExpiry() NilString {
+	return s.Expiry
+}
+
+// GetIssued returns the value of Issued.
+func (s *LicenseFileAttributes) GetIssued() Timestamp {
+	return s.Issued
+}
+
+// SetCertificate sets the value of Certificate.
+func (s *LicenseFileAttributes) SetCertificate(val string) {
+	s.Certificate = val
+}
+
+// SetAlgorithm sets the value of Algorithm.
+func (s *LicenseFileAttributes) SetAlgorithm(val string) {
+	s.Algorithm = val
+}
+
+// SetIncludes sets the value of Includes.
+func (s *LicenseFileAttributes) SetIncludes(val []string) {
+	s.Includes = val
+}
+
+// SetTTL sets the value of TTL.
+func (s *LicenseFileAttributes) SetTTL(val NilInt) {
+	s.TTL = val
+}
+
+// SetExpiry sets the value of Expiry.
+func (s *LicenseFileAttributes) SetExpiry(val NilString) {
+	s.Expiry = val
+}
+
+// SetIssued sets the value of Issued.
+func (s *LicenseFileAttributes) SetIssued(val Timestamp) {
+	s.Issued = val
+}
+
+// Ref: #/components/schemas/LicenseFileDocument
+type LicenseFileDocument struct {
+	Data LicenseFileResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseFileDocument) GetData() LicenseFileResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *LicenseFileDocument) SetData(val LicenseFileResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/LicenseFileResource
+type LicenseFileResource struct {
+	Type          LicenseFileResourceType          `json:"type"`
+	ID            string                           `json:"id"`
+	Attributes    LicenseFileAttributes            `json:"attributes"`
+	Relationships LicenseFileResourceRelationships `json:"relationships"`
+}
+
+// GetType returns the value of Type.
+func (s *LicenseFileResource) GetType() LicenseFileResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *LicenseFileResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *LicenseFileResource) GetAttributes() LicenseFileAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *LicenseFileResource) GetRelationships() LicenseFileResourceRelationships {
+	return s.Relationships
+}
+
+// SetType sets the value of Type.
+func (s *LicenseFileResource) SetType(val LicenseFileResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *LicenseFileResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *LicenseFileResource) SetAttributes(val LicenseFileAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *LicenseFileResource) SetRelationships(val LicenseFileResourceRelationships) {
+	s.Relationships = val
+}
+
+type LicenseFileResourceRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	License ToOneRelationship `json:"license"`
+}
+
+// GetAccount returns the value of Account.
+func (s *LicenseFileResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetLicense returns the value of License.
+func (s *LicenseFileResourceRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// SetAccount sets the value of Account.
+func (s *LicenseFileResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetLicense sets the value of License.
+func (s *LicenseFileResourceRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+type LicenseFileResourceType string
+
+const (
+	LicenseFileResourceTypeLicenseFiles LicenseFileResourceType = "license-files"
+)
+
+// AllValues returns all LicenseFileResourceType values.
+func (LicenseFileResourceType) AllValues() []LicenseFileResourceType {
+	return []LicenseFileResourceType{
+		LicenseFileResourceTypeLicenseFiles,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LicenseFileResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case LicenseFileResourceTypeLicenseFiles:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LicenseFileResourceType) UnmarshalText(data []byte) error {
+	switch LicenseFileResourceType(data) {
+	case LicenseFileResourceTypeLicenseFiles:
+		*s = LicenseFileResourceTypeLicenseFiles
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/LicenseListDocument
+type LicenseListDocument struct {
+	Data  []LicenseResource `json:"data"`
+	Links OptListLinks      `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseListDocument) GetData() []LicenseResource {
 	return s.Data
 }
 
 // GetLinks returns the value of Links.
-func (s *LicenseStubListDocument) GetLinks() OptListLinks {
+func (s *LicenseListDocument) GetLinks() OptListLinks {
 	return s.Links
 }
 
 // SetData sets the value of Data.
-func (s *LicenseStubListDocument) SetData(val []LicenseStubListDocumentDataItem) {
+func (s *LicenseListDocument) SetData(val []LicenseResource) {
 	s.Data = val
 }
 
 // SetLinks sets the value of Links.
-func (s *LicenseStubListDocument) SetLinks(val OptListLinks) {
+func (s *LicenseListDocument) SetLinks(val OptListLinks) {
 	s.Links = val
 }
 
-type LicenseStubListDocumentDataItem struct{}
+// Ref: #/components/schemas/LicenseMachinesRelationship
+type LicenseMachinesRelationship struct {
+	Links RelationshipLinks               `json:"links"`
+	Meta  LicenseMachinesRelationshipMeta `json:"meta"`
+}
+
+// GetLinks returns the value of Links.
+func (s *LicenseMachinesRelationship) GetLinks() RelationshipLinks {
+	return s.Links
+}
+
+// GetMeta returns the value of Meta.
+func (s *LicenseMachinesRelationship) GetMeta() LicenseMachinesRelationshipMeta {
+	return s.Meta
+}
+
+// SetLinks sets the value of Links.
+func (s *LicenseMachinesRelationship) SetLinks(val RelationshipLinks) {
+	s.Links = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *LicenseMachinesRelationship) SetMeta(val LicenseMachinesRelationshipMeta) {
+	s.Meta = val
+}
+
+type LicenseMachinesRelationshipMeta struct {
+	Cores  int `json:"cores"`
+	Memory int `json:"memory"`
+	Disk   int `json:"disk"`
+	Count  int `json:"count"`
+}
+
+// GetCores returns the value of Cores.
+func (s *LicenseMachinesRelationshipMeta) GetCores() int {
+	return s.Cores
+}
+
+// GetMemory returns the value of Memory.
+func (s *LicenseMachinesRelationshipMeta) GetMemory() int {
+	return s.Memory
+}
+
+// GetDisk returns the value of Disk.
+func (s *LicenseMachinesRelationshipMeta) GetDisk() int {
+	return s.Disk
+}
+
+// GetCount returns the value of Count.
+func (s *LicenseMachinesRelationshipMeta) GetCount() int {
+	return s.Count
+}
+
+// SetCores sets the value of Cores.
+func (s *LicenseMachinesRelationshipMeta) SetCores(val int) {
+	s.Cores = val
+}
+
+// SetMemory sets the value of Memory.
+func (s *LicenseMachinesRelationshipMeta) SetMemory(val int) {
+	s.Memory = val
+}
+
+// SetDisk sets the value of Disk.
+func (s *LicenseMachinesRelationshipMeta) SetDisk(val int) {
+	s.Disk = val
+}
+
+// SetCount sets the value of Count.
+func (s *LicenseMachinesRelationshipMeta) SetCount(val int) {
+	s.Count = val
+}
+
+// Ref: #/components/schemas/LicenseOwnerDocument
+type LicenseOwnerDocument struct {
+	Data NilUserResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseOwnerDocument) GetData() NilUserResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *LicenseOwnerDocument) SetData(val NilUserResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/LicenseRelationships
+type LicenseRelationships struct {
+	Account      ToOneRelationship           `json:"account"`
+	Product      ToOneRelationship           `json:"product"`
+	Policy       ToOneRelationship           `json:"policy"`
+	Group        ToOneRelationship           `json:"group"`
+	Owner        ToOneRelationship           `json:"owner"`
+	Users        LicenseUsersRelationship    `json:"users"`
+	Machines     LicenseMachinesRelationship `json:"machines"`
+	Tokens       ToManyRelationship          `json:"tokens"`
+	Entitlements ToManyRelationship          `json:"entitlements"`
+}
+
+// GetAccount returns the value of Account.
+func (s *LicenseRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *LicenseRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// GetPolicy returns the value of Policy.
+func (s *LicenseRelationships) GetPolicy() ToOneRelationship {
+	return s.Policy
+}
+
+// GetGroup returns the value of Group.
+func (s *LicenseRelationships) GetGroup() ToOneRelationship {
+	return s.Group
+}
+
+// GetOwner returns the value of Owner.
+func (s *LicenseRelationships) GetOwner() ToOneRelationship {
+	return s.Owner
+}
+
+// GetUsers returns the value of Users.
+func (s *LicenseRelationships) GetUsers() LicenseUsersRelationship {
+	return s.Users
+}
+
+// GetMachines returns the value of Machines.
+func (s *LicenseRelationships) GetMachines() LicenseMachinesRelationship {
+	return s.Machines
+}
+
+// GetTokens returns the value of Tokens.
+func (s *LicenseRelationships) GetTokens() ToManyRelationship {
+	return s.Tokens
+}
+
+// GetEntitlements returns the value of Entitlements.
+func (s *LicenseRelationships) GetEntitlements() ToManyRelationship {
+	return s.Entitlements
+}
+
+// SetAccount sets the value of Account.
+func (s *LicenseRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *LicenseRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+// SetPolicy sets the value of Policy.
+func (s *LicenseRelationships) SetPolicy(val ToOneRelationship) {
+	s.Policy = val
+}
+
+// SetGroup sets the value of Group.
+func (s *LicenseRelationships) SetGroup(val ToOneRelationship) {
+	s.Group = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *LicenseRelationships) SetOwner(val ToOneRelationship) {
+	s.Owner = val
+}
+
+// SetUsers sets the value of Users.
+func (s *LicenseRelationships) SetUsers(val LicenseUsersRelationship) {
+	s.Users = val
+}
+
+// SetMachines sets the value of Machines.
+func (s *LicenseRelationships) SetMachines(val LicenseMachinesRelationship) {
+	s.Machines = val
+}
+
+// SetTokens sets the value of Tokens.
+func (s *LicenseRelationships) SetTokens(val ToManyRelationship) {
+	s.Tokens = val
+}
+
+// SetEntitlements sets the value of Entitlements.
+func (s *LicenseRelationships) SetEntitlements(val ToManyRelationship) {
+	s.Entitlements = val
+}
+
+// Ref: #/components/schemas/LicenseResource
+type LicenseResource struct {
+	Type          LicenseResourceType  `json:"type"`
+	ID            string               `json:"id"`
+	Attributes    LicenseAttributes    `json:"attributes"`
+	Relationships LicenseRelationships `json:"relationships"`
+	Links         ResourceLinks        `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *LicenseResource) GetType() LicenseResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *LicenseResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *LicenseResource) GetAttributes() LicenseAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *LicenseResource) GetRelationships() LicenseRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *LicenseResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *LicenseResource) SetType(val LicenseResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *LicenseResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *LicenseResource) SetAttributes(val LicenseAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *LicenseResource) SetRelationships(val LicenseRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *LicenseResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type LicenseResourceType string
+
+const (
+	LicenseResourceTypeLicenses LicenseResourceType = "licenses"
+)
+
+// AllValues returns all LicenseResourceType values.
+func (LicenseResourceType) AllValues() []LicenseResourceType {
+	return []LicenseResourceType{
+		LicenseResourceTypeLicenses,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LicenseResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case LicenseResourceTypeLicenses:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LicenseResourceType) UnmarshalText(data []byte) error {
+	switch LicenseResourceType(data) {
+	case LicenseResourceTypeLicenses:
+		*s = LicenseResourceTypeLicenses
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/LicenseUserListDocument
+type LicenseUserListDocument struct {
+	Data []LicenseUserResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseUserListDocument) GetData() []LicenseUserResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *LicenseUserListDocument) SetData(val []LicenseUserResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/LicenseUserResource
+type LicenseUserResource struct {
+	Type          LicenseUserResourceType          `json:"type"`
+	ID            string                           `json:"id"`
+	Attributes    LicenseUserResourceAttributes    `json:"attributes"`
+	Relationships LicenseUserResourceRelationships `json:"relationships"`
+	Links         JoinLinks                        `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *LicenseUserResource) GetType() LicenseUserResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *LicenseUserResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *LicenseUserResource) GetAttributes() LicenseUserResourceAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *LicenseUserResource) GetRelationships() LicenseUserResourceRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *LicenseUserResource) GetLinks() JoinLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *LicenseUserResource) SetType(val LicenseUserResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *LicenseUserResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *LicenseUserResource) SetAttributes(val LicenseUserResourceAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *LicenseUserResource) SetRelationships(val LicenseUserResourceRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *LicenseUserResource) SetLinks(val JoinLinks) {
+	s.Links = val
+}
+
+type LicenseUserResourceAttributes struct {
+	Created Timestamp `json:"created"`
+	Updated Timestamp `json:"updated"`
+}
+
+// GetCreated returns the value of Created.
+func (s *LicenseUserResourceAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *LicenseUserResourceAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetCreated sets the value of Created.
+func (s *LicenseUserResourceAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *LicenseUserResourceAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+type LicenseUserResourceRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	License ToOneRelationship `json:"license"`
+	User    ToOneRelationship `json:"user"`
+}
+
+// GetAccount returns the value of Account.
+func (s *LicenseUserResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetLicense returns the value of License.
+func (s *LicenseUserResourceRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// GetUser returns the value of User.
+func (s *LicenseUserResourceRelationships) GetUser() ToOneRelationship {
+	return s.User
+}
+
+// SetAccount sets the value of Account.
+func (s *LicenseUserResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetLicense sets the value of License.
+func (s *LicenseUserResourceRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+// SetUser sets the value of User.
+func (s *LicenseUserResourceRelationships) SetUser(val ToOneRelationship) {
+	s.User = val
+}
+
+type LicenseUserResourceType string
+
+const (
+	LicenseUserResourceTypeLicenseUsers LicenseUserResourceType = "license-users"
+)
+
+// AllValues returns all LicenseUserResourceType values.
+func (LicenseUserResourceType) AllValues() []LicenseUserResourceType {
+	return []LicenseUserResourceType{
+		LicenseUserResourceTypeLicenseUsers,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s LicenseUserResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case LicenseUserResourceTypeLicenseUsers:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *LicenseUserResourceType) UnmarshalText(data []byte) error {
+	switch LicenseUserResourceType(data) {
+	case LicenseUserResourceTypeLicenseUsers:
+		*s = LicenseUserResourceTypeLicenseUsers
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/LicenseUsersRelationship
+type LicenseUsersRelationship struct {
+	Links RelationshipLinks            `json:"links"`
+	Meta  LicenseUsersRelationshipMeta `json:"meta"`
+}
+
+// GetLinks returns the value of Links.
+func (s *LicenseUsersRelationship) GetLinks() RelationshipLinks {
+	return s.Links
+}
+
+// GetMeta returns the value of Meta.
+func (s *LicenseUsersRelationship) GetMeta() LicenseUsersRelationshipMeta {
+	return s.Meta
+}
+
+// SetLinks sets the value of Links.
+func (s *LicenseUsersRelationship) SetLinks(val RelationshipLinks) {
+	s.Links = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *LicenseUsersRelationship) SetMeta(val LicenseUsersRelationshipMeta) {
+	s.Meta = val
+}
+
+type LicenseUsersRelationshipMeta struct {
+	Count int `json:"count"`
+}
+
+// GetCount returns the value of Count.
+func (s *LicenseUsersRelationshipMeta) GetCount() int {
+	return s.Count
+}
+
+// SetCount sets the value of Count.
+func (s *LicenseUsersRelationshipMeta) SetCount(val int) {
+	s.Count = val
+}
+
+// Ref: #/components/schemas/LicenseValidateDocument
+type LicenseValidateDocument struct {
+	Data NilLicenseResource  `json:"data"`
+	Meta LicenseValidateMeta `json:"meta"`
+}
+
+// GetData returns the value of Data.
+func (s *LicenseValidateDocument) GetData() NilLicenseResource {
+	return s.Data
+}
+
+// GetMeta returns the value of Meta.
+func (s *LicenseValidateDocument) GetMeta() LicenseValidateMeta {
+	return s.Meta
+}
+
+// SetData sets the value of Data.
+func (s *LicenseValidateDocument) SetData(val NilLicenseResource) {
+	s.Data = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *LicenseValidateDocument) SetMeta(val LicenseValidateMeta) {
+	s.Meta = val
+}
+
+// Ref: #/components/schemas/LicenseValidateMeta
+type LicenseValidateMeta struct {
+	Ts     Timestamp                   `json:"ts"`
+	Valid  bool                        `json:"valid"`
+	Detail string                      `json:"detail"`
+	Code   string                      `json:"code"`
+	Nonce  OptInt                      `json:"nonce"`
+	Scope  OptLicenseValidateMetaScope `json:"scope"`
+}
+
+// GetTs returns the value of Ts.
+func (s *LicenseValidateMeta) GetTs() Timestamp {
+	return s.Ts
+}
+
+// GetValid returns the value of Valid.
+func (s *LicenseValidateMeta) GetValid() bool {
+	return s.Valid
+}
+
+// GetDetail returns the value of Detail.
+func (s *LicenseValidateMeta) GetDetail() string {
+	return s.Detail
+}
+
+// GetCode returns the value of Code.
+func (s *LicenseValidateMeta) GetCode() string {
+	return s.Code
+}
+
+// GetNonce returns the value of Nonce.
+func (s *LicenseValidateMeta) GetNonce() OptInt {
+	return s.Nonce
+}
+
+// GetScope returns the value of Scope.
+func (s *LicenseValidateMeta) GetScope() OptLicenseValidateMetaScope {
+	return s.Scope
+}
+
+// SetTs sets the value of Ts.
+func (s *LicenseValidateMeta) SetTs(val Timestamp) {
+	s.Ts = val
+}
+
+// SetValid sets the value of Valid.
+func (s *LicenseValidateMeta) SetValid(val bool) {
+	s.Valid = val
+}
+
+// SetDetail sets the value of Detail.
+func (s *LicenseValidateMeta) SetDetail(val string) {
+	s.Detail = val
+}
+
+// SetCode sets the value of Code.
+func (s *LicenseValidateMeta) SetCode(val string) {
+	s.Code = val
+}
+
+// SetNonce sets the value of Nonce.
+func (s *LicenseValidateMeta) SetNonce(val OptInt) {
+	s.Nonce = val
+}
+
+// SetScope sets the value of Scope.
+func (s *LicenseValidateMeta) SetScope(val OptLicenseValidateMetaScope) {
+	s.Scope = val
+}
+
+type LicenseValidateMetaScope map[string]jx.Raw
+
+func (s *LicenseValidateMetaScope) init() LicenseValidateMetaScope {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/ListLinks
 type ListLinks struct {
@@ -2220,6 +3867,423 @@ func (s *ListLinks) SetMeta(val OptPaginationMeta) {
 	s.Meta = val
 }
 
+// Ref: #/components/schemas/MachineAttributes
+type MachineAttributes struct {
+	Fingerprint       string    `json:"fingerprint"`
+	Cores             NilInt    `json:"cores"`
+	Memory            NilInt    `json:"memory"`
+	Disk              NilInt    `json:"disk"`
+	IP                NilString `json:"ip"`
+	Hostname          NilString `json:"hostname"`
+	Platform          NilString `json:"platform"`
+	Name              NilString `json:"name"`
+	RequireHeartbeat  bool      `json:"requireHeartbeat"`
+	HeartbeatStatus   string    `json:"heartbeatStatus"`
+	HeartbeatDuration NilInt    `json:"heartbeatDuration"`
+	MaxProcesses      NilInt    `json:"maxProcesses"`
+	LastCheckOut      NilString `json:"lastCheckOut"`
+	LastHeartbeat     NilString `json:"lastHeartbeat"`
+	NextHeartbeat     NilString `json:"nextHeartbeat"`
+	Metadata          Metadata  `json:"metadata"`
+	Created           Timestamp `json:"created"`
+	Updated           Timestamp `json:"updated"`
+}
+
+// GetFingerprint returns the value of Fingerprint.
+func (s *MachineAttributes) GetFingerprint() string {
+	return s.Fingerprint
+}
+
+// GetCores returns the value of Cores.
+func (s *MachineAttributes) GetCores() NilInt {
+	return s.Cores
+}
+
+// GetMemory returns the value of Memory.
+func (s *MachineAttributes) GetMemory() NilInt {
+	return s.Memory
+}
+
+// GetDisk returns the value of Disk.
+func (s *MachineAttributes) GetDisk() NilInt {
+	return s.Disk
+}
+
+// GetIP returns the value of IP.
+func (s *MachineAttributes) GetIP() NilString {
+	return s.IP
+}
+
+// GetHostname returns the value of Hostname.
+func (s *MachineAttributes) GetHostname() NilString {
+	return s.Hostname
+}
+
+// GetPlatform returns the value of Platform.
+func (s *MachineAttributes) GetPlatform() NilString {
+	return s.Platform
+}
+
+// GetName returns the value of Name.
+func (s *MachineAttributes) GetName() NilString {
+	return s.Name
+}
+
+// GetRequireHeartbeat returns the value of RequireHeartbeat.
+func (s *MachineAttributes) GetRequireHeartbeat() bool {
+	return s.RequireHeartbeat
+}
+
+// GetHeartbeatStatus returns the value of HeartbeatStatus.
+func (s *MachineAttributes) GetHeartbeatStatus() string {
+	return s.HeartbeatStatus
+}
+
+// GetHeartbeatDuration returns the value of HeartbeatDuration.
+func (s *MachineAttributes) GetHeartbeatDuration() NilInt {
+	return s.HeartbeatDuration
+}
+
+// GetMaxProcesses returns the value of MaxProcesses.
+func (s *MachineAttributes) GetMaxProcesses() NilInt {
+	return s.MaxProcesses
+}
+
+// GetLastCheckOut returns the value of LastCheckOut.
+func (s *MachineAttributes) GetLastCheckOut() NilString {
+	return s.LastCheckOut
+}
+
+// GetLastHeartbeat returns the value of LastHeartbeat.
+func (s *MachineAttributes) GetLastHeartbeat() NilString {
+	return s.LastHeartbeat
+}
+
+// GetNextHeartbeat returns the value of NextHeartbeat.
+func (s *MachineAttributes) GetNextHeartbeat() NilString {
+	return s.NextHeartbeat
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *MachineAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *MachineAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *MachineAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetFingerprint sets the value of Fingerprint.
+func (s *MachineAttributes) SetFingerprint(val string) {
+	s.Fingerprint = val
+}
+
+// SetCores sets the value of Cores.
+func (s *MachineAttributes) SetCores(val NilInt) {
+	s.Cores = val
+}
+
+// SetMemory sets the value of Memory.
+func (s *MachineAttributes) SetMemory(val NilInt) {
+	s.Memory = val
+}
+
+// SetDisk sets the value of Disk.
+func (s *MachineAttributes) SetDisk(val NilInt) {
+	s.Disk = val
+}
+
+// SetIP sets the value of IP.
+func (s *MachineAttributes) SetIP(val NilString) {
+	s.IP = val
+}
+
+// SetHostname sets the value of Hostname.
+func (s *MachineAttributes) SetHostname(val NilString) {
+	s.Hostname = val
+}
+
+// SetPlatform sets the value of Platform.
+func (s *MachineAttributes) SetPlatform(val NilString) {
+	s.Platform = val
+}
+
+// SetName sets the value of Name.
+func (s *MachineAttributes) SetName(val NilString) {
+	s.Name = val
+}
+
+// SetRequireHeartbeat sets the value of RequireHeartbeat.
+func (s *MachineAttributes) SetRequireHeartbeat(val bool) {
+	s.RequireHeartbeat = val
+}
+
+// SetHeartbeatStatus sets the value of HeartbeatStatus.
+func (s *MachineAttributes) SetHeartbeatStatus(val string) {
+	s.HeartbeatStatus = val
+}
+
+// SetHeartbeatDuration sets the value of HeartbeatDuration.
+func (s *MachineAttributes) SetHeartbeatDuration(val NilInt) {
+	s.HeartbeatDuration = val
+}
+
+// SetMaxProcesses sets the value of MaxProcesses.
+func (s *MachineAttributes) SetMaxProcesses(val NilInt) {
+	s.MaxProcesses = val
+}
+
+// SetLastCheckOut sets the value of LastCheckOut.
+func (s *MachineAttributes) SetLastCheckOut(val NilString) {
+	s.LastCheckOut = val
+}
+
+// SetLastHeartbeat sets the value of LastHeartbeat.
+func (s *MachineAttributes) SetLastHeartbeat(val NilString) {
+	s.LastHeartbeat = val
+}
+
+// SetNextHeartbeat sets the value of NextHeartbeat.
+func (s *MachineAttributes) SetNextHeartbeat(val NilString) {
+	s.NextHeartbeat = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *MachineAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *MachineAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *MachineAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/MachineDocument
+type MachineDocument struct {
+	Data NilMachineResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *MachineDocument) GetData() NilMachineResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *MachineDocument) SetData(val NilMachineResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/MachineListDocument
+type MachineListDocument struct {
+	Data  []MachineResource `json:"data"`
+	Links OptListLinks      `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *MachineListDocument) GetData() []MachineResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *MachineListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *MachineListDocument) SetData(val []MachineResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *MachineListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/MachineRelationships
+type MachineRelationships struct {
+	Account    ToOneRelationship  `json:"account"`
+	Product    ToOneRelationship  `json:"product"`
+	Group      ToOneRelationship  `json:"group"`
+	License    ToOneRelationship  `json:"license"`
+	Owner      ToOneRelationship  `json:"owner"`
+	Components ToManyRelationship `json:"components"`
+	Processes  ToManyRelationship `json:"processes"`
+}
+
+// GetAccount returns the value of Account.
+func (s *MachineRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *MachineRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// GetGroup returns the value of Group.
+func (s *MachineRelationships) GetGroup() ToOneRelationship {
+	return s.Group
+}
+
+// GetLicense returns the value of License.
+func (s *MachineRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// GetOwner returns the value of Owner.
+func (s *MachineRelationships) GetOwner() ToOneRelationship {
+	return s.Owner
+}
+
+// GetComponents returns the value of Components.
+func (s *MachineRelationships) GetComponents() ToManyRelationship {
+	return s.Components
+}
+
+// GetProcesses returns the value of Processes.
+func (s *MachineRelationships) GetProcesses() ToManyRelationship {
+	return s.Processes
+}
+
+// SetAccount sets the value of Account.
+func (s *MachineRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *MachineRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+// SetGroup sets the value of Group.
+func (s *MachineRelationships) SetGroup(val ToOneRelationship) {
+	s.Group = val
+}
+
+// SetLicense sets the value of License.
+func (s *MachineRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+// SetOwner sets the value of Owner.
+func (s *MachineRelationships) SetOwner(val ToOneRelationship) {
+	s.Owner = val
+}
+
+// SetComponents sets the value of Components.
+func (s *MachineRelationships) SetComponents(val ToManyRelationship) {
+	s.Components = val
+}
+
+// SetProcesses sets the value of Processes.
+func (s *MachineRelationships) SetProcesses(val ToManyRelationship) {
+	s.Processes = val
+}
+
+// Ref: #/components/schemas/MachineResource
+type MachineResource struct {
+	Type          MachineResourceType  `json:"type"`
+	ID            string               `json:"id"`
+	Attributes    MachineAttributes    `json:"attributes"`
+	Relationships MachineRelationships `json:"relationships"`
+	Links         ResourceLinks        `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *MachineResource) GetType() MachineResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *MachineResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *MachineResource) GetAttributes() MachineAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *MachineResource) GetRelationships() MachineRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *MachineResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *MachineResource) SetType(val MachineResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *MachineResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *MachineResource) SetAttributes(val MachineAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *MachineResource) SetRelationships(val MachineRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *MachineResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type MachineResourceType string
+
+const (
+	MachineResourceTypeMachines MachineResourceType = "machines"
+)
+
+// AllValues returns all MachineResourceType values.
+func (MachineResourceType) AllValues() []MachineResourceType {
+	return []MachineResourceType{
+		MachineResourceTypeMachines,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MachineResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case MachineResourceTypeMachines:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MachineResourceType) UnmarshalText(data []byte) error {
+	switch MachineResourceType(data) {
+	case MachineResourceTypeMachines:
+		*s = MachineResourceTypeMachines
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/MachineStubListDocument
 type MachineStubListDocument struct {
 	Data  []MachineStubListDocumentDataItem `json:"data"`
@@ -2250,12 +4314,12 @@ type MachineStubListDocumentDataItem struct{}
 
 // Ref: #/components/schemas/MeDocument
 type MeDocument struct {
-	Data     UserResource    `json:"data"`
+	Data     MeDocumentData  `json:"data"`
 	Included []TokenResource `json:"included"`
 }
 
 // GetData returns the value of Data.
-func (s *MeDocument) GetData() UserResource {
+func (s *MeDocument) GetData() MeDocumentData {
 	return s.Data
 }
 
@@ -2265,13 +4329,103 @@ func (s *MeDocument) GetIncluded() []TokenResource {
 }
 
 // SetData sets the value of Data.
-func (s *MeDocument) SetData(val UserResource) {
+func (s *MeDocument) SetData(val MeDocumentData) {
 	s.Data = val
 }
 
 // SetIncluded sets the value of Included.
 func (s *MeDocument) SetIncluded(val []TokenResource) {
 	s.Included = val
+}
+
+// MeDocumentData represents sum type.
+type MeDocumentData struct {
+	Type            MeDocumentDataType // switch on this field
+	UserResource    UserResource
+	ProductResource ProductResource
+	LicenseResource LicenseResource
+}
+
+// MeDocumentDataType is oneOf type of MeDocumentData.
+type MeDocumentDataType string
+
+// Possible values for MeDocumentDataType.
+const (
+	UserResourceMeDocumentData    MeDocumentDataType = "UserResource"
+	ProductResourceMeDocumentData MeDocumentDataType = "ProductResource"
+	LicenseResourceMeDocumentData MeDocumentDataType = "LicenseResource"
+)
+
+// IsUserResource reports whether MeDocumentData is UserResource.
+func (s MeDocumentData) IsUserResource() bool { return s.Type == UserResourceMeDocumentData }
+
+// IsProductResource reports whether MeDocumentData is ProductResource.
+func (s MeDocumentData) IsProductResource() bool { return s.Type == ProductResourceMeDocumentData }
+
+// IsLicenseResource reports whether MeDocumentData is LicenseResource.
+func (s MeDocumentData) IsLicenseResource() bool { return s.Type == LicenseResourceMeDocumentData }
+
+// SetUserResource sets MeDocumentData to UserResource.
+func (s *MeDocumentData) SetUserResource(v UserResource) {
+	s.Type = UserResourceMeDocumentData
+	s.UserResource = v
+}
+
+// GetUserResource returns UserResource and true boolean if MeDocumentData is UserResource.
+func (s MeDocumentData) GetUserResource() (v UserResource, ok bool) {
+	if !s.IsUserResource() {
+		return v, false
+	}
+	return s.UserResource, true
+}
+
+// NewUserResourceMeDocumentData returns new MeDocumentData from UserResource.
+func NewUserResourceMeDocumentData(v UserResource) MeDocumentData {
+	var s MeDocumentData
+	s.SetUserResource(v)
+	return s
+}
+
+// SetProductResource sets MeDocumentData to ProductResource.
+func (s *MeDocumentData) SetProductResource(v ProductResource) {
+	s.Type = ProductResourceMeDocumentData
+	s.ProductResource = v
+}
+
+// GetProductResource returns ProductResource and true boolean if MeDocumentData is ProductResource.
+func (s MeDocumentData) GetProductResource() (v ProductResource, ok bool) {
+	if !s.IsProductResource() {
+		return v, false
+	}
+	return s.ProductResource, true
+}
+
+// NewProductResourceMeDocumentData returns new MeDocumentData from ProductResource.
+func NewProductResourceMeDocumentData(v ProductResource) MeDocumentData {
+	var s MeDocumentData
+	s.SetProductResource(v)
+	return s
+}
+
+// SetLicenseResource sets MeDocumentData to LicenseResource.
+func (s *MeDocumentData) SetLicenseResource(v LicenseResource) {
+	s.Type = LicenseResourceMeDocumentData
+	s.LicenseResource = v
+}
+
+// GetLicenseResource returns LicenseResource and true boolean if MeDocumentData is LicenseResource.
+func (s MeDocumentData) GetLicenseResource() (v LicenseResource, ok bool) {
+	if !s.IsLicenseResource() {
+		return v, false
+	}
+	return s.LicenseResource, true
+}
+
+// NewLicenseResourceMeDocumentData returns new MeDocumentData from LicenseResource.
+func NewLicenseResourceMeDocumentData(v LicenseResource) MeDocumentData {
+	var s MeDocumentData
+	s.SetLicenseResource(v)
+	return s
 }
 
 // Ref: #/components/schemas/Metadata
@@ -2421,6 +4575,96 @@ func (o NilInt) Or(d int) int {
 	return d
 }
 
+// NewNilLicenseResource returns new NilLicenseResource with value set to v.
+func NewNilLicenseResource(v LicenseResource) NilLicenseResource {
+	return NilLicenseResource{
+		Value: v,
+	}
+}
+
+// NilLicenseResource is nullable LicenseResource.
+type NilLicenseResource struct {
+	Value LicenseResource
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilLicenseResource) SetTo(v LicenseResource) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilLicenseResource) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilLicenseResource) SetToNull() {
+	o.Null = true
+	var v LicenseResource
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilLicenseResource) Get() (v LicenseResource, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilLicenseResource) Or(d LicenseResource) LicenseResource {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilMachineResource returns new NilMachineResource with value set to v.
+func NewNilMachineResource(v MachineResource) NilMachineResource {
+	return NilMachineResource{
+		Value: v,
+	}
+}
+
+// NilMachineResource is nullable MachineResource.
+type NilMachineResource struct {
+	Value MachineResource
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilMachineResource) SetTo(v MachineResource) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilMachineResource) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilMachineResource) SetToNull() {
+	o.Null = true
+	var v MachineResource
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilMachineResource) Get() (v MachineResource, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilMachineResource) Or(d MachineResource) MachineResource {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewNilResourceIdentifier returns new NilResourceIdentifier with value set to v.
 func NewNilResourceIdentifier(v ResourceIdentifier) NilResourceIdentifier {
 	return NilResourceIdentifier{
@@ -2505,6 +4749,51 @@ func (o NilString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilUserResource returns new NilUserResource with value set to v.
+func NewNilUserResource(v UserResource) NilUserResource {
+	return NilUserResource{
+		Value: v,
+	}
+}
+
+// NilUserResource is nullable UserResource.
+type NilUserResource struct {
+	Value UserResource
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilUserResource) SetTo(v UserResource) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilUserResource) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilUserResource) SetToNull() {
+	o.Null = true
+	var v UserResource
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilUserResource) Get() (v UserResource, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilUserResource) Or(d UserResource) UserResource {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2597,6 +4886,98 @@ func (o OptErrorSource) Get() (v ErrorSource, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptErrorSource) Or(d ErrorSource) ErrorSource {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptLicenseValidateMetaScope returns new OptLicenseValidateMetaScope with value set to v.
+func NewOptLicenseValidateMetaScope(v LicenseValidateMetaScope) OptLicenseValidateMetaScope {
+	return OptLicenseValidateMetaScope{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptLicenseValidateMetaScope is optional LicenseValidateMetaScope.
+type OptLicenseValidateMetaScope struct {
+	Value LicenseValidateMetaScope
+	Set   bool
+}
+
+// IsSet returns true if OptLicenseValidateMetaScope was set.
+func (o OptLicenseValidateMetaScope) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptLicenseValidateMetaScope) Reset() {
+	var v LicenseValidateMetaScope
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptLicenseValidateMetaScope) SetTo(v LicenseValidateMetaScope) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptLicenseValidateMetaScope) Get() (v LicenseValidateMetaScope, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptLicenseValidateMetaScope) Or(d LicenseValidateMetaScope) LicenseValidateMetaScope {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2769,69 +5150,6 @@ func (o OptNilString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilString) Or(d string) string {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptNilUserLicenseResourceAttributes returns new OptNilUserLicenseResourceAttributes with value set to v.
-func NewOptNilUserLicenseResourceAttributes(v UserLicenseResourceAttributes) OptNilUserLicenseResourceAttributes {
-	return OptNilUserLicenseResourceAttributes{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptNilUserLicenseResourceAttributes is optional nullable UserLicenseResourceAttributes.
-type OptNilUserLicenseResourceAttributes struct {
-	Value UserLicenseResourceAttributes
-	Set   bool
-	Null  bool
-}
-
-// IsSet returns true if OptNilUserLicenseResourceAttributes was set.
-func (o OptNilUserLicenseResourceAttributes) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptNilUserLicenseResourceAttributes) Reset() {
-	var v UserLicenseResourceAttributes
-	o.Value = v
-	o.Set = false
-	o.Null = false
-}
-
-// SetTo sets value to v.
-func (o *OptNilUserLicenseResourceAttributes) SetTo(v UserLicenseResourceAttributes) {
-	o.Set = true
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o OptNilUserLicenseResourceAttributes) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *OptNilUserLicenseResourceAttributes) SetToNull() {
-	o.Set = true
-	o.Null = true
-	var v UserLicenseResourceAttributes
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptNilUserLicenseResourceAttributes) Get() (v UserLicenseResourceAttributes, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptNilUserLicenseResourceAttributes) Or(d UserLicenseResourceAttributes) UserLicenseResourceAttributes {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -3142,52 +5460,6 @@ func (o OptUserDocumentMeta) Get() (v UserDocumentMeta, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptUserDocumentMeta) Or(d UserDocumentMeta) UserDocumentMeta {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptUserLicenseResourceRelationships returns new OptUserLicenseResourceRelationships with value set to v.
-func NewOptUserLicenseResourceRelationships(v UserLicenseResourceRelationships) OptUserLicenseResourceRelationships {
-	return OptUserLicenseResourceRelationships{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptUserLicenseResourceRelationships is optional UserLicenseResourceRelationships.
-type OptUserLicenseResourceRelationships struct {
-	Value UserLicenseResourceRelationships
-	Set   bool
-}
-
-// IsSet returns true if OptUserLicenseResourceRelationships was set.
-func (o OptUserLicenseResourceRelationships) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptUserLicenseResourceRelationships) Reset() {
-	var v UserLicenseResourceRelationships
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptUserLicenseResourceRelationships) SetTo(v UserLicenseResourceRelationships) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptUserLicenseResourceRelationships) Get() (v UserLicenseResourceRelationships, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptUserLicenseResourceRelationships) Or(d UserLicenseResourceRelationships) UserLicenseResourceRelationships {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4648,12 +6920,12 @@ func (s *ProductUserListDocument) SetLinks(val OptListLinks) {
 
 // Ref: #/components/schemas/ProfileDocument
 type ProfileDocument struct {
-	Data UserResource `json:"data"`
-	Meta ProfileMeta  `json:"meta"`
+	Data ProfileDocumentData `json:"data"`
+	Meta ProfileMeta         `json:"meta"`
 }
 
 // GetData returns the value of Data.
-func (s *ProfileDocument) GetData() UserResource {
+func (s *ProfileDocument) GetData() ProfileDocumentData {
 	return s.Data
 }
 
@@ -4663,13 +6935,107 @@ func (s *ProfileDocument) GetMeta() ProfileMeta {
 }
 
 // SetData sets the value of Data.
-func (s *ProfileDocument) SetData(val UserResource) {
+func (s *ProfileDocument) SetData(val ProfileDocumentData) {
 	s.Data = val
 }
 
 // SetMeta sets the value of Meta.
 func (s *ProfileDocument) SetMeta(val ProfileMeta) {
 	s.Meta = val
+}
+
+// ProfileDocumentData represents sum type.
+type ProfileDocumentData struct {
+	Type            ProfileDocumentDataType // switch on this field
+	UserResource    UserResource
+	ProductResource ProductResource
+	LicenseResource LicenseResource
+}
+
+// ProfileDocumentDataType is oneOf type of ProfileDocumentData.
+type ProfileDocumentDataType string
+
+// Possible values for ProfileDocumentDataType.
+const (
+	UserResourceProfileDocumentData    ProfileDocumentDataType = "UserResource"
+	ProductResourceProfileDocumentData ProfileDocumentDataType = "ProductResource"
+	LicenseResourceProfileDocumentData ProfileDocumentDataType = "LicenseResource"
+)
+
+// IsUserResource reports whether ProfileDocumentData is UserResource.
+func (s ProfileDocumentData) IsUserResource() bool { return s.Type == UserResourceProfileDocumentData }
+
+// IsProductResource reports whether ProfileDocumentData is ProductResource.
+func (s ProfileDocumentData) IsProductResource() bool {
+	return s.Type == ProductResourceProfileDocumentData
+}
+
+// IsLicenseResource reports whether ProfileDocumentData is LicenseResource.
+func (s ProfileDocumentData) IsLicenseResource() bool {
+	return s.Type == LicenseResourceProfileDocumentData
+}
+
+// SetUserResource sets ProfileDocumentData to UserResource.
+func (s *ProfileDocumentData) SetUserResource(v UserResource) {
+	s.Type = UserResourceProfileDocumentData
+	s.UserResource = v
+}
+
+// GetUserResource returns UserResource and true boolean if ProfileDocumentData is UserResource.
+func (s ProfileDocumentData) GetUserResource() (v UserResource, ok bool) {
+	if !s.IsUserResource() {
+		return v, false
+	}
+	return s.UserResource, true
+}
+
+// NewUserResourceProfileDocumentData returns new ProfileDocumentData from UserResource.
+func NewUserResourceProfileDocumentData(v UserResource) ProfileDocumentData {
+	var s ProfileDocumentData
+	s.SetUserResource(v)
+	return s
+}
+
+// SetProductResource sets ProfileDocumentData to ProductResource.
+func (s *ProfileDocumentData) SetProductResource(v ProductResource) {
+	s.Type = ProductResourceProfileDocumentData
+	s.ProductResource = v
+}
+
+// GetProductResource returns ProductResource and true boolean if ProfileDocumentData is ProductResource.
+func (s ProfileDocumentData) GetProductResource() (v ProductResource, ok bool) {
+	if !s.IsProductResource() {
+		return v, false
+	}
+	return s.ProductResource, true
+}
+
+// NewProductResourceProfileDocumentData returns new ProfileDocumentData from ProductResource.
+func NewProductResourceProfileDocumentData(v ProductResource) ProfileDocumentData {
+	var s ProfileDocumentData
+	s.SetProductResource(v)
+	return s
+}
+
+// SetLicenseResource sets ProfileDocumentData to LicenseResource.
+func (s *ProfileDocumentData) SetLicenseResource(v LicenseResource) {
+	s.Type = LicenseResourceProfileDocumentData
+	s.LicenseResource = v
+}
+
+// GetLicenseResource returns LicenseResource and true boolean if ProfileDocumentData is LicenseResource.
+func (s ProfileDocumentData) GetLicenseResource() (v LicenseResource, ok bool) {
+	if !s.IsLicenseResource() {
+		return v, false
+	}
+	return s.LicenseResource, true
+}
+
+// NewLicenseResourceProfileDocumentData returns new ProfileDocumentData from LicenseResource.
+func NewLicenseResourceProfileDocumentData(v LicenseResource) ProfileDocumentData {
+	var s ProfileDocumentData
+	s.SetLicenseResource(v)
+	return s
 }
 
 // Ref: #/components/schemas/ProfileMeta
@@ -4865,6 +7231,9 @@ func (*RetryWebhookEventReqApplicationVndAPIJSON) retryWebhookEventReq() {}
 type RetryWebhookEventReqEmptyBody struct{}
 
 func (*RetryWebhookEventReqEmptyBody) retryWebhookEventReq() {}
+
+// RevokeLicenseNoContent is response for RevokeLicense operation.
+type RevokeLicenseNoContent struct{}
 
 // RevokeTokenNoContent is response for RevokeToken operation.
 type RevokeTokenNoContent struct{}
@@ -5111,28 +7480,6 @@ func (s *SecondFactorResourceType) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
-}
-
-type ShowPolicyLicenseOK map[string]jx.Raw
-
-func (s *ShowPolicyLicenseOK) init() ShowPolicyLicenseOK {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type ShowProductLicenseOK map[string]jx.Raw
-
-func (s *ShowProductLicenseOK) init() ShowProductLicenseOK {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
 }
 
 type ShowProductMachineOK map[string]jx.Raw
@@ -5601,6 +7948,156 @@ type UpdateKeyReqEmptyBody struct{}
 
 func (*UpdateKeyReqEmptyBody) updateKeyReq() {}
 
+type UpdateLicenseGroupReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateLicenseGroupReqApplicationJSON) init() UpdateLicenseGroupReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseGroupReqApplicationJSON) updateLicenseGroupReq() {}
+
+type UpdateLicenseGroupReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateLicenseGroupReqApplicationVndAPIJSON) init() UpdateLicenseGroupReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseGroupReqApplicationVndAPIJSON) updateLicenseGroupReq() {}
+
+type UpdateLicenseGroupReqEmptyBody struct{}
+
+func (*UpdateLicenseGroupReqEmptyBody) updateLicenseGroupReq() {}
+
+type UpdateLicenseOwnerReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateLicenseOwnerReqApplicationJSON) init() UpdateLicenseOwnerReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseOwnerReqApplicationJSON) updateLicenseOwnerReq() {}
+
+type UpdateLicenseOwnerReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateLicenseOwnerReqApplicationVndAPIJSON) init() UpdateLicenseOwnerReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseOwnerReqApplicationVndAPIJSON) updateLicenseOwnerReq() {}
+
+type UpdateLicenseOwnerReqEmptyBody struct{}
+
+func (*UpdateLicenseOwnerReqEmptyBody) updateLicenseOwnerReq() {}
+
+type UpdateLicensePolicyReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateLicensePolicyReqApplicationJSON) init() UpdateLicensePolicyReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicensePolicyReqApplicationJSON) updateLicensePolicyReq() {}
+
+type UpdateLicensePolicyReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateLicensePolicyReqApplicationVndAPIJSON) init() UpdateLicensePolicyReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicensePolicyReqApplicationVndAPIJSON) updateLicensePolicyReq() {}
+
+type UpdateLicensePolicyReqEmptyBody struct{}
+
+func (*UpdateLicensePolicyReqEmptyBody) updateLicensePolicyReq() {}
+
+type UpdateLicenseReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateLicenseReqApplicationJSON) init() UpdateLicenseReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseReqApplicationJSON) updateLicenseReq() {}
+
+type UpdateLicenseReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateLicenseReqApplicationVndAPIJSON) init() UpdateLicenseReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseReqApplicationVndAPIJSON) updateLicenseReq() {}
+
+type UpdateLicenseReqEmptyBody struct{}
+
+func (*UpdateLicenseReqEmptyBody) updateLicenseReq() {}
+
+type UpdateLicenseUserAliasReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateLicenseUserAliasReqApplicationJSON) init() UpdateLicenseUserAliasReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseUserAliasReqApplicationJSON) updateLicenseUserAliasReq() {}
+
+type UpdateLicenseUserAliasReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateLicenseUserAliasReqApplicationVndAPIJSON) init() UpdateLicenseUserAliasReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateLicenseUserAliasReqApplicationVndAPIJSON) updateLicenseUserAliasReq() {}
+
+type UpdateLicenseUserAliasReqEmptyBody struct{}
+
+func (*UpdateLicenseUserAliasReqEmptyBody) updateLicenseUserAliasReq() {}
+
 type UpdatePolicyReqApplicationJSON map[string]jx.Raw
 
 func (s *UpdatePolicyReqApplicationJSON) init() UpdatePolicyReqApplicationJSON {
@@ -6004,162 +8501,6 @@ func (s *UserDocumentMeta) GetPasswordResetToken() string {
 // SetPasswordResetToken sets the value of PasswordResetToken.
 func (s *UserDocumentMeta) SetPasswordResetToken(val string) {
 	s.PasswordResetToken = val
-}
-
-// Ref: #/components/schemas/UserLicenseCollectionDocument
-type UserLicenseCollectionDocument struct {
-	Data  []UserLicenseResource `json:"data"`
-	Links OptListLinks          `json:"links"`
-}
-
-// GetData returns the value of Data.
-func (s *UserLicenseCollectionDocument) GetData() []UserLicenseResource {
-	return s.Data
-}
-
-// GetLinks returns the value of Links.
-func (s *UserLicenseCollectionDocument) GetLinks() OptListLinks {
-	return s.Links
-}
-
-// SetData sets the value of Data.
-func (s *UserLicenseCollectionDocument) SetData(val []UserLicenseResource) {
-	s.Data = val
-}
-
-// SetLinks sets the value of Links.
-func (s *UserLicenseCollectionDocument) SetLinks(val OptListLinks) {
-	s.Links = val
-}
-
-// Ref: #/components/schemas/UserLicenseDocument
-type UserLicenseDocument struct {
-	Data UserLicenseResource `json:"data"`
-}
-
-// GetData returns the value of Data.
-func (s *UserLicenseDocument) GetData() UserLicenseResource {
-	return s.Data
-}
-
-// SetData sets the value of Data.
-func (s *UserLicenseDocument) SetData(val UserLicenseResource) {
-	s.Data = val
-}
-
-// Ref: #/components/schemas/UserLicenseResource
-type UserLicenseResource struct {
-	Type          UserLicenseResourceType             `json:"type"`
-	ID            string                              `json:"id"`
-	Attributes    OptNilUserLicenseResourceAttributes `json:"attributes"`
-	Relationships OptUserLicenseResourceRelationships `json:"relationships"`
-	Links         ResourceLinks                       `json:"links"`
-}
-
-// GetType returns the value of Type.
-func (s *UserLicenseResource) GetType() UserLicenseResourceType {
-	return s.Type
-}
-
-// GetID returns the value of ID.
-func (s *UserLicenseResource) GetID() string {
-	return s.ID
-}
-
-// GetAttributes returns the value of Attributes.
-func (s *UserLicenseResource) GetAttributes() OptNilUserLicenseResourceAttributes {
-	return s.Attributes
-}
-
-// GetRelationships returns the value of Relationships.
-func (s *UserLicenseResource) GetRelationships() OptUserLicenseResourceRelationships {
-	return s.Relationships
-}
-
-// GetLinks returns the value of Links.
-func (s *UserLicenseResource) GetLinks() ResourceLinks {
-	return s.Links
-}
-
-// SetType sets the value of Type.
-func (s *UserLicenseResource) SetType(val UserLicenseResourceType) {
-	s.Type = val
-}
-
-// SetID sets the value of ID.
-func (s *UserLicenseResource) SetID(val string) {
-	s.ID = val
-}
-
-// SetAttributes sets the value of Attributes.
-func (s *UserLicenseResource) SetAttributes(val OptNilUserLicenseResourceAttributes) {
-	s.Attributes = val
-}
-
-// SetRelationships sets the value of Relationships.
-func (s *UserLicenseResource) SetRelationships(val OptUserLicenseResourceRelationships) {
-	s.Relationships = val
-}
-
-// SetLinks sets the value of Links.
-func (s *UserLicenseResource) SetLinks(val ResourceLinks) {
-	s.Links = val
-}
-
-type UserLicenseResourceAttributes map[string]jx.Raw
-
-func (s *UserLicenseResourceAttributes) init() UserLicenseResourceAttributes {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type UserLicenseResourceRelationships map[string]jx.Raw
-
-func (s *UserLicenseResourceRelationships) init() UserLicenseResourceRelationships {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type UserLicenseResourceType string
-
-const (
-	UserLicenseResourceTypeLicenses UserLicenseResourceType = "licenses"
-)
-
-// AllValues returns all UserLicenseResourceType values.
-func (UserLicenseResourceType) AllValues() []UserLicenseResourceType {
-	return []UserLicenseResourceType{
-		UserLicenseResourceTypeLicenses,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s UserLicenseResourceType) MarshalText() ([]byte, error) {
-	switch s {
-	case UserLicenseResourceTypeLicenses:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *UserLicenseResourceType) UnmarshalText(data []byte) error {
-	switch UserLicenseResourceType(data) {
-	case UserLicenseResourceTypeLicenses:
-		*s = UserLicenseResourceTypeLicenses
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 // Ref: #/components/schemas/UserMachineCollectionDocument
@@ -6647,6 +8988,66 @@ func (s *UserResourceType) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+type ValidateLicenseKeyReqApplicationJSON map[string]jx.Raw
+
+func (s *ValidateLicenseKeyReqApplicationJSON) init() ValidateLicenseKeyReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ValidateLicenseKeyReqApplicationJSON) validateLicenseKeyReq() {}
+
+type ValidateLicenseKeyReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *ValidateLicenseKeyReqApplicationVndAPIJSON) init() ValidateLicenseKeyReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ValidateLicenseKeyReqApplicationVndAPIJSON) validateLicenseKeyReq() {}
+
+type ValidateLicenseKeyReqEmptyBody struct{}
+
+func (*ValidateLicenseKeyReqEmptyBody) validateLicenseKeyReq() {}
+
+type ValidateLicenseReqApplicationJSON map[string]jx.Raw
+
+func (s *ValidateLicenseReqApplicationJSON) init() ValidateLicenseReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ValidateLicenseReqApplicationJSON) validateLicenseReq() {}
+
+type ValidateLicenseReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *ValidateLicenseReqApplicationVndAPIJSON) init() ValidateLicenseReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ValidateLicenseReqApplicationVndAPIJSON) validateLicenseReq() {}
+
+type ValidateLicenseReqEmptyBody struct{}
+
+func (*ValidateLicenseReqEmptyBody) validateLicenseReq() {}
 
 // Ref: #/components/schemas/WebhookEndpointAttributes
 type WebhookEndpointAttributes struct {
