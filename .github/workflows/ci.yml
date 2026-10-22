@@ -1,0 +1,65 @@
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: lic
+          POSTGRES_PASSWORD: lic
+          POSTGRES_DB: lic
+        ports: ['5440:5432']
+        options: >-
+          --health-cmd "pg_isready -U lic" --health-interval 5s --health-timeout 3s --health-retries 10
+      valkey:
+        image: valkey/valkey:8-alpine
+        ports: ['6390:6379']
+    env:
+      GOWORK: 'off'
+      LIC_TEST_DATABASE_URL: postgres://lic:lic@localhost:5440/lic?sslmode=disable
+      LIC_TEST_VALKEY_ADDR: localhost:6390
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('go.mod', 'go.sum') }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-go-${{ hashFiles('go.mod', 'go.sum') }}-
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: '@backplane-labs'
+      - run: corepack enable && corepack prepare yarn@1.22.22 --activate
+      - run: make configure configure-web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cd portal && yarn install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: bin/golangci-lint run ./...
+      - run: make db && git diff --exit-code -- internal/infra/postgres/db internal/infra/postgres/migrations
+      - run: make gen-api && git diff --exit-code -- openapi internal/oas
+      - run: make gen && git diff --exit-code -- proto web/src/gen
+      - run: cd web && yarn -s typecheck && yarn -s test && yarn -s build
+      - run: cd portal && yarn -s typecheck && yarn -s test && yarn -s build
+      - run: go vet ./...
+      - run: go test -race -p 1 -count=1 -timeout 15m ./...
