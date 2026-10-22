@@ -42,6 +42,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
+	"github.com/backplane-labs/backplane-lic/internal/infra/portal"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	whwebhook "github.com/backplane-labs/backplane-lic/internal/infra/webhook"
 )
@@ -72,6 +73,11 @@ func New(root backplane.Root[Config]) (*Service, error) {
 
 	spec := accounts.Spec{ID: id, Name: cfg.Account.Name, Slug: cfg.Account.Slug}
 	late := &lateHandler{}
+
+	public, err := portal.New(cfg.HTTP.Portal, id.String(), late)
+	if err != nil {
+		return nil, fmt.Errorf("http.portal: %w", err)
+	}
 
 	var relayOutbox *outbox.Outbox
 
@@ -117,7 +123,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 		return loop(ctx, time.Minute, jobsRunner.Tick)
 	})
 
-	return &Service{Store: store, Cache: cache, HTTP: late}, nil
+	return &Service{Store: store, Cache: cache, HTTP: public}, nil
 }
 
 // loop runs a periodic pass until the context ends.
@@ -168,7 +174,14 @@ func Handler(
 		return nil, err
 	}
 
-	return handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision, queue), nil
+	api := handler(store, httpapi.NewMemoryThrottler(), spec, cfg, docsHost, revision, queue)
+
+	public, err := portal.New(cfg.Portal, spec.ID.String(), api)
+	if err != nil {
+		return nil, fmt.Errorf("http.portal: %w", err)
+	}
+
+	return public, nil
 }
 
 func handler(

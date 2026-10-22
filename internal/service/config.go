@@ -4,6 +4,8 @@ import (
 	"github.com/backplane-labs/backplane/pkg/backplane/config"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/backplane-labs/backplane/pkg/backplane/infra/valkey"
+
+	"github.com/backplane-labs/backplane-lic/internal/infra/portal"
 )
 
 // Config is the whole configuration: file (BACKPLANE_CONFIG_FILE) < env
@@ -29,6 +31,8 @@ type Config struct {
 
 // HTTP holds the public API's runtime settings.
 type HTTP struct {
+	// Portal serves the standalone customer SPA on the public HTTP listener.
+	Portal portal.Config `json:"portal"`
 	// TrustedProxies lists the proxy CIDRs (or single IPs) whose
 	// X-Forwarded-For is honored when resolving the client address;
 	// empty means every request is keyed by its remote address.
