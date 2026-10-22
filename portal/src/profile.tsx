@@ -1,3 +1,4 @@
+import { CustomerError } from './errors';
 import { useEffect, useState, type FormEvent } from 'react';
 import QRCode from 'qrcode';
 import { useAuth } from './auth';
@@ -15,7 +16,7 @@ function PasswordForm() {
   const [done, setDone] = useState(false);
   async function update(event: FormEvent) {
     event.preventDefault(); setError(null); setDone(false);
-    if (newPassword !== confirm) { setError(new Error(t('passwordsDiffer'))); return; }
+    if (newPassword !== confirm) { setError(new CustomerError('passwordsDiffer')); return; }
     setBusy(true);
     try {
       await api.request(`/users/${encodeURIComponent(user!.id)}/actions/update-password`, { method: 'POST', body: { meta: { oldPassword, newPassword } } });

@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Button, Input } from '@backplane-labs/backplane-ui';
+import { Link } from 'react-router-dom';
+import { customerErrorMessage, isInvalidReset } from './errors';
 import { useLocale, type TranslationKey } from './i18n';
 
 export { Button };
@@ -10,9 +12,10 @@ export function Field({ label, hint, ...props }: InputHTMLAttributes<HTMLInputEl
 export function Notice({ children, error = false }: { children: ReactNode; error?: boolean }) {
   return <div className={`notice ${error ? 'notice-error' : ''}`} role={error ? 'alert' : 'status'}>{children}</div>;
 }
-export function ErrorNotice({ error }: { error: unknown }) {
+export function ErrorNotice({ error, reset = false }: { error: unknown; reset?: boolean }) {
+  const { t } = useLocale();
   if (!error) return null;
-  return <Notice error>{error instanceof Error ? error.message : String(error)}</Notice>;
+  return <Notice error>{customerErrorMessage(error, t, reset)}{reset && isInvalidReset(error) && <><br /><Link className="text-link" to="/forgot">{t('requestNewReset')}</Link></>}</Notice>;
 }
 export function Loading() {
   const { t } = useLocale();

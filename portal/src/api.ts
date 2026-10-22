@@ -20,10 +20,15 @@ export interface Document<T = Resource> {
 }
 export interface APIErrorItem { code?: string; title?: string; detail?: string; source?: { pointer?: string; parameter?: string } }
 export class APIError extends Error {
-  constructor(public status: number, public errors: APIErrorItem[]) {
+  constructor(public status: number, public errors: APIErrorItem[], public retryAfter?: number) {
     super(errors.map(e => [e.code, e.detail ?? e.title].filter(Boolean).join(': ')).join('\n') || `HTTP ${status}`);
   }
   has(code: string) { return this.errors.some(e => e.code === code); }
+}
+function retryAfterSeconds(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const seconds = /^\d+$/.test(value) ? Number(value) : (Date.parse(value) - Date.now()) / 1000;
+  return Number.isFinite(seconds) && seconds >= 0 ? Math.ceil(seconds) : undefined;
 }
 export type Session = { token: string; tokenId: string };
 const storageKey = `lic.portal:${config.account}:${config.basePath}`;
@@ -63,7 +68,7 @@ export class API {
     });
     if (!response.ok) {
       const error = await response.json().catch(() => null) as { errors?: APIErrorItem[] } | null;
-      const failure = new APIError(response.status, error?.errors ?? [{ title: response.statusText || 'Request failed' }]);
+      const failure = new APIError(response.status, error?.errors ?? [{ title: response.statusText || 'Request failed' }], retryAfterSeconds(response.headers.get('Retry-After')));
       if (this.token && !options.signal?.aborted && (failure.has('TOKEN_INVALID') || failure.has('TOKEN_EXPIRED') || failure.has('TOKEN_MISSING') || failure.has('USER_BANNED'))) {
         window.dispatchEvent(new CustomEvent('lic-session-invalid', { detail: { token: this.token } }));
       }

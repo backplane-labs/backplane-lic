@@ -1,3 +1,4 @@
+import { CustomerError } from './errors';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { API, APIError, basic, config, resetParameters, secretSession } from './api';
@@ -22,7 +23,7 @@ export function Login() {
     try {
       const response = await new API().request('/tokens', {
         method: 'POST', authorization: basic(email.trim(), password),
-        body: otpRequired ? { meta: { otp } } : {},
+        body: { data: { type: 'tokens', attributes: { name: 'Portal session' } }, ...(otpRequired ? { meta: { otp } } : {}) },
       });
       await auth.login(secretSession(response.data));
       setPassword(''); setOTP('');
@@ -40,11 +41,11 @@ export function Login() {
         {!otpRequired ? <><Field label={t('email')} type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} autoFocus />
           <Field label={t('password')} type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} /></>
           : <><p className="signed-email">{email}</p><Field label={t('otp')} hint={t('otpHelp')} value={otp} onChange={e => setOTP(e.target.value.replace(/\D/g, ''))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus />
-          <Button type="button" variant="link" onClick={() => { setOTPRequired(false); setOTP(''); setError(null); }}>{t('backLogin')}</Button></>}
+          </>}
         <Button type="submit" className="full-width">{busy ? t('working') : t('signIn')}</Button>
       </fieldset>
     </form>
-    <Link className="text-link" to="/forgot">{t('forgot')}</Link>
+    {otpRequired ? <button type="button" className="text-link auth-back" disabled={busy} onClick={() => { setOTPRequired(false); setOTP(''); setError(null); }}>{t('backLogin')}</button> : <Link className="text-link" to="/forgot">{t('forgot')}</Link>}
     <p className="session-note">{t('securityNote')}</p>
   </div>;
 }
@@ -76,12 +77,12 @@ export function ResetPassword() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  if (!params.userId || !params.token || (params.account && params.account !== config.account)) return <div className="auth-form"><h1>{t('forgotHeading')}</h1><Notice error>{t('invalidReset')}</Notice><Link className="text-link" to="/forgot">{t('forgotHeading')}</Link></div>;
-  return <div className="auth-form"><h1>{t('forgotHeading')}</h1>
-    <ErrorNotice error={error} />
+  if (!params.userId || !params.token || (params.account && params.account !== config.account)) return <div className="auth-form"><h1>{t('forgotHeading')}</h1><Notice error>{t('invalidReset')}</Notice><Link className="text-link" to="/forgot">{t('requestNewReset')}</Link></div>;
+  return <div className="auth-form"><h1>{t('forgotHeading')}</h1><p className="intro">{t('resetDetail')}</p>
+    <ErrorNotice error={error} reset />
     {done ? <Notice>{t('resetDone')}</Notice> : <form onSubmit={async event => {
       event.preventDefault(); setError(null);
-      if (password !== confirm) { setError(new Error(t('passwordsDiffer'))); return; }
+      if (password !== confirm) { setError(new CustomerError('passwordsDiffer')); return; }
       setBusy(true);
       try {
         await new API().request(`/users/${encodeURIComponent(params.userId)}/actions/reset-password`, { method: 'POST', body: { meta: { passwordResetToken: params.token, newPassword: password } } });

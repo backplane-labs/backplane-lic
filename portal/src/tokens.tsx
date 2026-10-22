@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@backplane-labs/backplane-ui';
 import { secretSession, type Resource } from './api';
 import { useAuth } from './auth';
@@ -18,6 +18,11 @@ export function Tokens() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [message, setMessage] = useState('');
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(''), 6000);
+    return () => clearTimeout(timer);
+  }, [message]);
   async function create(event: FormEvent) {
     event.preventDefault(); setError(null); setBusy(true); setMessage('');
     try {
@@ -53,7 +58,7 @@ export function Tokens() {
     {result.loading ? <Loading /> : result.error ? <LoadError error={result.error} retry={result.reload} /> : !result.value?.length ? <Empty title={t('noTokens')} description={t('noTokensDetail')} /> :
       <div className="token-list">{result.value.map(token => <article className="token-row" key={token.id}>
         <div className="token-info"><div className="token-name">{token.attributes.name || t('unnamed')}{token.id === session?.tokenId && <span className="session-badge">{t('current')}</span>}</div><dl className="token-dates"><div><dt>{t('created')}</dt><dd><DateValue value={token.attributes.created} empty="unknown" /></dd></div><div><dt>{t('expiry')}</dt><dd><DateValue value={token.attributes.expiry} /></dd></div></dl></div>
-        <div className="token-actions"><Button variant="outline" onClick={() => { setAction({ kind: 'regenerate', token }); setError(null); }}>{t('regenerate')}</Button><Button variant="destructive" onClick={() => { setAction({ kind: 'revoke', token }); setError(null); }}>{t('revoke')}</Button></div>
+        <div className="token-actions"><Button variant="outline" onClick={() => { setAction({ kind: 'regenerate', token }); setError(null); setMessage(''); }}>{t('regenerate')}</Button><Button variant="destructive" onClick={() => { setAction({ kind: 'revoke', token }); setError(null); setMessage(''); }}>{t('revoke')}</Button></div>
       </article>)}</div>}
     <Dialog open={creating} onOpenChange={open => { if (!busy) { setCreating(open); setError(null); } }}><DialogContent className="portal-dialog" showCloseButton={!busy}><DialogHeader><DialogTitle>{t('createToken')}</DialogTitle><DialogDescription>{t('tokensDetail')}</DialogDescription></DialogHeader>
       <form onSubmit={create}><fieldset disabled={busy}><Field label={t('tokenName')} placeholder={t('tokenNameHint')} value={name} onChange={e => setName(e.target.value)} maxLength={255} autoFocus /><Field label={t('tokenExpiry')} hint={t('tokenExpiryHint')} type="datetime-local" value={expiry} onChange={e => setExpiry(e.target.value)} />

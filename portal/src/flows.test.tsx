@@ -98,7 +98,7 @@ describe('customer authentication', () => {
     await screen.findByText('License destination');
     const calls = fetchMock.mock.calls.filter(call => endpoint(call[0]) === '/tokens');
     expect(calls[0][1].headers.Authorization).toMatch(/^Basic /);
-    expect(JSON.parse(calls[1][1].body)).toEqual({ meta: { otp: '123456' } });
+    expect(JSON.parse(calls[1][1].body)).toEqual({ data: { type: 'tokens', attributes: { name: 'Portal session' } }, meta: { otp: '123456' } });
     expect(readSession()?.token).toBe('new-secret');
   });
   it('rejects operator accounts and revokes the just-created login token', async () => {
@@ -288,7 +288,8 @@ describe('licenses', () => {
     render(<Providers><MemoryRouter initialEntries={[view === 'list' ? '/licenses' : '/licenses/license-1']}><Routes><Route path="/licenses/:id?" element={<Ready>{view === 'list' ? <Licenses /> : <LicenseDetail />}</Ready>} /></Routes></MemoryRouter></Providers>);
     await screen.findByText('ACME-KEY');
     expect(screen.getByText('Export')).toBeTruthy();
-    expect(screen.getByText(/cannot read product or plan names/)).toBeTruthy();
+    expect(screen.queryByText(/not available|cannot read/i)).toBeNull();
+    expect(screen.queryByText('Product')).toBeNull();
     expect(screen.queryByRole('alert')).toBeNull();
     if (view === 'detail') expect(screen.getByRole('button', { name: 'Download license file' }).hasAttribute('disabled')).toBe(false);
   });
@@ -296,8 +297,9 @@ describe('licenses', () => {
     signedIn();
     fetchMock.mockImplementation(async (url: string) => endpoint(url).endsWith('/product') ? failure('SERVER_ERROR', 500) : mockLicenses(url));
     route('/licenses', <Licenses />);
-    expect((await screen.findByRole('alert')).textContent).toContain('SERVER_ERROR');
-    expect(screen.queryByText(/cannot read product or plan names/)).toBeNull();
+    const alert = (await screen.findByRole('alert')).textContent ?? '';
+    expect(alert).toContain('Something went wrong');
+    expect(alert).not.toContain('SERVER_ERROR');
   });
   it('downloads the public checkout certificate as a .lic file without putting a bearer in the URL', async () => {
     signedIn(); fetchMock.mockImplementation(async (url: string) => mockLicenses(url));
