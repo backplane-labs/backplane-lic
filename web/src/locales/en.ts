@@ -1,4 +1,5 @@
 export default {
+  search: "Search", searchDescription: "Find licenses, users, products, policies, groups and entitlements by their attributes.", query: "Query", resourceType: "Resource type", combine: "Combine terms", matchAll: "Match all terms", matchAny: "Match any term", attribute: "Attribute", searchValue: "Value", searchHint: "At least 3 characters", addTerm: "Add term", addMetadataTerm: "Add metadata term", metadataKey: "Metadata key", results: "Results", noMatches: "Nothing matches", remove: "Remove", fullName: "Full name",
   unnamed: "Unnamed",
   overview: "Overview", raw: "Raw JSON", sections: "Sections", done: "Done", yes: "Yes", no: "No", never: "Never", unlimited: "Unlimited", response: "Response",
   expiryColumn: 'Expires',

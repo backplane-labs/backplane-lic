@@ -73,6 +73,84 @@ async function withPickers(operation: Operation, api: ReturnType<typeof useAPI>,
   }));
   return { ...operation, fields };
 }
+// The searchable attributes per resource, as POST /search accepts them.
+const searchable: Record<string, string[]> = {
+  licenses: ['name', 'key', 'id', 'owner', 'user', 'product', 'policy'],
+  users: ['email', 'fullName', 'firstName', 'lastName', 'role', 'id'],
+  products: ['name', 'id'],
+  policies: ['name', 'product', 'id'],
+  groups: ['name'],
+  entitlements: ['code', 'name', 'id'],
+};
+const withMetadata = new Set(['licenses', 'users', 'products', 'policies']);
+type Term = { key: string; value: string };
+
+function SearchPage() {
+  const t = useText(), api = useAPI(), navigate = usePluginNavigate();
+  const [type, setType] = useState('licenses'), [op, setOp] = useState('AND');
+  const [terms, setTerms] = useState<Term[]>([{ key: 'name', value: '' }]);
+  const [metadata, setMetadata] = useState<Term[]>([]);
+  const [page, setPage] = useState(1), [size, setSize] = useState('25');
+  const [submitted, setSubmitted] = useState<{ body: unknown; type: string }>();
+  const spec = byName(submitted?.type ?? type)!;
+  const query = { 'page[number]': String(page), 'page[size]': size };
+  const state = usePlatformQuery(`lic:search:${JSON.stringify(submitted)}:${JSON.stringify(query)}`,
+    (signal) => submitted ? api.call('POST', 'search', query, submitted.body, signal) : Promise.resolve<Document>({ data: [] }));
+  const rows = listData(state.value), next = nextPage(state.value?.links);
+  const columns = resourceColumns(spec, rows, t, (resource) => navigate(`${spec.name}/${encodeURIComponent(resource.id)}`));
+  const change = (list: Term[], index: number, patch: Partial<Term>) => list.map((term, i) => i === index ? { ...term, ...patch } : term);
+  const run = () => {
+    const filled = terms.filter((term) => term.value.trim());
+    const meta = metadata.filter((term) => term.key.trim() && term.value.trim());
+    const body: Record<string, unknown> = Object.fromEntries(filled.map((term) => [term.key, term.value]));
+    if (meta.length) body.metadata = Object.fromEntries(meta.map((term) => [term.key, term.value]));
+    setPage(1);
+    setSubmitted({ type, body: { meta: { type, op, query: body } } });
+  };
+  const pick = (next: string) => {
+    setType(next); setTerms([{ key: searchable[next][0], value: '' }]); setMetadata([]); setSubmitted(undefined);
+  };
+  return <Stack gap={16}>
+    <PageHeader title={t('search')} description={t('searchDescription')} />
+    <Panel title={t('query')}>
+      <form aria-label={t('search')} onSubmit={(event) => { event.preventDefault(); run(); }}><Stack gap={12}>
+        <div style={row}>
+          <SelectControl aria-label={t('resourceType')} value={type} onValueChange={pick} options={Object.keys(searchable).map((name) => ({ value: name, label: t(name) }))} />
+          <SelectControl aria-label={t('combine')} value={op} onValueChange={setOp} options={[{ value: 'AND', label: t('matchAll') }, { value: 'OR', label: t('matchAny') }]} />
+        </div>
+        {terms.map((term, index) => <div key={index} style={row}>
+          <SelectControl aria-label={t('attribute')} value={term.key} onValueChange={(key) => setTerms(change(terms, index, { key }))}
+            options={searchable[type].map((name) => ({ value: name, label: t(`${name}Column`, { defaultValue: t(name) }) }))} />
+          <Input aria-label={t('searchValue')} value={term.value} placeholder={t('searchHint')} style={{ flex: 1, minWidth: 220 }}
+            onChange={(event) => setTerms(change(terms, index, { value: event.target.value }))} />
+          {terms.length > 1 && <Button type="button" variant="ghost" size="sm" onClick={() => setTerms(terms.filter((_, i) => i !== index))}>{t('remove')}</Button>}
+        </div>)}
+        {metadata.map((term, index) => <div key={`m${index}`} style={row}>
+          <span>{t('metadata')}</span>
+          <Input aria-label={t('metadataKey')} value={term.key} placeholder={t('metadataKey')} style={{ maxWidth: 220 }} onChange={(event) => setMetadata(change(metadata, index, { key: event.target.value }))} />
+          <Input aria-label={t('searchValue')} value={term.value} placeholder={t('searchHint')} style={{ flex: 1, minWidth: 220 }} onChange={(event) => setMetadata(change(metadata, index, { value: event.target.value }))} />
+          <Button type="button" variant="ghost" size="sm" onClick={() => setMetadata(metadata.filter((_, i) => i !== index))}>{t('remove')}</Button>
+        </div>)}
+        <div style={row}>
+          <Button type="button" variant="outline" size="sm" onClick={() => setTerms([...terms, { key: searchable[type][0], value: '' }])}>{t('addTerm')}</Button>
+          {withMetadata.has(type) && <Button type="button" variant="outline" size="sm" onClick={() => setMetadata([...metadata, { key: '', value: '' }])}>{t('addMetadataTerm')}</Button>}
+          <Button type="submit" size="sm">{t('search')}</Button>
+        </div>
+      </Stack></form>
+    </Panel>
+    {submitted && <Panel title={t('results')} count={rows.length}>
+      {state.error !== undefined ? <ErrorNotice error={state.error} /> : state.loading ? <Loading />
+        : !rows.length ? <EmptyState title={t('noMatches')} />
+          : <DataTable label={t('results')} data={rows} columns={columns} getRowId={(resource) => resource.id} height={Math.min(640, 56 + rows.length * 40)}
+            onActivate={(resource) => navigate(`${spec.name}/${encodeURIComponent(resource.id)}`)} />}
+      <div style={{ ...row, marginTop: 16 }}>
+        <Button variant="outline" size="sm" disabled={page === 1 || state.loading} onClick={() => setPage(page - 1)}>{t('previous')}</Button><span>{t('page', { page })}</span>
+        <Button variant="outline" size="sm" disabled={state.loading || !next} onClick={() => setPage(page + 1)}>{t('next')}</Button>
+        <SelectControl aria-label={t('pageSize')} value={size} onValueChange={(value) => { setSize(value); setPage(1); }} options={['10', '25', '50', '100'].map((value) => ({ value, label: value }))} />
+      </div>
+    </Panel>}
+  </Stack>;
+}
 function ResourcePage() {
   const { resource: name, id } = useParams(), spec = byName(name ?? '');
   const t = useText();
@@ -87,19 +165,7 @@ function ResourceList({ spec, path, relationship, parentPath, onInspect, onChang
   const query = { ...applied, ...(cursorQuery ?? { 'page[number]': String(page), 'page[size]': size }) };
   const state = usePlatformQuery(`lic:list:${path}:${JSON.stringify(query)}`, (signal) => api.call('GET', path, query, undefined, signal));
   const rows = listData(state.value), next = nextPage(state.value?.links), standalone = context.environment === 'standalone';
-  // A row is named by its name; an identifier shown in its own column
-  // (a license key, a user email) is not repeated as the name.
-  const nameOf = (resource: Resource) => {
-    const label = labelOf(resource);
-    return columns.some((column) => resource.attributes?.[column] === label) ? String(resource.attributes?.name ?? t('unnamed')) : label;
-  };
-  const columns = (spec.columns ?? ['status']).filter((column) => column !== 'name' && rows.some((resource) => resource.attributes?.[column] !== undefined));
-  const tableColumns: DataColumn<Resource>[] = [
-    { id: 'name', label: t('name'), value: (resource) => nameOf(resource), render: (resource) => <Button variant="link" size="sm" style={{ padding: 0, height: 'auto' }} onClick={() => open(resource)}>{nameOf(resource)}</Button> },
-    ...columns.map((column): DataColumn<Resource> => ({ id: column, ...(column === 'key' || column === 'email' ? { width: 320 } : {}), label: t(`${column}Column`, { defaultValue: t(column) }), value: (resource) => cellText(resource.attributes?.[column]),
-      render: (resource) => <Value name={column} value={resource.attributes?.[column]} /> })),
-    { id: 'id', label: 'ID', value: (resource) => resource.id, render: (resource) => <span style={{ ...mono, color: 'var(--muted-foreground)' }} title={resource.id}>{resource.id.slice(0, 8)}</span> },
-  ];
+  const tableColumns = resourceColumns(spec, rows, t, (resource) => open(resource));
   const open = (resource: Resource) => onInspect ? onInspect(resource) : navigate(`${spec.name}/${encodeURIComponent(resource.id)}`);
   const create = async () => {
     if (spec.name === 'second-factors') {
@@ -216,6 +282,24 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
       </>}
   </Stack>;
 }
+// resourceColumns is a resource type's table: its name, its own columns
+// and the short id. A row is named by its name; an identifier shown in its
+// own column (a license key, a user email) is not repeated as the name.
+function resourceColumns(
+  spec: ResourceSpec, rows: Resource[], t: ReturnType<typeof useText>, open: (resource: Resource) => void,
+): DataColumn<Resource>[] {
+  const columns = (spec.columns ?? ['status']).filter((column) => column !== 'name' && rows.some((resource) => resource.attributes?.[column] !== undefined));
+  const nameOf = (resource: Resource) => {
+    const label = labelOf(resource);
+    return columns.some((column) => resource.attributes?.[column] === label) ? String(resource.attributes?.name ?? t('unnamed')) : label;
+  };
+  return [
+    { id: 'name', label: t('name'), value: (resource) => nameOf(resource), render: (resource) => <Button variant="link" size="sm" style={{ padding: 0, height: 'auto' }} onClick={() => open(resource)}>{nameOf(resource)}</Button> },
+    ...columns.map((column): DataColumn<Resource> => ({ id: column, ...(column === 'key' || column === 'email' ? { width: 320 } : {}), label: t(`${column}Column`, { defaultValue: t(column) }), value: (resource) => cellText(resource.attributes?.[column]),
+      render: (resource) => <Value name={column} value={resource.attributes?.[column]} /> })),
+    { id: 'id', label: 'ID', value: (resource) => resource.id, render: (resource) => <span style={{ ...mono, color: 'var(--muted-foreground)' }} title={resource.id}>{resource.id.slice(0, 8)}</span> },
+  ];
+}
 function cellText(value: unknown): string {
   if (value === null || value === undefined || value === '') return '—';
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) return new Date(value).toLocaleString();
@@ -235,5 +319,5 @@ function ToOne({ relationship: rel, path, onChanged }: { relationship: Relations
   </Stack>;
 }
 export const definition = definePlugin({ ...navigation, routes: [{ element: <Shell />, children: [
-  { index: true, element: <AccountPage /> }, { path: 'account', element: <AccountPage /> }, { path: ':resource', element: <ResourcePage /> }, { path: ':resource/:id', element: <ResourcePage /> }, { path: '*', element: <EmptyState title="404" /> },
+  { index: true, element: <AccountPage /> }, { path: 'account', element: <AccountPage /> }, { path: 'search', element: <SearchPage /> }, { path: ':resource', element: <ResourcePage /> }, { path: ':resource/:id', element: <ResourcePage /> }, { path: '*', element: <EmptyState title="404" /> },
 ] }] });

@@ -1,5 +1,7 @@
 import type en from './en';
 const ru: Record<keyof typeof en, string> = {
+  remove: 'Убрать',
+  search: "Поиск", searchDescription: "Поиск лицензий, пользователей, продуктов, политик, групп и функций по атрибутам.", query: "Запрос", resourceType: "Тип ресурса", combine: "Сочетание условий", matchAll: "Все условия", matchAny: "Любое условие", attribute: "Атрибут", searchValue: "Значение", searchHint: "Не меньше 3 символов", addTerm: "Добавить условие", addMetadataTerm: "Добавить условие по metadata", metadataKey: "Ключ metadata", results: "Результаты", noMatches: "Ничего не найдено", fullName: "Полное имя",
   unnamed: "Без имени",
   overview: "Обзор", raw: "JSON", sections: "Разделы", done: "Готово", yes: "Да", no: "Нет", never: "Бессрочно", unlimited: "Без ограничений", response: "Ответ API",
   expiryColumn: 'Истекает',

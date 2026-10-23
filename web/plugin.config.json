@@ -2,6 +2,7 @@
   "service": "lic",
   "nav": [
     { "path": "", "labelKey": "account" },
+    { "path": "search", "labelKey": "search" },
     { "path": "products", "labelKey": "products" },
     { "path": "policies", "labelKey": "policies" },
     { "path": "licenses", "labelKey": "licenses" },
