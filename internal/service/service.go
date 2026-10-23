@@ -64,6 +64,15 @@ type Service struct {
 	HTTP http.Handler
 }
 
+// newCache declares the Valkey dependency; absent unless configured.
+func newCache(root backplane.Root[Config], cfg *valkey.Config) deps.Optional[valkey.AsideClient] {
+	if cfg == nil {
+		return deps.Optional[valkey.AsideClient]{}
+	}
+
+	return deps.NewOptional(root, valkey.NewAside(*cfg), deps.Name("cache"))
+}
+
 // New builds the tree under root: the store and cache dependencies, and
 // a start step that creates the account row from configuration and
 // builds the HTTP handler over the started store.
@@ -71,7 +80,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	cfg := root.Config()
 
 	store := deps.NewDependency(root, postgres.New(cfg.Store), deps.Name("store"))
-	cache := deps.NewOptional(root, valkey.NewAside(cfg.Cache), deps.Name("cache"))
+	cache := newCache(root, cfg.Cache)
 
 	id, err := uuid.Parse(cfg.Account.ID)
 	if err != nil {

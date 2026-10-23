@@ -15,7 +15,9 @@ type Config struct {
 	config.Backplane `json:"backplane"`
 
 	Store postgres.Config `json:"store"`
-	Cache valkey.Config   `json:"cache"`
+	// Cache is optional: without it tokens are read from the store and
+	// the password-attempt windows are kept per process.
+	Cache *valkey.Config `json:"cache,omitempty"`
 
 	// Account is the single account of the installation: the row is
 	// created at startup from these fields when missing.
@@ -24,16 +26,16 @@ type Config struct {
 	// HTTP is the public API's runtime section.
 	HTTP HTTP `json:"http"`
 
-	Automation Automation `json:"automation"`
+	Automation Automation `json:"automation,omitempty"`
 
 	// Brand is the vendor identity customers see: the portal's header,
 	// accent color and footer links, and the brand_* data of every message.
-	Brand domain.Brand `json:"brand"`
+	Brand domain.Brand `json:"brand,omitempty"`
 
 	// DocsHost overrides the docs origin of error links (the reference
 	// derives it from its configured host); empty derives it from the
 	// request host.
-	DocsHost string `json:"docsHost" schemapb:"description=Docs links origin"` //nolint:tagliatelle // config is camelCase
+	DocsHost string `json:"docsHost,omitempty" schemapb:"description=Docs links origin"` //nolint:tagliatelle,lll // camelCase
 }
 
 // HTTP holds the public API's runtime settings.
@@ -43,18 +45,18 @@ type HTTP struct {
 	// TrustedProxies lists the proxy CIDRs (or single IPs) whose
 	// X-Forwarded-For is honored when resolving the client address;
 	// empty means every request is keyed by its remote address.
-	TrustedProxies []string `json:"trustedProxies" schemapb:"description=Proxies"` //nolint:tagliatelle // camelCase
+	TrustedProxies []string `json:"trustedProxies,omitempty" schemapb:"description=Proxies"` //nolint:tagliatelle,lll // camelCase
 	// WebhookAllowPrivate lists the otherwise-private CIDRs webhook
 	// endpoint URLs may resolve to (the self-hosted escape hatch for
 	// internal receivers; the reference's
 	// KEYGEN_ALLOWED_PRIVATE_ADDRESSES).
-	WebhookAllowPrivate []string `json:"webhookAllowPrivate" schemapb:"description=Private webhook CIDRs"` //nolint:tagliatelle,lll // camelCase
+	WebhookAllowPrivate []string `json:"webhookAllowPrivate,omitempty" schemapb:"description=Private webhook CIDRs"` //nolint:tagliatelle,lll // camelCase
 }
 
 // Automation configures links and language, not mail transport.
 type Automation struct {
-	PortalBase string `json:"portalBase" schemapb:"description=Public portal base URL"` //nolint:tagliatelle,lll // config is camelCase
-	Locale     string `json:"locale"     schemapb:"description=Default message language (en or ru)"`
+	PortalBase string `json:"portalBase,omitempty" schemapb:"description=Public portal base URL"` //nolint:tagliatelle,lll // config is camelCase
+	Locale     string `json:"locale,omitempty"     schemapb:"description=Default message language (en or ru)"`
 }
 
 // Account identifies the configured account; both its id and its slug

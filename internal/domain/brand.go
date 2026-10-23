@@ -26,7 +26,7 @@ var (
 // portal's header, colors and footer links, and the data every message
 // template receives. It is immutable after NewBrand.
 type Brand struct {
-	Name         string `json:"name"`
+	Name         string `json:"name,omitempty"`
 	Tagline      string `json:"tagline,omitempty"`
 	LogoURL      string `json:"logoUrl,omitempty"`      //nolint:tagliatelle // frontend configuration is camelCase
 	FaviconURL   string `json:"faviconUrl,omitempty"`   //nolint:tagliatelle // frontend configuration is camelCase
