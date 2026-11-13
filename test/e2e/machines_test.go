@@ -1,6 +1,7 @@
 // Package e2e_test drives the finished service through its public HTTP
-// port with the pkg/licensing clients: the in-process server boots over the
-// shared PostgreSQL (LIC_TEST_DATABASE_URL) in an account of its own.
+// port with the pkg/licensing clients: lictest runs the server in-process on
+// a loopback port over the shared PostgreSQL (LIC_TEST_DATABASE_URL), in an
+// account of its own.
 package e2e_test
 
 import (
@@ -16,42 +17,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/backplane-labs/backplane/pkg/backplane/config"
-	sdkpg "github.com/backplane-labs/backplane/pkg/backplane/infra/postgres"
 	"github.com/google/uuid"
 
-	"github.com/gopherex/xlog"
-
-	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
-	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
-	"github.com/backplane-labs/backplane-lic/internal/service"
-	"github.com/backplane-labs/backplane-lic/internal/testkit"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/installation"
+	"github.com/backplane-labs/backplane-lic/pkg/licensing/lictest"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/request"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/usage"
-	conformance "github.com/backplane-labs/backplane-lic/test/conformance"
 )
 
-const (
-	origin      = "http://lic.test"
-	usageDomain = "e2e-usage/v1"
-)
-
-// inProcess is the licensing clients' transport into the in-process server.
-type inProcess struct{ target conformance.Target }
-
-func (p inProcess) RoundTrip(req *http.Request) (*http.Response, error) { return p.target.Do(req) }
+const usageDomain = "e2e-usage/v1"
 
 // env is the booted service and the fixture an admin builds in it.
 type env struct {
-	t        *testing.T
-	target   *conformance.HandlerTarget
-	slug     string
-	admin    string
-	publicHx string
+	*lictest.Server
 
-	productID  string
+	t *testing.T
+
 	licenseID  string
 	licenseKey string
 	productTok string
@@ -65,161 +47,30 @@ func boot(t *testing.T) *env {
 		t.Skip("set LIC_TEST_DATABASE_URL (make up) to run the end-to-end tests")
 	}
 
-	store, err := postgres.Open(t.Context(), xlog.NewJSON(xlog.WithWriter(io.Discard)), sdkpg.Config{DSN: config.Secret(dsn)})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Cleanup(store.Close)
-
-	id := uuid.New()
-	spec := accounts.Spec{ID: id, Slug: "e2e-" + id.String()[:8], Name: "e2e " + id.String()[:8]}
-
-	if _, err := accounts.Bootstrap(t.Context(), store.Accounts, spec); err != nil {
-		t.Fatal(err)
-	}
-
-	admin, err := testkit.SeedAdmin(t.Context(), store, spec.ID, "admin@e2e.example.com")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	handler, err := service.Handler(store, spec, service.HTTP{}, "keygen.test", "e2e")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	e := &env{
-		t: t, target: &conformance.HandlerTarget{Handler: handler, AdminToken: admin}, slug: spec.Slug, admin: admin,
-	}
-	e.publicHx = e.accountKey(spec.ID.String())
-
-	return e
-}
-
-// call sends an authenticated JSON:API request as the admin and answers the status and body.
-func (e *env) call(method, path, body string) (int, []byte) {
-	e.t.Helper()
-
-	var reader io.Reader
-	if body != "" {
-		reader = strings.NewReader(body)
-	}
-
-	req, err := e.target.NewRequest(e.t.Context(), method, path, reader)
-	if err != nil {
-		e.t.Fatal(err)
-	}
-
-	req.Header.Set("Accept", "application/vnd.api+json")
-	req.Header.Set("Authorization", "Bearer "+e.admin)
-
-	if body != "" {
-		req.Header.Set("Content-Type", "application/vnd.api+json")
-	}
-
-	resp, err := e.target.Do(req)
-	if err != nil {
-		e.t.Fatal(err)
-	}
-
-	raw, err := io.ReadAll(resp.Body)
-	if closeErr := resp.Body.Close(); err != nil || closeErr != nil {
-		e.t.Fatal(err, closeErr)
-	}
-
-	return resp.StatusCode, raw
-}
-
-// document is the slice of a JSON:API document the fixture reads.
-type document struct {
-	Data struct {
-		ID         string `json:"id"`
-		Attributes struct {
-			Key   string `json:"key"`
-			Token string `json:"token"`
-		} `json:"attributes"`
-		Meta struct {
-			Keys struct {
-				Ed25519 string `json:"ed25519"`
-			} `json:"keys"`
-		} `json:"meta"`
-	} `json:"data"`
-}
-
-func (e *env) create(path, body string) document {
-	e.t.Helper()
-
-	status, raw := e.call(http.MethodPost, path, body)
-	// Keygen answers a token with 200 and every other resource with 201.
-	if status != http.StatusCreated && status != http.StatusOK {
-		e.t.Fatalf("POST %s = %d: %s", path, status, raw)
-	}
-
-	var doc document
-	if err := json.Unmarshal(raw, &doc); err != nil {
-		e.t.Fatal(err)
-	}
-
-	return doc
-}
-
-// accountKey reads the account's Ed25519 public key (base64 of hex) as hex.
-func (e *env) accountKey(accountID string) string {
-	e.t.Helper()
-
-	status, raw := e.call(http.MethodGet, "/v1/accounts/"+accountID, "")
-	if status != http.StatusOK {
-		e.t.Fatalf("account = %d: %s", status, raw)
-	}
-
-	var doc document
-	if err := json.Unmarshal(raw, &doc); err != nil {
-		e.t.Fatal(err)
-	}
-
-	decoded, err := base64.StdEncoding.DecodeString(doc.Data.Meta.Keys.Ed25519)
-	if err != nil {
-		e.t.Fatal(err)
-	}
-
-	return string(decoded)
+	return &env{Server: lictest.Start(t, dsn), t: t}
 }
 
 // fixture creates the product, policy, license and product token as the admin.
 func (e *env) fixture() {
 	e.t.Helper()
 
-	base := "/v1/accounts/" + e.slug
+	product := e.Product(e.t, "e2e product")
+	policy := e.Policy(e.t, product, lictest.Attributes{
+		"name": "e2e policy", "authenticationStrategy": "LICENSE", "floating": true, "maxMachines": 3,
+	})
+	license := e.License(e.t, policy, nil)
 
-	product := e.create(base+"/products", `{"data":{"type":"product","attributes":{"name":"e2e product"}}}`)
-	policy := e.create(base+"/policies", `{"data":{"type":"policy","attributes":{"name":"e2e policy",`+
-		`"scheme":"ED25519_SIGN","authenticationStrategy":"LICENSE","floating":true,"maxMachines":3},`+
-		`"relationships":{"product":{"data":{"type":"product","id":"`+product.Data.ID+`"}}}}}`)
-	license := e.create(base+"/licenses", `{"data":{"type":"license","relationships":{"policy":{"data":`+
-		`{"type":"policy","id":"`+policy.Data.ID+`"}}}}}`)
-	token := e.create(base+"/products/"+product.Data.ID+"/tokens", `{"data":{"type":"tokens"}}`)
-
-	e.productID, e.licenseID, e.licenseKey = product.Data.ID, license.Data.ID, license.Data.Attributes.Key
-	e.productTok = token.Data.Attributes.Token
+	e.licenseID, e.licenseKey, e.productTok = license.ID, license.Key, e.ProductToken(e.t, product)
 
 	if e.licenseKey == "" || e.productTok == "" {
-		e.t.Fatalf("fixture lacks a license key or product token: %+v %+v", license, token)
+		e.t.Fatalf("fixture lacks a license key or product token: %+v", license)
 	}
 }
 
 func (e *env) client(cfg licensing.Config) *licensing.Client {
 	e.t.Helper()
 
-	cfg.APIURL, cfg.PublicKey = origin, e.publicHx
-	cfg.HTTPClient = &http.Client{Transport: inProcess{target: e.target}}
-
-	client, err := licensing.New(cfg)
-	if err != nil {
-		e.t.Fatal(err)
-	}
-
-	return client
+	return e.Client(e.t, cfg)
 }
 
 func TestMachineLifecycleEndToEnd(t *testing.T) {
@@ -280,7 +131,7 @@ func (e *env) activate(key installation.Key) *licensing.Machine {
 func (e *env) checkOut(machine *licensing.Machine, key installation.Key) {
 	e.t.Helper()
 
-	verifier, err := licensing.NewVerifier(e.publicHx)
+	verifier, err := licensing.NewVerifier(e.PublicKey)
 	if err != nil {
 		e.t.Fatal(err)
 	}
@@ -712,8 +563,22 @@ func TestUsageIsVendorSideOnly(t *testing.T) {
 	}
 
 	// A report for a machine without a key in its metadata is refused with a code.
-	plain := e.create("/v1/accounts/"+e.slug+"/machines", `{"data":{"type":"machines","attributes":{"fingerprint":"keyless-`+
-		uuid.NewString()+`"},"relationships":{"license":{"data":{"type":"licenses","id":"`+e.licenseID+`"}}}}}`)
+	status, raw := e.Do(t, http.MethodPost, "/machines", map[string]any{"data": map[string]any{
+		"type": "machines", "attributes": map[string]any{"fingerprint": "keyless-" + uuid.NewString()},
+		"relationships": map[string]any{"license": map[string]any{
+			"data": map[string]any{"type": "licenses", "id": e.licenseID},
+		}},
+	}})
+
+	var plain struct {
+		Data struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+
+	if err := json.Unmarshal(raw, &plain); status != http.StatusCreated || err != nil {
+		t.Fatalf("keyless machine = %d %s %v", status, raw, err)
+	}
 
 	keyless, err := e.client(licensing.Config{Token: e.productTok}).Machine(t.Context(), plain.Data.ID)
 	if err != nil {

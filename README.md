@@ -14,7 +14,8 @@ cmd/lic/                 the binary: Config, composition via internal/service
 internal/domain/         pure rules: entities, crypto helpers (account keys)
 internal/app/            scenarios: licenses, machines (components, processes,
                          usage journal, heartbeat cull), users, policies, …
-pkg/licensing/           Go client library; installation/, request/, usage/
+pkg/licensing/           Go client library; installation/, request/, usage/,
+                         lictest/ (the server in a test's process)
 internal/infra/postgres/ schema.sql, sqld queries, generated db, repositories
 internal/infra/httpapi/  ogen handler: JSON:API rendering, error mapping
 internal/infra/portal/   embedded customer SPA and HTTP mount
@@ -358,6 +359,28 @@ expiry: deleting one permits an old retry to repeat its mutation. They may
 contain a license key, including the one-time plaintext of a legacy-encrypted
 key, so treat this table as credential storage. Domain validation errors fail
 without retry; storage and transport failures remain retryable.
+
+## Testing against the real server: `pkg/licensing/lictest`
+
+`lictest.Start(t, dsn)` runs this server inside a test's process on a
+loopback port, over a PostgreSQL the caller provides (migrated on start), in
+an account of its own, so tests of a consumer share one database and run in
+parallel. It answers a `*lictest.Server` with `URL` (the client's `APIURL`),
+`AccountID`, `Slug`, `AdminToken` and `PublicKey` (the account's Ed25519
+verify key, hex), and builds a fixture through the API as the admin:
+
+```go
+srv := lictest.Start(t, dsn)
+product := srv.Product(t, "app")
+policy := srv.Policy(t, product, lictest.Attributes{"maxMachines": 1}) // over name + scheme ED25519_SIGN
+license := srv.License(t, policy, lictest.Attributes{"metadata": map[string]any{"plan": "pro"}})
+vendor := srv.Client(t, licensing.Config{Token: srv.ProductToken(t, product)})
+user := srv.Client(t, licensing.Config{LicenseKey: license.Key})
+status, body := srv.Do(t, http.MethodGet, "/machines", nil) // any admin call under the account
+```
+
+`Attributes` are the API's JSON:API attributes (camelCase); the server
+validates them. The repository's own end-to-end tests (`test/e2e`) run on it.
 
 ## Client library: installation, request signing, usage journal
 
