@@ -73,6 +73,7 @@ func TestEndToEnd(t *testing.T) {
 	}
 
 	clock := time.Now
+	started := clock()
 
 	if _, err := testkit.SeedAdmin(ctx, store, id, adminEmail); err != nil {
 		t.Fatalf("seed admin: %v", err)
@@ -107,8 +108,10 @@ func TestEndToEnd(t *testing.T) {
 		Passwords:     passwords.New(store, events.None{}, rand.Reader, clock),
 		Spec:          httpapi.Spec{ID: id, Slug: spec.Slug},
 		Revision:      "deadbeef",
-		Throttle:      httpapi.NewMemoryThrottler(),
-		Clock:         clock,
+		// A frozen throttle clock keeps every attempt of step 6 in one
+		// minute-aligned window, however slow the run.
+		Throttle: httpapi.NewMemoryThrottler(func() time.Time { return started }),
+		Clock:    clock,
 	})
 
 	base := "/v1/accounts/" + id.String()

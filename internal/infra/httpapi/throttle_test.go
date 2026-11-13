@@ -16,8 +16,7 @@ func TestMemoryThrottleFixedWindow(t *testing.T) {
 	t.Parallel()
 
 	now := time.Unix(1_800_000_059, 0)
-	limiter := NewMemoryThrottler()
-	limiter.clock = func() time.Time { return now }
+	limiter := NewMemoryThrottler(func() time.Time { return now })
 
 	for i := int64(1); i <= 6; i++ {
 		got, err := limiter.Inc(t.Context(), "identity", time.Minute)
@@ -65,8 +64,7 @@ func TestMFAThrottleIdentityAndResponse(t *testing.T) {
 	t.Parallel()
 
 	now := time.Unix(1_800_000_001, 0)
-	limiter := NewMemoryThrottler()
-	limiter.clock = func() time.Time { return now }
+	limiter := NewMemoryThrottler(func() time.Time { return now })
 	p := pipeline{spec: Spec{ID: uuid.New()}, throttle: limiter, clock: func() time.Time { return now }}
 	user := uuid.New().String()
 	path := "/v1/accounts/" + p.spec.ID.String() + "/users/" + user + "/second-factors"

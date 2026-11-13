@@ -121,7 +121,7 @@ func pipeSetup(t *testing.T) (http.Handler, string, string) {
 		Tokens:   tokens.New(tokenStore{}, events.None{}, rand.Reader, clock),
 		Spec:     httpapi.Spec{ID: account.ID, Slug: account.Slug},
 		Revision: "deadbeef",
-		Throttle: httpapi.NewMemoryThrottler(),
+		Throttle: httpapi.NewMemoryThrottler(time.Now),
 		Clock:    clock,
 	})
 

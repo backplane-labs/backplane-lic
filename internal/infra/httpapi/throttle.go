@@ -36,9 +36,10 @@ type bucket struct {
 	count   int64
 }
 
-// NewMemoryThrottler builds the in-memory counter.
-func NewMemoryThrottler() *MemoryThrottler {
-	return &MemoryThrottler{buckets: map[string]bucket{}, clock: time.Now}
+// NewMemoryThrottler builds the in-memory counter over the given clock
+// (windows are aligned to it, like Rack::Attack periods).
+func NewMemoryThrottler(clock func() time.Time) *MemoryThrottler {
+	return &MemoryThrottler{buckets: map[string]bucket{}, clock: clock}
 }
 
 // Inc increments the key's window counter.

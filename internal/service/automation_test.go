@@ -156,7 +156,7 @@ func TestPasswordAutomation(t *testing.T) { //nolint:paralleltest // shared inte
 			decorate := func(publisher events.Publisher) events.Publisher {
 				return app.NewPublisher(store, publisher, queue, contracts, portalBase, "ru", testBrand, time.Now)
 			}
-			handler := handler(store, httpapi.NewMemoryThrottler(), liccache.None{},
+			handler := handler(store, httpapi.NewMemoryThrottler(time.Now), liccache.None{},
 				accounts.Spec{ID: account.ID, Slug: account.Slug}, HTTP{}, "", "automation-test", queue, decorate,
 				slog.Default())
 			request := httptest.NewRequest(http.MethodPost, "/v1/accounts/"+account.ID.String()+"/passwords",

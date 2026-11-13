@@ -197,7 +197,7 @@ func newThrottler(cache deps.Optional[valkey.AsideClient]) httpapi.Throttler { /
 		return httpapi.NewValkeyThrottler(client.Client())
 	}
 
-	return httpapi.NewMemoryThrottler()
+	return httpapi.NewMemoryThrottler(time.Now)
 }
 
 func notificationPass(jobsRunner *jobs.Runner, notifier licenses.Notifier) func(context.Context) error {
@@ -264,7 +264,7 @@ func Handler(
 		return nil, err
 	}
 
-	api := handler(store, httpapi.NewMemoryThrottler(), liccache.None{}, spec, cfg, docsHost, revision, queue,
+	api := handler(store, httpapi.NewMemoryThrottler(time.Now), liccache.None{}, spec, cfg, docsHost, revision, queue,
 		func(publisher events.Publisher) events.Publisher { return publisher }, slog.Default())
 
 	public, err := portal.New(cfg.Portal, domain.Brand{Name: domain.DefaultBrandName}, spec.ID.String(), api)
