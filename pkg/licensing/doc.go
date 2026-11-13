@@ -37,6 +37,19 @@
 //	if err := file.Verify(verifier); err != nil { ... }
 //	dataset, err := file.Decrypt(licenseKey)
 //
+// A genuine file past its expiry (or issued in the future beyond the
+// clock skew) still decodes: Decode and Decrypt answer the dataset with
+// ErrLicenseFileExpired / ErrMachineFileExpired / ErrClockOutOfSync, so
+// a lapsed lease can be shown and told apart from an invalid one (a bad
+// signature, key or fingerprint answers no dataset):
+//
+//	dataset, err := file.Decrypt(licenseKey, fingerprint)
+//	switch {
+//	case err == nil: // in force
+//	case errors.Is(err, licensing.ErrMachineFileExpired): // lapsed, dataset readable
+//	default: // invalid, dataset nil (unless ErrClockOutOfSync)
+//	}
+//
 // Heartbeats run in the caller's goroutine, tied to a context:
 //
 //	ctx, stop := context.WithCancel(context.Background())

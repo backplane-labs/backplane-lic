@@ -351,8 +351,11 @@ func TestLicenseFileExpired(t *testing.T) {
 		t.Fatalf("ParseLicenseFile: %v", err)
 	}
 
-	if _, err := file.Decode(); !errors.Is(err, licensing.ErrLicenseFileExpired) {
-		t.Fatalf("Decode err = %v", err)
+	// An expired file is still read: the dataset comes with the refusal.
+	dataset, err := file.Decode()
+	if !errors.Is(err, licensing.ErrLicenseFileExpired) || dataset == nil || dataset.Expiry == nil ||
+		dataset.License.ID == "" {
+		t.Fatalf("Decode = %+v, %v", dataset, err)
 	}
 }
 
@@ -371,8 +374,56 @@ func TestLicenseFileClockSkew(t *testing.T) {
 		t.Fatalf("ParseLicenseFile: %v", err)
 	}
 
-	if _, err := file.Decode(); !errors.Is(err, licensing.ErrClockOutOfSync) {
-		t.Fatalf("Decode err = %v", err)
+	dataset, err := file.Decode()
+	if !errors.Is(err, licensing.ErrClockOutOfSync) || dataset == nil || dataset.License.ID == "" {
+		t.Fatalf("Decode = %+v, %v", dataset, err)
+	}
+}
+
+// An expired machine file decrypts with its dataset and the refusal; a
+// wrong fingerprint (no decryption) answers no dataset.
+func TestMachineFileExpiredStillReadable(t *testing.T) {
+	t.Parallel()
+
+	account := newTestAccount(t)
+
+	const licenseKey, fingerprint = "key/xyz", "fp-1"
+
+	issued := time.Now().Add(-2 * time.Hour).UTC()
+	payload := `{"data":{"id":"mach-1","type":"machines","attributes":{"fingerprint":"` + fingerprint +
+		`","metadata":{"mode":"online"}}},"meta":{"issued":"` + issued.Format(time.RFC3339Nano) +
+		`","expiry":"` + issued.Add(time.Hour).Format(time.RFC3339Nano) + `","ttl":3600}}`
+
+	block := buildCertificate(t, account, "machine/",
+		"-----BEGIN MACHINE FILE-----", "-----END MACHINE FILE-----",
+		[]byte(payload), true, licenseKey+fingerprint, "ed25519")
+
+	file, err := licensing.ParseMachineFile(block)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	verifier, err := licensing.NewVerifier(account.ed25519Hex())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := file.Verify(verifier); err != nil {
+		t.Fatalf("an expired file is still genuine: %v", err)
+	}
+
+	dataset, err := file.Decrypt(licenseKey, fingerprint)
+	if !errors.Is(err, licensing.ErrMachineFileExpired) || dataset == nil {
+		t.Fatalf("Decrypt = %+v, %v", dataset, err)
+	}
+
+	if mode, _ := dataset.Machine.Metadata.String("mode"); mode != "online" || !dataset.Issued.Equal(issued) ||
+		dataset.Expiry == nil {
+		t.Fatalf("expired dataset = %+v", dataset)
+	}
+
+	if wrong, err := file.Decrypt(licenseKey, "wrong-fp"); wrong != nil || !errors.Is(err, licensing.ErrCertificateInvalid) {
+		t.Fatalf("wrong fingerprint = %+v, %v", wrong, err)
 	}
 }
 

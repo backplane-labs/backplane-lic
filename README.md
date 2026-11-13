@@ -139,6 +139,16 @@ explicit `null` asks for a perpetual file. `include` embeds `license`, `license.
 `license.product`, `license.policy`, `license.owner` (alias `license.user`),
 `license.users`, `components`, `environment`, `group` and `owner`.
 
+On the client, `MachineFile.Verify` checks the signature, and `Decode`
+(base64) or `Decrypt(licenseKey, fingerprint)` reads the dataset. A
+file that decodes but fails the time policy, being past its expiry or issued
+in the future beyond the clock skew, answers its dataset together with
+`ErrMachineFileExpired` or `ErrClockOutOfSync` (license files:
+`ErrLicenseFileExpired`). A lapsed lease stays readable (issued, expiry,
+metadata); a format, key or fingerprint failure answers no dataset.
+Decoding never checks the signature: only a file that passed `Verify` is
+authentic.
+
 `POST …/actions/generate-offline-proof` answers the machine with
 `meta.proof`: `proof/<dataset>.<signature>`, the dataset JSON (account,
 product, policy, license, machine, timestamp) and its RSA-SHA256 signature

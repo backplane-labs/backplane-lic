@@ -305,6 +305,14 @@ func (f *MachineFile) Verify(v Verifier) error {
 }
 
 // Decode decodes an unencrypted license file's dataset.
+//
+// A file whose payload decodes but fails the time policy (past its expiry,
+// or issued in the future beyond the clock skew) is answered WITH its
+// dataset and the temporal refusal (ErrLicenseFileExpired or ErrClockOutOfSync), so a
+// caller can still read an expired lease; every other failure (format,
+// decryption, a wrong key or fingerprint) answers no dataset. Decoding
+// does not verify the signature: call Verify first, and treat the dataset
+// as authentic only when it passed.
 func (f *LicenseFile) Decode() (*LicenseFileDataset, error) {
 	cert, err := f.certificate()
 	if err != nil {
@@ -321,15 +329,17 @@ func (f *LicenseFile) Decode() (*LicenseFileDataset, error) {
 	}
 
 	dataset := &LicenseFileDataset{}
-	if err := dataset.decode(payload, f.clock); err != nil {
+	if err := dataset.decode(payload); err != nil {
 		return nil, err
 	}
 
-	return dataset, nil
+	err = dataset.check(f.clock)
+
+	return dataset, err
 }
 
 // Decrypt decrypts and decodes the license file with the license key:
-// the AES key is SHA256(license key).
+// the AES key is SHA256(license key). The time policy is Decode's.
 func (f *LicenseFile) Decrypt(licenseKey string) (*LicenseFileDataset, error) {
 	cert, err := f.certificate()
 	if err != nil {
@@ -346,14 +356,24 @@ func (f *LicenseFile) Decrypt(licenseKey string) (*LicenseFileDataset, error) {
 	}
 
 	dataset := &LicenseFileDataset{}
-	if err := dataset.decode(payload, f.clock); err != nil {
+	if err := dataset.decode(payload); err != nil {
 		return nil, err
 	}
 
-	return dataset, nil
+	err = dataset.check(f.clock)
+
+	return dataset, err
 }
 
 // Decode decodes an unencrypted machine file's dataset.
+//
+// A file whose payload decodes but fails the time policy (past its expiry,
+// or issued in the future beyond the clock skew) is answered WITH its
+// dataset and the temporal refusal (ErrMachineFileExpired or ErrClockOutOfSync), so a
+// caller can still read an expired lease; every other failure (format,
+// decryption, a wrong key or fingerprint) answers no dataset. Decoding
+// does not verify the signature: call Verify first, and treat the dataset
+// as authentic only when it passed.
 func (f *MachineFile) Decode() (*MachineFileDataset, error) {
 	cert, err := f.certificate()
 	if err != nil {
@@ -370,15 +390,17 @@ func (f *MachineFile) Decode() (*MachineFileDataset, error) {
 	}
 
 	dataset := &MachineFileDataset{}
-	if err := dataset.decode(payload, f.clock); err != nil {
+	if err := dataset.decode(payload); err != nil {
 		return nil, err
 	}
 
-	return dataset, nil
+	err = dataset.check(f.clock)
+
+	return dataset, err
 }
 
 // Decrypt decrypts and decodes the machine file: the AES key is
-// SHA256(license key + fingerprint).
+// SHA256(license key + fingerprint). The time policy is Decode's.
 func (f *MachineFile) Decrypt(licenseKey, fingerprint string) (*MachineFileDataset, error) {
 	cert, err := f.certificate()
 	if err != nil {
@@ -395,11 +417,13 @@ func (f *MachineFile) Decrypt(licenseKey, fingerprint string) (*MachineFileDatas
 	}
 
 	dataset := &MachineFileDataset{}
-	if err := dataset.decode(payload, f.clock); err != nil {
+	if err := dataset.decode(payload); err != nil {
 		return nil, err
 	}
 
-	return dataset, nil
+	err = dataset.check(f.clock)
+
+	return dataset, err
 }
 
 // decodeBase64Payload decodes a plain base64-encoded dataset payload.
@@ -434,7 +458,7 @@ type LicenseFileDataset struct {
 }
 
 // decode unmarshals a payload document.
-func (d *LicenseFileDataset) decode(payload []byte, clock fileClock) error {
+func (d *LicenseFileDataset) decode(payload []byte) error {
 	doc, err := jsonapi.Parse(payload)
 	if err != nil {
 		return fmt.Errorf("decode license file payload: %w", err)
@@ -471,6 +495,11 @@ func (d *LicenseFileDataset) decode(payload []byte, clock fileClock) error {
 		d.Entitlements = append(d.Entitlements, entitlement)
 	}
 
+	return nil
+}
+
+// check applies the time policy to the decoded dataset.
+func (d *LicenseFileDataset) check(clock fileClock) error {
 	return clock.checkDataset(d.Issued, d.Expiry, d.TTL, ErrLicenseFileExpired)
 }
 
@@ -493,7 +522,7 @@ type MachineFileDataset struct {
 }
 
 // decode unmarshals a payload document.
-func (d *MachineFileDataset) decode(payload []byte, clock fileClock) error {
+func (d *MachineFileDataset) decode(payload []byte) error {
 	doc, err := jsonapi.Parse(payload)
 	if err != nil {
 		return fmt.Errorf("decode machine file payload: %w", err)
@@ -523,6 +552,11 @@ func (d *MachineFileDataset) decode(payload []byte, clock fileClock) error {
 		}
 	}
 
+	return nil
+}
+
+// check applies the time policy to the decoded dataset.
+func (d *MachineFileDataset) check(clock fileClock) error {
 	return clock.checkDataset(d.Issued, d.Expiry, d.TTL, ErrMachineFileExpired)
 }
 
