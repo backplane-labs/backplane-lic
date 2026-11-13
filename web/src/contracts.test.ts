@@ -25,8 +25,12 @@ test('every management descriptor compiles, including all policy attrs and enums
     for (const action of resource.actions ?? []) assert.doesNotThrow(() => validateDraft(formSchema(action.fields ?? []), {}), action.name);
   }
   const source = readFileSync(new URL('../../internal/infra/httpapi/policies_body.go', import.meta.url), 'utf8');
-  const block = source.match(/var policyCreateAttrs = \[\]string\{([\s\S]*?)\n\}/)![1];
-  const allowed = [...block.matchAll(/"([^"]+)"/g)].map((match) => match[1].replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()));
+  const block = source.match(/var policyCreateAttrs = \[\]string\{[^\n]*\n([\s\S]*?)\n\}/)![1];
+  // Entries are string literals or the file's named attribute constants.
+  const constants = new Map([...source.matchAll(/^\s*(attr\w+)\s*=\s*"([^"]+)"/gm)].map((match) => [match[1], match[2]]));
+  const allowed = [...block.matchAll(/"([^"]+)"|\b(attr\w+)\b/g)]
+    .map((match) => match[1] ?? constants.get(match[2]) ?? assert.fail(`unknown constant ${match[2]}`))
+    .map((name) => name.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()));
   assert.deepEqual(resources.find((r) => r.name === 'policies')!.attributes.map((field) => field.name).sort(), allowed.sort());
 });
 test('schema field errors block missing required values and invalid boolean types', () => {
