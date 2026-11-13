@@ -52,7 +52,7 @@ func settleValidationTouch(tb testing.TB, target Target, step Step, result StepT
 	for {
 		status, body := call(tb, target, http.MethodGet,
 			"/v1/accounts/"+AccountSlug+"/licenses/"+expected.Data.ID, "", map[string]string{
-				"Authorization": "Bearer " + AdminToken(tb, target),
+				headerAuthorization: "Bearer " + AdminToken(tb, target),
 			})
 
 		var current licenseTouchDocument

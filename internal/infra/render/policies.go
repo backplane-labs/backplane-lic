@@ -65,7 +65,7 @@ func PolicyResource(accountID uuid.UUID, p domain.Policy) oas.PolicyResource {
 		},
 		Relationships: oas.PolicyRelationships{
 			Account:      accountLink(accountID),
-			Product:      toOne(base, "/product", "products", p.ProductID),
+			Product:      toOne(base, "/product", typeProducts, p.ProductID),
 			Pool:         related(base, "/pool"),
 			Licenses:     related(base, "/licenses"),
 			Entitlements: related(base, "/entitlements"),

@@ -118,7 +118,7 @@ func (s Scenario) OfGroupShow(
 	}
 
 	if err := access.Require(ctx, "group.licenses.read"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // authorization error
+		return domain.License{}, err // authorization error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -134,7 +134,7 @@ func (s Scenario) OfGroupShow(
 	}
 
 	if err := access.GroupLicenseShow(principal, license, groupOwned); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // authorization error
+		return domain.License{}, err // authorization error
 	}
 
 	return license, nil
@@ -144,7 +144,7 @@ func (s Scenario) nestedIndex(
 	ctx context.Context, account domain.Account, f Filter, params paging.Params, permission, scopeOverride string,
 ) (List, error) {
 	if err := access.Require(ctx, permission); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -178,7 +178,7 @@ func (s Scenario) nestedIndex(
 	// The group-owner route has its own policy, not LicensePolicy#index?.
 	if scopeKind != "group_owner" {
 		if err := access.LicenseIndexPostCheck(principal, items, attached); err != nil {
-			return List{}, err //nolint:wrapcheck // the authorization's own error
+			return List{}, err // the authorization's own error
 		}
 	}
 
@@ -207,7 +207,7 @@ func (s Scenario) nestedShow(
 	within func(domain.License) bool,
 ) (domain.License, error) {
 	if err := access.Require(ctx, permission); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	license, err := s.load(ctx, account, idOrKey)

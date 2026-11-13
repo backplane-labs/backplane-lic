@@ -105,7 +105,7 @@ func (s Scenario) User(
 // userRelationship runs the shared index/show guard.
 func (s Scenario) userRelationship(ctx context.Context, account domain.Account, license domain.License) error {
 	if err := access.Require(ctx, "user.read"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -114,7 +114,7 @@ func (s Scenario) userRelationship(ctx context.Context, account domain.Account, 
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return nil
@@ -130,11 +130,11 @@ func (s Scenario) AttachUsers( //nolint:cyclop // the attach validations, verbat
 	}
 
 	if err := access.Require(ctx, "license.users.attach"); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
 	if err := access.LicenseUsersAttach(access.PrincipalOf(ctx), license); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
 	for _, id := range userIDs {
@@ -190,7 +190,7 @@ func (s Scenario) AttachUsers( //nolint:cyclop // the attach validations, verbat
 		return s.publish(ctx, "license.users.attached", rows)
 	})
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the boundary's own error
+		return nil, err // the boundary's own error
 	}
 
 	return rows, nil
@@ -207,11 +207,11 @@ func (s Scenario) DetachUsers(
 	}
 
 	if err := access.Require(ctx, "license.users.detach"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.LicenseUsersAttach(access.PrincipalOf(ctx), license); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if license.OwnerID.Valid {
@@ -315,7 +315,7 @@ func (s Scenario) Entitlement(
 
 func (s Scenario) entitlementRelationship(ctx context.Context, account domain.Account, license domain.License) error {
 	if err := access.Require(ctx, "entitlement.read"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -324,7 +324,7 @@ func (s Scenario) entitlementRelationship(ctx context.Context, account domain.Ac
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return nil
@@ -389,7 +389,7 @@ func (s Scenario) AttachEntitlements(
 		return s.publish(ctx, "license.entitlements.attached", rows)
 	})
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the boundary's own error
+		return nil, err // the boundary's own error
 	}
 
 	return rows, nil
@@ -451,11 +451,11 @@ func (s Scenario) DetachEntitlements(
 
 func (s Scenario) entitlementsWrite(ctx context.Context, license domain.License) error {
 	if err := access.Require(ctx, "license.entitlements.attach"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.LicenseEntitlementsAttach(access.PrincipalOf(ctx), license); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return nil
@@ -466,7 +466,7 @@ func (s Scenario) entitlementsWrite(ctx context.Context, license domain.License)
 func (s Scenario) UserActive(ctx context.Context, account domain.Account, userID uuid.UUID) (string, error) {
 	user, err := s.users.UserByID(ctx, account.ID, userID)
 	if err != nil {
-		return "", err //nolint:wrapcheck // the port's own error
+		return "", err // the port's own error
 	}
 
 	active, err := s.users.UserHasActiveLicense(ctx, account.ID, userID)

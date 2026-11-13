@@ -173,6 +173,150 @@ func (q *Queries) ListAutomationMessages(ctx context.Context, accountID *string)
 	return items, nil
 }
 
+const listComponentsSQL = `SELECT c.id, c.account_id, c.machine_id, c.name, c.fingerprint, c.metadata, c.created_at, c.updated_at,
+  l.product_id, m.license_id, count(*) OVER ()::bigint AS total
+FROM lic.machine_components c
+JOIN lic.machines m ON m.id = c.machine_id
+JOIN lic.licenses l ON l.id = m.license_id
+WHERE c.account_id = $1
+  AND ($2::uuid IS NULL OR c.id = $2)
+  AND ($3::uuid IS NULL OR c.machine_id = $3)
+  AND ($4::uuid IS NULL OR l.product_id = $4)
+  AND ($5::uuid IS NULL OR m.license_id = $5)
+  AND ($6::uuid IS NULL OR m.owner_id = $6)
+  AND ($7::text IS NULL OR EXISTS (
+    SELECT 1 FROM lic.users u
+    WHERE u.account_id = c.account_id AND (u.id::text = $7 OR u.email = $7)
+      AND (l.user_id = u.id OR EXISTS (
+        SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = u.id
+      ))
+  ))
+  AND ($8::text IS NULL
+    OR ($8::text = 'product' AND l.product_id = $9)
+    OR ($8::text = 'license' AND m.license_id = $9)
+    OR ($8::text = 'user' AND (l.user_id = $9 OR EXISTS (
+      SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = $9
+    ))))
+  AND ($10::uuid IS NULL
+    OR ($11::boolean AND (c.created_at, c.id) > (SELECT x.created_at, x.id FROM lic.machine_components x WHERE x.id = $10))
+    OR (NOT $11::boolean AND (c.created_at, c.id) < (SELECT x.created_at, x.id FROM lic.machine_components x WHERE x.id = $10)))
+ORDER BY
+  CASE WHEN $11::boolean THEN c.created_at END ASC,
+  CASE WHEN $11::boolean THEN c.id END ASC,
+  CASE WHEN NOT $11::boolean THEN c.created_at END DESC,
+  CASE WHEN NOT $11::boolean THEN c.id END DESC
+LIMIT $12 OFFSET $13;`
+
+type ListComponentsParams struct {
+	AccountID       uuid.UUID
+	ComponentID     *uuid.UUID
+	FilterMachineID *uuid.UUID
+	FilterProductID *uuid.UUID
+	FilterLicenseID *uuid.UUID
+	FilterOwnerID   *uuid.UUID
+	FilterUser      *string
+	ScopeKind       *string
+	ScopeID         *uuid.UUID
+	Cursor          *uuid.UUID
+	Asc             bool
+	Fetch           int64
+	PageOffset      int64
+}
+
+type ListComponentsRow struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	MachineID   uuid.UUID
+	Name        string
+	Fingerprint string
+	Metadata    json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	ProductID   uuid.UUID
+	LicenseID   uuid.UUID
+	Total       int64
+}
+
+func (q *Queries) ListComponents(ctx context.Context, arg ListComponentsParams) ([]ListComponentsRow, error) {
+	rows, err := q.db.Query(ctx, listComponentsSQL, arg.AccountID, arg.ComponentID, arg.FilterMachineID, arg.FilterProductID, arg.FilterLicenseID, arg.FilterOwnerID, arg.FilterUser, arg.ScopeKind, arg.ScopeID, arg.Cursor, arg.Asc, arg.Fetch, arg.PageOffset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListComponentsRow
+	for rows.Next() {
+		var i ListComponentsRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.MachineID, &i.Name, &i.Fingerprint, &i.Metadata, &i.CreatedAt, &i.UpdatedAt, &i.ProductID, &i.LicenseID, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateMachineComponentSQL = `UPDATE lic.machine_components SET name = $1, metadata = $2, updated_at = $3
+WHERE account_id = $4 AND id = $5;`
+
+type UpdateMachineComponentParams struct {
+	Name      string
+	Metadata  json.RawMessage
+	UpdatedAt time.Time
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) UpdateMachineComponent(ctx context.Context, arg UpdateMachineComponentParams) error {
+	_, err := q.db.Exec(ctx, updateMachineComponentSQL, arg.Name, arg.Metadata, arg.UpdatedAt, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteMachineComponentSQL = `DELETE FROM lic.machine_components WHERE account_id = $1 AND id = $2;`
+
+type DeleteMachineComponentParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteMachineComponent(ctx context.Context, arg DeleteMachineComponentParams) error {
+	_, err := q.db.Exec(ctx, deleteMachineComponentSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const componentFingerprintTakenSQL = `SELECT EXISTS (
+  SELECT 1 FROM lic.machine_components c
+  JOIN lic.machines m ON m.id = c.machine_id
+  JOIN lic.licenses l ON l.id = m.license_id
+  WHERE c.account_id = $1 AND c.fingerprint = $2
+    AND CASE $3::text
+      WHEN 'account' THEN true
+      WHEN 'product' THEN l.product_id = $4
+      WHEN 'policy' THEN m.policy_id = $4
+      WHEN 'license' THEN m.license_id = $4
+      ELSE c.machine_id = $4
+    END
+);`
+
+type ComponentFingerprintTakenParams struct {
+	AccountID   uuid.UUID
+	Fingerprint string
+	Kind        string
+	ScopeID     uuid.UUID
+}
+
+type ComponentFingerprintTakenRow struct {
+	Column bool
+}
+
+func (q *Queries) ComponentFingerprintTaken(ctx context.Context, arg ComponentFingerprintTakenParams) (ComponentFingerprintTakenRow, error) {
+	row := q.db.QueryRow(ctx, componentFingerprintTakenSQL, arg.AccountID, arg.Fingerprint, arg.Kind, arg.ScopeID)
+	var i ComponentFingerprintTakenRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
 const consoleCountsSQL = `SELECT
   (SELECT count(*) FROM lic.products WHERE account_id = $1)::bigint AS products,
   (SELECT count(*) FROM lic.policies WHERE account_id = $1)::bigint AS policies,
@@ -2060,8 +2204,8 @@ LEFT JOIN lic.license_entitlements le ON le.entitlement_id = e.id AND le.license
 WHERE e.account_id = $3 AND (pe.id IS NOT NULL OR le.id IS NOT NULL)
 ORDER BY e.code;
 
--- License-scope validation helpers: the machines and processes behind
--- a license, with the heartbeat facts the alive/dead math needs.`
+-- License-scope validation helpers: the processes behind a license (its
+-- machines load through the machines repository).`
 
 type ListLicenseEntitlementCodesParams struct {
 	PolicyID  uuid.UUID
@@ -2093,100 +2237,6 @@ func (q *Queries) ListLicenseEntitlementCodes(ctx context.Context, arg ListLicen
 	return items, nil
 }
 
-const getLicenseMachineByIDSQL = `SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,
-  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,
-  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,
-  m.created_at, m.updated_at,
-  p.require_heartbeat, p.heartbeat_duration
-FROM lic.machines m
-JOIN lic.policies p ON p.id = m.policy_id
-WHERE m.account_id = $1 AND m.id = $2 AND m.license_id = $3;`
-
-type GetLicenseMachineByIDParams struct {
-	AccountID uuid.UUID
-	ID        uuid.UUID
-	LicenseID uuid.UUID
-}
-
-type GetLicenseMachineByIDRow struct {
-	ID                   uuid.UUID
-	AccountID            uuid.UUID
-	LicenseID            uuid.UUID
-	PolicyID             uuid.UUID
-	OwnerID              *uuid.UUID
-	GroupID              *uuid.UUID
-	Name                 *string
-	Fingerprint          string
-	IP                   *string
-	Hostname             *string
-	Platform             *string
-	Cores                *int32
-	Memory               *int64
-	Disk                 *int64
-	MaxProcessesOverride *int32
-	Metadata             json.RawMessage
-	LastHeartbeatAt      *time.Time
-	LastCheckOutAt       *time.Time
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-	RequireHeartbeat     bool
-	HeartbeatDuration    *int32
-}
-
-func (q *Queries) GetLicenseMachineByID(ctx context.Context, arg GetLicenseMachineByIDParams) (GetLicenseMachineByIDRow, error) {
-	row := q.db.QueryRow(ctx, getLicenseMachineByIDSQL, arg.AccountID, arg.ID, arg.LicenseID)
-	var i GetLicenseMachineByIDRow
-	err := row.Scan(&i.ID, &i.AccountID, &i.LicenseID, &i.PolicyID, &i.OwnerID, &i.GroupID, &i.Name, &i.Fingerprint, &i.IP, &i.Hostname, &i.Platform, &i.Cores, &i.Memory, &i.Disk, &i.MaxProcessesOverride, &i.Metadata, &i.LastHeartbeatAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.RequireHeartbeat, &i.HeartbeatDuration)
-	return i, err
-}
-
-const getLicenseMachineByFingerprintSQL = `SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,
-  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,
-  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,
-  m.created_at, m.updated_at,
-  p.require_heartbeat, p.heartbeat_duration
-FROM lic.machines m
-JOIN lic.policies p ON p.id = m.policy_id
-WHERE m.account_id = $1 AND m.fingerprint = $2 AND m.license_id = $3;`
-
-type GetLicenseMachineByFingerprintParams struct {
-	AccountID   uuid.UUID
-	Fingerprint string
-	LicenseID   uuid.UUID
-}
-
-type GetLicenseMachineByFingerprintRow struct {
-	ID                   uuid.UUID
-	AccountID            uuid.UUID
-	LicenseID            uuid.UUID
-	PolicyID             uuid.UUID
-	OwnerID              *uuid.UUID
-	GroupID              *uuid.UUID
-	Name                 *string
-	Fingerprint          string
-	IP                   *string
-	Hostname             *string
-	Platform             *string
-	Cores                *int32
-	Memory               *int64
-	Disk                 *int64
-	MaxProcessesOverride *int32
-	Metadata             json.RawMessage
-	LastHeartbeatAt      *time.Time
-	LastCheckOutAt       *time.Time
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-	RequireHeartbeat     bool
-	HeartbeatDuration    *int32
-}
-
-func (q *Queries) GetLicenseMachineByFingerprint(ctx context.Context, arg GetLicenseMachineByFingerprintParams) (GetLicenseMachineByFingerprintRow, error) {
-	row := q.db.QueryRow(ctx, getLicenseMachineByFingerprintSQL, arg.AccountID, arg.Fingerprint, arg.LicenseID)
-	var i GetLicenseMachineByFingerprintRow
-	err := row.Scan(&i.ID, &i.AccountID, &i.LicenseID, &i.PolicyID, &i.OwnerID, &i.GroupID, &i.Name, &i.Fingerprint, &i.IP, &i.Hostname, &i.Platform, &i.Cores, &i.Memory, &i.Disk, &i.MaxProcessesOverride, &i.Metadata, &i.LastHeartbeatAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.RequireHeartbeat, &i.HeartbeatDuration)
-	return i, err
-}
-
 const countLicenseProcessesSQL = `SELECT count(*) AS count FROM lic.machine_processes mp
 JOIN lic.machines m ON m.id = mp.machine_id
 WHERE m.account_id = $1 AND m.license_id = $2
@@ -2210,11 +2260,7 @@ func (q *Queries) CountLicenseProcesses(ctx context.Context, arg CountLicensePro
 }
 
 const countMachineProcessesSQL = `SELECT count(*) AS count FROM lic.machine_processes mp
-WHERE mp.account_id = $1 AND mp.machine_id = $2;
-
--- The machine rows of a license (relationship index and validation).
--- heartbeat_status mirrors Machine#heartbeat_status with the default
--- TTL of 10 minutes.`
+WHERE mp.account_id = $1 AND mp.machine_id = $2;`
 
 type CountMachineProcessesParams struct {
 	AccountID uuid.UUID
@@ -2230,96 +2276,6 @@ func (q *Queries) CountMachineProcesses(ctx context.Context, arg CountMachinePro
 	var i CountMachineProcessesRow
 	err := row.Scan(&i.Count)
 	return i, err
-}
-
-const listLicenseMachinesSQL = `SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,
-  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,
-  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,
-  m.created_at, m.updated_at,
-  p.require_heartbeat, p.heartbeat_duration,
-  CASE
-    WHEN m.last_heartbeat_at IS NULL
-      AND (p.require_heartbeat = false
-        OR m.created_at >= ($1::timestamptz - INTERVAL '1 second' * COALESCE(p.heartbeat_duration, $2)))
-      THEN 'NOT_STARTED'
-    WHEN m.last_heartbeat_at IS NOT NULL
-      AND m.last_heartbeat_at >= ($1::timestamptz - INTERVAL '1 second' * COALESCE(p.heartbeat_duration, $2))
-      THEN 'ALIVE'
-    ELSE 'DEAD'
-  END AS heartbeat_status
-FROM lic.machines m
-JOIN lic.policies p ON p.id = m.policy_id
-WHERE m.account_id = $3
-  AND m.license_id = $4
-  AND ($5::text IS NULL OR m.fingerprint = $5)
-  AND ($6::uuid IS NULL OR m.license_id IN (
-    SELECT l2.id FROM lic.licenses l2 WHERE l2.product_id = $6
-  ))
-  AND (
-    $7::uuid IS NULL OR EXISTS (
-      SELECT 1 FROM lic.licenses l3
-      LEFT JOIN lic.license_users lu ON lu.license_id = l3.id
-      WHERE l3.id = m.license_id AND (l3.user_id = $7 OR lu.user_id = $7)
-    )
-  )
-ORDER BY m.created_at DESC, m.id DESC
-LIMIT $8;`
-
-type ListLicenseMachinesParams struct {
-	Now          time.Time
-	HeartbeatTtl *int32
-	AccountID    uuid.UUID
-	LicenseID    uuid.UUID
-	Fingerprint  *string
-	ProductID    *uuid.UUID
-	UserID       *uuid.UUID
-	Limit        int64
-}
-
-type ListLicenseMachinesRow struct {
-	ID                   uuid.UUID
-	AccountID            uuid.UUID
-	LicenseID            uuid.UUID
-	PolicyID             uuid.UUID
-	OwnerID              *uuid.UUID
-	GroupID              *uuid.UUID
-	Name                 *string
-	Fingerprint          string
-	IP                   *string
-	Hostname             *string
-	Platform             *string
-	Cores                *int32
-	Memory               *int64
-	Disk                 *int64
-	MaxProcessesOverride *int32
-	Metadata             json.RawMessage
-	LastHeartbeatAt      *time.Time
-	LastCheckOutAt       *time.Time
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
-	RequireHeartbeat     bool
-	HeartbeatDuration    *int32
-	HeartbeatStatus      string
-}
-
-func (q *Queries) ListLicenseMachines(ctx context.Context, arg ListLicenseMachinesParams) ([]ListLicenseMachinesRow, error) {
-	rows, err := q.db.Query(ctx, listLicenseMachinesSQL, arg.Now, arg.HeartbeatTtl, arg.AccountID, arg.LicenseID, arg.Fingerprint, arg.ProductID, arg.UserID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListLicenseMachinesRow
-	for rows.Next() {
-		var i ListLicenseMachinesRow
-		if err := rows.Scan(&i.ID, &i.AccountID, &i.LicenseID, &i.PolicyID, &i.OwnerID, &i.GroupID, &i.Name, &i.Fingerprint, &i.IP, &i.Hostname, &i.Platform, &i.Cores, &i.Memory, &i.Disk, &i.MaxProcessesOverride, &i.Metadata, &i.LastHeartbeatAt, &i.LastCheckOutAt, &i.CreatedAt, &i.UpdatedAt, &i.RequireHeartbeat, &i.HeartbeatDuration, &i.HeartbeatStatus); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const countLicenseMachinesSQL = `SELECT count(*) AS count FROM lic.machines
@@ -2570,6 +2526,357 @@ type StampLicenseNotificationParams struct {
 
 func (q *Queries) StampLicenseNotification(ctx context.Context, arg StampLicenseNotificationParams) error {
 	_, err := q.db.Exec(ctx, stampLicenseNotificationSQL, arg.Event, arg.Now, arg.AccountID, arg.ID)
+	return err
+}
+
+const deadMachinesSQL = `SELECT m.id, m.account_id
+FROM lic.machines m
+JOIN lic.policies p ON p.id = m.policy_id
+WHERE p.heartbeat_cull_strategy <> 'ALWAYS_REVIVE'
+  AND (
+    (m.last_heartbeat_at IS NULL AND p.require_heartbeat
+      AND m.created_at < $1::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600)))
+    OR (m.last_heartbeat_at IS NOT NULL
+      AND m.last_heartbeat_at < $1::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600)))
+  )
+ORDER BY m.last_heartbeat_at NULLS FIRST, m.id
+LIMIT $2;`
+
+type DeadMachinesParams struct {
+	Now   time.Time
+	Batch int64
+}
+
+type DeadMachinesRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+}
+
+func (q *Queries) DeadMachines(ctx context.Context, arg DeadMachinesParams) ([]DeadMachinesRow, error) {
+	rows, err := q.db.Query(ctx, deadMachinesSQL, arg.Now, arg.Batch)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DeadMachinesRow
+	for rows.Next() {
+		var i DeadMachinesRow
+		if err := rows.Scan(&i.ID, &i.AccountID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertMachineSQL = `INSERT INTO lic.machines (
+  id, account_id, license_id, policy_id, owner_id, group_id, name, fingerprint, ip, hostname, platform,
+  cores, memory, disk, max_processes_override, metadata, last_heartbeat_at, created_at, updated_at
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+  $12, $13, $14, $15, $16, $17, $18, $19
+);`
+
+type InsertMachineParams struct {
+	ID                   uuid.UUID
+	AccountID            uuid.UUID
+	LicenseID            uuid.UUID
+	PolicyID             uuid.UUID
+	OwnerID              *uuid.UUID
+	GroupID              *uuid.UUID
+	Name                 *string
+	Fingerprint          string
+	IP                   *string
+	Hostname             *string
+	Platform             *string
+	Cores                *int32
+	Memory               *int64
+	Disk                 *int64
+	MaxProcessesOverride *int32
+	Metadata             json.RawMessage
+	LastHeartbeatAt      *time.Time
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+func (q *Queries) InsertMachine(ctx context.Context, arg InsertMachineParams) error {
+	_, err := q.db.Exec(ctx, insertMachineSQL, arg.ID, arg.AccountID, arg.LicenseID, arg.PolicyID, arg.OwnerID, arg.GroupID, arg.Name, arg.Fingerprint, arg.IP, arg.Hostname, arg.Platform, arg.Cores, arg.Memory, arg.Disk, arg.MaxProcessesOverride, arg.Metadata, arg.LastHeartbeatAt, arg.CreatedAt, arg.UpdatedAt)
+	return err
+}
+
+const updateMachineSQL = `UPDATE lic.machines SET
+  owner_id = $1, group_id = $2, name = $3, ip = $4, hostname = $5,
+  platform = $6, cores = $7, memory = $8, disk = $9,
+  max_processes_override = $10, metadata = $11,
+  last_heartbeat_at = $12, last_check_out_at = $13,
+  last_death_event_sent_at = $14, updated_at = $15
+WHERE account_id = $16 AND id = $17;`
+
+type UpdateMachineParams struct {
+	OwnerID              *uuid.UUID
+	GroupID              *uuid.UUID
+	Name                 *string
+	IP                   *string
+	Hostname             *string
+	Platform             *string
+	Cores                *int32
+	Memory               *int64
+	Disk                 *int64
+	MaxProcessesOverride *int32
+	Metadata             json.RawMessage
+	LastHeartbeatAt      *time.Time
+	LastCheckOutAt       *time.Time
+	LastDeathEventSentAt *time.Time
+	UpdatedAt            time.Time
+	AccountID            uuid.UUID
+	ID                   uuid.UUID
+}
+
+func (q *Queries) UpdateMachine(ctx context.Context, arg UpdateMachineParams) error {
+	_, err := q.db.Exec(ctx, updateMachineSQL, arg.OwnerID, arg.GroupID, arg.Name, arg.IP, arg.Hostname, arg.Platform, arg.Cores, arg.Memory, arg.Disk, arg.MaxProcessesOverride, arg.Metadata, arg.LastHeartbeatAt, arg.LastCheckOutAt, arg.LastDeathEventSentAt, arg.UpdatedAt, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteMachineSQL = `DELETE FROM lic.machines WHERE account_id = $1 AND id = $2;`
+
+type DeleteMachineParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteMachine(ctx context.Context, arg DeleteMachineParams) error {
+	_, err := q.db.Exec(ctx, deleteMachineSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const machineExistsSQL = `SELECT EXISTS (SELECT 1 FROM lic.machines WHERE account_id = $1 AND id = $2);`
+
+type MachineExistsParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type MachineExistsRow struct {
+	Column bool
+}
+
+func (q *Queries) MachineExists(ctx context.Context, arg MachineExistsParams) (MachineExistsRow, error) {
+	row := q.db.QueryRow(ctx, machineExistsSQL, arg.AccountID, arg.ID)
+	var i MachineExistsRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const fingerprintTakenSQL = `SELECT EXISTS (
+  SELECT 1 FROM lic.machines m
+  JOIN lic.licenses l ON l.id = m.license_id
+  WHERE m.account_id = $1 AND m.fingerprint = $2
+    AND CASE $3::text
+      WHEN 'account' THEN true
+      WHEN 'product' THEN l.product_id = $4
+      WHEN 'policy' THEN m.policy_id = $4
+      ELSE m.license_id = $4
+    END
+);`
+
+type FingerprintTakenParams struct {
+	AccountID   uuid.UUID
+	Fingerprint string
+	Kind        string
+	ScopeID     uuid.UUID
+}
+
+type FingerprintTakenRow struct {
+	Column bool
+}
+
+func (q *Queries) FingerprintTaken(ctx context.Context, arg FingerprintTakenParams) (FingerprintTakenRow, error) {
+	row := q.db.QueryRow(ctx, fingerprintTakenSQL, arg.AccountID, arg.Fingerprint, arg.Kind, arg.ScopeID)
+	var i FingerprintTakenRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const machineTotalsSQL = `SELECT count(*)::bigint AS count,
+  COALESCE(sum(cores), 0)::bigint AS cores,
+  COALESCE(sum(memory), 0)::bigint AS memory,
+  COALESCE(sum(disk), 0)::bigint AS disk
+FROM lic.machines
+WHERE license_id = $1 AND id <> $2
+  AND (NOT $3::boolean OR owner_id IS NOT DISTINCT FROM $4::uuid);`
+
+type MachineTotalsParams struct {
+	LicenseID uuid.UUID
+	Except    uuid.UUID
+	PerUser   bool
+	OwnerID   *uuid.UUID
+}
+
+type MachineTotalsRow struct {
+	Count  int64
+	Cores  int64
+	Memory int64
+	Disk   int64
+}
+
+func (q *Queries) MachineTotals(ctx context.Context, arg MachineTotalsParams) (MachineTotalsRow, error) {
+	row := q.db.QueryRow(ctx, machineTotalsSQL, arg.LicenseID, arg.Except, arg.PerUser, arg.OwnerID)
+	var i MachineTotalsRow
+	err := row.Scan(&i.Count, &i.Cores, &i.Memory, &i.Disk)
+	return i, err
+}
+
+const refreshLicenseMachineCountersSQL = `UPDATE lic.licenses l SET
+  machines_count = t.count, machines_core_count = t.cores,
+  machines_memory_count = t.memory, machines_disk_count = t.disk, updated_at = $1
+FROM (
+  SELECT count(*)::integer AS count, COALESCE(sum(cores), 0)::integer AS cores,
+    COALESCE(sum(memory), 0)::bigint AS memory, COALESCE(sum(disk), 0)::bigint AS disk
+  FROM lic.machines WHERE license_id = $2
+) t
+WHERE l.account_id = $3 AND l.id = $2;`
+
+type RefreshLicenseMachineCountersParams struct {
+	UpdatedAt time.Time
+	LicenseID uuid.UUID
+	AccountID uuid.UUID
+}
+
+func (q *Queries) RefreshLicenseMachineCounters(ctx context.Context, arg RefreshLicenseMachineCountersParams) error {
+	_, err := q.db.Exec(ctx, refreshLicenseMachineCountersSQL, arg.UpdatedAt, arg.LicenseID, arg.AccountID)
+	return err
+}
+
+const lockLicenseSQL = `SELECT 1 FROM lic.licenses WHERE account_id = $1 AND id = $2 FOR UPDATE;`
+
+type LockLicenseParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) LockLicense(ctx context.Context, arg LockLicenseParams) error {
+	_, err := q.db.Exec(ctx, lockLicenseSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const licenseHasUserSQL = `SELECT EXISTS (
+  SELECT 1 FROM lic.licenses l WHERE l.id = $1 AND l.user_id = $2
+  UNION ALL
+  SELECT 1 FROM lic.license_users lu WHERE lu.license_id = $1 AND lu.user_id = $2
+);`
+
+type LicenseHasUserParams struct {
+	LicenseID uuid.UUID
+	UserID    uuid.UUID
+}
+
+type LicenseHasUserRow struct {
+	Column bool
+}
+
+func (q *Queries) LicenseHasUser(ctx context.Context, arg LicenseHasUserParams) (LicenseHasUserRow, error) {
+	row := q.db.QueryRow(ctx, licenseHasUserSQL, arg.LicenseID, arg.UserID)
+	var i LicenseHasUserRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const groupMachineCountSQL = `SELECT count(*)::bigint FROM lic.machines WHERE group_id = $1;`
+
+type GroupMachineCountRow struct {
+	Column int64
+}
+
+func (q *Queries) GroupMachineCount(ctx context.Context, groupID *uuid.UUID) (GroupMachineCountRow, error) {
+	row := q.db.QueryRow(ctx, groupMachineCountSQL, groupID)
+	var i GroupMachineCountRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const insertMachineComponentSQL = `INSERT INTO lic.machine_components (id, account_id, machine_id, name, fingerprint, metadata, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+
+type InsertMachineComponentParams struct {
+	ID          uuid.UUID
+	AccountID   uuid.UUID
+	MachineID   uuid.UUID
+	Name        string
+	Fingerprint string
+	Metadata    json.RawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func (q *Queries) InsertMachineComponent(ctx context.Context, arg InsertMachineComponentParams) error {
+	_, err := q.db.Exec(ctx, insertMachineComponentSQL, arg.ID, arg.AccountID, arg.MachineID, arg.Name, arg.Fingerprint, arg.Metadata, arg.CreatedAt, arg.UpdatedAt)
+	return err
+}
+
+const tokenForUpdateNowaitSQL = `SELECT id, max_activations, activations, max_deactivations, deactivations
+FROM lic.tokens WHERE account_id = $1 AND id = $2
+FOR UPDATE NOWAIT;`
+
+type TokenForUpdateNowaitParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type TokenForUpdateNowaitRow struct {
+	ID               uuid.UUID
+	MaxActivations   *int32
+	Activations      int32
+	MaxDeactivations *int32
+	Deactivations    int32
+}
+
+func (q *Queries) TokenForUpdateNowait(ctx context.Context, arg TokenForUpdateNowaitParams) (TokenForUpdateNowaitRow, error) {
+	row := q.db.QueryRow(ctx, tokenForUpdateNowaitSQL, arg.AccountID, arg.ID)
+	var i TokenForUpdateNowaitRow
+	err := row.Scan(&i.ID, &i.MaxActivations, &i.Activations, &i.MaxDeactivations, &i.Deactivations)
+	return i, err
+}
+
+const tokenForUpdateSkipLockedSQL = `SELECT id, max_activations, activations, max_deactivations, deactivations
+FROM lic.tokens WHERE account_id = $1 AND id = $2
+FOR UPDATE SKIP LOCKED;`
+
+type TokenForUpdateSkipLockedParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+type TokenForUpdateSkipLockedRow struct {
+	ID               uuid.UUID
+	MaxActivations   *int32
+	Activations      int32
+	MaxDeactivations *int32
+	Deactivations    int32
+}
+
+func (q *Queries) TokenForUpdateSkipLocked(ctx context.Context, arg TokenForUpdateSkipLockedParams) (TokenForUpdateSkipLockedRow, error) {
+	row := q.db.QueryRow(ctx, tokenForUpdateSkipLockedSQL, arg.AccountID, arg.ID)
+	var i TokenForUpdateSkipLockedRow
+	err := row.Scan(&i.ID, &i.MaxActivations, &i.Activations, &i.MaxDeactivations, &i.Deactivations)
+	return i, err
+}
+
+const setTokenActivationCountersSQL = `UPDATE lic.tokens SET activations = $1, deactivations = $2, updated_at = $3
+WHERE account_id = $4 AND id = $5;`
+
+type SetTokenActivationCountersParams struct {
+	Activations   int32
+	Deactivations int32
+	UpdatedAt     time.Time
+	AccountID     uuid.UUID
+	ID            uuid.UUID
+}
+
+func (q *Queries) SetTokenActivationCounters(ctx context.Context, arg SetTokenActivationCountersParams) error {
+	_, err := q.db.Exec(ctx, setTokenActivationCountersSQL, arg.Activations, arg.Deactivations, arg.UpdatedAt, arg.AccountID, arg.ID)
 	return err
 }
 
@@ -3204,6 +3511,254 @@ func (q *Queries) GetPolicyByLicense(ctx context.Context, arg GetPolicyByLicense
 	row := q.db.QueryRow(ctx, getPolicyByLicenseSQL, arg.AccountID, arg.LicenseID)
 	var i GetPolicyByLicenseRow
 	err := row.Scan(&i.ID, &i.AccountID, &i.ProductID, &i.Name, &i.Duration, &i.Strict, &i.Floating, &i.UsePool, &i.MaxMachines, &i.MaxProcesses, &i.MaxUsers, &i.MaxCores, &i.MaxMemory, &i.MaxDisk, &i.MaxUses, &i.MachineUniquenessStrategy, &i.MachineMatchingStrategy, &i.ComponentUniquenessStrategy, &i.ComponentMatchingStrategy, &i.ExpirationStrategy, &i.ExpirationBasis, &i.RenewalBasis, &i.TransferStrategy, &i.AuthenticationStrategy, &i.MachineLeasingStrategy, &i.ProcessLeasingStrategy, &i.OverageStrategy, &i.Scheme, &i.Encrypted, &i.Protected, &i.RequireProductScope, &i.RequirePolicyScope, &i.RequireMachineScope, &i.RequireFingerprintScope, &i.RequireComponentsScope, &i.RequireUserScope, &i.RequireChecksumScope, &i.RequireVersionScope, &i.RequireCheckIn, &i.CheckInInterval, &i.CheckInIntervalCount, &i.HeartbeatDuration, &i.HeartbeatCullStrategy, &i.HeartbeatResurrectionStrategy, &i.HeartbeatBasis, &i.RequireHeartbeat, &i.Metadata, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
+const listProcessesSQL = `SELECT pr.id, pr.account_id, pr.machine_id, pr.pid, pr.metadata, pr.last_heartbeat_at,
+  pr.last_death_event_sent_at, pr.created_at, pr.updated_at,
+  p.heartbeat_duration, p.heartbeat_resurrection_strategy, p.heartbeat_cull_strategy,
+  l.product_id, m.license_id, count(*) OVER ()::bigint AS total
+FROM lic.machine_processes pr
+JOIN lic.machines m ON m.id = pr.machine_id
+JOIN lic.licenses l ON l.id = m.license_id
+JOIN lic.policies p ON p.id = m.policy_id
+WHERE pr.account_id = $1
+  AND ($2::uuid IS NULL OR pr.id = $2)
+  AND ($3::uuid IS NULL OR pr.machine_id = $3)
+  AND ($4::uuid IS NULL OR l.product_id = $4)
+  AND ($5::uuid IS NULL OR m.license_id = $5)
+  AND ($6::uuid IS NULL OR m.owner_id = $6)
+  AND ($7::text IS NULL OR EXISTS (
+    SELECT 1 FROM lic.users u
+    WHERE u.account_id = pr.account_id AND (u.id::text = $7 OR u.email = $7)
+      AND (l.user_id = u.id OR EXISTS (
+        SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = u.id
+      ))
+  ))
+  AND ($8::text IS NULL OR CASE $8::text
+    WHEN 'ALIVE' THEN pr.last_heartbeat_at >= $9::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600))
+    WHEN 'DEAD' THEN pr.last_heartbeat_at < $9::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600))
+    ELSE false
+  END)
+  AND ($10::text IS NULL
+    OR ($10::text = 'product' AND l.product_id = $11)
+    OR ($10::text = 'license' AND m.license_id = $11)
+    OR ($10::text = 'user' AND (l.user_id = $11 OR EXISTS (
+      SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = $11
+    ))))
+  AND ($12::uuid IS NULL
+    OR ($13::boolean AND (pr.created_at, pr.id) > (SELECT x.created_at, x.id FROM lic.machine_processes x WHERE x.id = $12))
+    OR (NOT $13::boolean AND (pr.created_at, pr.id) < (SELECT x.created_at, x.id FROM lic.machine_processes x WHERE x.id = $12)))
+ORDER BY
+  CASE WHEN $13::boolean THEN pr.created_at END ASC,
+  CASE WHEN $13::boolean THEN pr.id END ASC,
+  CASE WHEN NOT $13::boolean THEN pr.created_at END DESC,
+  CASE WHEN NOT $13::boolean THEN pr.id END DESC
+LIMIT $14 OFFSET $15;
+
+-- The dead processes the cull visits (CullDeadProcessesWorker).`
+
+type ListProcessesParams struct {
+	AccountID       uuid.UUID
+	ProcessID       *uuid.UUID
+	FilterMachineID *uuid.UUID
+	FilterProductID *uuid.UUID
+	FilterLicenseID *uuid.UUID
+	FilterOwnerID   *uuid.UUID
+	FilterUser      *string
+	FilterStatus    *string
+	Now             time.Time
+	ScopeKind       *string
+	ScopeID         *uuid.UUID
+	Cursor          *uuid.UUID
+	Asc             bool
+	Fetch           int64
+	PageOffset      int64
+}
+
+type ListProcessesRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	MachineID                     uuid.UUID
+	Pid                           string
+	Metadata                      json.RawMessage
+	LastHeartbeatAt               time.Time
+	LastDeathEventSentAt          *time.Time
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+	HeartbeatDuration             *int32
+	HeartbeatResurrectionStrategy *string
+	HeartbeatCullStrategy         *string
+	ProductID                     uuid.UUID
+	LicenseID                     uuid.UUID
+	Total                         int64
+}
+
+func (q *Queries) ListProcesses(ctx context.Context, arg ListProcessesParams) ([]ListProcessesRow, error) {
+	rows, err := q.db.Query(ctx, listProcessesSQL, arg.AccountID, arg.ProcessID, arg.FilterMachineID, arg.FilterProductID, arg.FilterLicenseID, arg.FilterOwnerID, arg.FilterUser, arg.FilterStatus, arg.Now, arg.ScopeKind, arg.ScopeID, arg.Cursor, arg.Asc, arg.Fetch, arg.PageOffset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProcessesRow
+	for rows.Next() {
+		var i ListProcessesRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.MachineID, &i.Pid, &i.Metadata, &i.LastHeartbeatAt, &i.LastDeathEventSentAt, &i.CreatedAt, &i.UpdatedAt, &i.HeartbeatDuration, &i.HeartbeatResurrectionStrategy, &i.HeartbeatCullStrategy, &i.ProductID, &i.LicenseID, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const deadProcessesSQL = `SELECT pr.id, pr.account_id
+FROM lic.machine_processes pr
+JOIN lic.machines m ON m.id = pr.machine_id
+JOIN lic.policies p ON p.id = m.policy_id
+WHERE p.heartbeat_cull_strategy <> 'ALWAYS_REVIVE'
+  AND pr.last_heartbeat_at < $1::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600))
+ORDER BY pr.last_heartbeat_at, pr.id
+LIMIT $2;`
+
+type DeadProcessesParams struct {
+	Now   time.Time
+	Batch int64
+}
+
+type DeadProcessesRow struct {
+	ID        uuid.UUID
+	AccountID uuid.UUID
+}
+
+func (q *Queries) DeadProcesses(ctx context.Context, arg DeadProcessesParams) ([]DeadProcessesRow, error) {
+	rows, err := q.db.Query(ctx, deadProcessesSQL, arg.Now, arg.Batch)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DeadProcessesRow
+	for rows.Next() {
+		var i DeadProcessesRow
+		if err := rows.Scan(&i.ID, &i.AccountID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertMachineProcessSQL = `INSERT INTO lic.machine_processes (id, account_id, machine_id, pid, metadata, last_heartbeat_at, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+
+type InsertMachineProcessParams struct {
+	ID              uuid.UUID
+	AccountID       uuid.UUID
+	MachineID       uuid.UUID
+	Pid             string
+	Metadata        json.RawMessage
+	LastHeartbeatAt time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+func (q *Queries) InsertMachineProcess(ctx context.Context, arg InsertMachineProcessParams) error {
+	_, err := q.db.Exec(ctx, insertMachineProcessSQL, arg.ID, arg.AccountID, arg.MachineID, arg.Pid, arg.Metadata, arg.LastHeartbeatAt, arg.CreatedAt, arg.UpdatedAt)
+	return err
+}
+
+const updateMachineProcessSQL = `UPDATE lic.machine_processes SET metadata = $1, last_heartbeat_at = $2,
+  last_death_event_sent_at = $3, updated_at = $4
+WHERE account_id = $5 AND id = $6;`
+
+type UpdateMachineProcessParams struct {
+	Metadata             json.RawMessage
+	LastHeartbeatAt      time.Time
+	LastDeathEventSentAt *time.Time
+	UpdatedAt            time.Time
+	AccountID            uuid.UUID
+	ID                   uuid.UUID
+}
+
+func (q *Queries) UpdateMachineProcess(ctx context.Context, arg UpdateMachineProcessParams) error {
+	_, err := q.db.Exec(ctx, updateMachineProcessSQL, arg.Metadata, arg.LastHeartbeatAt, arg.LastDeathEventSentAt, arg.UpdatedAt, arg.AccountID, arg.ID)
+	return err
+}
+
+const deleteMachineProcessSQL = `DELETE FROM lic.machine_processes WHERE account_id = $1 AND id = $2;`
+
+type DeleteMachineProcessParams struct {
+	AccountID uuid.UUID
+	ID        uuid.UUID
+}
+
+func (q *Queries) DeleteMachineProcess(ctx context.Context, arg DeleteMachineProcessParams) error {
+	_, err := q.db.Exec(ctx, deleteMachineProcessSQL, arg.AccountID, arg.ID)
+	return err
+}
+
+const processExistsSQL = `SELECT EXISTS (SELECT 1 FROM lic.machine_processes WHERE id = $1);`
+
+type ProcessExistsRow struct {
+	Column bool
+}
+
+func (q *Queries) ProcessExists(ctx context.Context, id uuid.UUID) (ProcessExistsRow, error) {
+	row := q.db.QueryRow(ctx, processExistsSQL, id)
+	var i ProcessExistsRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const processPidTakenSQL = `SELECT EXISTS (SELECT 1 FROM lic.machine_processes WHERE machine_id = $1 AND pid = $2);
+
+-- The process counts the limits compare against (every process counts,
+-- alive or dead): of a machine, of a license, of a license's owner.`
+
+type ProcessPidTakenParams struct {
+	MachineID uuid.UUID
+	Pid       string
+}
+
+type ProcessPidTakenRow struct {
+	Column bool
+}
+
+func (q *Queries) ProcessPidTaken(ctx context.Context, arg ProcessPidTakenParams) (ProcessPidTakenRow, error) {
+	row := q.db.QueryRow(ctx, processPidTakenSQL, arg.MachineID, arg.Pid)
+	var i ProcessPidTakenRow
+	err := row.Scan(&i.Column)
+	return i, err
+}
+
+const processCountSQL = `SELECT count(*)::bigint
+FROM lic.machine_processes pr
+JOIN lic.machines m ON m.id = pr.machine_id
+WHERE CASE $1::text
+    WHEN 'machine' THEN pr.machine_id = $2
+    WHEN 'license' THEN m.license_id = $2
+    ELSE m.license_id = $2 AND m.owner_id IS NOT DISTINCT FROM $3::uuid
+  END;`
+
+type ProcessCountParams struct {
+	Kind    string
+	ScopeID uuid.UUID
+	OwnerID *uuid.UUID
+}
+
+type ProcessCountRow struct {
+	Column int64
+}
+
+func (q *Queries) ProcessCount(ctx context.Context, arg ProcessCountParams) (ProcessCountRow, error) {
+	row := q.db.QueryRow(ctx, processCountSQL, arg.Kind, arg.ScopeID, arg.OwnerID)
+	var i ProcessCountRow
+	err := row.Scan(&i.Column)
 	return i, err
 }
 
@@ -4814,7 +5369,9 @@ func (q *Queries) SearchEntitlementsByCode(ctx context.Context, arg SearchEntitl
 	return items, nil
 }
 
-const searchEntitlementsByNameSQL = `SELECT id FROM lic.entitlements WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+const searchEntitlementsByNameSQL = `SELECT id FROM lic.entitlements WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';
+
+-- Machine search queries.`
 
 type SearchEntitlementsByNameParams struct {
 	AccountID uuid.UUID
@@ -4834,6 +5391,360 @@ func (q *Queries) SearchEntitlementsByName(ctx context.Context, arg SearchEntitl
 	var items []SearchEntitlementsByNameRow
 	for rows.Next() {
 		var i SearchEntitlementsByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByIDSQL = `SELECT id FROM lic.machines
+WHERE account_id = $1
+  AND (id = $2::uuid OR ($2::uuid IS NULL AND id::text ILIKE '%' || $3::text || '%'));`
+
+type SearchMachinesByIDParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+}
+
+type SearchMachinesByIDRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByID(ctx context.Context, arg SearchMachinesByIDParams) ([]SearchMachinesByIDRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByIDSQL, arg.AccountID, arg.ID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByIDRow
+	for rows.Next() {
+		var i SearchMachinesByIDRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByFingerprintSQL = `SELECT id FROM lic.machines WHERE account_id = $1 AND fingerprint ILIKE '%' || $2::text || '%';`
+
+type SearchMachinesByFingerprintParams struct {
+	AccountID uuid.UUID
+	Like      string
+}
+
+type SearchMachinesByFingerprintRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByFingerprint(ctx context.Context, arg SearchMachinesByFingerprintParams) ([]SearchMachinesByFingerprintRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByFingerprintSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByFingerprintRow
+	for rows.Next() {
+		var i SearchMachinesByFingerprintRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByNameSQL = `SELECT id FROM lic.machines WHERE account_id = $1 AND name ILIKE '%' || $2::text || '%';`
+
+type SearchMachinesByNameParams struct {
+	AccountID uuid.UUID
+	Like      *string
+}
+
+type SearchMachinesByNameRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByName(ctx context.Context, arg SearchMachinesByNameParams) ([]SearchMachinesByNameRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByNameSQL, arg.AccountID, arg.Like)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByNameRow
+	for rows.Next() {
+		var i SearchMachinesByNameRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByMetadataSQL = `SELECT id FROM lic.machines
+WHERE account_id = $1 AND (metadata @> $2::jsonb OR metadata @> $3::jsonb);`
+
+type SearchMachinesByMetadataParams struct {
+	AccountID uuid.UUID
+	Raw       json.RawMessage
+	Cast      json.RawMessage
+}
+
+type SearchMachinesByMetadataRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByMetadata(ctx context.Context, arg SearchMachinesByMetadataParams) ([]SearchMachinesByMetadataRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByMetadataSQL, arg.AccountID, arg.Raw, arg.Cast)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByMetadataRow
+	for rows.Next() {
+		var i SearchMachinesByMetadataRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByLicenseSQL = `SELECT m.id FROM lic.machines m
+JOIN lic.licenses l ON l.id = m.license_id
+WHERE m.account_id = $1
+  AND (
+    m.license_id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      l.key = $3::text
+      OR l.key ILIKE '%' || $4::text || '%'
+      OR ($5::bool AND to_tsvector('simple', m.license_id::text) @@ to_tsquery('simple', ''' ' || $6::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchMachinesByLicenseParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Term      string
+	Like      string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchMachinesByLicenseRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByLicense(ctx context.Context, arg SearchMachinesByLicenseParams) ([]SearchMachinesByLicenseRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByLicenseSQL, arg.AccountID, arg.ID, arg.Term, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByLicenseRow
+	for rows.Next() {
+		var i SearchMachinesByLicenseRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByOwnerSQL = `SELECT m.id FROM lic.machines m
+LEFT JOIN lic.users u ON u.id = m.owner_id
+WHERE m.account_id = $1
+  AND (
+    m.owner_id = $2::uuid
+    OR ($2::uuid IS NULL AND u.id IS NOT NULL AND (
+      u.email = $3::text
+      OR u.email ILIKE '%' || $4::text || '%'
+      OR ($5::bool AND to_tsvector('simple', u.id::text) @@ to_tsquery('simple', ''' ' || $6::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchMachinesByOwnerParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Term      *string
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchMachinesByOwnerRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByOwner(ctx context.Context, arg SearchMachinesByOwnerParams) ([]SearchMachinesByOwnerRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByOwnerSQL, arg.AccountID, arg.ID, arg.Term, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByOwnerRow
+	for rows.Next() {
+		var i SearchMachinesByOwnerRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByUserSQL = `SELECT DISTINCT m.id FROM lic.machines m
+LEFT JOIN lic.licenses l ON l.id = m.license_id
+LEFT JOIN lic.license_users lu ON lu.license_id = l.id
+LEFT JOIN lic.users u ON (u.id = m.owner_id OR u.id = l.user_id OR u.id = lu.user_id)
+WHERE m.account_id = $1
+  AND u.id IS NOT NULL
+  AND (
+    u.id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      u.email = $3::text
+      OR u.email ILIKE '%' || $4::text || '%'
+      OR ($5::bool AND to_tsvector('simple', u.id::text) @@ to_tsquery('simple', ''' ' || $6::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchMachinesByUserParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Term      *string
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchMachinesByUserRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByUser(ctx context.Context, arg SearchMachinesByUserParams) ([]SearchMachinesByUserRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByUserSQL, arg.AccountID, arg.ID, arg.Term, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByUserRow
+	for rows.Next() {
+		var i SearchMachinesByUserRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByProductSQL = `SELECT m.id FROM lic.machines m
+JOIN lic.licenses l ON l.id = m.license_id
+JOIN lic.products pr ON pr.id = l.product_id
+WHERE m.account_id = $1
+  AND (
+    l.product_id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      pr.name ILIKE '%' || $3::text || '%'
+      OR ($4::bool AND to_tsvector('simple', l.product_id::text) @@ to_tsquery('simple', ''' ' || $5::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchMachinesByProductParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      *string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchMachinesByProductRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByProduct(ctx context.Context, arg SearchMachinesByProductParams) ([]SearchMachinesByProductRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByProductSQL, arg.AccountID, arg.ID, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByProductRow
+	for rows.Next() {
+		var i SearchMachinesByProductRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchMachinesByPolicySQL = `SELECT m.id FROM lic.machines m
+JOIN lic.policies p ON p.id = m.policy_id
+WHERE m.account_id = $1
+  AND (
+    m.policy_id = $2::uuid
+    OR ($2::uuid IS NULL AND (
+      p.name ILIKE '%' || $3::text || '%'
+      OR ($4::bool AND to_tsvector('simple', m.policy_id::text) @@ to_tsquery('simple', ''' ' || $5::text || ' ''' || ':*'))
+    ))
+  );`
+
+type SearchMachinesByPolicyParams struct {
+	AccountID uuid.UUID
+	ID        *uuid.UUID
+	Like      string
+	Prefix    bool
+	Tsv       string
+}
+
+type SearchMachinesByPolicyRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) SearchMachinesByPolicy(ctx context.Context, arg SearchMachinesByPolicyParams) ([]SearchMachinesByPolicyRow, error) {
+	rows, err := q.db.Query(ctx, searchMachinesByPolicySQL, arg.AccountID, arg.ID, arg.Like, arg.Prefix, arg.Tsv)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchMachinesByPolicyRow
+	for rows.Next() {
+		var i SearchMachinesByPolicyRow
 		if err := rows.Scan(&i.ID); err != nil {
 			return nil, err
 		}
@@ -5182,6 +6093,192 @@ func (q *Queries) LicenseOfProduct(ctx context.Context, arg LicenseOfProductPara
 	var i LicenseOfProductRow
 	err := row.Scan(&i.Owned)
 	return i, err
+}
+
+const usageHeadForUpdateSQL = `SELECT epoch, seq, hash FROM lic.machine_usage_heads WHERE machine_id = $1 FOR UPDATE;`
+
+type UsageHeadForUpdateRow struct {
+	Epoch int64
+	Seq   int64
+	Hash  string
+}
+
+func (q *Queries) UsageHeadForUpdate(ctx context.Context, machineID uuid.UUID) ([]UsageHeadForUpdateRow, error) {
+	rows, err := q.db.Query(ctx, usageHeadForUpdateSQL, machineID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UsageHeadForUpdateRow
+	for rows.Next() {
+		var i UsageHeadForUpdateRow
+		if err := rows.Scan(&i.Epoch, &i.Seq, &i.Hash); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const upsertUsageHeadSQL = `INSERT INTO lic.machine_usage_heads (machine_id, account_id, epoch, seq, hash, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6)
+ON CONFLICT (machine_id) DO UPDATE SET epoch = EXCLUDED.epoch, seq = EXCLUDED.seq, hash = EXCLUDED.hash,
+  updated_at = EXCLUDED.updated_at;`
+
+type UpsertUsageHeadParams struct {
+	MachineID uuid.UUID
+	AccountID uuid.UUID
+	Epoch     int64
+	Seq       int64
+	Hash      string
+	UpdatedAt time.Time
+}
+
+func (q *Queries) UpsertUsageHead(ctx context.Context, arg UpsertUsageHeadParams) error {
+	_, err := q.db.Exec(ctx, upsertUsageHeadSQL, arg.MachineID, arg.AccountID, arg.Epoch, arg.Seq, arg.Hash, arg.UpdatedAt)
+	return err
+}
+
+const insertUsageEventSQL = `INSERT INTO lic.machine_usage_events (machine_id, epoch, seq, event, hash, created_at)
+VALUES ($1, $2, $3, $4, $5, $6);`
+
+type InsertUsageEventParams struct {
+	MachineID uuid.UUID
+	Epoch     int64
+	Seq       int64
+	Event     []byte
+	Hash      string
+	CreatedAt time.Time
+}
+
+func (q *Queries) InsertUsageEvent(ctx context.Context, arg InsertUsageEventParams) error {
+	_, err := q.db.Exec(ctx, insertUsageEventSQL, arg.MachineID, arg.Epoch, arg.Seq, arg.Event, arg.Hash, arg.CreatedAt)
+	return err
+}
+
+const insertUsageAckSQL = `INSERT INTO lic.machine_usage_acks (machine_id, epoch, seq, hash, counters, build, created_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7);`
+
+type InsertUsageAckParams struct {
+	MachineID uuid.UUID
+	Epoch     int64
+	Seq       int64
+	Hash      string
+	Counters  json.RawMessage
+	Build     *string
+	CreatedAt time.Time
+}
+
+func (q *Queries) InsertUsageAck(ctx context.Context, arg InsertUsageAckParams) error {
+	_, err := q.db.Exec(ctx, insertUsageAckSQL, arg.MachineID, arg.Epoch, arg.Seq, arg.Hash, arg.Counters, arg.Build, arg.CreatedAt)
+	return err
+}
+
+const usageHeadSQL = `SELECT epoch, seq, hash FROM lic.machine_usage_heads WHERE machine_id = $1;`
+
+type UsageHeadRow struct {
+	Epoch int64
+	Seq   int64
+	Hash  string
+}
+
+func (q *Queries) UsageHead(ctx context.Context, machineID uuid.UUID) ([]UsageHeadRow, error) {
+	rows, err := q.db.Query(ctx, usageHeadSQL, machineID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UsageHeadRow
+	for rows.Next() {
+		var i UsageHeadRow
+		if err := rows.Scan(&i.Epoch, &i.Seq, &i.Hash); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const usageEventsSQL = `SELECT seq, event, hash FROM lic.machine_usage_events
+WHERE machine_id = $1 AND epoch = $2 AND seq > $3
+ORDER BY seq
+LIMIT $4;`
+
+type UsageEventsParams struct {
+	MachineID uuid.UUID
+	Epoch     int64
+	After     int64
+	Lim       int64
+}
+
+type UsageEventsRow struct {
+	Seq   int64
+	Event []byte
+	Hash  string
+}
+
+func (q *Queries) UsageEvents(ctx context.Context, arg UsageEventsParams) ([]UsageEventsRow, error) {
+	rows, err := q.db.Query(ctx, usageEventsSQL, arg.MachineID, arg.Epoch, arg.After, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UsageEventsRow
+	for rows.Next() {
+		var i UsageEventsRow
+		if err := rows.Scan(&i.Seq, &i.Event, &i.Hash); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const usageAcksSQL = `SELECT epoch, seq, hash FROM lic.machine_usage_acks
+WHERE machine_id = $1 AND epoch = $2 AND seq > $3
+ORDER BY seq
+LIMIT $4;`
+
+type UsageAcksParams struct {
+	MachineID uuid.UUID
+	Epoch     int64
+	After     int64
+	Lim       int64
+}
+
+type UsageAcksRow struct {
+	Epoch int64
+	Seq   int64
+	Hash  string
+}
+
+func (q *Queries) UsageAcks(ctx context.Context, arg UsageAcksParams) ([]UsageAcksRow, error) {
+	rows, err := q.db.Query(ctx, usageAcksSQL, arg.MachineID, arg.Epoch, arg.After, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UsageAcksRow
+	for rows.Next() {
+		var i UsageAcksRow
+		if err := rows.Scan(&i.Epoch, &i.Seq, &i.Hash); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserByEmailSQL = `SELECT id, account_id, first_name, last_name, email, password_digest, role,
@@ -7591,6 +8688,184 @@ func (q *Queries) CountMachinesByFingerprints(ctx context.Context, arg CountMach
 	var i CountMachinesByFingerprintsRow
 	err := row.Scan(&i.Count)
 	return i, err
+}
+
+type ListMachinesParams struct {
+	AccountID          uuid.UUID
+	FilterIds          []uuid.UUID
+	IDOrFingerprint    *string
+	FilterFingerprint  *string
+	FilterIP           *string
+	FilterHostname     *string
+	FilterProductID    *uuid.UUID
+	FilterPolicyID     *uuid.UUID
+	FilterLicenseID    *uuid.UUID
+	FilterKey          *string
+	FilterGroupID      *uuid.UUID
+	FilterOwnerNull    bool
+	FilterOwner        *string
+	FilterUser         *string
+	FilterMetadata     json.RawMessage
+	FilterMetadataCast json.RawMessage
+	FilterStatus       *string
+	Now                time.Time
+	ScopeKind          *string
+	ScopeID            *uuid.UUID
+	Cursor             *uuid.UUID
+	Asc                bool
+	Fetch              int64
+	PageOffset         int64
+}
+
+type ListMachinesRow struct {
+	ID                            uuid.UUID
+	AccountID                     uuid.UUID
+	LicenseID                     uuid.UUID
+	PolicyID                      uuid.UUID
+	OwnerID                       *uuid.UUID
+	GroupID                       *uuid.UUID
+	Name                          *string
+	Fingerprint                   string
+	IP                            *string
+	Hostname                      *string
+	Platform                      *string
+	Cores                         *int32
+	Memory                        *int64
+	Disk                          *int64
+	MaxProcessesOverride          *int32
+	Metadata                      json.RawMessage
+	LastHeartbeatAt               *time.Time
+	LastCheckOutAt                *time.Time
+	LastDeathEventSentAt          *time.Time
+	CreatedAt                     time.Time
+	UpdatedAt                     time.Time
+	ProductID                     uuid.UUID
+	LicenseOwnerID                *uuid.UUID
+	LicenseProtected              bool
+	RequireHeartbeat              bool
+	HeartbeatDuration             *int32
+	HeartbeatBasis                *string
+	HeartbeatResurrectionStrategy *string
+	HeartbeatCullStrategy         *string
+	LicenseMaxProcesses           *int32
+	Total                         int64
+}
+
+func (q *Queries) ListMachines(ctx context.Context, arg ListMachinesParams) ([]ListMachinesRow, error) {
+	var b strings.Builder
+	var args []any
+	positions := make(map[uint32]int)
+	if positions[1] == 0 {
+		args = append(args, arg.AccountID)
+		positions[1] = len(args)
+	}
+	if positions[2] == 0 {
+		args = append(args, arg.FilterIds)
+		positions[2] = len(args)
+	}
+	if positions[3] == 0 {
+		args = append(args, arg.IDOrFingerprint)
+		positions[3] = len(args)
+	}
+	if positions[4] == 0 {
+		args = append(args, arg.FilterFingerprint)
+		positions[4] = len(args)
+	}
+	if positions[5] == 0 {
+		args = append(args, arg.FilterIP)
+		positions[5] = len(args)
+	}
+	if positions[6] == 0 {
+		args = append(args, arg.FilterHostname)
+		positions[6] = len(args)
+	}
+	if positions[7] == 0 {
+		args = append(args, arg.FilterProductID)
+		positions[7] = len(args)
+	}
+	if positions[8] == 0 {
+		args = append(args, arg.FilterPolicyID)
+		positions[8] = len(args)
+	}
+	if positions[9] == 0 {
+		args = append(args, arg.FilterLicenseID)
+		positions[9] = len(args)
+	}
+	if positions[10] == 0 {
+		args = append(args, arg.FilterKey)
+		positions[10] = len(args)
+	}
+	if positions[11] == 0 {
+		args = append(args, arg.FilterGroupID)
+		positions[11] = len(args)
+	}
+	if positions[12] == 0 {
+		args = append(args, arg.FilterOwnerNull)
+		positions[12] = len(args)
+	}
+	if positions[13] == 0 {
+		args = append(args, arg.FilterOwner)
+		positions[13] = len(args)
+	}
+	if positions[14] == 0 {
+		args = append(args, arg.FilterUser)
+		positions[14] = len(args)
+	}
+	if positions[15] == 0 {
+		args = append(args, arg.FilterMetadata)
+		positions[15] = len(args)
+	}
+	if positions[16] == 0 {
+		args = append(args, arg.FilterMetadataCast)
+		positions[16] = len(args)
+	}
+	if positions[17] == 0 {
+		args = append(args, arg.FilterStatus)
+		positions[17] = len(args)
+	}
+	if positions[18] == 0 {
+		args = append(args, arg.Now)
+		positions[18] = len(args)
+	}
+	if positions[19] == 0 {
+		args = append(args, arg.ScopeKind)
+		positions[19] = len(args)
+	}
+	if positions[20] == 0 {
+		args = append(args, arg.ScopeID)
+		positions[20] = len(args)
+	}
+	if positions[21] == 0 {
+		args = append(args, arg.Cursor)
+		positions[21] = len(args)
+	}
+	if positions[22] == 0 {
+		args = append(args, arg.Asc)
+		positions[22] = len(args)
+	}
+	if positions[23] == 0 {
+		args = append(args, arg.Fetch)
+		positions[23] = len(args)
+	}
+	if positions[24] == 0 {
+		args = append(args, arg.PageOffset)
+		positions[24] = len(args)
+	}
+	b.WriteString(fmt.Sprintf("SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,\n  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,\n  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,\n  m.last_death_event_sent_at, m.created_at, m.updated_at,\n  p.product_id, l.user_id AS license_owner_id,\n  COALESCE(l.protected, p.protected, false)::boolean AS license_protected,\n  p.require_heartbeat, p.heartbeat_duration, p.heartbeat_basis,\n  p.heartbeat_resurrection_strategy, p.heartbeat_cull_strategy,\n  COALESCE(NULLIF(l.max_processes_override, 0), p.max_processes) AS license_max_processes,\n  count(*) OVER ()::bigint AS total\nFROM lic.machines m\nJOIN lic.licenses l ON l.id = m.license_id\nJOIN lic.policies p ON p.id = m.policy_id\nWHERE m.account_id = $%d\n  AND ($%d::uuid[] IS NULL OR m.id = ANY($%d::uuid[]))\n  AND ($%d::text IS NULL\n    OR m.id::text = $%d OR m.fingerprint = $%d)\n  AND ($%d::text IS NULL OR m.fingerprint = $%d)\n  AND ($%d::text IS NULL OR m.ip = $%d)\n  AND ($%d::text IS NULL OR m.hostname = $%d)\n  AND ($%d::uuid IS NULL OR l.product_id = $%d)\n  AND ($%d::uuid IS NULL OR l.policy_id = $%d)\n  AND ($%d::uuid IS NULL OR m.license_id = $%d)\n  AND ($%d::text IS NULL OR l.key = $%d)\n  AND ($%d::uuid IS NULL OR m.group_id = $%d)\n  AND (NOT $%d::boolean OR m.owner_id IS NULL)\n  AND ($%d::text IS NULL OR m.owner_id IN (\n    SELECT u.id FROM lic.users u\n    WHERE u.account_id = m.account_id AND (u.id::text = $%d OR u.email = $%d)\n  ))\n  AND ($%d::text IS NULL OR EXISTS (\n    SELECT 1 FROM lic.users u\n    WHERE u.account_id = m.account_id AND (u.id::text = $%d OR u.email = $%d)\n      AND (l.user_id = u.id OR EXISTS (\n        SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = u.id\n      ))\n  ))\n  AND ($%d::jsonb IS NULL\n    OR m.metadata @> $%d OR m.metadata @> $%d)\n  AND ($%d::text IS NULL OR CASE $%d::text\n    WHEN 'ALIVE' THEN\n      (m.last_heartbeat_at IS NULL AND NOT p.require_heartbeat)\n      OR (m.last_heartbeat_at IS NULL AND p.require_heartbeat\n        AND m.created_at >= $%d::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600)))\n      OR (m.last_heartbeat_at IS NOT NULL\n        AND m.last_heartbeat_at >= $%d::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600)))\n    WHEN 'DEAD' THEN\n      (m.last_heartbeat_at IS NULL AND p.require_heartbeat\n        AND m.created_at < $%d::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600)))\n      OR (m.last_heartbeat_at IS NOT NULL\n        AND m.last_heartbeat_at < $%d::timestamptz - make_interval(secs => COALESCE(p.heartbeat_duration, 600)))\n    ELSE false\n  END)\n  AND ($%d::text IS NULL\n    OR ($%d::text = 'product' AND l.product_id = $%d)\n    OR ($%d::text = 'license' AND m.license_id = $%d)\n    OR ($%d::text = 'user' AND (l.user_id = $%d OR EXISTS (\n      SELECT 1 FROM lic.license_users lu WHERE lu.license_id = l.id AND lu.user_id = $%d\n    ))))\n  AND ($%d::uuid IS NULL\n    OR ($%d::boolean AND (m.created_at, m.id) > (SELECT c.created_at, c.id FROM lic.machines c WHERE c.id = $%d))\n    OR (NOT $%d::boolean AND (m.created_at, m.id) < (SELECT c.created_at, c.id FROM lic.machines c WHERE c.id = $%d)))\nORDER BY\n  CASE WHEN $%d::boolean THEN m.created_at END ASC,\n  CASE WHEN $%d::boolean THEN m.id END ASC,\n  CASE WHEN NOT $%d::boolean THEN m.created_at END DESC,\n  CASE WHEN NOT $%d::boolean THEN m.id END DESC\nLIMIT $%d OFFSET $%d;\n\n-- The dead machines the cull visits (CullDeadMachinesWorker): the dead\n-- scope, the reference's cull-strategy condition verbatim (a NULL strategy\n-- fails it), every account, a bounded batch.", positions[1], positions[2], positions[2], positions[3], positions[3], positions[3], positions[4], positions[4], positions[5], positions[5], positions[6], positions[6], positions[7], positions[7], positions[8], positions[8], positions[9], positions[9], positions[10], positions[10], positions[11], positions[11], positions[12], positions[13], positions[13], positions[13], positions[14], positions[14], positions[14], positions[15], positions[15], positions[16], positions[17], positions[17], positions[18], positions[18], positions[18], positions[18], positions[19], positions[19], positions[20], positions[19], positions[20], positions[19], positions[20], positions[20], positions[21], positions[22], positions[21], positions[22], positions[21], positions[22], positions[22], positions[22], positions[22], positions[23], positions[24]))
+	rows, err := q.db.Query(ctx, b.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListMachinesRow
+	for rows.Next() {
+		var i ListMachinesRow
+		if err := rows.Scan(&i.ID, &i.AccountID, &i.LicenseID, &i.PolicyID, &i.OwnerID, &i.GroupID, &i.Name, &i.Fingerprint, &i.IP, &i.Hostname, &i.Platform, &i.Cores, &i.Memory, &i.Disk, &i.MaxProcessesOverride, &i.Metadata, &i.LastHeartbeatAt, &i.LastCheckOutAt, &i.LastDeathEventSentAt, &i.CreatedAt, &i.UpdatedAt, &i.ProductID, &i.LicenseOwnerID, &i.LicenseProtected, &i.RequireHeartbeat, &i.HeartbeatDuration, &i.HeartbeatBasis, &i.HeartbeatResurrectionStrategy, &i.HeartbeatCullStrategy, &i.LicenseMaxProcesses, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, rows.Err()
 }
 
 type ListPoliciesDescParams struct {

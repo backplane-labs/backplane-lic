@@ -25,7 +25,7 @@ func SeedAdmin(ctx context.Context, db *postgres.Store, accountID uuid.UUID, ema
 	scenario := users.New(db, events.None{}, time.Now)
 
 	if err := scenario.SeedAdmin(ctx, accountID, email); err != nil {
-		return "", err //nolint:wrapcheck // the scenario's own error
+		return "", err // the scenario's own error
 	}
 
 	account, err := db.Account(ctx, accountID)

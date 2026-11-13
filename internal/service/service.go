@@ -34,6 +34,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/jobs"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
+	"github.com/backplane-labs/backplane-lic/internal/app/machines"
 	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/port"
@@ -125,7 +126,8 @@ func New(root backplane.Root[Config]) (*Service, error) {
 		publisher := decorate(webhooks.NewPublisher(store.Get(), relay, spec.ID, rand.Reader, time.Now))
 		activities.Set(appautomation.NewActivities(store.Get(), licenseScenario(store.Get(), cached, publisher, time.Now),
 			spec.ID, time.Now))
-		late.set(handler(store.Get(), throttler, cached, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate))
+		late.set(handler(store.Get(), throttler, cached, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate,
+			slog.New(xlog.NewSlogHandler(bootstrap.Log()))))
 
 		return nil
 	})
@@ -143,16 +145,24 @@ func New(root backplane.Root[Config]) (*Service, error) {
 
 	runner := deps.NewComponent(root, "jobs")
 	runner.Go(func(ctx context.Context) error {
-		jobsRunner := jobs.NewRunner(store.Get(), time.Now)
 		publisher := appautomation.NewPublisher(store.Get(),
 			webhooks.NewPublisher(store.Get(), relayOutbox, spec.ID, rand.Reader, time.Now),
 			relayOutbox, contracts, cfg.Automation.PortalBase, cfg.Automation.Locale, brand, time.Now)
-		notifier := licenses.NewNotifier(store.Get().Licenses, publisher, spec.ID, time.Now, store.Get().Do)
 
-		return loop(ctx, time.Minute, notificationPass(jobsRunner, notifier))
+		return runJobs(ctx, store.Get(), publisher, spec.ID)
 	})
 
 	return &Service{Console: newConsole(root, store, id, late), Store: store, Cache: cache, HTTP: public}, nil
+}
+
+// runJobs ticks the periodic jobs (the heartbeat cull and the rest) and the
+// notices until ctx ends.
+func runJobs(ctx context.Context, store *postgres.Store, publisher events.Publisher, account uuid.UUID) error {
+	culler := machineScenario(store, licenseScenario(store, liccache.None{}, publisher, time.Now), publisher, time.Now)
+	jobsRunner := jobs.NewRunner(store, culler, time.Now)
+	notifier := licenses.NewNotifier(store.Licenses, publisher, account, time.Now, store.Do)
+
+	return loop(ctx, time.Minute, notificationPass(jobsRunner, notifier))
 }
 
 // customerFacing validates the vendor identity and mounts the portal over
@@ -193,7 +203,7 @@ func newThrottler(cache deps.Optional[valkey.AsideClient]) httpapi.Throttler { /
 func notificationPass(jobsRunner *jobs.Runner, notifier licenses.Notifier) func(context.Context) error {
 	return func(ctx context.Context) error {
 		if err := jobsRunner.Tick(ctx); err != nil {
-			return err //nolint:wrapcheck // scenario error
+			return err
 		}
 
 		// Keygen schedules expiration and check-in notices every ten minutes.
@@ -255,7 +265,7 @@ func Handler(
 	}
 
 	api := handler(store, httpapi.NewMemoryThrottler(), liccache.None{}, spec, cfg, docsHost, revision, queue,
-		func(publisher events.Publisher) events.Publisher { return publisher })
+		func(publisher events.Publisher) events.Publisher { return publisher }, slog.Default())
 
 	public, err := portal.New(cfg.Portal, domain.Brand{Name: domain.DefaultBrandName}, spec.ID.String(), api)
 	if err != nil {
@@ -275,6 +285,7 @@ type tokenCache interface {
 func handler(
 	store *postgres.Store, throttler httpapi.Throttler, cached tokenCache, spec accounts.Spec, cfg HTTP,
 	docsHost, revision string, queue port.WebhookQueue, decorate func(events.Publisher) events.Publisher,
+	log *slog.Logger,
 ) http.Handler {
 	clock := time.Now
 	publisher := decorate(webhooks.NewPublisher(store, queue, spec.ID, rand.Reader, clock))
@@ -293,6 +304,7 @@ func handler(
 		Tokens:        tokens.New(cached.Manage(store), publisher, rand.Reader, clock),
 		Groups:        groups.New(store, publisher, clock),
 		Licenses:      licenseScenario(store, cached, publisher, clock),
+		Machines:      machineScenario(store, licenseScenario(store, cached, publisher, clock), publisher, clock),
 		Products: products.New(store.Products, store.Tokens, store.Users,
 			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),
@@ -302,6 +314,7 @@ func handler(
 		Revision:       revision,
 		DocsHost:       docsHost,
 		TrustedProxies: cfg.TrustedProxies,
+		Log:            log,
 		Clock:          clock,
 	})
 }
@@ -315,7 +328,13 @@ func licenseScenario(
 		publisher, rand.Reader, clock, store.Do)
 }
 
-// lateHandler serves the handler built at start; before that, 503.
+func machineScenario(
+	store *postgres.Store, included machines.LicenseIncludes, publisher events.Publisher, clock func() time.Time,
+) machines.Scenario {
+	return machines.New(store.Machines, store.Machines, store.Machines, store.Machines, store, included, publisher,
+		clock, store.Do)
+}
+
 type lateHandler struct {
 	h atomic.Pointer[http.Handler]
 }

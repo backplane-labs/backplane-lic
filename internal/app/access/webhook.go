@@ -44,8 +44,8 @@ func WebhookEndpointIndex(p Principal, page []domain.WebhookEndpoint) error {
 	case isWriteFamily(p) || p.Role == domain.RoleReadOnly:
 		return nil
 	case p.Role == domain.RoleProduct:
-		for _, endpoint := range page { //nolint:gocritic // mirrors the reference's shape
-			if endpoint.ProductID.UUID != p.BearerID {
+		for i := range page {
+			if page[i].ProductID.UUID != p.BearerID {
 				return deny()
 			}
 		}
@@ -65,8 +65,9 @@ func WebhookEventIndex(p Principal, page []domain.WebhookEvent, productOf func(u
 	case isWriteFamily(p) || p.Role == domain.RoleReadOnly:
 		return nil
 	case p.Role == domain.RoleProduct:
-		for _, event := range page { //nolint:gocritic // mirrors the reference's shape
-			if !event.EndpointID.Valid || productOf(event.EndpointID.UUID) != p.BearerID {
+		for i := range page {
+			endpointID := page[i].EndpointID
+			if !endpointID.Valid || productOf(endpointID.UUID) != p.BearerID {
 				return deny()
 			}
 		}
@@ -123,6 +124,12 @@ func ProductMayRead(productID uuid.UUID, resource any) bool {
 	case domain.LicenseValidationEvent:
 		return v.License.ProductID == productID
 	case domain.License:
+		return v.ProductID == productID
+	case domain.Machine:
+		return v.ProductID == productID
+	case domain.MachineComponent:
+		return v.ProductID == productID
+	case domain.MachineProcess:
 		return v.ProductID == productID
 	case domain.LicenseUser, domain.LicenseEntitlement,
 		[]domain.LicenseUser, []domain.LicenseEntitlement,

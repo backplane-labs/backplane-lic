@@ -13,6 +13,19 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
+// The machine codes of the validation verdicts several rules share.
+const (
+	codeNotFound        = "NOT_FOUND"
+	codeExpired         = "EXPIRED"
+	codeTooManyMachines = "TOO_MANY_MACHINES"
+)
+
+// The verdict details several rules share.
+const (
+	detailExpired         = "is expired"
+	detailTooManyMachines = "has too many associated machines"
+)
+
 // Verdict is a validation outcome: valid, the detail phrase and the
 // code.
 type Verdict struct {
@@ -101,7 +114,7 @@ func (s Scenario) ValidateKey(
 
 	if principal.BearerID != uuid.Nil {
 		if err := access.Require(ctx, "license.validate"); err != nil {
-			return nil, Verdict{}, err //nolint:wrapcheck // the authorization's own error
+			return nil, Verdict{}, err // the authorization's own error
 		}
 
 		attached, err := s.userAttached(ctx, account.ID, principal.BearerID, *license)
@@ -110,7 +123,7 @@ func (s Scenario) ValidateKey(
 		}
 
 		if err := access.LicenseAction(principal, *license, "validate", attached); err != nil {
-			return nil, Verdict{}, err //nolint:wrapcheck // the authorization's own error
+			return nil, Verdict{}, err // the authorization's own error
 		}
 	}
 
@@ -202,7 +215,7 @@ func (s Scenario) licenseForValidate(
 	}
 
 	if err := access.Require(ctx, "license.validate"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -211,7 +224,7 @@ func (s Scenario) licenseForValidate(
 	}
 
 	if err := access.LicenseAction(access.PrincipalOf(ctx), license, "validate", attached); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	return license, nil
@@ -223,7 +236,7 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 ) Verdict {
 	// nil license → NOT_FOUND (validate-key only; the :id routes 404).
 	if licensePtr == nil {
-		return Verdict{false, "does not exist", "NOT_FOUND", nil, nil}
+		return Verdict{false, "does not exist", codeNotFound, nil, nil}
 	}
 
 	license := *licensePtr
@@ -249,7 +262,7 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 	}
 
 	if policy.ExpirationStrategy == "RESTRICT_ACCESS" && license.Expired(now) {
-		return Verdict{false, "is expired", "EXPIRED", nil, nil}
+		return Verdict{false, detailExpired, codeExpired, nil, nil}
 	}
 
 	if license.CheckInOverdue(now) {
@@ -310,7 +323,7 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 			allow := policy.ExpirationStrategy == "ALLOW_ACCESS" ||
 				policy.ExpirationStrategy == "MAINTAIN_ACCESS"
 
-			return Verdict{allow, "is expired", "EXPIRED", nil, nil}
+			return Verdict{allow, detailExpired, codeExpired, nil, nil}
 		}
 
 		return Verdict{true, "is valid", "VALID", nil, nil}
@@ -338,7 +351,7 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 			allow := policy.OverageStrategy == "ALWAYS_ALLOW_OVERAGE" ||
 				(policy.OverageStrategy == "ALLOW_2X_OVERAGE" && float64(count) <= float64(bound)*2)
 
-			return Verdict{allow, "has too many associated machines", "TOO_MANY_MACHINES", nil, nil}
+			return Verdict{allow, detailTooManyMachines, codeTooManyMachines, nil, nil}
 		}
 	}
 
@@ -356,10 +369,10 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 		}
 
 		if !overageCovers(policy, float64(count), float64(*limit), false) {
-			return Verdict{false, "has too many associated machines", "TOO_MANY_MACHINES", nil, nil}
+			return Verdict{false, detailTooManyMachines, codeTooManyMachines, nil, nil}
 		}
 
-		return Verdict{true, "has too many associated machines", "TOO_MANY_MACHINES", nil, nil}
+		return Verdict{true, detailTooManyMachines, codeTooManyMachines, nil, nil}
 	}
 
 	if v, done := s.validateResources(ctx, account, license, policy, scopeOwner); done {
@@ -374,7 +387,7 @@ func (s Scenario) runValidation( //nolint:gocognit,gocyclo,cyclop,funlen,maintid
 		allow := policy.ExpirationStrategy == "ALLOW_ACCESS" ||
 			policy.ExpirationStrategy == "MAINTAIN_ACCESS"
 
-		return Verdict{allow, "is expired", "EXPIRED", nil, nil}
+		return Verdict{allow, detailExpired, codeExpired, nil, nil}
 	}
 
 	return Verdict{true, "is valid", "VALID", nil, nil}

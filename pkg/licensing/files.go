@@ -459,7 +459,7 @@ func (d *LicenseFileDataset) decode(payload []byte, clock fileClock) error {
 	d.Issued, d.Expiry, d.TTL = meta.Issued, meta.Expiry, meta.TTL
 
 	for _, included := range doc.Included {
-		if included.Type != "entitlements" {
+		if included.Type != typeEntitlements {
 			continue
 		}
 
@@ -537,7 +537,7 @@ func (d *MachineFileDataset) decodeIncluded(res jsonapi.Resource) error {
 		d.License.bind(nil, res)
 
 		return nil
-	case "entitlements":
+	case typeEntitlements:
 		entitlement := Entitlement{}
 		if err := decodeEntitlement(res, &entitlement); err != nil {
 			return err

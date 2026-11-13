@@ -1,8 +1,7 @@
 // Package jobs is the periodic-jobs runner: every tick takes a PG
 // advisory xact lock so exactly one replica runs it, then runs the
-// jobs that are due. Keygen runs these on cron (sidekiq-cron); later
-// phases add the heartbeat culling and expiration notifications to
-// the same runner.
+// jobs that are due — the heartbeat cull and the prunes Keygen runs on
+// cron (sidekiq-cron).
 package jobs
 
 import (
@@ -30,26 +29,35 @@ const (
 	Day = 24 * time.Hour
 )
 
+// Culler runs the heartbeat cull over the dead machines and processes.
+type Culler interface {
+	Cull(ctx context.Context, now time.Time) error
+}
+
+// CullPeriod is the cull cadence (the reference's cron, every 2 minutes).
+const CullPeriod = 2 * time.Minute
+
 // Runner runs the periodic jobs. It holds no state but each job's last
 // run, so it is safe for a single goroutine (the composition root's).
 type Runner struct {
-	store Store
-	clock func() time.Time
-	last  map[string]time.Time
+	store  Store
+	culler Culler
+	clock  func() time.Time
+	last   map[string]time.Time
 }
 
 // NewRunner builds the runner.
-func NewRunner(store Store, clock func() time.Time) *Runner {
-	return &Runner{store: store, clock: clock, last: map[string]time.Time{}}
+func NewRunner(store Store, culler Culler, clock func() time.Time) *Runner {
+	return &Runner{store: store, culler: culler, clock: clock, last: map[string]time.Time{}}
 }
 
 // Tick runs one pass: the advisory-lock transaction (another replica's
 // tick makes it a no-op) and, inside it, every due job.
 func (r *Runner) Tick(ctx context.Context) error {
-	return r.store.Do(ctx, func(ctx context.Context) error { //nolint:wrapcheck // fn's own error
+	return r.store.Do(ctx, func(ctx context.Context) error {
 		locked, err := r.store.TryAdvisoryLock(ctx)
 		if err != nil {
-			return err //nolint:wrapcheck // the store's own error
+			return err
 		}
 
 		if !locked {
@@ -81,17 +89,17 @@ type job struct {
 	run    func(ctx context.Context, now time.Time) error
 }
 
-// jobs lists the runner's jobs; later phases append the heartbeat
-// culling and the expiration notifications.
+// jobs lists the runner's jobs.
 func (r *Runner) jobs() []job {
 	return []job{
+		{name: "heartbeat-cull", period: CullPeriod, run: r.culler.Cull},
 		{
 			name:   "webhook-event-prune",
 			period: Day,
 			run: func(ctx context.Context, now time.Time) error {
 				_, err := r.store.PruneWebhookEvents(ctx, now.AddDate(0, 0, -WebhookBacklogDays))
 
-				return err //nolint:wrapcheck // the store's own error
+				return err
 			},
 		},
 		{
@@ -100,7 +108,7 @@ func (r *Runner) jobs() []job {
 			run: func(ctx context.Context, now time.Time) error {
 				_, err := r.store.PruneExpiredTokens(ctx, now.AddDate(0, 0, -ExpiredTokenGraceDays))
 
-				return err //nolint:wrapcheck // the store's own error
+				return err
 			},
 		},
 	}

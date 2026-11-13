@@ -1,6 +1,7 @@
 package conformance
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -58,7 +59,8 @@ func (n *normaliser) compile() {
 
 	n.uuid = regexp.MustCompile(`^` + uuidPattern + `$`)
 	n.uuidFind = regexp.MustCompile(uuidPattern)
-	n.ts = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$`)
+	// ISO 8601, and Ruby's Time#to_s (a proof dataset's ts).
+	n.ts = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?Z| \d{2}:\d{2}:\d{2} UTC)$`)
 	n.token = regexp.MustCompile(`^[a-z]+-[0-9a-f]{20,}v[123]$`)
 	n.hex = regexp.MustCompile(`^[0-9a-fA-F]+$`)
 	n.b64 = regexp.MustCompile(`^[A-Za-z0-9+/]+={0,2}$`)
@@ -135,6 +137,32 @@ func (n *normaliser) webhookEvent(resource map[string]any) map[string]any {
 	return out
 }
 
+// proof normalises a machine proof ("proof/<dataset>.<signature>"): the
+// dataset decodes and compares structurally, the signature is masked.
+func (n *normaliser) proof(value string) string {
+	data, _, ok := strings.Cut(strings.TrimPrefix(value, "proof/"), ".")
+	if !ok {
+		return value
+	}
+
+	raw, err := base64.URLEncoding.DecodeString(data)
+	if err != nil {
+		return value
+	}
+
+	var decoded any
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		return value
+	}
+
+	normalised, err := json.Marshal(n.value(decoded))
+	if err != nil {
+		return value
+	}
+
+	return "proof/" + string(normalised) + ".<signature>"
+}
+
 func (n *normaliser) string(value string) string { //nolint:cyclop // the masking ladder
 	switch {
 	case n.token.MatchString(value):
@@ -150,6 +178,8 @@ func (n *normaliser) string(value string) string { //nolint:cyclop // the maskin
 	case strings.HasPrefix(value, "-----BEGIN LICENSE FILE-----"),
 		strings.HasPrefix(value, "-----BEGIN MACHINE FILE-----"):
 		return n.placeholder("certificate", value)
+	case strings.HasPrefix(value, "proof/"):
+		return n.proof(value)
 	}
 
 	// A webhook event's payload is a JSON document carried as a string;

@@ -76,6 +76,24 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
 	CheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (*CheckoutLicenseFileOKHeaders, error)
+	// CheckoutMachine invokes checkoutMachine operation.
+	//
+	// Check out a machine license file (JSON:API).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/check-out
+	CheckoutMachine(ctx context.Context, request CheckoutMachineReq, params CheckoutMachineParams) (*MachineFileDocument, error)
+	// CheckoutMachineRaw invokes checkoutMachineRaw operation.
+	//
+	// Check out a machine license file (raw).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/actions/check-out
+	CheckoutMachineRaw(ctx context.Context, params CheckoutMachineRawParams) (*CheckoutMachineRawOKHeaders, error)
+	// CreateComponent invokes createComponent operation.
+	//
+	// Create a machine component.
+	//
+	// POST /v1/accounts/{account}/components
+	CreateComponent(ctx context.Context, request CreateComponentReq, params CreateComponentParams) (*ComponentDocumentHeaders, error)
 	// CreateEntitlement invokes createEntitlement operation.
 	//
 	// Create an entitlement.
@@ -106,12 +124,24 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/tokens
 	CreateLicenseToken(ctx context.Context, request CreateLicenseTokenReq, params CreateLicenseTokenParams) (*TokenDocument, error)
+	// CreateMachine invokes createMachine operation.
+	//
+	// Activate a machine.
+	//
+	// POST /v1/accounts/{account}/machines
+	CreateMachine(ctx context.Context, request CreateMachineReq, params CreateMachineParams) (*MachineDocumentHeaders, error)
 	// CreatePolicy invokes createPolicy operation.
 	//
 	// Create a policy.
 	//
 	// POST /v1/accounts/{account}/policies
 	CreatePolicy(ctx context.Context, request CreatePolicyReq, params CreatePolicyParams) (*PolicyDocumentHeaders, error)
+	// CreateProcess invokes createProcess operation.
+	//
+	// Create a machine process.
+	//
+	// POST /v1/accounts/{account}/processes
+	CreateProcess(ctx context.Context, request CreateProcessReq, params CreateProcessParams) (*ProcessDocumentHeaders, error)
 	// CreateProduct invokes createProduct operation.
 	//
 	// Create a product.
@@ -155,12 +185,30 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage
 	DecrementLicenseUsage(ctx context.Context, request DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (*LicenseDocument, error)
+	// DeleteComponent invokes deleteComponent operation.
+	//
+	// Delete a machine component.
+	//
+	// DELETE /v1/accounts/{account}/components/{componentId}
+	DeleteComponent(ctx context.Context, params DeleteComponentParams) error
 	// DeleteGroup invokes deleteGroup operation.
 	//
 	// Delete a group (members keep existing, group nulled).
 	//
 	// DELETE /v1/accounts/{account}/groups/{groupId}
 	DeleteGroup(ctx context.Context, params DeleteGroupParams) error
+	// DeleteMachine invokes deleteMachine operation.
+	//
+	// Delete a machine.
+	//
+	// DELETE /v1/accounts/{account}/machines/{machineId}
+	DeleteMachine(ctx context.Context, params DeleteMachineParams) error
+	// DeleteProcess invokes deleteProcess operation.
+	//
+	// Delete a machine process.
+	//
+	// DELETE /v1/accounts/{account}/processes/{processId}
+	DeleteProcess(ctx context.Context, params DeleteProcessParams) error
 	// DeleteUser invokes deleteUser operation.
 	//
 	// Delete a user.
@@ -239,6 +287,12 @@ type Invoker interface {
 	//
 	// DELETE /v1/accounts/{account}/policies/{policyId}/entitlements
 	DetachPolicyEntitlements(ctx context.Context, request DetachPolicyEntitlementsReq, params DetachPolicyEntitlementsParams) error
+	// GenerateMachineProof invokes generateMachineProof operation.
+	//
+	// Sign an offline proof of the machine (API v1.0).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof
+	GenerateMachineProof(ctx context.Context, request GenerateMachineProofReq, params GenerateMachineProofParams) (*MachineProofDocument, error)
 	// GenerateToken invokes generateToken operation.
 	//
 	// Basic email:password (with meta.otp for two-factor users) or any token authentication. The
@@ -264,6 +318,12 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
 	IncrementLicenseUsage(ctx context.Context, request IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (*LicenseDocument, error)
+	// IndexComponents invokes indexComponents operation.
+	//
+	// List machine components.
+	//
+	// GET /v1/accounts/{account}/components
+	IndexComponents(ctx context.Context, params IndexComponentsParams) (*ComponentListDocument, error)
 	// IndexEntitlements invokes indexEntitlements operation.
 	//
 	// List entitlements.
@@ -306,6 +366,24 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/licenses
 	IndexLicenses(ctx context.Context, params IndexLicensesParams) (*LicenseListDocument, error)
+	// IndexMachineComponents invokes indexMachineComponents operation.
+	//
+	// List a machine's components.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/components
+	IndexMachineComponents(ctx context.Context, params IndexMachineComponentsParams) (*ComponentListDocument, error)
+	// IndexMachineProcesses invokes indexMachineProcesses operation.
+	//
+	// List a machine's processes.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/processes
+	IndexMachineProcesses(ctx context.Context, params IndexMachineProcessesParams) (*ProcessListDocument, error)
+	// IndexMachines invokes indexMachines operation.
+	//
+	// List machines.
+	//
+	// GET /v1/accounts/{account}/machines
+	IndexMachines(ctx context.Context, params IndexMachinesParams) (*MachineListDocument, error)
 	// IndexPolicies invokes indexPolicies operation.
 	//
 	// List policies.
@@ -330,6 +408,12 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/pool
 	IndexPolicyPool(ctx context.Context, params IndexPolicyPoolParams) (*KeyListDocument, error)
+	// IndexProcesses invokes indexProcesses operation.
+	//
+	// List machine processes.
+	//
+	// GET /v1/accounts/{account}/processes
+	IndexProcesses(ctx context.Context, params IndexProcessesParams) (*ProcessListDocument, error)
 	// IndexProductLicenses invokes indexProductLicenses operation.
 	//
 	// List a product's licenses.
@@ -341,7 +425,7 @@ type Invoker interface {
 	// List a product's machines.
 	//
 	// GET /v1/accounts/{account}/products/{productId}/machines
-	IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineStubListDocument, error)
+	IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineListDocument, error)
 	// IndexProductPolicies invokes indexProductPolicies operation.
 	//
 	// List a product's policies.
@@ -377,7 +461,7 @@ type Invoker interface {
 	// List a group's machines.
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/machines
-	ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*UserMachineCollectionDocument, error)
+	ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*MachineListDocument, error)
 	// ListGroupOwners invokes listGroupOwners operation.
 	//
 	// List a group's owners (group-owner join resources).
@@ -413,7 +497,7 @@ type Invoker interface {
 	// List a user's machines.
 	//
 	// GET /v1/accounts/{account}/users/{userId}/machines
-	ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*UserMachineCollectionDocument, error)
+	ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*MachineListDocument, error)
 	// ListUserProducts invokes listUserProducts operation.
 	//
 	// List a user's products.
@@ -464,6 +548,24 @@ type Invoker interface {
 	//
 	// GET /v1/ping
 	Ping(ctx context.Context) error
+	// PingMachine invokes pingMachine operation.
+	//
+	// Ping a machine's heartbeat (short alias).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/ping
+	PingMachine(ctx context.Context, params PingMachineParams) (*MachineDocument, error)
+	// PingMachineHeartbeat invokes pingMachineHeartbeat operation.
+	//
+	// Ping a machine's heartbeat.
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat
+	PingMachineHeartbeat(ctx context.Context, request PingMachineHeartbeatReq, params PingMachineHeartbeatParams) (*MachineDocument, error)
+	// PingProcess invokes pingProcess operation.
+	//
+	// Ping a machine process's heartbeat.
+	//
+	// POST /v1/accounts/{account}/processes/{processId}/actions/ping
+	PingProcess(ctx context.Context, request PingProcessReq, params PingProcessParams) (*ProcessDocument, error)
 	// PopPolicyPool invokes popPolicyPool operation.
 	//
 	// Destroys the newest pooled key and answers its document.
@@ -512,6 +614,12 @@ type Invoker interface {
 	//
 	// PUT /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
 	ReplaceUserSecondFactor(ctx context.Context, request ReplaceUserSecondFactorReq, params ReplaceUserSecondFactorParams) (*SecondFactorDocument, error)
+	// ReportMachineUsage invokes reportMachineUsage operation.
+	//
+	// Report the installation's signed usage chain (a backplane extension).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/report-usage
+	ReportMachineUsage(ctx context.Context, request ReportMachineUsageReq, params ReportMachineUsageParams) (*MachineUsageAckDocument, error)
 	// RequestPasswordReset invokes requestPasswordReset operation.
 	//
 	// Always answers 204; unknown emails trigger nothing.
@@ -524,6 +632,18 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
 	ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (*LicenseDocument, error)
+	// ResetMachine invokes resetMachine operation.
+	//
+	// Reset a machine's heartbeat (short alias).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/reset
+	ResetMachine(ctx context.Context, params ResetMachineParams) (*MachineDocument, error)
+	// ResetMachineHeartbeat invokes resetMachineHeartbeat operation.
+	//
+	// Reset a machine's heartbeat.
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat
+	ResetMachineHeartbeat(ctx context.Context, request ResetMachineHeartbeatReq, params ResetMachineHeartbeatParams) (*MachineDocument, error)
 	// ResetUserPassword invokes resetUserPassword operation.
 	//
 	// Reset a user's password with a reset token.
@@ -556,6 +676,30 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/search
 	Search(ctx context.Context, request SearchReq, params SearchParams) (jx.Raw, error)
+	// ShowComponent invokes showComponent operation.
+	//
+	// Retrieve a machine component.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}
+	ShowComponent(ctx context.Context, params ShowComponentParams) (*ComponentDocument, error)
+	// ShowComponentLicense invokes showComponentLicense operation.
+	//
+	// Retrieve a component's license.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}/license
+	ShowComponentLicense(ctx context.Context, params ShowComponentLicenseParams) (*LicenseDocument, error)
+	// ShowComponentMachine invokes showComponentMachine operation.
+	//
+	// Retrieve a component's machine.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}/machine
+	ShowComponentMachine(ctx context.Context, params ShowComponentMachineParams) (*MachineDocument, error)
+	// ShowComponentProduct invokes showComponentProduct operation.
+	//
+	// Retrieve a component's product.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}/product
+	ShowComponentProduct(ctx context.Context, params ShowComponentProductParams) (*ProductDocument, error)
 	// ShowEntitlement invokes showEntitlement operation.
 	//
 	// Retrieve an entitlement (by id or code).
@@ -579,7 +723,7 @@ type Invoker interface {
 	// Show one of a group's machines (id or fingerprint alias).
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/machines/{machineId}
-	ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*UserMachineDocument, error)
+	ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*MachineDocument, error)
 	// ShowGroupOwner invokes showGroupOwner operation.
 	//
 	// Show one of a group's owners.
@@ -670,6 +814,60 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/licenses/{licenseId}/user
 	ShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (*LicenseOwnerDocument, error)
+	// ShowMachine invokes showMachine operation.
+	//
+	// Retrieve a machine (by id or fingerprint).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}
+	ShowMachine(ctx context.Context, params ShowMachineParams) (*MachineDocument, error)
+	// ShowMachineComponent invokes showMachineComponent operation.
+	//
+	// Retrieve one of a machine's components.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/components/{componentId}
+	ShowMachineComponent(ctx context.Context, params ShowMachineComponentParams) (*ComponentDocument, error)
+	// ShowMachineGroup invokes showMachineGroup operation.
+	//
+	// Retrieve a machine's group.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/group
+	ShowMachineGroup(ctx context.Context, params ShowMachineGroupParams) (*GroupDocument, error)
+	// ShowMachineLicense invokes showMachineLicense operation.
+	//
+	// Retrieve a machine's license.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/license
+	ShowMachineLicense(ctx context.Context, params ShowMachineLicenseParams) (*LicenseDocument, error)
+	// ShowMachineOwner invokes showMachineOwner operation.
+	//
+	// Retrieve a machine's owner.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/owner
+	ShowMachineOwner(ctx context.Context, params ShowMachineOwnerParams) (*LicenseOwnerDocument, error)
+	// ShowMachineProcess invokes showMachineProcess operation.
+	//
+	// Retrieve one of a machine's processes.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/processes/{processId}
+	ShowMachineProcess(ctx context.Context, params ShowMachineProcessParams) (*ProcessDocument, error)
+	// ShowMachineProduct invokes showMachineProduct operation.
+	//
+	// Retrieve a machine's product.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/product
+	ShowMachineProduct(ctx context.Context, params ShowMachineProductParams) (*ProductDocument, error)
+	// ShowMachineUsage invokes showMachineUsage operation.
+	//
+	// Read the machine's accepted usage chain (a backplane extension).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/usage
+	ShowMachineUsage(ctx context.Context, params ShowMachineUsageParams) (*MachineUsageDocument, error)
+	// ShowMachineUserAlias invokes showMachineUserAlias operation.
+	//
+	// Retrieve a machine's owner (v1.5 alias).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/user
+	ShowMachineUserAlias(ctx context.Context, params ShowMachineUserAliasParams) (*LicenseOwnerDocument, error)
 	// ShowPolicy invokes showPolicy operation.
 	//
 	// Retrieve a policy.
@@ -700,6 +898,30 @@ type Invoker interface {
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/product
 	ShowPolicyProduct(ctx context.Context, params ShowPolicyProductParams) (*ProductDocument, error)
+	// ShowProcess invokes showProcess operation.
+	//
+	// Retrieve a machine process.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}
+	ShowProcess(ctx context.Context, params ShowProcessParams) (*ProcessDocument, error)
+	// ShowProcessLicense invokes showProcessLicense operation.
+	//
+	// Retrieve a process's license.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}/license
+	ShowProcessLicense(ctx context.Context, params ShowProcessLicenseParams) (*LicenseDocument, error)
+	// ShowProcessMachine invokes showProcessMachine operation.
+	//
+	// Retrieve a process's machine.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}/machine
+	ShowProcessMachine(ctx context.Context, params ShowProcessMachineParams) (*MachineDocument, error)
+	// ShowProcessProduct invokes showProcessProduct operation.
+	//
+	// Retrieve a process's product.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}/product
+	ShowProcessProduct(ctx context.Context, params ShowProcessProductParams) (*ProductDocument, error)
 	// ShowProduct invokes showProduct operation.
 	//
 	// Retrieve a product (by id or code).
@@ -765,7 +987,7 @@ type Invoker interface {
 	// Show one of a user's machines (id or fingerprint alias).
 	//
 	// GET /v1/accounts/{account}/users/{userId}/machines/{machineId}
-	ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*UserMachineDocument, error)
+	ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*MachineDocument, error)
 	// ShowUserProduct invokes showUserProduct operation.
 	//
 	// Show one of a user's products.
@@ -808,6 +1030,12 @@ type Invoker interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/unban
 	UnbanUser(ctx context.Context, params UnbanUserParams) (*UserDocument, error)
+	// UpdateComponent invokes updateComponent operation.
+	//
+	// Update a machine component.
+	//
+	// PATCH /v1/accounts/{account}/components/{componentId}
+	UpdateComponent(ctx context.Context, request UpdateComponentReq, params UpdateComponentParams) (*ComponentDocument, error)
 	// UpdateEntitlement invokes updateEntitlement operation.
 	//
 	// Update an entitlement.
@@ -856,12 +1084,36 @@ type Invoker interface {
 	//
 	// PATCH /v1/accounts/{account}/licenses/{licenseId}/user
 	UpdateLicenseUserAlias(ctx context.Context, request UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (*LicenseDocument, error)
+	// UpdateMachine invokes updateMachine operation.
+	//
+	// Update a machine.
+	//
+	// PATCH /v1/accounts/{account}/machines/{machineId}
+	UpdateMachine(ctx context.Context, request UpdateMachineReq, params UpdateMachineParams) (*MachineDocument, error)
+	// UpdateMachineGroup invokes updateMachineGroup operation.
+	//
+	// Set a machine's group.
+	//
+	// PATCH /v1/accounts/{account}/machines/{machineId}/group
+	UpdateMachineGroup(ctx context.Context, request UpdateMachineGroupReq, params UpdateMachineGroupParams) (*MachineDocument, error)
+	// UpdateMachineOwner invokes updateMachineOwner operation.
+	//
+	// Set a machine's owner.
+	//
+	// PATCH /v1/accounts/{account}/machines/{machineId}/owner
+	UpdateMachineOwner(ctx context.Context, request UpdateMachineOwnerReq, params UpdateMachineOwnerParams) (*MachineDocument, error)
 	// UpdatePolicy invokes updatePolicy operation.
 	//
 	// Scheme, encrypted and usePool are immutable; relationships are not accepted.
 	//
 	// PATCH /v1/accounts/{account}/policies/{policyId}
 	UpdatePolicy(ctx context.Context, request UpdatePolicyReq, params UpdatePolicyParams) (*PolicyDocument, error)
+	// UpdateProcess invokes updateProcess operation.
+	//
+	// Update a machine process.
+	//
+	// PATCH /v1/accounts/{account}/processes/{processId}
+	UpdateProcess(ctx context.Context, request UpdateProcessReq, params UpdateProcessParams) (*ProcessDocument, error)
 	// UpdateProduct invokes updateProduct operation.
 	//
 	// Update a product.
@@ -1862,6 +2114,329 @@ func (c *Client) sendCheckoutLicenseFile(ctx context.Context, params CheckoutLic
 	return result, nil
 }
 
+// CheckoutMachine invokes checkoutMachine operation.
+//
+// Check out a machine license file (JSON:API).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/check-out
+func (c *Client) CheckoutMachine(ctx context.Context, request CheckoutMachineReq, params CheckoutMachineParams) (*MachineFileDocument, error) {
+	res, err := c.sendCheckoutMachine(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCheckoutMachine(ctx context.Context, request CheckoutMachineReq, params CheckoutMachineParams) (res *MachineFileDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkoutMachine"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/check-out"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckoutMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/check-out"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCheckoutMachineRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckoutMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CheckoutMachineRaw invokes checkoutMachineRaw operation.
+//
+// Check out a machine license file (raw).
+//
+// GET /v1/accounts/{account}/machines/{machineId}/actions/check-out
+func (c *Client) CheckoutMachineRaw(ctx context.Context, params CheckoutMachineRawParams) (*CheckoutMachineRawOKHeaders, error) {
+	res, err := c.sendCheckoutMachineRaw(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendCheckoutMachineRaw(ctx context.Context, params CheckoutMachineRawParams) (res *CheckoutMachineRawOKHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkoutMachineRaw"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/check-out"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CheckoutMachineRawOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/check-out"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckoutMachineRawResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateComponent invokes createComponent operation.
+//
+// Create a machine component.
+//
+// POST /v1/accounts/{account}/components
+func (c *Client) CreateComponent(ctx context.Context, request CreateComponentReq, params CreateComponentParams) (*ComponentDocumentHeaders, error) {
+	res, err := c.sendCreateComponent(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateComponent(ctx context.Context, request CreateComponentReq, params CreateComponentParams) (res *ComponentDocumentHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createComponent"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateComponentOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateComponentRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateComponentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateEntitlement invokes createEntitlement operation.
 //
 // Create an entitlement.
@@ -2361,6 +2936,102 @@ func (c *Client) sendCreateLicenseToken(ctx context.Context, request CreateLicen
 	return result, nil
 }
 
+// CreateMachine invokes createMachine operation.
+//
+// Activate a machine.
+//
+// POST /v1/accounts/{account}/machines
+func (c *Client) CreateMachine(ctx context.Context, request CreateMachineReq, params CreateMachineParams) (*MachineDocumentHeaders, error) {
+	res, err := c.sendCreateMachine(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateMachine(ctx context.Context, request CreateMachineReq, params CreateMachineParams) (res *MachineDocumentHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createMachine"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateMachineRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreatePolicy invokes createPolicy operation.
 //
 // Create a policy.
@@ -2450,6 +3121,102 @@ func (c *Client) sendCreatePolicy(ctx context.Context, request CreatePolicyReq, 
 
 	stage = "DecodeResponse"
 	result, err := decodeCreatePolicyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateProcess invokes createProcess operation.
+//
+// Create a machine process.
+//
+// POST /v1/accounts/{account}/processes
+func (c *Client) CreateProcess(ctx context.Context, request CreateProcessReq, params CreateProcessParams) (*ProcessDocumentHeaders, error) {
+	res, err := c.sendCreateProcess(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateProcess(ctx context.Context, request CreateProcessReq, params CreateProcessParams) (res *ProcessDocumentHeaders, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createProcess"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateProcessOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateProcessRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateProcessResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3206,6 +3973,117 @@ func (c *Client) sendDecrementLicenseUsage(ctx context.Context, request Decremen
 	return result, nil
 }
 
+// DeleteComponent invokes deleteComponent operation.
+//
+// Delete a machine component.
+//
+// DELETE /v1/accounts/{account}/components/{componentId}
+func (c *Client) DeleteComponent(ctx context.Context, params DeleteComponentParams) error {
+	_, err := c.sendDeleteComponent(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteComponent(ctx context.Context, params DeleteComponentParams) (res *DeleteComponentNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteComponent"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components/{componentId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteComponentOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteComponentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteGroup invokes deleteGroup operation.
 //
 // Delete a group (members keep existing, group nulled).
@@ -3310,6 +4188,228 @@ func (c *Client) sendDeleteGroup(ctx context.Context, params DeleteGroupParams) 
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteMachine invokes deleteMachine operation.
+//
+// Delete a machine.
+//
+// DELETE /v1/accounts/{account}/machines/{machineId}
+func (c *Client) DeleteMachine(ctx context.Context, params DeleteMachineParams) error {
+	_, err := c.sendDeleteMachine(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteMachine(ctx context.Context, params DeleteMachineParams) (res *DeleteMachineNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteMachine"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteProcess invokes deleteProcess operation.
+//
+// Delete a machine process.
+//
+// DELETE /v1/accounts/{account}/processes/{processId}
+func (c *Client) DeleteProcess(ctx context.Context, params DeleteProcessParams) error {
+	_, err := c.sendDeleteProcess(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteProcess(ctx context.Context, params DeleteProcessParams) (res *DeleteProcessNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteProcess"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteProcessOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteProcessResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4798,6 +5898,121 @@ func (c *Client) sendDetachPolicyEntitlements(ctx context.Context, request Detac
 	return result, nil
 }
 
+// GenerateMachineProof invokes generateMachineProof operation.
+//
+// Sign an offline proof of the machine (API v1.0).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof
+func (c *Client) GenerateMachineProof(ctx context.Context, request GenerateMachineProofReq, params GenerateMachineProofParams) (*MachineProofDocument, error) {
+	res, err := c.sendGenerateMachineProof(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendGenerateMachineProof(ctx context.Context, request GenerateMachineProofReq, params GenerateMachineProofParams) (res *MachineProofDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("generateMachineProof"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GenerateMachineProofOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/generate-offline-proof"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGenerateMachineProofRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGenerateMachineProofResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GenerateToken invokes generateToken operation.
 //
 // Basic email:password (with meta.otp for two-factor users) or any token authentication. The
@@ -5169,6 +6384,99 @@ func (c *Client) sendIncrementLicenseUsage(ctx context.Context, request Incremen
 
 	stage = "DecodeResponse"
 	result, err := decodeIncrementLicenseUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexComponents invokes indexComponents operation.
+//
+// List machine components.
+//
+// GET /v1/accounts/{account}/components
+func (c *Client) IndexComponents(ctx context.Context, params IndexComponentsParams) (*ComponentListDocument, error) {
+	res, err := c.sendIndexComponents(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexComponents(ctx context.Context, params IndexComponentsParams) (res *ComponentListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexComponents"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexComponentsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexComponentsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5903,6 +7211,323 @@ func (c *Client) sendIndexLicenses(ctx context.Context, params IndexLicensesPara
 	return result, nil
 }
 
+// IndexMachineComponents invokes indexMachineComponents operation.
+//
+// List a machine's components.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/components
+func (c *Client) IndexMachineComponents(ctx context.Context, params IndexMachineComponentsParams) (*ComponentListDocument, error) {
+	res, err := c.sendIndexMachineComponents(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexMachineComponents(ctx context.Context, params IndexMachineComponentsParams) (res *ComponentListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexMachineComponents"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/components"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexMachineComponentsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/components"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexMachineComponentsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexMachineProcesses invokes indexMachineProcesses operation.
+//
+// List a machine's processes.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/processes
+func (c *Client) IndexMachineProcesses(ctx context.Context, params IndexMachineProcessesParams) (*ProcessListDocument, error) {
+	res, err := c.sendIndexMachineProcesses(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexMachineProcesses(ctx context.Context, params IndexMachineProcessesParams) (res *ProcessListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexMachineProcesses"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/processes"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexMachineProcessesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/processes"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexMachineProcessesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IndexMachines invokes indexMachines operation.
+//
+// List machines.
+//
+// GET /v1/accounts/{account}/machines
+func (c *Client) IndexMachines(ctx context.Context, params IndexMachinesParams) (*MachineListDocument, error) {
+	res, err := c.sendIndexMachines(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexMachines(ctx context.Context, params IndexMachinesParams) (res *MachineListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexMachines"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexMachinesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexMachinesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // IndexPolicies invokes indexPolicies operation.
 //
 // List policies.
@@ -6332,6 +7957,99 @@ func (c *Client) sendIndexPolicyPool(ctx context.Context, params IndexPolicyPool
 	return result, nil
 }
 
+// IndexProcesses invokes indexProcesses operation.
+//
+// List machine processes.
+//
+// GET /v1/accounts/{account}/processes
+func (c *Client) IndexProcesses(ctx context.Context, params IndexProcessesParams) (*ProcessListDocument, error) {
+	res, err := c.sendIndexProcesses(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendIndexProcesses(ctx context.Context, params IndexProcessesParams) (res *ProcessListDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("indexProcesses"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, IndexProcessesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeIndexProcessesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // IndexProductLicenses invokes indexProductLicenses operation.
 //
 // List a product's licenses.
@@ -6449,12 +8167,12 @@ func (c *Client) sendIndexProductLicenses(ctx context.Context, params IndexProdu
 // List a product's machines.
 //
 // GET /v1/accounts/{account}/products/{productId}/machines
-func (c *Client) IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineStubListDocument, error) {
+func (c *Client) IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineListDocument, error) {
 	res, err := c.sendIndexProductMachines(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendIndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (res *MachineStubListDocument, err error) {
+func (c *Client) sendIndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (res *MachineListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("indexProductMachines"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -7102,12 +8820,12 @@ func (c *Client) sendListGroupLicenses(ctx context.Context, params ListGroupLice
 // List a group's machines.
 //
 // GET /v1/accounts/{account}/groups/{groupId}/machines
-func (c *Client) ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*UserMachineCollectionDocument, error) {
+func (c *Client) ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*MachineListDocument, error) {
 	res, err := c.sendListGroupMachines(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (res *UserMachineCollectionDocument, err error) {
+func (c *Client) sendListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (res *MachineListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listGroupMachines"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -7736,12 +9454,12 @@ func (c *Client) sendListUserLicenses(ctx context.Context, params ListUserLicens
 // List a user's machines.
 //
 // GET /v1/accounts/{account}/users/{userId}/machines
-func (c *Client) ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*UserMachineCollectionDocument, error) {
+func (c *Client) ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*MachineListDocument, error) {
 	res, err := c.sendListUserMachines(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListUserMachines(ctx context.Context, params ListUserMachinesParams) (res *UserMachineCollectionDocument, err error) {
+func (c *Client) sendListUserMachines(ctx context.Context, params ListUserMachinesParams) (res *MachineListDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listUserMachines"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -8627,6 +10345,348 @@ func (c *Client) sendPing(ctx context.Context) (res *PingOK, err error) {
 	return result, nil
 }
 
+// PingMachine invokes pingMachine operation.
+//
+// Ping a machine's heartbeat (short alias).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/ping
+func (c *Client) PingMachine(ctx context.Context, params PingMachineParams) (*MachineDocument, error) {
+	res, err := c.sendPingMachine(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPingMachine(ctx context.Context, params PingMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("pingMachine"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/ping"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PingMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/ping"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePingMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PingMachineHeartbeat invokes pingMachineHeartbeat operation.
+//
+// Ping a machine's heartbeat.
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat
+func (c *Client) PingMachineHeartbeat(ctx context.Context, request PingMachineHeartbeatReq, params PingMachineHeartbeatParams) (*MachineDocument, error) {
+	res, err := c.sendPingMachineHeartbeat(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPingMachineHeartbeat(ctx context.Context, request PingMachineHeartbeatReq, params PingMachineHeartbeatParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("pingMachineHeartbeat"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PingMachineHeartbeatOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/ping-heartbeat"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePingMachineHeartbeatRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePingMachineHeartbeatResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PingProcess invokes pingProcess operation.
+//
+// Ping a machine process's heartbeat.
+//
+// POST /v1/accounts/{account}/processes/{processId}/actions/ping
+func (c *Client) PingProcess(ctx context.Context, request PingProcessReq, params PingProcessParams) (*ProcessDocument, error) {
+	res, err := c.sendPingProcess(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPingProcess(ctx context.Context, request PingProcessReq, params PingProcessParams) (res *ProcessDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("pingProcess"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}/actions/ping"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, PingProcessOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/ping"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePingProcessRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePingProcessResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // PopPolicyPool invokes popPolicyPool operation.
 //
 // Destroys the newest pooled key and answers its document.
@@ -9505,6 +11565,121 @@ func (c *Client) sendReplaceUserSecondFactor(ctx context.Context, request Replac
 	return result, nil
 }
 
+// ReportMachineUsage invokes reportMachineUsage operation.
+//
+// Report the installation's signed usage chain (a backplane extension).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/report-usage
+func (c *Client) ReportMachineUsage(ctx context.Context, request ReportMachineUsageReq, params ReportMachineUsageParams) (*MachineUsageAckDocument, error) {
+	res, err := c.sendReportMachineUsage(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendReportMachineUsage(ctx context.Context, request ReportMachineUsageReq, params ReportMachineUsageParams) (res *MachineUsageAckDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("reportMachineUsage"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/report-usage"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ReportMachineUsageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/report-usage"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeReportMachineUsageRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeReportMachineUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RequestPasswordReset invokes requestPasswordReset operation.
 //
 // Always answers 204; unknown emails trigger nothing.
@@ -9706,6 +11881,233 @@ func (c *Client) sendResetLicenseUsage(ctx context.Context, params ResetLicenseU
 
 	stage = "DecodeResponse"
 	result, err := decodeResetLicenseUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ResetMachine invokes resetMachine operation.
+//
+// Reset a machine's heartbeat (short alias).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/reset
+func (c *Client) ResetMachine(ctx context.Context, params ResetMachineParams) (*MachineDocument, error) {
+	res, err := c.sendResetMachine(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendResetMachine(ctx context.Context, params ResetMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("resetMachine"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/reset"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ResetMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/reset"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeResetMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ResetMachineHeartbeat invokes resetMachineHeartbeat operation.
+//
+// Reset a machine's heartbeat.
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat
+func (c *Client) ResetMachineHeartbeat(ctx context.Context, request ResetMachineHeartbeatReq, params ResetMachineHeartbeatParams) (*MachineDocument, error) {
+	res, err := c.sendResetMachineHeartbeat(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendResetMachineHeartbeat(ctx context.Context, request ResetMachineHeartbeatReq, params ResetMachineHeartbeatParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("resetMachineHeartbeat"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ResetMachineHeartbeatOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/actions/reset-heartbeat"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeResetMachineHeartbeatRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeResetMachineHeartbeatResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -10264,6 +12666,453 @@ func (c *Client) sendSearch(ctx context.Context, request SearchReq, params Searc
 	return result, nil
 }
 
+// ShowComponent invokes showComponent operation.
+//
+// Retrieve a machine component.
+//
+// GET /v1/accounts/{account}/components/{componentId}
+func (c *Client) ShowComponent(ctx context.Context, params ShowComponentParams) (*ComponentDocument, error) {
+	res, err := c.sendShowComponent(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowComponent(ctx context.Context, params ShowComponentParams) (res *ComponentDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showComponent"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components/{componentId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowComponentOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowComponentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowComponentLicense invokes showComponentLicense operation.
+//
+// Retrieve a component's license.
+//
+// GET /v1/accounts/{account}/components/{componentId}/license
+func (c *Client) ShowComponentLicense(ctx context.Context, params ShowComponentLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendShowComponentLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowComponentLicense(ctx context.Context, params ShowComponentLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showComponentLicense"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components/{componentId}/license"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowComponentLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/license"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowComponentLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowComponentMachine invokes showComponentMachine operation.
+//
+// Retrieve a component's machine.
+//
+// GET /v1/accounts/{account}/components/{componentId}/machine
+func (c *Client) ShowComponentMachine(ctx context.Context, params ShowComponentMachineParams) (*MachineDocument, error) {
+	res, err := c.sendShowComponentMachine(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowComponentMachine(ctx context.Context, params ShowComponentMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showComponentMachine"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components/{componentId}/machine"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowComponentMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/machine"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowComponentMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowComponentProduct invokes showComponentProduct operation.
+//
+// Retrieve a component's product.
+//
+// GET /v1/accounts/{account}/components/{componentId}/product
+func (c *Client) ShowComponentProduct(ctx context.Context, params ShowComponentProductParams) (*ProductDocument, error) {
+	res, err := c.sendShowComponentProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowComponentProduct(ctx context.Context, params ShowComponentProductParams) (res *ProductDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showComponentProduct"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components/{componentId}/product"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowComponentProductOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/product"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowComponentProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ShowEntitlement invokes showEntitlement operation.
 //
 // Retrieve an entitlement (by id or code).
@@ -10621,12 +13470,12 @@ func (c *Client) sendShowGroupLicense(ctx context.Context, params ShowGroupLicen
 // Show one of a group's machines (id or fingerprint alias).
 //
 // GET /v1/accounts/{account}/groups/{groupId}/machines/{machineId}
-func (c *Client) ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*UserMachineDocument, error) {
+func (c *Client) ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*MachineDocument, error) {
 	res, err := c.sendShowGroupMachine(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (res *UserMachineDocument, err error) {
+func (c *Client) sendShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (res *MachineDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("showGroupMachine"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -12532,6 +15381,1049 @@ func (c *Client) sendShowLicenseUserAlias(ctx context.Context, params ShowLicens
 	return result, nil
 }
 
+// ShowMachine invokes showMachine operation.
+//
+// Retrieve a machine (by id or fingerprint).
+//
+// GET /v1/accounts/{account}/machines/{machineId}
+func (c *Client) ShowMachine(ctx context.Context, params ShowMachineParams) (*MachineDocument, error) {
+	res, err := c.sendShowMachine(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachine(ctx context.Context, params ShowMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachine"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineComponent invokes showMachineComponent operation.
+//
+// Retrieve one of a machine's components.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/components/{componentId}
+func (c *Client) ShowMachineComponent(ctx context.Context, params ShowMachineComponentParams) (*ComponentDocument, error) {
+	res, err := c.sendShowMachineComponent(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineComponent(ctx context.Context, params ShowMachineComponentParams) (res *ComponentDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineComponent"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/components/{componentId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineComponentOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineComponentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineGroup invokes showMachineGroup operation.
+//
+// Retrieve a machine's group.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/group
+func (c *Client) ShowMachineGroup(ctx context.Context, params ShowMachineGroupParams) (*GroupDocument, error) {
+	res, err := c.sendShowMachineGroup(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineGroup(ctx context.Context, params ShowMachineGroupParams) (res *GroupDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineGroup"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/group"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineGroupOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/group"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineLicense invokes showMachineLicense operation.
+//
+// Retrieve a machine's license.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/license
+func (c *Client) ShowMachineLicense(ctx context.Context, params ShowMachineLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendShowMachineLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineLicense(ctx context.Context, params ShowMachineLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineLicense"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/license"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/license"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineOwner invokes showMachineOwner operation.
+//
+// Retrieve a machine's owner.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/owner
+func (c *Client) ShowMachineOwner(ctx context.Context, params ShowMachineOwnerParams) (*LicenseOwnerDocument, error) {
+	res, err := c.sendShowMachineOwner(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineOwner(ctx context.Context, params ShowMachineOwnerParams) (res *LicenseOwnerDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineOwner"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/owner"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineOwnerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/owner"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineOwnerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineProcess invokes showMachineProcess operation.
+//
+// Retrieve one of a machine's processes.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/processes/{processId}
+func (c *Client) ShowMachineProcess(ctx context.Context, params ShowMachineProcessParams) (*ProcessDocument, error) {
+	res, err := c.sendShowMachineProcess(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineProcess(ctx context.Context, params ShowMachineProcessParams) (res *ProcessDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineProcess"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/processes/{processId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineProcessOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineProcessResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineProduct invokes showMachineProduct operation.
+//
+// Retrieve a machine's product.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/product
+func (c *Client) ShowMachineProduct(ctx context.Context, params ShowMachineProductParams) (*ProductDocument, error) {
+	res, err := c.sendShowMachineProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineProduct(ctx context.Context, params ShowMachineProductParams) (res *ProductDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineProduct"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/product"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineProductOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/product"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineUsage invokes showMachineUsage operation.
+//
+// Read the machine's accepted usage chain (a backplane extension).
+//
+// GET /v1/accounts/{account}/machines/{machineId}/usage
+func (c *Client) ShowMachineUsage(ctx context.Context, params ShowMachineUsageParams) (*MachineUsageDocument, error) {
+	res, err := c.sendShowMachineUsage(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineUsage(ctx context.Context, params ShowMachineUsageParams) (res *MachineUsageDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineUsage"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/usage"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineUsageOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/usage"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineUsageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowMachineUserAlias invokes showMachineUserAlias operation.
+//
+// Retrieve a machine's owner (v1.5 alias).
+//
+// GET /v1/accounts/{account}/machines/{machineId}/user
+func (c *Client) ShowMachineUserAlias(ctx context.Context, params ShowMachineUserAliasParams) (*LicenseOwnerDocument, error) {
+	res, err := c.sendShowMachineUserAlias(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowMachineUserAlias(ctx context.Context, params ShowMachineUserAliasParams) (res *LicenseOwnerDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showMachineUserAlias"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/user"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowMachineUserAliasOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/user"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowMachineUserAliasResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ShowPolicy invokes showPolicy operation.
 //
 // Retrieve a policy.
@@ -13138,6 +17030,453 @@ func (c *Client) sendShowPolicyProduct(ctx context.Context, params ShowPolicyPro
 
 	stage = "DecodeResponse"
 	result, err := decodeShowPolicyProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowProcess invokes showProcess operation.
+//
+// Retrieve a machine process.
+//
+// GET /v1/accounts/{account}/processes/{processId}
+func (c *Client) ShowProcess(ctx context.Context, params ShowProcessParams) (*ProcessDocument, error) {
+	res, err := c.sendShowProcess(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowProcess(ctx context.Context, params ShowProcessParams) (res *ProcessDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showProcess"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowProcessOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowProcessResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowProcessLicense invokes showProcessLicense operation.
+//
+// Retrieve a process's license.
+//
+// GET /v1/accounts/{account}/processes/{processId}/license
+func (c *Client) ShowProcessLicense(ctx context.Context, params ShowProcessLicenseParams) (*LicenseDocument, error) {
+	res, err := c.sendShowProcessLicense(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowProcessLicense(ctx context.Context, params ShowProcessLicenseParams) (res *LicenseDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showProcessLicense"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}/license"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowProcessLicenseOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/license"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowProcessLicenseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowProcessMachine invokes showProcessMachine operation.
+//
+// Retrieve a process's machine.
+//
+// GET /v1/accounts/{account}/processes/{processId}/machine
+func (c *Client) ShowProcessMachine(ctx context.Context, params ShowProcessMachineParams) (*MachineDocument, error) {
+	res, err := c.sendShowProcessMachine(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowProcessMachine(ctx context.Context, params ShowProcessMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showProcessMachine"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}/machine"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowProcessMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/machine"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowProcessMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ShowProcessProduct invokes showProcessProduct operation.
+//
+// Retrieve a process's product.
+//
+// GET /v1/accounts/{account}/processes/{processId}/product
+func (c *Client) ShowProcessProduct(ctx context.Context, params ShowProcessProductParams) (*ProductDocument, error) {
+	res, err := c.sendShowProcessProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendShowProcessProduct(ctx context.Context, params ShowProcessProductParams) (res *ProductDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("showProcessProduct"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}/product"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ShowProcessProductOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/product"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeShowProcessProductResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -14375,12 +18714,12 @@ func (c *Client) sendShowUserLicense(ctx context.Context, params ShowUserLicense
 // Show one of a user's machines (id or fingerprint alias).
 //
 // GET /v1/accounts/{account}/users/{userId}/machines/{machineId}
-func (c *Client) ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*UserMachineDocument, error) {
+func (c *Client) ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*MachineDocument, error) {
 	res, err := c.sendShowUserMachine(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendShowUserMachine(ctx context.Context, params ShowUserMachineParams) (res *UserMachineDocument, err error) {
+func (c *Client) sendShowUserMachine(ctx context.Context, params ShowUserMachineParams) (res *MachineDocument, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("showUserMachine"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -15336,6 +19675,120 @@ func (c *Client) sendUnbanUser(ctx context.Context, params UnbanUserParams) (res
 	return result, nil
 }
 
+// UpdateComponent invokes updateComponent operation.
+//
+// Update a machine component.
+//
+// PATCH /v1/accounts/{account}/components/{componentId}
+func (c *Client) UpdateComponent(ctx context.Context, request UpdateComponentReq, params UpdateComponentParams) (*ComponentDocument, error) {
+	res, err := c.sendUpdateComponent(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateComponent(ctx context.Context, request UpdateComponentReq, params UpdateComponentParams) (res *ComponentDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateComponent"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/components/{componentId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateComponentOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/components/"
+	{
+		// Encode "componentId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "componentId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ComponentId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateComponentRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateComponentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateEntitlement invokes updateEntitlement operation.
 //
 // Update an entitlement.
@@ -16252,6 +20705,350 @@ func (c *Client) sendUpdateLicenseUserAlias(ctx context.Context, request UpdateL
 	return result, nil
 }
 
+// UpdateMachine invokes updateMachine operation.
+//
+// Update a machine.
+//
+// PATCH /v1/accounts/{account}/machines/{machineId}
+func (c *Client) UpdateMachine(ctx context.Context, request UpdateMachineReq, params UpdateMachineParams) (*MachineDocument, error) {
+	res, err := c.sendUpdateMachine(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateMachine(ctx context.Context, request UpdateMachineReq, params UpdateMachineParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateMachine"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateMachineOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateMachineRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateMachineResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateMachineGroup invokes updateMachineGroup operation.
+//
+// Set a machine's group.
+//
+// PATCH /v1/accounts/{account}/machines/{machineId}/group
+func (c *Client) UpdateMachineGroup(ctx context.Context, request UpdateMachineGroupReq, params UpdateMachineGroupParams) (*MachineDocument, error) {
+	res, err := c.sendUpdateMachineGroup(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateMachineGroup(ctx context.Context, request UpdateMachineGroupReq, params UpdateMachineGroupParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateMachineGroup"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/group"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateMachineGroupOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/group"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateMachineGroupRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateMachineGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateMachineOwner invokes updateMachineOwner operation.
+//
+// Set a machine's owner.
+//
+// PATCH /v1/accounts/{account}/machines/{machineId}/owner
+func (c *Client) UpdateMachineOwner(ctx context.Context, request UpdateMachineOwnerReq, params UpdateMachineOwnerParams) (*MachineDocument, error) {
+	res, err := c.sendUpdateMachineOwner(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateMachineOwner(ctx context.Context, request UpdateMachineOwnerReq, params UpdateMachineOwnerParams) (res *MachineDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateMachineOwner"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/machines/{machineId}/owner"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateMachineOwnerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/machines/"
+	{
+		// Encode "machineId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "machineId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MachineId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/owner"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateMachineOwnerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateMachineOwnerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdatePolicy invokes updatePolicy operation.
 //
 // Scheme, encrypted and usePool are immutable; relationships are not accepted.
@@ -16359,6 +21156,120 @@ func (c *Client) sendUpdatePolicy(ctx context.Context, request UpdatePolicyReq, 
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdatePolicyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateProcess invokes updateProcess operation.
+//
+// Update a machine process.
+//
+// PATCH /v1/accounts/{account}/processes/{processId}
+func (c *Client) UpdateProcess(ctx context.Context, request UpdateProcessReq, params UpdateProcessParams) (*ProcessDocument, error) {
+	res, err := c.sendUpdateProcess(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateProcess(ctx context.Context, request UpdateProcessReq, params UpdateProcessParams) (res *ProcessDocument, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateProcess"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/v1/accounts/{account}/processes/{processId}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateProcessOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/accounts/"
+	{
+		// Encode "account" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "account",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Account))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/processes/"
+	{
+		// Encode "processId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "processId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProcessId))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateProcessRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateProcessResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

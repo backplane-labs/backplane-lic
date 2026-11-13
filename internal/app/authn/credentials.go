@@ -46,6 +46,9 @@ const (
 	schemeLicense = "license"
 )
 
+// challengeBearer is the scheme a 401 challenges with.
+const challengeBearer = "Bearer"
+
 // emailRe approximates the reference's EMAIL_RE (also the users table's
 // email CHECK).
 var emailRe = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
@@ -166,7 +169,7 @@ func (r Resolved) ChallengeScheme() string {
 		return "Basic"
 	}
 
-	return "Bearer"
+	return challengeBearer
 }
 
 func splitAuthorization(authorization string) (string, string) {

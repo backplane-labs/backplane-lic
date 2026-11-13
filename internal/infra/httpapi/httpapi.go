@@ -8,6 +8,8 @@ package httpapi
 import (
 	"context"
 	"encoding/base64"
+	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/groups"
 	"github.com/backplane-labs/backplane-lic/internal/app/keys"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
+	"github.com/backplane-labs/backplane-lic/internal/app/machines"
 	"github.com/backplane-labs/backplane-lic/internal/app/passwords"
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
@@ -61,6 +64,7 @@ type Deps struct {
 	Entitlements  entitlements.Scenario
 	Keys          keys.Scenario
 	Licenses      licenses.Scenario
+	Machines      machines.Scenario
 	Webhooks      webhooks.Scenario
 	Search        search.Scenario
 	Spec          Spec
@@ -73,6 +77,8 @@ type Deps struct {
 	// honored when resolving the client IP (empty: RemoteAddr always).
 	TrustedProxies []string
 	Clock          func() time.Time
+	// Log records the technical failures answered as 500.
+	Log *slog.Logger
 }
 
 // API implements the ogen handler over the app's scenarios. The
@@ -91,10 +97,12 @@ type API struct {
 	entitlements entitlements.Scenario
 	keys         keys.Scenario
 	licenses     licenses.Scenario
+	machines     machines.Scenario
 	webhooks     webhooks.Scenario
 	search       search.Scenario
 	clock        func() time.Time
 	spec         Spec
+	log          *slog.Logger
 }
 
 // New builds the service's HTTP handler: the ogen server wrapped in the
@@ -118,10 +126,12 @@ func New(deps Deps) http.Handler {
 		entitlements:  deps.Entitlements,
 		keys:          deps.Keys,
 		licenses:      deps.Licenses,
+		machines:      deps.Machines,
 		clock:         clock,
 		webhooks:      deps.Webhooks,
 		search:        deps.Search,
 		spec:          deps.Spec,
+		log:           deps.Log,
 	}
 
 	server, err := oas.NewServer(api)
@@ -178,7 +188,7 @@ func (a *API) GenerateToken(
 
 	token, raw, err := a.tokens.Generate(ctx, req.account, req.principal, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	// The response's Keygen-Token header carries the NEW token even for
@@ -215,7 +225,7 @@ func (a *API) Me(ctx context.Context, _ oas.MeParams) (*oas.MeDocument, error) {
 
 	user, status, err := a.users.Me(ctx, req.account.ID, req.principal.BearerID)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.MeDocument{Data: oas.MeDocumentData{
@@ -251,7 +261,7 @@ func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDoc
 
 	user, status, err := a.users.Me(ctx, req.account.ID, req.principal.BearerID)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	tokenID := oas.NilString{Null: true}
@@ -272,6 +282,12 @@ func (a *API) Profile(ctx context.Context, _ oas.ProfileParams) (*oas.ProfileDoc
 // error (or the 500 fallback) with the request id as meta.id.
 func (a *API) NewError(ctx context.Context, err error) *oas.ErrorStatusCode {
 	req := requestOf(ctx)
+
+	var typed *apperr.T
+	if !errors.As(err, &typed) {
+		a.log.ErrorContext(ctx, "request failed", slog.String("request_id", req.id.String()),
+			slog.String("method", req.method), slog.String("error", err.Error()))
+	}
 
 	return errorStatus(apperrFrom(err), req)
 }
@@ -323,8 +339,6 @@ func accountDocument(account domain.Account) *oas.AccountDocument {
 			},
 			Links: oas.ResourceLinks{Self: base},
 			Meta: oas.AccountMeta{
-				// Base64 of the stored string in every case: the RSA and
-				// ECDSA PEMs, and — for ed25519 — the hex string itself.
 				PublicKey: base64Std(account.Keys.RSAPublic),
 				Keys: oas.AccountKeysMeta{
 					Ed25519: base64Std(account.Keys.Ed25519Public),
@@ -339,8 +353,6 @@ func accountDocument(account domain.Account) *oas.AccountDocument {
 // storedBearerUser is the stored polymorphic type of a user bearer.
 const storedBearerUser = "User"
 
-// errNotUserBearer: /me and /profile serve user bearers (the reference
-// serves license documents for license bearers — a later phase).
 var errNotUserBearer = apperr.NotFoundDefault()
 
 func base64Std(s string) string {
@@ -364,7 +376,7 @@ func nilString(s string) oas.NilString {
 func (a *API) meLicense(ctx context.Context, req *request) (*oas.MeDocument, error) {
 	license, err := a.licenses.Show(ctx, req.account, req.principal.BearerID.String())
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.MeDocument{Data: oas.MeDocumentData{
@@ -385,7 +397,7 @@ func (a *API) meLicense(ctx context.Context, req *request) (*oas.MeDocument, err
 func (a *API) profileLicense(ctx context.Context, req *request) (*oas.ProfileDocument, error) {
 	license, err := a.licenses.Show(ctx, req.account, req.principal.BearerID.String())
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	tokenID := oas.NilString{Null: true}
@@ -406,7 +418,7 @@ func (a *API) profileLicense(ctx context.Context, req *request) (*oas.ProfileDoc
 func (a *API) meProduct(ctx context.Context, req *request) (*oas.MeDocument, error) {
 	product, err := a.products.Show(ctx, req.account, req.principal.BearerID.String())
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.MeDocument{Data: oas.MeDocumentData{
@@ -427,7 +439,7 @@ func (a *API) meProduct(ctx context.Context, req *request) (*oas.MeDocument, err
 func (a *API) profileProduct(ctx context.Context, req *request) (*oas.ProfileDocument, error) {
 	product, err := a.products.Show(ctx, req.account, req.principal.BearerID.String())
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	tokenID := oas.NilString{Null: true}

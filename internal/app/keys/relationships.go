@@ -25,7 +25,7 @@ func (s Scenario) Product(
 
 	product, err = s.products.ProductByID(ctx, account.ID, key.ProductID)
 	if err != nil {
-		return domain.Key{}, domain.Product{}, err //nolint:wrapcheck // the product lookup's own error
+		return domain.Key{}, domain.Product{}, err // the product lookup's own error
 	}
 
 	return key, product, nil
@@ -58,7 +58,7 @@ func (s Scenario) relationship(
 	ctx context.Context, account domain.Account, id uuid.UUID, permission string,
 ) (domain.Key, domain.Product, error) { //nolint:unparam // kept symmetric with the port
 	if err := access.Require(ctx, permission); err != nil {
-		return domain.Key{}, domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, domain.Product{}, err // the authorization's own error
 	}
 
 	key, err := s.load(ctx, account.ID, id)
@@ -67,7 +67,7 @@ func (s Scenario) relationship(
 	}
 
 	if err := access.KeyRelationship(access.PrincipalOf(ctx), key); err != nil {
-		return domain.Key{}, domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, domain.Product{}, err // the authorization's own error
 	}
 
 	return key, domain.Product{}, nil

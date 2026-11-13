@@ -58,7 +58,7 @@ func (s Scenario) SeedAdmin(ctx context.Context, accountID uuid.UUID, email stri
 func (s Scenario) Me(ctx context.Context, accountID, id uuid.UUID) (domain.User, string, error) {
 	user, err := s.store.UserByID(ctx, accountID, id)
 	if errors.Is(err, ErrNotFound) {
-		return domain.User{}, "", err //nolint:wrapcheck // the sentinel speaks
+		return domain.User{}, "", err // the sentinel speaks
 	}
 
 	if err != nil {

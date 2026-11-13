@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -61,7 +62,7 @@ func pointerOf(segments ...string) string {
 func parsePaging(req *request) (paging.Params, error) {
 	p, err := paging.Parse(queryOf(req.originalURI))
 	if err != nil {
-		return p, err //nolint:wrapcheck // the paging package's own document
+		return p, err
 	}
 
 	return p, nil
@@ -90,7 +91,7 @@ func userFilter(query url.Values) users.Filter {
 func defaultRoles(query url.Values) []string {
 	values := query["roles[]"]
 	if len(values) == 0 {
-		return []string{"user"}
+		return []string{typeUserSingular}
 	}
 
 	out := make([]string, 0, len(values))
@@ -223,7 +224,7 @@ func (a *API) ListUsers(ctx context.Context, _ oas.ListUsersParams) (*oas.UserCo
 
 	page, err := a.users.List(ctx, req.account, req.principal, userFilter(queryOf(req.originalURI)), p)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return listedUsers(req, page, p), nil
@@ -242,7 +243,7 @@ func (a *API) CreateUser(
 
 	row, err := a.users.Create(ctx, req.account, req.principal, attrs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.UserDocumentHeaders{
@@ -258,7 +259,7 @@ func (a *API) ShowUser(ctx context.Context, params oas.ShowUserParams) (*oas.Use
 
 	row, err := a.users.Show(ctx, req.account, req.principal, params.UserId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -279,7 +280,7 @@ func (a *API) UpdateUser(
 
 	row, err := a.users.Update(ctx, req.account, req.principal, params.UserId, attrs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -291,7 +292,7 @@ func (a *API) UpdateUser(
 func (a *API) DeleteUser(ctx context.Context, params oas.DeleteUserParams) error {
 	req := requestOf(ctx)
 
-	return a.users.Delete(ctx, req.account, req.principal, params.UserId) //nolint:wrapcheck // the scenario's own error
+	return a.users.Delete(ctx, req.account, req.principal, params.UserId)
 }
 
 // UpdateUserPassword implements the update-password action.
@@ -307,7 +308,7 @@ func (a *API) UpdateUserPassword(
 
 	row, err := a.users.UpdatePassword(ctx, req.account, req.principal, params.UserId, oldPassword, newPassword)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -328,7 +329,7 @@ func (a *API) ResetUserPassword(
 
 	row, err := a.users.ResetPassword(ctx, req.account, req.principal, params.UserId, token, newPassword)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -342,7 +343,7 @@ func (a *API) BanUser(ctx context.Context, params oas.BanUserParams) (*oas.UserD
 
 	row, err := a.users.Ban(ctx, req.account, req.principal, params.UserId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -356,7 +357,7 @@ func (a *API) UnbanUser(ctx context.Context, params oas.UnbanUserParams) (*oas.U
 
 	row, err := a.users.Unban(ctx, req.account, req.principal, params.UserId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -370,7 +371,7 @@ func (a *API) ShowUserGroup(ctx context.Context, params oas.ShowUserGroupParams)
 
 	group, err := a.users.Group(ctx, req.account, req.principal, params.UserId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	if group == nil {
@@ -395,7 +396,7 @@ func (a *API) UpdateUserGroup(
 
 	row, err := a.users.SetGroup(ctx, req.account, req.principal, params.UserId, group)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := userDoc(row)
@@ -411,7 +412,7 @@ func (a *API) ListUserProducts(
 
 	ids, err := a.users.Related(ctx, req.account, req.principal, params.UserId, "products")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.UserProductCollectionDocument{Data: make([]oas.UserProductResource, 0, len(ids))}
@@ -430,7 +431,7 @@ func (a *API) ShowUserProduct(
 
 	id, err := a.users.RelatedShow(ctx, req.account, req.principal, params.UserId, "products", params.ProductId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.UserProductDocument{Data: render.ProductStub(req.account.ID, id)}, nil
@@ -453,12 +454,12 @@ func (a *API) ListUserLicenses(
 
 	user, err := a.users.RelatedUser(ctx, req.account, req.principal, params.UserId, "licenses")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	page, err := a.licenses.OfUser(ctx, req.account, user.ID, licenseFilter(req.query), listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return a.licenseListDocument(req, page, listParams), nil
@@ -476,12 +477,12 @@ func (a *API) ShowUserLicense(
 
 	user, err := a.users.RelatedUser(ctx, req.account, req.principal, params.UserId, "licenses")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	license, err := a.licenses.OfUserShow(ctx, req.account, user.ID, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -490,32 +491,58 @@ func (a *API) ShowUserLicense(
 // ListUserMachines implements GET /users/{userId}/machines.
 func (a *API) ListUserMachines(
 	ctx context.Context, params oas.ListUserMachinesParams,
-) (*oas.UserMachineCollectionDocument, error) {
+) (*oas.MachineListDocument, error) {
 	req := requestOf(ctx)
 
 	ids, err := a.users.Related(ctx, req.account, req.principal, params.UserId, "machines")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
-	doc := &oas.UserMachineCollectionDocument{Data: make([]oas.UserMachineResource, 0, len(ids))}
-	for _, id := range ids {
-		doc.Data = append(doc.Data, render.MachineStub(req.account.ID, id))
+	return a.machineList(ctx, req, ids)
+}
+
+// machineList renders the machines of another resource's relationship.
+func (a *API) machineList(ctx context.Context, req *request, ids []uuid.UUID) (*oas.MachineListDocument, error) {
+	listed, err := a.machines.Listed(ctx, req.account, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	doc := &oas.MachineListDocument{Data: make([]oas.MachineResource, 0, len(listed))}
+	for i := range listed {
+		doc.Data = append(doc.Data, render.Machine(req.account.ID, listed[i]))
 	}
 
 	return doc, nil
 }
 
+// machineOf renders one machine of another resource's relationship.
+func (a *API) machineOf(ctx context.Context, req *request, id uuid.UUID) (*oas.MachineDocument, error) {
+	listed, err := a.machines.Listed(ctx, req.account, []uuid.UUID{id})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(listed) == 0 {
+		return nil, apperr.NotFound("machine", id.String())
+	}
+
+	doc := machineDoc(req, listed[0])
+
+	return &doc, nil
+}
+
 // ShowUserMachine implements GET /users/{userId}/machines/{machineId}.
 func (a *API) ShowUserMachine(
 	ctx context.Context, params oas.ShowUserMachineParams,
-) (*oas.UserMachineDocument, error) {
+) (*oas.MachineDocument, error) {
 	req := requestOf(ctx)
 
 	id, err := a.users.RelatedShow(ctx, req.account, req.principal, params.UserId, "machines", params.MachineId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
-	return &oas.UserMachineDocument{Data: render.MachineStub(req.account.ID, id)}, nil
+	return a.machineOf(ctx, req, id)
 }

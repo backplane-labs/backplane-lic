@@ -65,7 +65,7 @@ func (a *API) ListTokens(ctx context.Context, _ oas.ListTokensParams) (*oas.Toke
 
 	page, err := a.tokens.Manager().List(ctx, req.account, req.principal, tokenFilter(req), p)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := tokenCollection(req, page)
@@ -85,7 +85,7 @@ func (a *API) ShowToken(ctx context.Context, params oas.ShowTokenParams) (*oas.T
 
 	token, err := a.tokens.Manager().Show(ctx, req.account, req.principal, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, "")}, nil
@@ -99,7 +99,7 @@ func (a *API) RegenerateCurrentToken(
 
 	token, raw, err := a.tokens.Manager().RegenerateCurrent(ctx, req.account, req.principal)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, raw)}, nil
@@ -118,7 +118,7 @@ func (a *API) RegenerateToken(
 
 	token, raw, err := a.tokens.Manager().Regenerate(ctx, req.account, req.principal, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, raw)}, nil
@@ -133,7 +133,7 @@ func (a *API) RevokeToken(ctx context.Context, params oas.RevokeTokenParams) err
 		return apperr.NotFound("token", params.TokenId)
 	}
 
-	return a.tokens.Manager().Revoke(ctx, req.account, req.principal, id) //nolint:wrapcheck // the scenario's own error
+	return a.tokens.Manager().Revoke(ctx, req.account, req.principal, id) // the scenario's own error
 }
 
 // ListUserTokens implements GET /users/{userId}/tokens.
@@ -151,7 +151,7 @@ func (a *API) ListUserTokens(
 		tokens.Filter{BearerType: storedBearerUser, BearerID: uuid.NullUUID{UUID: user.ID, Valid: true}},
 		mustPaging(req))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	page.Rows = filterUserTokens(page.Rows, user.ID)
@@ -177,7 +177,7 @@ func (a *API) ShowUserToken(
 
 	token, err := a.tokens.Manager().Show(ctx, req.account, req.principal, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	if token.BearerType != storedBearerUser || token.BearerID != user.ID {
@@ -205,7 +205,7 @@ func (a *API) CreateUserToken(
 
 	token, raw, err := a.tokens.Manager().CreateForUser(ctx, req.account, req.principal, user, attrs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, raw)}, nil
@@ -229,7 +229,7 @@ func (a *API) RequestPasswordReset(
 		deliver = &value
 	}
 
-	return a.passwords.Request(ctx, req.account, email, deliver) //nolint:wrapcheck // the scenario's own error
+	return a.passwords.Request(ctx, req.account, email, deliver) // the scenario's own error
 }
 
 // validatePasswordResetBody decodes meta{email, deliver?}.

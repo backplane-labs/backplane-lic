@@ -6,6 +6,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// Strategy values several rule sets share.
+const (
+	matchAny   = "MATCH_ANY"
+	perLicense = "PER_LICENSE"
+)
+
 // Policy is a product's licensing rule set. Every strategy column is a
 // nullable enum; the zero-value strings mean null on the wire.
 type Policy struct {
@@ -76,18 +82,18 @@ func PolicyCryptoSchemes() []string {
 
 // Strategy enum sets, transcribed from Policy's SCOPES/constants.
 func MachineUniquenessStrategies() []string {
-	return []string{"UNIQUE_PER_ACCOUNT", "UNIQUE_PER_PRODUCT", "UNIQUE_PER_POLICY", "UNIQUE_PER_LICENSE"}
+	return []string{"UNIQUE_PER_ACCOUNT", "UNIQUE_PER_PRODUCT", "UNIQUE_PER_POLICY", uniquePerLicense}
 }
 
 func ComponentUniquenessStrategies() []string {
 	return []string{
 		"UNIQUE_PER_ACCOUNT", "UNIQUE_PER_PRODUCT", "UNIQUE_PER_POLICY",
-		"UNIQUE_PER_LICENSE", "UNIQUE_PER_MACHINE",
+		uniquePerLicense, "UNIQUE_PER_MACHINE",
 	}
 }
 
 func MatchingStrategies() []string {
-	return []string{"MATCH_ANY", "MATCH_TWO", "MATCH_MOST", "MATCH_ALL"}
+	return []string{matchAny, "MATCH_TWO", "MATCH_MOST", "MATCH_ALL"}
 }
 
 func ExpirationStrategies() []string {
@@ -96,7 +102,7 @@ func ExpirationStrategies() []string {
 
 func ExpirationBases() []string {
 	return []string{
-		"FROM_CREATION", "FROM_FIRST_VALIDATION", "FROM_FIRST_ACTIVATION",
+		basisFromCreation, "FROM_FIRST_VALIDATION", "FROM_FIRST_ACTIVATION",
 		"FROM_FIRST_DOWNLOAD", "FROM_FIRST_USE",
 	}
 }
@@ -114,11 +120,11 @@ func AuthenticationStrategies() []string {
 }
 
 func MachineLeasingStrategies() []string {
-	return []string{"PER_LICENSE", "PER_USER"}
+	return []string{perLicense, "PER_USER"}
 }
 
 func ProcessLeasingStrategies() []string {
-	return []string{"PER_LICENSE", "PER_MACHINE", "PER_USER"}
+	return []string{perLicense, "PER_MACHINE", "PER_USER"}
 }
 
 func OverageStrategies() []string {
@@ -137,7 +143,7 @@ func HeartbeatResurrectionStrategies() []string {
 	}
 }
 
-func HeartbeatBases() []string { return []string{"FROM_CREATION", "FROM_FIRST_PING"} }
+func HeartbeatBases() []string { return []string{basisFromCreation, "FROM_FIRST_PING"} }
 
 func CheckInIntervals() []string { return []string{"day", "week", "month", "year"} }
 
@@ -146,16 +152,16 @@ func CheckInIntervals() []string { return []string{"day", "week", "month", "year
 func PolicyCreateDefaults() Policy {
 	return Policy{
 		Strict:                        false,
-		MachineUniquenessStrategy:     "UNIQUE_PER_LICENSE",
-		MachineMatchingStrategy:       "MATCH_ANY",
+		MachineUniquenessStrategy:     uniquePerLicense,
+		MachineMatchingStrategy:       matchAny,
 		ComponentUniquenessStrategy:   "UNIQUE_PER_MACHINE",
-		ComponentMatchingStrategy:     "MATCH_ANY",
+		ComponentMatchingStrategy:     matchAny,
 		ExpirationStrategy:            "RESTRICT_ACCESS",
-		ExpirationBasis:               "FROM_CREATION",
+		ExpirationBasis:               basisFromCreation,
 		RenewalBasis:                  "FROM_EXPIRY",
 		TransferStrategy:              "KEEP_EXPIRY",
 		AuthenticationStrategy:        "TOKEN",
-		MachineLeasingStrategy:        "PER_LICENSE",
+		MachineLeasingStrategy:        perLicense,
 		ProcessLeasingStrategy:        "PER_MACHINE",
 		OverageStrategy:               "NO_OVERAGE",
 		HeartbeatCullStrategy:         "DEACTIVATE_DEAD",

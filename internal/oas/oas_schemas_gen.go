@@ -658,6 +658,373 @@ type CheckoutLicenseReqEmptyBody struct{}
 
 func (*CheckoutLicenseReqEmptyBody) checkoutLicenseReq() {}
 
+type CheckoutMachineRawOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s CheckoutMachineRawOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// CheckoutMachineRawOKHeaders wraps CheckoutMachineRawOK with response headers.
+type CheckoutMachineRawOKHeaders struct {
+	ContentDisposition OptString
+	Response           CheckoutMachineRawOK
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *CheckoutMachineRawOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetResponse returns the value of Response.
+func (s *CheckoutMachineRawOKHeaders) GetResponse() CheckoutMachineRawOK {
+	return s.Response
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *CheckoutMachineRawOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetResponse sets the value of Response.
+func (s *CheckoutMachineRawOKHeaders) SetResponse(val CheckoutMachineRawOK) {
+	s.Response = val
+}
+
+type CheckoutMachineReqApplicationJSON map[string]jx.Raw
+
+func (s *CheckoutMachineReqApplicationJSON) init() CheckoutMachineReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CheckoutMachineReqApplicationJSON) checkoutMachineReq() {}
+
+type CheckoutMachineReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CheckoutMachineReqApplicationVndAPIJSON) init() CheckoutMachineReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CheckoutMachineReqApplicationVndAPIJSON) checkoutMachineReq() {}
+
+type CheckoutMachineReqEmptyBody struct{}
+
+func (*CheckoutMachineReqEmptyBody) checkoutMachineReq() {}
+
+// Ref: #/components/schemas/ComponentAttributes
+type ComponentAttributes struct {
+	Fingerprint string    `json:"fingerprint"`
+	Name        string    `json:"name"`
+	Metadata    Metadata  `json:"metadata"`
+	Created     Timestamp `json:"created"`
+	Updated     Timestamp `json:"updated"`
+}
+
+// GetFingerprint returns the value of Fingerprint.
+func (s *ComponentAttributes) GetFingerprint() string {
+	return s.Fingerprint
+}
+
+// GetName returns the value of Name.
+func (s *ComponentAttributes) GetName() string {
+	return s.Name
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *ComponentAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *ComponentAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *ComponentAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetFingerprint sets the value of Fingerprint.
+func (s *ComponentAttributes) SetFingerprint(val string) {
+	s.Fingerprint = val
+}
+
+// SetName sets the value of Name.
+func (s *ComponentAttributes) SetName(val string) {
+	s.Name = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *ComponentAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *ComponentAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *ComponentAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+// Ref: #/components/schemas/ComponentDocument
+type ComponentDocument struct {
+	Data NilComponentResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *ComponentDocument) GetData() NilComponentResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *ComponentDocument) SetData(val NilComponentResource) {
+	s.Data = val
+}
+
+// ComponentDocumentHeaders wraps ComponentDocument with response headers.
+type ComponentDocumentHeaders struct {
+	Location OptString
+	Response ComponentDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *ComponentDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *ComponentDocumentHeaders) GetResponse() ComponentDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *ComponentDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ComponentDocumentHeaders) SetResponse(val ComponentDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/ComponentListDocument
+type ComponentListDocument struct {
+	Data  []ComponentResource `json:"data"`
+	Links OptListLinks        `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *ComponentListDocument) GetData() []ComponentResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *ComponentListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *ComponentListDocument) SetData(val []ComponentResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ComponentListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/ComponentRelationships
+type ComponentRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	Product ToOneRelationship `json:"product"`
+	License ToOneRelationship `json:"license"`
+	Machine ToOneRelationship `json:"machine"`
+}
+
+// GetAccount returns the value of Account.
+func (s *ComponentRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *ComponentRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// GetLicense returns the value of License.
+func (s *ComponentRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// GetMachine returns the value of Machine.
+func (s *ComponentRelationships) GetMachine() ToOneRelationship {
+	return s.Machine
+}
+
+// SetAccount sets the value of Account.
+func (s *ComponentRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *ComponentRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+// SetLicense sets the value of License.
+func (s *ComponentRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+// SetMachine sets the value of Machine.
+func (s *ComponentRelationships) SetMachine(val ToOneRelationship) {
+	s.Machine = val
+}
+
+// Ref: #/components/schemas/ComponentResource
+type ComponentResource struct {
+	Type          ComponentResourceType  `json:"type"`
+	ID            string                 `json:"id"`
+	Attributes    ComponentAttributes    `json:"attributes"`
+	Relationships ComponentRelationships `json:"relationships"`
+	Links         ResourceLinks          `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *ComponentResource) GetType() ComponentResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *ComponentResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *ComponentResource) GetAttributes() ComponentAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *ComponentResource) GetRelationships() ComponentRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *ComponentResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *ComponentResource) SetType(val ComponentResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *ComponentResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *ComponentResource) SetAttributes(val ComponentAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *ComponentResource) SetRelationships(val ComponentRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ComponentResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type ComponentResourceType string
+
+const (
+	ComponentResourceTypeComponents ComponentResourceType = "components"
+)
+
+// AllValues returns all ComponentResourceType values.
+func (ComponentResourceType) AllValues() []ComponentResourceType {
+	return []ComponentResourceType{
+		ComponentResourceTypeComponents,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ComponentResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case ComponentResourceTypeComponents:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ComponentResourceType) UnmarshalText(data []byte) error {
+	switch ComponentResourceType(data) {
+	case ComponentResourceTypeComponents:
+		*s = ComponentResourceTypeComponents
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type CreateComponentReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateComponentReqApplicationJSON) init() CreateComponentReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateComponentReqApplicationJSON) createComponentReq() {}
+
+type CreateComponentReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateComponentReqApplicationVndAPIJSON) init() CreateComponentReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateComponentReqApplicationVndAPIJSON) createComponentReq() {}
+
+type CreateComponentReqEmptyBody struct{}
+
+func (*CreateComponentReqEmptyBody) createComponentReq() {}
+
 type CreateEntitlementReqApplicationJSON map[string]jx.Raw
 
 func (s *CreateEntitlementReqApplicationJSON) init() CreateEntitlementReqApplicationJSON {
@@ -808,6 +1175,36 @@ type CreateLicenseTokenReqEmptyBody struct{}
 
 func (*CreateLicenseTokenReqEmptyBody) createLicenseTokenReq() {}
 
+type CreateMachineReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateMachineReqApplicationJSON) init() CreateMachineReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateMachineReqApplicationJSON) createMachineReq() {}
+
+type CreateMachineReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateMachineReqApplicationVndAPIJSON) init() CreateMachineReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateMachineReqApplicationVndAPIJSON) createMachineReq() {}
+
+type CreateMachineReqEmptyBody struct{}
+
+func (*CreateMachineReqEmptyBody) createMachineReq() {}
+
 type CreatePolicyReqApplicationJSON map[string]jx.Raw
 
 func (s *CreatePolicyReqApplicationJSON) init() CreatePolicyReqApplicationJSON {
@@ -837,6 +1234,36 @@ func (*CreatePolicyReqApplicationVndAPIJSON) createPolicyReq() {}
 type CreatePolicyReqEmptyBody struct{}
 
 func (*CreatePolicyReqEmptyBody) createPolicyReq() {}
+
+type CreateProcessReqApplicationJSON map[string]jx.Raw
+
+func (s *CreateProcessReqApplicationJSON) init() CreateProcessReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateProcessReqApplicationJSON) createProcessReq() {}
+
+type CreateProcessReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *CreateProcessReqApplicationVndAPIJSON) init() CreateProcessReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*CreateProcessReqApplicationVndAPIJSON) createProcessReq() {}
+
+type CreateProcessReqEmptyBody struct{}
+
+func (*CreateProcessReqEmptyBody) createProcessReq() {}
 
 type CreateProductReqApplicationJSON map[string]jx.Raw
 
@@ -1048,8 +1475,17 @@ type DecrementLicenseUsageReqEmptyBody struct{}
 
 func (*DecrementLicenseUsageReqEmptyBody) decrementLicenseUsageReq() {}
 
+// DeleteComponentNoContent is response for DeleteComponent operation.
+type DeleteComponentNoContent struct{}
+
 // DeleteGroupNoContent is response for DeleteGroup operation.
 type DeleteGroupNoContent struct{}
+
+// DeleteMachineNoContent is response for DeleteMachine operation.
+type DeleteMachineNoContent struct{}
+
+// DeleteProcessNoContent is response for DeleteProcess operation.
+type DeleteProcessNoContent struct{}
 
 // DeleteUserNoContent is response for DeleteUser operation.
 type DeleteUserNoContent struct{}
@@ -1649,6 +2085,36 @@ func (s *ErrorStatusCode) SetStatusCode(val int) {
 func (s *ErrorStatusCode) SetResponse(val ErrorDocument) {
 	s.Response = val
 }
+
+type GenerateMachineProofReqApplicationJSON map[string]jx.Raw
+
+func (s *GenerateMachineProofReqApplicationJSON) init() GenerateMachineProofReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*GenerateMachineProofReqApplicationJSON) generateMachineProofReq() {}
+
+type GenerateMachineProofReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *GenerateMachineProofReqApplicationVndAPIJSON) init() GenerateMachineProofReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*GenerateMachineProofReqApplicationVndAPIJSON) generateMachineProofReq() {}
+
+type GenerateMachineProofReqEmptyBody struct{}
+
+func (*GenerateMachineProofReqEmptyBody) generateMachineProofReq() {}
 
 type GenerateTokenReqApplicationJSON map[string]jx.Raw
 
@@ -4084,6 +4550,165 @@ func (s *MachineDocument) SetData(val NilMachineResource) {
 	s.Data = val
 }
 
+// MachineDocumentHeaders wraps MachineDocument with response headers.
+type MachineDocumentHeaders struct {
+	Location OptString
+	Response MachineDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *MachineDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *MachineDocumentHeaders) GetResponse() MachineDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *MachineDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *MachineDocumentHeaders) SetResponse(val MachineDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/MachineFileDocument
+type MachineFileDocument struct {
+	Data MachineFileResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *MachineFileDocument) GetData() MachineFileResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *MachineFileDocument) SetData(val MachineFileResource) {
+	s.Data = val
+}
+
+// Ref: #/components/schemas/MachineFileResource
+type MachineFileResource struct {
+	Type          MachineFileResourceType          `json:"type"`
+	ID            string                           `json:"id"`
+	Attributes    LicenseFileAttributes            `json:"attributes"`
+	Relationships MachineFileResourceRelationships `json:"relationships"`
+}
+
+// GetType returns the value of Type.
+func (s *MachineFileResource) GetType() MachineFileResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *MachineFileResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *MachineFileResource) GetAttributes() LicenseFileAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *MachineFileResource) GetRelationships() MachineFileResourceRelationships {
+	return s.Relationships
+}
+
+// SetType sets the value of Type.
+func (s *MachineFileResource) SetType(val MachineFileResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *MachineFileResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *MachineFileResource) SetAttributes(val LicenseFileAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *MachineFileResource) SetRelationships(val MachineFileResourceRelationships) {
+	s.Relationships = val
+}
+
+type MachineFileResourceRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	License ToOneRelationship `json:"license"`
+	Machine ToOneRelationship `json:"machine"`
+}
+
+// GetAccount returns the value of Account.
+func (s *MachineFileResourceRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetLicense returns the value of License.
+func (s *MachineFileResourceRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// GetMachine returns the value of Machine.
+func (s *MachineFileResourceRelationships) GetMachine() ToOneRelationship {
+	return s.Machine
+}
+
+// SetAccount sets the value of Account.
+func (s *MachineFileResourceRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetLicense sets the value of License.
+func (s *MachineFileResourceRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+// SetMachine sets the value of Machine.
+func (s *MachineFileResourceRelationships) SetMachine(val ToOneRelationship) {
+	s.Machine = val
+}
+
+type MachineFileResourceType string
+
+const (
+	MachineFileResourceTypeMachineFiles MachineFileResourceType = "machine-files"
+)
+
+// AllValues returns all MachineFileResourceType values.
+func (MachineFileResourceType) AllValues() []MachineFileResourceType {
+	return []MachineFileResourceType{
+		MachineFileResourceTypeMachineFiles,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MachineFileResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case MachineFileResourceTypeMachineFiles:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MachineFileResourceType) UnmarshalText(data []byte) error {
+	switch MachineFileResourceType(data) {
+	case MachineFileResourceTypeMachineFiles:
+		*s = MachineFileResourceTypeMachineFiles
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/MachineListDocument
 type MachineListDocument struct {
 	Data  []MachineResource `json:"data"`
@@ -4108,6 +4733,46 @@ func (s *MachineListDocument) SetData(val []MachineResource) {
 // SetLinks sets the value of Links.
 func (s *MachineListDocument) SetLinks(val OptListLinks) {
 	s.Links = val
+}
+
+// Ref: #/components/schemas/MachineProofDocument
+type MachineProofDocument struct {
+	Data MachineResource          `json:"data"`
+	Meta MachineProofDocumentMeta `json:"meta"`
+}
+
+// GetData returns the value of Data.
+func (s *MachineProofDocument) GetData() MachineResource {
+	return s.Data
+}
+
+// GetMeta returns the value of Meta.
+func (s *MachineProofDocument) GetMeta() MachineProofDocumentMeta {
+	return s.Meta
+}
+
+// SetData sets the value of Data.
+func (s *MachineProofDocument) SetData(val MachineResource) {
+	s.Data = val
+}
+
+// SetMeta sets the value of Meta.
+func (s *MachineProofDocument) SetMeta(val MachineProofDocumentMeta) {
+	s.Meta = val
+}
+
+type MachineProofDocumentMeta struct {
+	Proof string `json:"proof"`
+}
+
+// GetProof returns the value of Proof.
+func (s *MachineProofDocumentMeta) GetProof() string {
+	return s.Proof
+}
+
+// SetProof sets the value of Proof.
+func (s *MachineProofDocumentMeta) SetProof(val string) {
+	s.Proof = val
 }
 
 // Ref: #/components/schemas/MachineRelationships
@@ -4284,33 +4949,168 @@ func (s *MachineResourceType) UnmarshalText(data []byte) error {
 	}
 }
 
-// Ref: #/components/schemas/MachineStubListDocument
-type MachineStubListDocument struct {
-	Data  []MachineStubListDocumentDataItem `json:"data"`
-	Links OptListLinks                      `json:"links"`
+// Ref: #/components/schemas/MachineUsageAckDocument
+type MachineUsageAckDocument struct {
+	Data MachineResource             `json:"data"`
+	Meta MachineUsageAckDocumentMeta `json:"meta"`
 }
 
 // GetData returns the value of Data.
-func (s *MachineStubListDocument) GetData() []MachineStubListDocumentDataItem {
+func (s *MachineUsageAckDocument) GetData() MachineResource {
 	return s.Data
 }
 
-// GetLinks returns the value of Links.
-func (s *MachineStubListDocument) GetLinks() OptListLinks {
-	return s.Links
+// GetMeta returns the value of Meta.
+func (s *MachineUsageAckDocument) GetMeta() MachineUsageAckDocumentMeta {
+	return s.Meta
 }
 
 // SetData sets the value of Data.
-func (s *MachineStubListDocument) SetData(val []MachineStubListDocumentDataItem) {
+func (s *MachineUsageAckDocument) SetData(val MachineResource) {
 	s.Data = val
 }
 
-// SetLinks sets the value of Links.
-func (s *MachineStubListDocument) SetLinks(val OptListLinks) {
-	s.Links = val
+// SetMeta sets the value of Meta.
+func (s *MachineUsageAckDocument) SetMeta(val MachineUsageAckDocumentMeta) {
+	s.Meta = val
 }
 
-type MachineStubListDocumentDataItem struct{}
+type MachineUsageAckDocumentMeta struct {
+	Ack UsageAck `json:"ack"`
+}
+
+// GetAck returns the value of Ack.
+func (s *MachineUsageAckDocumentMeta) GetAck() UsageAck {
+	return s.Ack
+}
+
+// SetAck sets the value of Ack.
+func (s *MachineUsageAckDocumentMeta) SetAck(val UsageAck) {
+	s.Ack = val
+}
+
+// Ref: #/components/schemas/MachineUsageDocument
+type MachineUsageDocument struct {
+	Meta MachineUsageDocumentMeta `json:"meta"`
+}
+
+// GetMeta returns the value of Meta.
+func (s *MachineUsageDocument) GetMeta() MachineUsageDocumentMeta {
+	return s.Meta
+}
+
+// SetMeta sets the value of Meta.
+func (s *MachineUsageDocument) SetMeta(val MachineUsageDocumentMeta) {
+	s.Meta = val
+}
+
+type MachineUsageDocumentMeta struct {
+	Epoch  int64                                `json:"epoch"`
+	Events []MachineUsageDocumentMetaEventsItem `json:"events"`
+	Head   MachineUsageDocumentMetaHead         `json:"head"`
+	Acks   []UsageAck                           `json:"acks"`
+}
+
+// GetEpoch returns the value of Epoch.
+func (s *MachineUsageDocumentMeta) GetEpoch() int64 {
+	return s.Epoch
+}
+
+// GetEvents returns the value of Events.
+func (s *MachineUsageDocumentMeta) GetEvents() []MachineUsageDocumentMetaEventsItem {
+	return s.Events
+}
+
+// GetHead returns the value of Head.
+func (s *MachineUsageDocumentMeta) GetHead() MachineUsageDocumentMetaHead {
+	return s.Head
+}
+
+// GetAcks returns the value of Acks.
+func (s *MachineUsageDocumentMeta) GetAcks() []UsageAck {
+	return s.Acks
+}
+
+// SetEpoch sets the value of Epoch.
+func (s *MachineUsageDocumentMeta) SetEpoch(val int64) {
+	s.Epoch = val
+}
+
+// SetEvents sets the value of Events.
+func (s *MachineUsageDocumentMeta) SetEvents(val []MachineUsageDocumentMetaEventsItem) {
+	s.Events = val
+}
+
+// SetHead sets the value of Head.
+func (s *MachineUsageDocumentMeta) SetHead(val MachineUsageDocumentMetaHead) {
+	s.Head = val
+}
+
+// SetAcks sets the value of Acks.
+func (s *MachineUsageDocumentMeta) SetAcks(val []UsageAck) {
+	s.Acks = val
+}
+
+type MachineUsageDocumentMetaEventsItem struct {
+	Seq   int64  `json:"seq"`
+	Event string `json:"event"`
+	Hash  string `json:"hash"`
+}
+
+// GetSeq returns the value of Seq.
+func (s *MachineUsageDocumentMetaEventsItem) GetSeq() int64 {
+	return s.Seq
+}
+
+// GetEvent returns the value of Event.
+func (s *MachineUsageDocumentMetaEventsItem) GetEvent() string {
+	return s.Event
+}
+
+// GetHash returns the value of Hash.
+func (s *MachineUsageDocumentMetaEventsItem) GetHash() string {
+	return s.Hash
+}
+
+// SetSeq sets the value of Seq.
+func (s *MachineUsageDocumentMetaEventsItem) SetSeq(val int64) {
+	s.Seq = val
+}
+
+// SetEvent sets the value of Event.
+func (s *MachineUsageDocumentMetaEventsItem) SetEvent(val string) {
+	s.Event = val
+}
+
+// SetHash sets the value of Hash.
+func (s *MachineUsageDocumentMetaEventsItem) SetHash(val string) {
+	s.Hash = val
+}
+
+type MachineUsageDocumentMetaHead struct {
+	Seq  int64  `json:"seq"`
+	Hash string `json:"hash"`
+}
+
+// GetSeq returns the value of Seq.
+func (s *MachineUsageDocumentMetaHead) GetSeq() int64 {
+	return s.Seq
+}
+
+// GetHash returns the value of Hash.
+func (s *MachineUsageDocumentMetaHead) GetHash() string {
+	return s.Hash
+}
+
+// SetSeq sets the value of Seq.
+func (s *MachineUsageDocumentMetaHead) SetSeq(val int64) {
+	s.Seq = val
+}
+
+// SetHash sets the value of Hash.
+func (s *MachineUsageDocumentMetaHead) SetHash(val string) {
+	s.Hash = val
+}
 
 // Ref: #/components/schemas/MeDocument
 type MeDocument struct {
@@ -4479,6 +5279,51 @@ func (o NilBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilComponentResource returns new NilComponentResource with value set to v.
+func NewNilComponentResource(v ComponentResource) NilComponentResource {
+	return NilComponentResource{
+		Value: v,
+	}
+}
+
+// NilComponentResource is nullable ComponentResource.
+type NilComponentResource struct {
+	Value ComponentResource
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilComponentResource) SetTo(v ComponentResource) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilComponentResource) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilComponentResource) SetToNull() {
+	o.Null = true
+	var v ComponentResource
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilComponentResource) Get() (v ComponentResource, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilComponentResource) Or(d ComponentResource) ComponentResource {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4659,6 +5504,51 @@ func (o NilMachineResource) Get() (v MachineResource, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilMachineResource) Or(d MachineResource) MachineResource {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilProcessResource returns new NilProcessResource with value set to v.
+func NewNilProcessResource(v ProcessResource) NilProcessResource {
+	return NilProcessResource{
+		Value: v,
+	}
+}
+
+// NilProcessResource is nullable ProcessResource.
+type NilProcessResource struct {
+	Value ProcessResource
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilProcessResource) SetTo(v ProcessResource) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilProcessResource) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilProcessResource) SetToNull() {
+	o.Null = true
+	var v ProcessResource
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilProcessResource) Get() (v ProcessResource, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilProcessResource) Or(d ProcessResource) ProcessResource {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5156,69 +6046,6 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
-// NewOptNilUserMachineResourceAttributes returns new OptNilUserMachineResourceAttributes with value set to v.
-func NewOptNilUserMachineResourceAttributes(v UserMachineResourceAttributes) OptNilUserMachineResourceAttributes {
-	return OptNilUserMachineResourceAttributes{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptNilUserMachineResourceAttributes is optional nullable UserMachineResourceAttributes.
-type OptNilUserMachineResourceAttributes struct {
-	Value UserMachineResourceAttributes
-	Set   bool
-	Null  bool
-}
-
-// IsSet returns true if OptNilUserMachineResourceAttributes was set.
-func (o OptNilUserMachineResourceAttributes) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptNilUserMachineResourceAttributes) Reset() {
-	var v UserMachineResourceAttributes
-	o.Value = v
-	o.Set = false
-	o.Null = false
-}
-
-// SetTo sets value to v.
-func (o *OptNilUserMachineResourceAttributes) SetTo(v UserMachineResourceAttributes) {
-	o.Set = true
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o OptNilUserMachineResourceAttributes) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *OptNilUserMachineResourceAttributes) SetToNull() {
-	o.Set = true
-	o.Null = true
-	var v UserMachineResourceAttributes
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptNilUserMachineResourceAttributes) Get() (v UserMachineResourceAttributes, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptNilUserMachineResourceAttributes) Or(d UserMachineResourceAttributes) UserMachineResourceAttributes {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptNilUserProductResourceAttributes returns new OptNilUserProductResourceAttributes with value set to v.
 func NewOptNilUserProductResourceAttributes(v UserProductResourceAttributes) OptNilUserProductResourceAttributes {
 	return OptNilUserProductResourceAttributes{
@@ -5466,52 +6293,6 @@ func (o OptUserDocumentMeta) Or(d UserDocumentMeta) UserDocumentMeta {
 	return d
 }
 
-// NewOptUserMachineResourceRelationships returns new OptUserMachineResourceRelationships with value set to v.
-func NewOptUserMachineResourceRelationships(v UserMachineResourceRelationships) OptUserMachineResourceRelationships {
-	return OptUserMachineResourceRelationships{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptUserMachineResourceRelationships is optional UserMachineResourceRelationships.
-type OptUserMachineResourceRelationships struct {
-	Value UserMachineResourceRelationships
-	Set   bool
-}
-
-// IsSet returns true if OptUserMachineResourceRelationships was set.
-func (o OptUserMachineResourceRelationships) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptUserMachineResourceRelationships) Reset() {
-	var v UserMachineResourceRelationships
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptUserMachineResourceRelationships) SetTo(v UserMachineResourceRelationships) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptUserMachineResourceRelationships) Get() (v UserMachineResourceRelationships, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptUserMachineResourceRelationships) Or(d UserMachineResourceRelationships) UserMachineResourceRelationships {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptUserProductResourceRelationships returns new OptUserProductResourceRelationships with value set to v.
 func NewOptUserProductResourceRelationships(v UserProductResourceRelationships) OptUserProductResourceRelationships {
 	return OptUserProductResourceRelationships{
@@ -5584,8 +6365,68 @@ func (s *PaginationMeta) SetCount(val int) {
 	s.Count = val
 }
 
+type PingMachineHeartbeatReqApplicationJSON map[string]jx.Raw
+
+func (s *PingMachineHeartbeatReqApplicationJSON) init() PingMachineHeartbeatReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*PingMachineHeartbeatReqApplicationJSON) pingMachineHeartbeatReq() {}
+
+type PingMachineHeartbeatReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *PingMachineHeartbeatReqApplicationVndAPIJSON) init() PingMachineHeartbeatReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*PingMachineHeartbeatReqApplicationVndAPIJSON) pingMachineHeartbeatReq() {}
+
+type PingMachineHeartbeatReqEmptyBody struct{}
+
+func (*PingMachineHeartbeatReqEmptyBody) pingMachineHeartbeatReq() {}
+
 // PingOK is response for Ping operation.
 type PingOK struct{}
+
+type PingProcessReqApplicationJSON map[string]jx.Raw
+
+func (s *PingProcessReqApplicationJSON) init() PingProcessReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*PingProcessReqApplicationJSON) pingProcessReq() {}
+
+type PingProcessReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *PingProcessReqApplicationVndAPIJSON) init() PingProcessReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*PingProcessReqApplicationVndAPIJSON) pingProcessReq() {}
+
+type PingProcessReqEmptyBody struct{}
+
+func (*PingProcessReqEmptyBody) pingProcessReq() {}
 
 // Ref: #/components/schemas/PolicyAttributes
 type PolicyAttributes struct {
@@ -6500,6 +7341,354 @@ func (s *PolicyResourceType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ProcessAttributes
+type ProcessAttributes struct {
+	Pid           string                  `json:"pid"`
+	Status        ProcessAttributesStatus `json:"status"`
+	Interval      int                     `json:"interval"`
+	LastHeartbeat Timestamp               `json:"lastHeartbeat"`
+	NextHeartbeat Timestamp               `json:"nextHeartbeat"`
+	Metadata      Metadata                `json:"metadata"`
+	Created       Timestamp               `json:"created"`
+	Updated       Timestamp               `json:"updated"`
+}
+
+// GetPid returns the value of Pid.
+func (s *ProcessAttributes) GetPid() string {
+	return s.Pid
+}
+
+// GetStatus returns the value of Status.
+func (s *ProcessAttributes) GetStatus() ProcessAttributesStatus {
+	return s.Status
+}
+
+// GetInterval returns the value of Interval.
+func (s *ProcessAttributes) GetInterval() int {
+	return s.Interval
+}
+
+// GetLastHeartbeat returns the value of LastHeartbeat.
+func (s *ProcessAttributes) GetLastHeartbeat() Timestamp {
+	return s.LastHeartbeat
+}
+
+// GetNextHeartbeat returns the value of NextHeartbeat.
+func (s *ProcessAttributes) GetNextHeartbeat() Timestamp {
+	return s.NextHeartbeat
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *ProcessAttributes) GetMetadata() Metadata {
+	return s.Metadata
+}
+
+// GetCreated returns the value of Created.
+func (s *ProcessAttributes) GetCreated() Timestamp {
+	return s.Created
+}
+
+// GetUpdated returns the value of Updated.
+func (s *ProcessAttributes) GetUpdated() Timestamp {
+	return s.Updated
+}
+
+// SetPid sets the value of Pid.
+func (s *ProcessAttributes) SetPid(val string) {
+	s.Pid = val
+}
+
+// SetStatus sets the value of Status.
+func (s *ProcessAttributes) SetStatus(val ProcessAttributesStatus) {
+	s.Status = val
+}
+
+// SetInterval sets the value of Interval.
+func (s *ProcessAttributes) SetInterval(val int) {
+	s.Interval = val
+}
+
+// SetLastHeartbeat sets the value of LastHeartbeat.
+func (s *ProcessAttributes) SetLastHeartbeat(val Timestamp) {
+	s.LastHeartbeat = val
+}
+
+// SetNextHeartbeat sets the value of NextHeartbeat.
+func (s *ProcessAttributes) SetNextHeartbeat(val Timestamp) {
+	s.NextHeartbeat = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *ProcessAttributes) SetMetadata(val Metadata) {
+	s.Metadata = val
+}
+
+// SetCreated sets the value of Created.
+func (s *ProcessAttributes) SetCreated(val Timestamp) {
+	s.Created = val
+}
+
+// SetUpdated sets the value of Updated.
+func (s *ProcessAttributes) SetUpdated(val Timestamp) {
+	s.Updated = val
+}
+
+type ProcessAttributesStatus string
+
+const (
+	ProcessAttributesStatusALIVE       ProcessAttributesStatus = "ALIVE"
+	ProcessAttributesStatusDEAD        ProcessAttributesStatus = "DEAD"
+	ProcessAttributesStatusRESURRECTED ProcessAttributesStatus = "RESURRECTED"
+)
+
+// AllValues returns all ProcessAttributesStatus values.
+func (ProcessAttributesStatus) AllValues() []ProcessAttributesStatus {
+	return []ProcessAttributesStatus{
+		ProcessAttributesStatusALIVE,
+		ProcessAttributesStatusDEAD,
+		ProcessAttributesStatusRESURRECTED,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ProcessAttributesStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ProcessAttributesStatusALIVE:
+		return []byte(s), nil
+	case ProcessAttributesStatusDEAD:
+		return []byte(s), nil
+	case ProcessAttributesStatusRESURRECTED:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ProcessAttributesStatus) UnmarshalText(data []byte) error {
+	switch ProcessAttributesStatus(data) {
+	case ProcessAttributesStatusALIVE:
+		*s = ProcessAttributesStatusALIVE
+		return nil
+	case ProcessAttributesStatusDEAD:
+		*s = ProcessAttributesStatusDEAD
+		return nil
+	case ProcessAttributesStatusRESURRECTED:
+		*s = ProcessAttributesStatusRESURRECTED
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ProcessDocument
+type ProcessDocument struct {
+	Data NilProcessResource `json:"data"`
+}
+
+// GetData returns the value of Data.
+func (s *ProcessDocument) GetData() NilProcessResource {
+	return s.Data
+}
+
+// SetData sets the value of Data.
+func (s *ProcessDocument) SetData(val NilProcessResource) {
+	s.Data = val
+}
+
+// ProcessDocumentHeaders wraps ProcessDocument with response headers.
+type ProcessDocumentHeaders struct {
+	Location OptString
+	Response ProcessDocument
+}
+
+// GetLocation returns the value of Location.
+func (s *ProcessDocumentHeaders) GetLocation() OptString {
+	return s.Location
+}
+
+// GetResponse returns the value of Response.
+func (s *ProcessDocumentHeaders) GetResponse() ProcessDocument {
+	return s.Response
+}
+
+// SetLocation sets the value of Location.
+func (s *ProcessDocumentHeaders) SetLocation(val OptString) {
+	s.Location = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ProcessDocumentHeaders) SetResponse(val ProcessDocument) {
+	s.Response = val
+}
+
+// Ref: #/components/schemas/ProcessListDocument
+type ProcessListDocument struct {
+	Data  []ProcessResource `json:"data"`
+	Links OptListLinks      `json:"links"`
+}
+
+// GetData returns the value of Data.
+func (s *ProcessListDocument) GetData() []ProcessResource {
+	return s.Data
+}
+
+// GetLinks returns the value of Links.
+func (s *ProcessListDocument) GetLinks() OptListLinks {
+	return s.Links
+}
+
+// SetData sets the value of Data.
+func (s *ProcessListDocument) SetData(val []ProcessResource) {
+	s.Data = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ProcessListDocument) SetLinks(val OptListLinks) {
+	s.Links = val
+}
+
+// Ref: #/components/schemas/ProcessRelationships
+type ProcessRelationships struct {
+	Account ToOneRelationship `json:"account"`
+	Product ToOneRelationship `json:"product"`
+	License ToOneRelationship `json:"license"`
+	Machine ToOneRelationship `json:"machine"`
+}
+
+// GetAccount returns the value of Account.
+func (s *ProcessRelationships) GetAccount() ToOneRelationship {
+	return s.Account
+}
+
+// GetProduct returns the value of Product.
+func (s *ProcessRelationships) GetProduct() ToOneRelationship {
+	return s.Product
+}
+
+// GetLicense returns the value of License.
+func (s *ProcessRelationships) GetLicense() ToOneRelationship {
+	return s.License
+}
+
+// GetMachine returns the value of Machine.
+func (s *ProcessRelationships) GetMachine() ToOneRelationship {
+	return s.Machine
+}
+
+// SetAccount sets the value of Account.
+func (s *ProcessRelationships) SetAccount(val ToOneRelationship) {
+	s.Account = val
+}
+
+// SetProduct sets the value of Product.
+func (s *ProcessRelationships) SetProduct(val ToOneRelationship) {
+	s.Product = val
+}
+
+// SetLicense sets the value of License.
+func (s *ProcessRelationships) SetLicense(val ToOneRelationship) {
+	s.License = val
+}
+
+// SetMachine sets the value of Machine.
+func (s *ProcessRelationships) SetMachine(val ToOneRelationship) {
+	s.Machine = val
+}
+
+// Ref: #/components/schemas/ProcessResource
+type ProcessResource struct {
+	Type          ProcessResourceType  `json:"type"`
+	ID            string               `json:"id"`
+	Attributes    ProcessAttributes    `json:"attributes"`
+	Relationships ProcessRelationships `json:"relationships"`
+	Links         ResourceLinks        `json:"links"`
+}
+
+// GetType returns the value of Type.
+func (s *ProcessResource) GetType() ProcessResourceType {
+	return s.Type
+}
+
+// GetID returns the value of ID.
+func (s *ProcessResource) GetID() string {
+	return s.ID
+}
+
+// GetAttributes returns the value of Attributes.
+func (s *ProcessResource) GetAttributes() ProcessAttributes {
+	return s.Attributes
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *ProcessResource) GetRelationships() ProcessRelationships {
+	return s.Relationships
+}
+
+// GetLinks returns the value of Links.
+func (s *ProcessResource) GetLinks() ResourceLinks {
+	return s.Links
+}
+
+// SetType sets the value of Type.
+func (s *ProcessResource) SetType(val ProcessResourceType) {
+	s.Type = val
+}
+
+// SetID sets the value of ID.
+func (s *ProcessResource) SetID(val string) {
+	s.ID = val
+}
+
+// SetAttributes sets the value of Attributes.
+func (s *ProcessResource) SetAttributes(val ProcessAttributes) {
+	s.Attributes = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *ProcessResource) SetRelationships(val ProcessRelationships) {
+	s.Relationships = val
+}
+
+// SetLinks sets the value of Links.
+func (s *ProcessResource) SetLinks(val ResourceLinks) {
+	s.Links = val
+}
+
+type ProcessResourceType string
+
+const (
+	ProcessResourceTypeProcesses ProcessResourceType = "processes"
+)
+
+// AllValues returns all ProcessResourceType values.
+func (ProcessResourceType) AllValues() []ProcessResourceType {
+	return []ProcessResourceType{
+		ProcessResourceTypeProcesses,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ProcessResourceType) MarshalText() ([]byte, error) {
+	switch s {
+	case ProcessResourceTypeProcesses:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ProcessResourceType) UnmarshalText(data []byte) error {
+	switch ProcessResourceType(data) {
+	case ProcessResourceTypeProcesses:
+		*s = ProcessResourceTypeProcesses
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/ProductAttributes
 type ProductAttributes struct {
 	Name                 string    `json:"name"`
@@ -7098,6 +8287,36 @@ type ReplaceUserSecondFactorReqEmptyBody struct{}
 
 func (*ReplaceUserSecondFactorReqEmptyBody) replaceUserSecondFactorReq() {}
 
+type ReportMachineUsageReqApplicationJSON map[string]jx.Raw
+
+func (s *ReportMachineUsageReqApplicationJSON) init() ReportMachineUsageReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ReportMachineUsageReqApplicationJSON) reportMachineUsageReq() {}
+
+type ReportMachineUsageReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *ReportMachineUsageReqApplicationVndAPIJSON) init() ReportMachineUsageReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ReportMachineUsageReqApplicationVndAPIJSON) reportMachineUsageReq() {}
+
+type ReportMachineUsageReqEmptyBody struct{}
+
+func (*ReportMachineUsageReqEmptyBody) reportMachineUsageReq() {}
+
 // RequestPasswordResetNoContent is response for RequestPasswordReset operation.
 type RequestPasswordResetNoContent struct{}
 
@@ -7130,6 +8349,36 @@ func (*RequestPasswordResetReqApplicationVndAPIJSON) requestPasswordResetReq() {
 type RequestPasswordResetReqEmptyBody struct{}
 
 func (*RequestPasswordResetReqEmptyBody) requestPasswordResetReq() {}
+
+type ResetMachineHeartbeatReqApplicationJSON map[string]jx.Raw
+
+func (s *ResetMachineHeartbeatReqApplicationJSON) init() ResetMachineHeartbeatReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ResetMachineHeartbeatReqApplicationJSON) resetMachineHeartbeatReq() {}
+
+type ResetMachineHeartbeatReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *ResetMachineHeartbeatReqApplicationVndAPIJSON) init() ResetMachineHeartbeatReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*ResetMachineHeartbeatReqApplicationVndAPIJSON) resetMachineHeartbeatReq() {}
+
+type ResetMachineHeartbeatReqEmptyBody struct{}
+
+func (*ResetMachineHeartbeatReqEmptyBody) resetMachineHeartbeatReq() {}
 
 type ResetUserPasswordReqApplicationJSON map[string]jx.Raw
 
@@ -7888,6 +9137,36 @@ func (s *TokenResourceType) UnmarshalText(data []byte) error {
 	}
 }
 
+type UpdateComponentReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateComponentReqApplicationJSON) init() UpdateComponentReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateComponentReqApplicationJSON) updateComponentReq() {}
+
+type UpdateComponentReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateComponentReqApplicationVndAPIJSON) init() UpdateComponentReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateComponentReqApplicationVndAPIJSON) updateComponentReq() {}
+
+type UpdateComponentReqEmptyBody struct{}
+
+func (*UpdateComponentReqEmptyBody) updateComponentReq() {}
+
 type UpdateEntitlementReqApplicationJSON map[string]jx.Raw
 
 func (s *UpdateEntitlementReqApplicationJSON) init() UpdateEntitlementReqApplicationJSON {
@@ -8128,6 +9407,96 @@ type UpdateLicenseUserAliasReqEmptyBody struct{}
 
 func (*UpdateLicenseUserAliasReqEmptyBody) updateLicenseUserAliasReq() {}
 
+type UpdateMachineGroupReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateMachineGroupReqApplicationJSON) init() UpdateMachineGroupReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateMachineGroupReqApplicationJSON) updateMachineGroupReq() {}
+
+type UpdateMachineGroupReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateMachineGroupReqApplicationVndAPIJSON) init() UpdateMachineGroupReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateMachineGroupReqApplicationVndAPIJSON) updateMachineGroupReq() {}
+
+type UpdateMachineGroupReqEmptyBody struct{}
+
+func (*UpdateMachineGroupReqEmptyBody) updateMachineGroupReq() {}
+
+type UpdateMachineOwnerReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateMachineOwnerReqApplicationJSON) init() UpdateMachineOwnerReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateMachineOwnerReqApplicationJSON) updateMachineOwnerReq() {}
+
+type UpdateMachineOwnerReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateMachineOwnerReqApplicationVndAPIJSON) init() UpdateMachineOwnerReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateMachineOwnerReqApplicationVndAPIJSON) updateMachineOwnerReq() {}
+
+type UpdateMachineOwnerReqEmptyBody struct{}
+
+func (*UpdateMachineOwnerReqEmptyBody) updateMachineOwnerReq() {}
+
+type UpdateMachineReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateMachineReqApplicationJSON) init() UpdateMachineReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateMachineReqApplicationJSON) updateMachineReq() {}
+
+type UpdateMachineReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateMachineReqApplicationVndAPIJSON) init() UpdateMachineReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateMachineReqApplicationVndAPIJSON) updateMachineReq() {}
+
+type UpdateMachineReqEmptyBody struct{}
+
+func (*UpdateMachineReqEmptyBody) updateMachineReq() {}
+
 type UpdatePolicyReqApplicationJSON map[string]jx.Raw
 
 func (s *UpdatePolicyReqApplicationJSON) init() UpdatePolicyReqApplicationJSON {
@@ -8157,6 +9526,36 @@ func (*UpdatePolicyReqApplicationVndAPIJSON) updatePolicyReq() {}
 type UpdatePolicyReqEmptyBody struct{}
 
 func (*UpdatePolicyReqEmptyBody) updatePolicyReq() {}
+
+type UpdateProcessReqApplicationJSON map[string]jx.Raw
+
+func (s *UpdateProcessReqApplicationJSON) init() UpdateProcessReqApplicationJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateProcessReqApplicationJSON) updateProcessReq() {}
+
+type UpdateProcessReqApplicationVndAPIJSON map[string]jx.Raw
+
+func (s *UpdateProcessReqApplicationVndAPIJSON) init() UpdateProcessReqApplicationVndAPIJSON {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+func (*UpdateProcessReqApplicationVndAPIJSON) updateProcessReq() {}
+
+type UpdateProcessReqEmptyBody struct{}
+
+func (*UpdateProcessReqEmptyBody) updateProcessReq() {}
 
 type UpdateProductReqApplicationJSON map[string]jx.Raw
 
@@ -8337,6 +9736,43 @@ func (*UpdateWebhookEndpointReqApplicationVndAPIJSON) updateWebhookEndpointReq()
 type UpdateWebhookEndpointReqEmptyBody struct{}
 
 func (*UpdateWebhookEndpointReqEmptyBody) updateWebhookEndpointReq() {}
+
+// Ref: #/components/schemas/UsageAck
+type UsageAck struct {
+	Epoch int64  `json:"epoch"`
+	Seq   int64  `json:"seq"`
+	Hash  string `json:"hash"`
+}
+
+// GetEpoch returns the value of Epoch.
+func (s *UsageAck) GetEpoch() int64 {
+	return s.Epoch
+}
+
+// GetSeq returns the value of Seq.
+func (s *UsageAck) GetSeq() int64 {
+	return s.Seq
+}
+
+// GetHash returns the value of Hash.
+func (s *UsageAck) GetHash() string {
+	return s.Hash
+}
+
+// SetEpoch sets the value of Epoch.
+func (s *UsageAck) SetEpoch(val int64) {
+	s.Epoch = val
+}
+
+// SetSeq sets the value of Seq.
+func (s *UsageAck) SetSeq(val int64) {
+	s.Seq = val
+}
+
+// SetHash sets the value of Hash.
+func (s *UsageAck) SetHash(val string) {
+	s.Hash = val
+}
 
 // Ref: #/components/schemas/UserAttributes
 type UserAttributes struct {
@@ -8531,162 +9967,6 @@ func (s *UserDocumentMeta) GetPasswordResetToken() string {
 // SetPasswordResetToken sets the value of PasswordResetToken.
 func (s *UserDocumentMeta) SetPasswordResetToken(val string) {
 	s.PasswordResetToken = val
-}
-
-// Ref: #/components/schemas/UserMachineCollectionDocument
-type UserMachineCollectionDocument struct {
-	Data  []UserMachineResource `json:"data"`
-	Links OptListLinks          `json:"links"`
-}
-
-// GetData returns the value of Data.
-func (s *UserMachineCollectionDocument) GetData() []UserMachineResource {
-	return s.Data
-}
-
-// GetLinks returns the value of Links.
-func (s *UserMachineCollectionDocument) GetLinks() OptListLinks {
-	return s.Links
-}
-
-// SetData sets the value of Data.
-func (s *UserMachineCollectionDocument) SetData(val []UserMachineResource) {
-	s.Data = val
-}
-
-// SetLinks sets the value of Links.
-func (s *UserMachineCollectionDocument) SetLinks(val OptListLinks) {
-	s.Links = val
-}
-
-// Ref: #/components/schemas/UserMachineDocument
-type UserMachineDocument struct {
-	Data UserMachineResource `json:"data"`
-}
-
-// GetData returns the value of Data.
-func (s *UserMachineDocument) GetData() UserMachineResource {
-	return s.Data
-}
-
-// SetData sets the value of Data.
-func (s *UserMachineDocument) SetData(val UserMachineResource) {
-	s.Data = val
-}
-
-// Ref: #/components/schemas/UserMachineResource
-type UserMachineResource struct {
-	Type          UserMachineResourceType             `json:"type"`
-	ID            string                              `json:"id"`
-	Attributes    OptNilUserMachineResourceAttributes `json:"attributes"`
-	Relationships OptUserMachineResourceRelationships `json:"relationships"`
-	Links         ResourceLinks                       `json:"links"`
-}
-
-// GetType returns the value of Type.
-func (s *UserMachineResource) GetType() UserMachineResourceType {
-	return s.Type
-}
-
-// GetID returns the value of ID.
-func (s *UserMachineResource) GetID() string {
-	return s.ID
-}
-
-// GetAttributes returns the value of Attributes.
-func (s *UserMachineResource) GetAttributes() OptNilUserMachineResourceAttributes {
-	return s.Attributes
-}
-
-// GetRelationships returns the value of Relationships.
-func (s *UserMachineResource) GetRelationships() OptUserMachineResourceRelationships {
-	return s.Relationships
-}
-
-// GetLinks returns the value of Links.
-func (s *UserMachineResource) GetLinks() ResourceLinks {
-	return s.Links
-}
-
-// SetType sets the value of Type.
-func (s *UserMachineResource) SetType(val UserMachineResourceType) {
-	s.Type = val
-}
-
-// SetID sets the value of ID.
-func (s *UserMachineResource) SetID(val string) {
-	s.ID = val
-}
-
-// SetAttributes sets the value of Attributes.
-func (s *UserMachineResource) SetAttributes(val OptNilUserMachineResourceAttributes) {
-	s.Attributes = val
-}
-
-// SetRelationships sets the value of Relationships.
-func (s *UserMachineResource) SetRelationships(val OptUserMachineResourceRelationships) {
-	s.Relationships = val
-}
-
-// SetLinks sets the value of Links.
-func (s *UserMachineResource) SetLinks(val ResourceLinks) {
-	s.Links = val
-}
-
-type UserMachineResourceAttributes map[string]jx.Raw
-
-func (s *UserMachineResourceAttributes) init() UserMachineResourceAttributes {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type UserMachineResourceRelationships map[string]jx.Raw
-
-func (s *UserMachineResourceRelationships) init() UserMachineResourceRelationships {
-	m := *s
-	if m == nil {
-		m = map[string]jx.Raw{}
-		*s = m
-	}
-	return m
-}
-
-type UserMachineResourceType string
-
-const (
-	UserMachineResourceTypeMachines UserMachineResourceType = "machines"
-)
-
-// AllValues returns all UserMachineResourceType values.
-func (UserMachineResourceType) AllValues() []UserMachineResourceType {
-	return []UserMachineResourceType{
-		UserMachineResourceTypeMachines,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s UserMachineResourceType) MarshalText() ([]byte, error) {
-	switch s {
-	case UserMachineResourceTypeMachines:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *UserMachineResourceType) UnmarshalText(data []byte) error {
-	switch UserMachineResourceType(data) {
-	case UserMachineResourceTypeMachines:
-		*s = UserMachineResourceTypeMachines
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 // Ref: #/components/schemas/UserProductCollectionDocument

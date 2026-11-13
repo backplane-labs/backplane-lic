@@ -36,7 +36,7 @@ func (a *API) ListGroups(ctx context.Context, _ oas.ListGroupsParams) (*oas.Grou
 
 	page, err := a.groups.List(ctx, req.account, req.principal, p)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.GroupCollectionDocument{
@@ -64,7 +64,7 @@ func (a *API) CreateGroup(
 
 	group, err := a.groups.Create(ctx, req.account, req.principal, attrs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.GroupDocumentHeaders{
@@ -85,7 +85,7 @@ func (a *API) ShowGroup(ctx context.Context, params oas.ShowGroupParams) (*oas.G
 
 	group, err := a.groups.Show(ctx, req.account, req.principal, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := groupDoc(group)
@@ -111,7 +111,7 @@ func (a *API) UpdateGroup(
 
 	group, err := a.groups.Update(ctx, req.account, req.principal, id, attrs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := groupDoc(group)
@@ -128,7 +128,7 @@ func (a *API) DeleteGroup(ctx context.Context, params oas.DeleteGroupParams) err
 		return apperr.NotFound("group", params.GroupId)
 	}
 
-	return a.groups.Delete(ctx, req.account, req.principal, id) //nolint:wrapcheck // the scenario's own error
+	return a.groups.Delete(ctx, req.account, req.principal, id)
 }
 
 // ListGroupUsers implements GET /groups/{groupId}/users.
@@ -144,7 +144,7 @@ func (a *API) ListGroupUsers(
 
 	rows, err := a.groups.Users(ctx, req.account, req.principal, id, limitOf(req))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.UserCollectionDocument{Data: make([]oas.UserResource, 0, len(rows))}
@@ -153,7 +153,7 @@ func (a *API) ListGroupUsers(
 
 		member, status, err := a.users.Me(ctx, req.account.ID, user.ID)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err
 		}
 
 		doc.Data = append(doc.Data, render.User(req.account.ID, member, status))
@@ -175,7 +175,7 @@ func (a *API) ShowGroupUser(ctx context.Context, params oas.ShowGroupUserParams)
 		ctx, req.account, req.principal, groupID, maxSubIndex,
 	)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	alias := params.UserId
@@ -185,7 +185,7 @@ func (a *API) ShowGroupUser(ctx context.Context, params oas.ShowGroupUserParams)
 		if member.ID.String() == alias || member.Email == alias {
 			row, err := a.users.Show(ctx, req.account, req.principal, alias)
 			if err != nil {
-				return nil, err //nolint:wrapcheck // the scenario's own error
+				return nil, err
 			}
 
 			doc := userDoc(row)
@@ -219,12 +219,12 @@ func (a *API) ListGroupLicenses(
 
 	group, err := a.groups.LicenseGroup(ctx, req.account, req.principal, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	page, err := a.licenses.OfGroup(ctx, req.account, group, licenseFilter(req.query), listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return a.licenseListDocument(req, page, listParams), nil
@@ -247,12 +247,12 @@ func (a *API) ShowGroupLicense(
 
 	group, err := a.groups.LicenseGroup(ctx, req.account, req.principal, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	license, err := a.licenses.OfGroupShow(ctx, req.account, group, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -261,7 +261,7 @@ func (a *API) ShowGroupLicense(
 // ListGroupMachines implements GET /groups/{groupId}/machines.
 func (a *API) ListGroupMachines(
 	ctx context.Context, params oas.ListGroupMachinesParams,
-) (*oas.UserMachineCollectionDocument, error) {
+) (*oas.MachineListDocument, error) {
 	req := requestOf(ctx)
 
 	id, err := uuid.Parse(params.GroupId)
@@ -271,21 +271,16 @@ func (a *API) ListGroupMachines(
 
 	ids, err := a.groups.MachineIDs(ctx, req.account, req.principal, id, limitOf(req))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
-	doc := &oas.UserMachineCollectionDocument{Data: make([]oas.UserMachineResource, 0, len(ids))}
-	for _, machineID := range ids {
-		doc.Data = append(doc.Data, render.MachineStub(req.account.ID, machineID))
-	}
-
-	return doc, nil
+	return a.machineList(ctx, req, ids)
 }
 
 // ShowGroupMachine implements GET /groups/{groupId}/machines/{machineId}.
 func (a *API) ShowGroupMachine(
 	ctx context.Context, params oas.ShowGroupMachineParams,
-) (*oas.UserMachineDocument, error) {
+) (*oas.MachineDocument, error) {
 	req := requestOf(ctx)
 
 	groupID, err := uuid.Parse(params.GroupId)
@@ -295,12 +290,12 @@ func (a *API) ShowGroupMachine(
 
 	ids, err := a.groups.MachineIDs(ctx, req.account, req.principal, groupID, maxSubIndex)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	for _, machineID := range ids {
 		if machineID.String() == params.MachineId {
-			return &oas.UserMachineDocument{Data: render.MachineStub(req.account.ID, machineID)}, nil
+			return a.machineOf(ctx, req, machineID)
 		}
 	}
 
@@ -320,7 +315,7 @@ func (a *API) ListGroupOwners(
 
 	owners, err := a.groups.Owners(ctx, req.account, req.principal, id, limitOf(req))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.GroupOwnerCollectionDocument{Data: make([]oas.GroupOwnerResource, 0, len(owners))}
@@ -350,7 +345,7 @@ func (a *API) ShowGroupOwner(
 
 	owner, err := a.groups.Owner(ctx, req.account, req.principal, groupID, ownerID)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.GroupOwnerDocument{Data: render.GroupOwner(owner)}, nil
@@ -374,7 +369,7 @@ func (a *API) AttachGroupOwners(
 
 	owners, err := a.groups.AttachOwners(ctx, req.account, req.principal, id, userIDs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.GroupOwnerCollectionDocument{Data: make([]oas.GroupOwnerResource, 0, len(owners))}
@@ -404,7 +399,7 @@ func (a *API) DetachGroupOwners(
 
 	err = a.groups.DetachOwners(ctx, req.account, req.principal, id, userIDs)
 
-	return err //nolint:wrapcheck // the scenario's own error
+	return err
 }
 
 // limitOf answers the index window size (the limit mode default).
@@ -458,7 +453,7 @@ func validateGroupAttrs(req *request, update bool) (groups.Attrs, error) {
 		return attrs, err
 	}
 
-	attrKeys := []string{"name", "max_users", "max_licenses", "max_machines", "metadata"}
+	attrKeys := []string{"name", attrMaxUsers, "max_licenses", attrMaxMachines, "metadata"}
 	if err := unpermitted(attrsObj, "/data/attributes/", attrKeys...); err != nil {
 		return attrs, err
 	}
@@ -530,7 +525,7 @@ func nameAttr(obj map[string]any, update bool) (*string, error) {
 func groupLimits(obj map[string]any, attrs *groups.Attrs) error {
 	var err error
 
-	if attrs.MaxUsers, err = optionalIntAttr(obj, "max_users"); err != nil {
+	if attrs.MaxUsers, err = optionalIntAttr(obj, attrMaxUsers); err != nil {
 		return err
 	}
 
@@ -538,7 +533,7 @@ func groupLimits(obj map[string]any, attrs *groups.Attrs) error {
 		return err
 	}
 
-	attrs.MaxMachines, err = optionalIntAttr(obj, "max_machines")
+	attrs.MaxMachines, err = optionalIntAttr(obj, attrMaxMachines)
 
 	return err
 }

@@ -25,7 +25,7 @@ func (a *API) IndexEntitlements( //nolint:dupl // route handlers share the envel
 
 	page, err := a.entitlements.Index(ctx, req.account, params)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.EntitlementListDocument{Data: make([]oas.EntitlementResource, 0, len(page.Items))}
@@ -50,7 +50,7 @@ func (a *API) ShowEntitlement(
 
 	entitlement, err := a.entitlements.Show(ctx, req.account, params.EntitlementId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.EntitlementDocument{Data: render.EntitlementResource(req.account.ID, entitlement)}, nil
@@ -73,7 +73,7 @@ func (a *API) CreateEntitlement(
 
 	entitlement, err := a.entitlements.Create(ctx, req.account, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.EntitlementDocumentHeaders{
@@ -94,7 +94,7 @@ func (a *API) UpdateEntitlement(
 	}
 
 	if _, err := a.entitlements.Resolve(ctx, req.account, params.EntitlementId); err != nil {
-		return nil, err //nolint:wrapcheck // the load's own error
+		return nil, err // the load's own error
 	}
 
 	in, err := validateEntitlementBody(req.body, true)
@@ -104,7 +104,7 @@ func (a *API) UpdateEntitlement(
 
 	entitlement, err := a.entitlements.Update(ctx, req.account, params.EntitlementId, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.EntitlementDocument{Data: render.EntitlementResource(req.account.ID, entitlement)}, nil
@@ -118,7 +118,7 @@ func (a *API) DestroyEntitlement(ctx context.Context, params oas.DestroyEntitlem
 		return err
 	}
 
-	return a.entitlements.Destroy(ctx, req.account, params.EntitlementId) //nolint:wrapcheck // the scenario's own error
+	return a.entitlements.Destroy(ctx, req.account, params.EntitlementId) // the scenario's own error
 }
 
 // validateEntitlementBody shape-validates the create/update body like

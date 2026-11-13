@@ -45,6 +45,8 @@ services:
     env_file: keygen/.env
     environment:
       DISABLE_DATABASE_ENVIRONMENT_CHECK: "1"
+      DATABASE_URL: postgres://keygen:keygen@keygen-postgres:5432/keygen
+      REDIS_URL: redis://keygen-redis:6379
     command: sh -c "until pg_isready -h keygen-postgres -U keygen; do sleep 1; done; bundle exec rails keygen:setup"
     depends_on: [keygen-postgres]
     restart: no

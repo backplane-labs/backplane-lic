@@ -11,13 +11,19 @@ import (
 )
 
 var (
-	rn21AllowedHeaders = map[string]string{
+	rn24AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn42AllowedHeaders = map[string]string{
+	rn47AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn22AllowedHeaders = map[string]string{
+	rn25AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn53AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn26AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn4AllowedHeaders = map[string]string{
@@ -27,16 +33,16 @@ var (
 		"DELETE": "Content-Type",
 		"POST":   "Content-Type",
 	}
-	rn23AllowedHeaders = map[string]string{
+	rn27AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn44AllowedHeaders = map[string]string{
+	rn55AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn24AllowedHeaders = map[string]string{
+	rn28AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn144AllowedHeaders = map[string]string{
+	rn187AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn8AllowedHeaders = map[string]string{
@@ -45,42 +51,69 @@ var (
 	rn20AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn38AllowedHeaders = map[string]string{
+	rn45AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn53AllowedHeaders = map[string]string{
+	rn66AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn75AllowedHeaders = map[string]string{
+	rn94AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn9AllowedHeaders = map[string]string{
 		"DELETE": "Content-Type",
 		"POST":   "Content-Type",
 	}
-	rn101AllowedHeaders = map[string]string{
+	rn128AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn104AllowedHeaders = map[string]string{
+	rn131AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn105AllowedHeaders = map[string]string{
+	rn132AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn25AllowedHeaders = map[string]string{
+	rn29AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn112AllowedHeaders = map[string]string{
+	rn139AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
 	rn11AllowedHeaders = map[string]string{
 		"DELETE": "Content-Type",
 		"POST":   "Content-Type",
 	}
-	rn81AllowedHeaders = map[string]string{
+	rn30AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn26AllowedHeaders = map[string]string{
+	rn22AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn23AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn62AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn91AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn100AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn105AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn142AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn144AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn101AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn31AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn13AllowedHeaders = map[string]string{
@@ -90,54 +123,63 @@ var (
 		"DELETE": "Content-Type",
 		"POST":   "Content-Type",
 	}
-	rn28AllowedHeaders = map[string]string{
+	rn33AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn30AllowedHeaders = map[string]string{
+	rn49AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn31AllowedHeaders = map[string]string{
+	rn92AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn87AllowedHeaders = map[string]string{
+	rn35AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn50AllowedHeaders = map[string]string{
+	rn37AllowedHeaders = map[string]string{
+		"PATCH": "Content-Type",
+	}
+	rn38AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn32AllowedHeaders = map[string]string{
+	rn110AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn63AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn39AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn16AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn84AllowedHeaders = map[string]string{
+	rn107AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn143AllowedHeaders = map[string]string{
+	rn186AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn131AllowedHeaders = map[string]string{
+	rn174AllowedHeaders = map[string]string{
 		"PUT": "Content-Type",
 	}
-	rn34AllowedHeaders = map[string]string{
+	rn41AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn40AllowedHeaders = map[string]string{
+	rn51AllowedHeaders = map[string]string{
 		"DELETE": "Content-Type",
 		"PATCH":  "Content-Type",
 		"PUT":    "Content-Type",
 	}
-	rn35AllowedHeaders = map[string]string{
+	rn42AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn36AllowedHeaders = map[string]string{
+	rn43AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn46AllowedHeaders = map[string]string{
+	rn57AllowedHeaders = map[string]string{
 		"PATCH": "Content-Type",
 	}
-	rn85AllowedHeaders = map[string]string{
+	rn108AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 )
@@ -240,6 +282,184 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						break
 					}
 					switch elem[0] {
+					case 'c': // Prefix: "components"
+
+						if l := len("components"); len(elem) >= l && elem[0:l] == "components" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleIndexComponentsRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleCreateComponentRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET,POST",
+									allowedHeaders: rn24AllowedHeaders,
+									acceptPost:     "application/json,application/vnd.api+json",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "componentId"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "DELETE":
+									s.handleDeleteComponentRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								case "GET":
+									s.handleShowComponentRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								case "PATCH":
+									s.handleUpdateComponentRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "DELETE,GET,PATCH",
+										allowedHeaders: rn47AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "application/json,application/vnd.api+json",
+									})
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'l': // Prefix: "license"
+
+									if l := len("license"); len(elem) >= l && elem[0:l] == "license" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleShowComponentLicenseRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: nil,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
+										}
+
+										return
+									}
+
+								case 'm': // Prefix: "machine"
+
+									if l := len("machine"); len(elem) >= l && elem[0:l] == "machine" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleShowComponentMachineRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: nil,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
+										}
+
+										return
+									}
+
+								case 'p': // Prefix: "product"
+
+									if l := len("product"); len(elem) >= l && elem[0:l] == "product" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleShowComponentProductRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: nil,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
+										}
+
+										return
+									}
+
+								}
+
+							}
+
+						}
+
 					case 'e': // Prefix: "entitlements"
 
 						if l := len("entitlements"); len(elem) >= l && elem[0:l] == "entitlements" {
@@ -261,7 +481,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "GET,POST",
-									allowedHeaders: rn21AllowedHeaders,
+									allowedHeaders: rn25AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -308,7 +528,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								default:
 									s.notAllowed(w, r, notAllowedParams{
 										allowedMethods: "DELETE,GET,PATCH",
-										allowedHeaders: rn42AllowedHeaders,
+										allowedHeaders: rn53AllowedHeaders,
 										acceptPost:     "",
 										acceptPatch:    "application/json,application/vnd.api+json",
 									})
@@ -340,7 +560,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "GET,POST",
-									allowedHeaders: rn22AllowedHeaders,
+									allowedHeaders: rn26AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -712,7 +932,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "GET,POST",
-									allowedHeaders: rn23AllowedHeaders,
+									allowedHeaders: rn27AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -758,7 +978,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								default:
 									s.notAllowed(w, r, notAllowedParams{
 										allowedMethods: "DELETE,GET,PATCH",
-										allowedHeaders: rn44AllowedHeaders,
+										allowedHeaders: rn55AllowedHeaders,
 										acceptPost:     "",
 										acceptPatch:    "application/json,application/vnd.api+json",
 									})
@@ -862,7 +1082,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "GET,POST",
-									allowedHeaders: rn24AllowedHeaders,
+									allowedHeaders: rn28AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -901,7 +1121,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									default:
 										s.notAllowed(w, r, notAllowedParams{
 											allowedMethods: "POST",
-											allowedHeaders: rn144AllowedHeaders,
+											allowedHeaders: rn187AllowedHeaders,
 											acceptPost:     "application/json,application/vnd.api+json",
 											acceptPatch:    "",
 										})
@@ -1068,7 +1288,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "POST",
-													allowedHeaders: rn38AllowedHeaders,
+													allowedHeaders: rn45AllowedHeaders,
 													acceptPost:     "application/json,application/vnd.api+json",
 													acceptPatch:    "",
 												})
@@ -1096,7 +1316,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "POST",
-													allowedHeaders: rn53AllowedHeaders,
+													allowedHeaders: rn66AllowedHeaders,
 													acceptPost:     "application/json,application/vnd.api+json",
 													acceptPatch:    "",
 												})
@@ -1283,7 +1503,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "GET,POST",
-													allowedHeaders: rn75AllowedHeaders,
+													allowedHeaders: rn94AllowedHeaders,
 													acceptPost:     "application/json,application/vnd.api+json",
 													acceptPatch:    "",
 												})
@@ -1395,7 +1615,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,PATCH",
-												allowedHeaders: rn101AllowedHeaders,
+												allowedHeaders: rn128AllowedHeaders,
 												acceptPost:     "",
 												acceptPatch:    "application/json,application/vnd.api+json",
 											})
@@ -1495,7 +1715,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,PATCH",
-												allowedHeaders: rn104AllowedHeaders,
+												allowedHeaders: rn131AllowedHeaders,
 												acceptPost:     "",
 												acceptPatch:    "application/json,application/vnd.api+json",
 											})
@@ -1540,7 +1760,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "GET,PATCH",
-													allowedHeaders: rn105AllowedHeaders,
+													allowedHeaders: rn132AllowedHeaders,
 													acceptPost:     "",
 													acceptPatch:    "application/json,application/vnd.api+json",
 												})
@@ -1602,7 +1822,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,POST",
-												allowedHeaders: rn25AllowedHeaders,
+												allowedHeaders: rn29AllowedHeaders,
 												acceptPost:     "application/json,application/vnd.api+json",
 												acceptPatch:    "",
 											})
@@ -1674,7 +1894,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,PATCH",
-												allowedHeaders: rn112AllowedHeaders,
+												allowedHeaders: rn139AllowedHeaders,
 												acceptPost:     "",
 												acceptPatch:    "application/json,application/vnd.api+json",
 											})
@@ -1768,31 +1988,710 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						}
 
-					case 'm': // Prefix: "me"
+					case 'm': // Prefix: "m"
 
-						if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
+						if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleMeRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, notAllowedParams{
-									allowedMethods: "GET",
-									allowedHeaders: nil,
-									acceptPost:     "",
-									acceptPatch:    "",
-								})
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "achines"
+
+							if l := len("achines"); len(elem) >= l && elem[0:l] == "achines" {
+								elem = elem[l:]
+							} else {
+								break
 							}
 
-							return
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleIndexMachinesRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								case "POST":
+									s.handleCreateMachineRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET,POST",
+										allowedHeaders: rn30AllowedHeaders,
+										acceptPost:     "application/json,application/vnd.api+json",
+										acceptPatch:    "",
+									})
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "machineId"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "DELETE":
+										s.handleDeleteMachineRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleShowMachineRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "PATCH":
+										s.handleUpdateMachineRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "DELETE,GET,PATCH",
+											allowedHeaders: rn22AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "application/json,application/vnd.api+json",
+										})
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										break
+									}
+									switch elem[0] {
+									case 'a': // Prefix: "actions/"
+
+										if l := len("actions/"); len(elem) >= l && elem[0:l] == "actions/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'c': // Prefix: "check-out"
+
+											if l := len("check-out"); len(elem) >= l && elem[0:l] == "check-out" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleCheckoutMachineRawRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												case "POST":
+													s.handleCheckoutMachineRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET,POST",
+														allowedHeaders: rn23AllowedHeaders,
+														acceptPost:     "application/json,application/vnd.api+json",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										case 'g': // Prefix: "generate-offline-proof"
+
+											if l := len("generate-offline-proof"); len(elem) >= l && elem[0:l] == "generate-offline-proof" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "POST":
+													s.handleGenerateMachineProofRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "POST",
+														allowedHeaders: rn62AllowedHeaders,
+														acceptPost:     "application/json,application/vnd.api+json",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										case 'p': // Prefix: "ping"
+
+											if l := len("ping"); len(elem) >= l && elem[0:l] == "ping" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "POST":
+													s.handlePingMachineRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "POST",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '-': // Prefix: "-heartbeat"
+
+												if l := len("-heartbeat"); len(elem) >= l && elem[0:l] == "-heartbeat" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "POST":
+														s.handlePingMachineHeartbeatRequest([2]string{
+															args[0],
+															args[1],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "POST",
+															allowedHeaders: rn91AllowedHeaders,
+															acceptPost:     "application/json,application/vnd.api+json",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'r': // Prefix: "re"
+
+											if l := len("re"); len(elem) >= l && elem[0:l] == "re" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												break
+											}
+											switch elem[0] {
+											case 'p': // Prefix: "port-usage"
+
+												if l := len("port-usage"); len(elem) >= l && elem[0:l] == "port-usage" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "POST":
+														s.handleReportMachineUsageRequest([2]string{
+															args[0],
+															args[1],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "POST",
+															allowedHeaders: rn100AllowedHeaders,
+															acceptPost:     "application/json,application/vnd.api+json",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											case 's': // Prefix: "set"
+
+												if l := len("set"); len(elem) >= l && elem[0:l] == "set" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													switch r.Method {
+													case "POST":
+														s.handleResetMachineRequest([2]string{
+															args[0],
+															args[1],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "POST",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+												switch elem[0] {
+												case '-': // Prefix: "-heartbeat"
+
+													if l := len("-heartbeat"); len(elem) >= l && elem[0:l] == "-heartbeat" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch r.Method {
+														case "POST":
+															s.handleResetMachineHeartbeatRequest([2]string{
+																args[0],
+																args[1],
+															}, elemIsEscaped, w, r)
+														default:
+															s.notAllowed(w, r, notAllowedParams{
+																allowedMethods: "POST",
+																allowedHeaders: rn105AllowedHeaders,
+																acceptPost:     "application/json,application/vnd.api+json",
+																acceptPatch:    "",
+															})
+														}
+
+														return
+													}
+
+												}
+
+											}
+
+										}
+
+									case 'c': // Prefix: "components"
+
+										if l := len("components"); len(elem) >= l && elem[0:l] == "components" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch r.Method {
+											case "GET":
+												s.handleIndexMachineComponentsRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, notAllowedParams{
+													allowedMethods: "GET",
+													allowedHeaders: nil,
+													acceptPost:     "",
+													acceptPatch:    "",
+												})
+											}
+
+											return
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "componentId"
+											// Leaf parameter, slashes are prohibited
+											idx := strings.IndexByte(elem, '/')
+											if idx >= 0 {
+												break
+											}
+											args[2] = elem
+											elem = ""
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowMachineComponentRequest([3]string{
+														args[0],
+														args[1],
+														args[2],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									case 'g': // Prefix: "group"
+
+										if l := len("group"); len(elem) >= l && elem[0:l] == "group" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleShowMachineGroupRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											case "PATCH":
+												s.handleUpdateMachineGroupRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, notAllowedParams{
+													allowedMethods: "GET,PATCH",
+													allowedHeaders: rn142AllowedHeaders,
+													acceptPost:     "",
+													acceptPatch:    "application/json,application/vnd.api+json",
+												})
+											}
+
+											return
+										}
+
+									case 'l': // Prefix: "license"
+
+										if l := len("license"); len(elem) >= l && elem[0:l] == "license" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleShowMachineLicenseRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, notAllowedParams{
+													allowedMethods: "GET",
+													allowedHeaders: nil,
+													acceptPost:     "",
+													acceptPatch:    "",
+												})
+											}
+
+											return
+										}
+
+									case 'o': // Prefix: "owner"
+
+										if l := len("owner"); len(elem) >= l && elem[0:l] == "owner" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch r.Method {
+											case "GET":
+												s.handleShowMachineOwnerRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											case "PATCH":
+												s.handleUpdateMachineOwnerRequest([2]string{
+													args[0],
+													args[1],
+												}, elemIsEscaped, w, r)
+											default:
+												s.notAllowed(w, r, notAllowedParams{
+													allowedMethods: "GET,PATCH",
+													allowedHeaders: rn144AllowedHeaders,
+													acceptPost:     "",
+													acceptPatch:    "application/json,application/vnd.api+json",
+												})
+											}
+
+											return
+										}
+
+									case 'p': // Prefix: "pro"
+
+										if l := len("pro"); len(elem) >= l && elem[0:l] == "pro" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'c': // Prefix: "cesses"
+
+											if l := len("cesses"); len(elem) >= l && elem[0:l] == "cesses" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch r.Method {
+												case "GET":
+													s.handleIndexMachineProcessesRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "processId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch r.Method {
+													case "GET":
+														s.handleShowMachineProcessRequest([3]string{
+															args[0],
+															args[1],
+															args[2],
+														}, elemIsEscaped, w, r)
+													default:
+														s.notAllowed(w, r, notAllowedParams{
+															allowedMethods: "GET",
+															allowedHeaders: nil,
+															acceptPost:     "",
+															acceptPatch:    "",
+														})
+													}
+
+													return
+												}
+
+											}
+
+										case 'd': // Prefix: "duct"
+
+											if l := len("duct"); len(elem) >= l && elem[0:l] == "duct" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowMachineProductRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									case 'u': // Prefix: "us"
+
+										if l := len("us"); len(elem) >= l && elem[0:l] == "us" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'a': // Prefix: "age"
+
+											if l := len("age"); len(elem) >= l && elem[0:l] == "age" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowMachineUsageRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										case 'e': // Prefix: "er"
+
+											if l := len("er"); len(elem) >= l && elem[0:l] == "er" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowMachineUserAliasRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									}
+
+								}
+
+							}
+
+						case 'e': // Prefix: "e"
+
+							if l := len("e"); len(elem) >= l && elem[0:l] == "e" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleMeRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET",
+										allowedHeaders: nil,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
+								}
+
+								return
+							}
+
 						}
 
 					case 'p': // Prefix: "p"
@@ -1825,7 +2724,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								default:
 									s.notAllowed(w, r, notAllowedParams{
 										allowedMethods: "POST",
-										allowedHeaders: rn81AllowedHeaders,
+										allowedHeaders: rn101AllowedHeaders,
 										acceptPost:     "application/json,application/vnd.api+json",
 										acceptPatch:    "",
 									})
@@ -1855,7 +2754,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								default:
 									s.notAllowed(w, r, notAllowedParams{
 										allowedMethods: "GET,POST",
-										allowedHeaders: rn26AllowedHeaders,
+										allowedHeaders: rn31AllowedHeaders,
 										acceptPost:     "application/json,application/vnd.api+json",
 										acceptPatch:    "",
 									})
@@ -2198,6 +3097,212 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								break
 							}
 							switch elem[0] {
+							case 'c': // Prefix: "cesses"
+
+								if l := len("cesses"); len(elem) >= l && elem[0:l] == "cesses" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleIndexProcessesRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleCreateProcessRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET,POST",
+											allowedHeaders: rn33AllowedHeaders,
+											acceptPost:     "application/json,application/vnd.api+json",
+											acceptPatch:    "",
+										})
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "processId"
+									// Match until "/"
+									idx := strings.IndexByte(elem, '/')
+									if idx < 0 {
+										idx = len(elem)
+									}
+									args[1] = elem[:idx]
+									elem = elem[idx:]
+
+									if len(elem) == 0 {
+										switch r.Method {
+										case "DELETE":
+											s.handleDeleteProcessRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										case "GET":
+											s.handleShowProcessRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										case "PATCH":
+											s.handleUpdateProcessRequest([2]string{
+												args[0],
+												args[1],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "DELETE,GET,PATCH",
+												allowedHeaders: rn49AllowedHeaders,
+												acceptPost:     "",
+												acceptPatch:    "application/json,application/vnd.api+json",
+											})
+										}
+
+										return
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'a': // Prefix: "actions/ping"
+
+											if l := len("actions/ping"); len(elem) >= l && elem[0:l] == "actions/ping" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "POST":
+													s.handlePingProcessRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "POST",
+														allowedHeaders: rn92AllowedHeaders,
+														acceptPost:     "application/json,application/vnd.api+json",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										case 'l': // Prefix: "license"
+
+											if l := len("license"); len(elem) >= l && elem[0:l] == "license" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowProcessLicenseRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										case 'm': // Prefix: "machine"
+
+											if l := len("machine"); len(elem) >= l && elem[0:l] == "machine" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowProcessMachineRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										case 'p': // Prefix: "product"
+
+											if l := len("product"); len(elem) >= l && elem[0:l] == "product" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch r.Method {
+												case "GET":
+													s.handleShowProcessProductRequest([2]string{
+														args[0],
+														args[1],
+													}, elemIsEscaped, w, r)
+												default:
+													s.notAllowed(w, r, notAllowedParams{
+														allowedMethods: "GET",
+														allowedHeaders: nil,
+														acceptPost:     "",
+														acceptPatch:    "",
+													})
+												}
+
+												return
+											}
+
+										}
+
+									}
+
+								}
+
 							case 'd': // Prefix: "ducts"
 
 								if l := len("ducts"); len(elem) >= l && elem[0:l] == "ducts" {
@@ -2219,7 +3324,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									default:
 										s.notAllowed(w, r, notAllowedParams{
 											allowedMethods: "GET,POST",
-											allowedHeaders: rn28AllowedHeaders,
+											allowedHeaders: rn35AllowedHeaders,
 											acceptPost:     "application/json,application/vnd.api+json",
 											acceptPatch:    "",
 										})
@@ -2265,7 +3370,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "DELETE,GET,PATCH",
-												allowedHeaders: rn30AllowedHeaders,
+												allowedHeaders: rn37AllowedHeaders,
 												acceptPost:     "",
 												acceptPatch:    "application/json,application/vnd.api+json",
 											})
@@ -2510,7 +3615,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												default:
 													s.notAllowed(w, r, notAllowedParams{
 														allowedMethods: "GET,POST",
-														allowedHeaders: rn31AllowedHeaders,
+														allowedHeaders: rn38AllowedHeaders,
 														acceptPost:     "application/json,application/vnd.api+json",
 														acceptPatch:    "",
 													})
@@ -2681,7 +3786,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn87AllowedHeaders,
+									allowedHeaders: rn110AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -2715,7 +3820,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "GET,POST,PUT",
-									allowedHeaders: rn50AllowedHeaders,
+									allowedHeaders: rn63AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -2794,7 +3899,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "GET,POST",
-									allowedHeaders: rn32AllowedHeaders,
+									allowedHeaders: rn39AllowedHeaders,
 									acceptPost:     "application/json,application/vnd.api+json",
 									acceptPatch:    "",
 								})
@@ -2920,7 +4025,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "POST",
-													allowedHeaders: rn84AllowedHeaders,
+													allowedHeaders: rn107AllowedHeaders,
 													acceptPost:     "application/json,application/vnd.api+json",
 													acceptPatch:    "",
 												})
@@ -2988,7 +4093,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												default:
 													s.notAllowed(w, r, notAllowedParams{
 														allowedMethods: "POST",
-														allowedHeaders: rn143AllowedHeaders,
+														allowedHeaders: rn186AllowedHeaders,
 														acceptPost:     "application/json,application/vnd.api+json",
 														acceptPatch:    "",
 													})
@@ -3025,7 +4130,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,PUT",
-												allowedHeaders: rn131AllowedHeaders,
+												allowedHeaders: rn174AllowedHeaders,
 												acceptPost:     "",
 												acceptPatch:    "",
 											})
@@ -3258,7 +4363,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,POST",
-												allowedHeaders: rn34AllowedHeaders,
+												allowedHeaders: rn41AllowedHeaders,
 												acceptPost:     "application/json,application/vnd.api+json",
 												acceptPatch:    "",
 											})
@@ -3314,7 +4419,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											default:
 												s.notAllowed(w, r, notAllowedParams{
 													allowedMethods: "DELETE,GET,PATCH,PUT",
-													allowedHeaders: rn40AllowedHeaders,
+													allowedHeaders: rn51AllowedHeaders,
 													acceptPost:     "",
 													acceptPatch:    "application/json,application/vnd.api+json",
 												})
@@ -3348,7 +4453,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "GET,POST",
-												allowedHeaders: rn35AllowedHeaders,
+												allowedHeaders: rn42AllowedHeaders,
 												acceptPost:     "application/json,application/vnd.api+json",
 												acceptPatch:    "",
 											})
@@ -3436,7 +4541,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								default:
 									s.notAllowed(w, r, notAllowedParams{
 										allowedMethods: "GET,POST",
-										allowedHeaders: rn36AllowedHeaders,
+										allowedHeaders: rn43AllowedHeaders,
 										acceptPost:     "application/json,application/vnd.api+json",
 										acceptPatch:    "",
 									})
@@ -3483,7 +4588,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									default:
 										s.notAllowed(w, r, notAllowedParams{
 											allowedMethods: "DELETE,GET,PATCH",
-											allowedHeaders: rn46AllowedHeaders,
+											allowedHeaders: rn57AllowedHeaders,
 											acceptPost:     "",
 											acceptPatch:    "application/json,application/vnd.api+json",
 										})
@@ -3580,7 +4685,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										default:
 											s.notAllowed(w, r, notAllowedParams{
 												allowedMethods: "POST",
-												allowedHeaders: rn85AllowedHeaders,
+												allowedHeaders: rn108AllowedHeaders,
 												acceptPost:     "application/json,application/vnd.api+json",
 												acceptPatch:    "",
 											})
@@ -3794,6 +4899,183 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						break
 					}
 					switch elem[0] {
+					case 'c': // Prefix: "components"
+
+						if l := len("components"); len(elem) >= l && elem[0:l] == "components" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = IndexComponentsOperation
+								r.summary = "List machine components"
+								r.operationID = "indexComponents"
+								r.operationGroup = ""
+								r.pathPattern = "/v1/accounts/{account}/components"
+								r.args = args
+								r.count = 1
+								return r, true
+							case "POST":
+								r.name = CreateComponentOperation
+								r.summary = "Create a machine component"
+								r.operationID = "createComponent"
+								r.operationGroup = ""
+								r.pathPattern = "/v1/accounts/{account}/components"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "componentId"
+							// Match until "/"
+							idx := strings.IndexByte(elem, '/')
+							if idx < 0 {
+								idx = len(elem)
+							}
+							args[1] = elem[:idx]
+							elem = elem[idx:]
+
+							if len(elem) == 0 {
+								switch method {
+								case "DELETE":
+									r.name = DeleteComponentOperation
+									r.summary = "Delete a machine component"
+									r.operationID = "deleteComponent"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/components/{componentId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "GET":
+									r.name = ShowComponentOperation
+									r.summary = "Retrieve a machine component"
+									r.operationID = "showComponent"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/components/{componentId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								case "PATCH":
+									r.name = UpdateComponentOperation
+									r.summary = "Update a machine component"
+									r.operationID = "updateComponent"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/components/{componentId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									break
+								}
+								switch elem[0] {
+								case 'l': // Prefix: "license"
+
+									if l := len("license"); len(elem) >= l && elem[0:l] == "license" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = ShowComponentLicenseOperation
+											r.summary = "Retrieve a component's license"
+											r.operationID = "showComponentLicense"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/components/{componentId}/license"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+								case 'm': // Prefix: "machine"
+
+									if l := len("machine"); len(elem) >= l && elem[0:l] == "machine" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = ShowComponentMachineOperation
+											r.summary = "Retrieve a component's machine"
+											r.operationID = "showComponentMachine"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/components/{componentId}/machine"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+								case 'p': // Prefix: "product"
+
+									if l := len("product"); len(elem) >= l && elem[0:l] == "product" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = ShowComponentProductOperation
+											r.summary = "Retrieve a component's product"
+											r.operationID = "showComponentProduct"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/components/{componentId}/product"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+
+								}
+
+							}
+
+						}
+
 					case 'e': // Prefix: "entitlements"
 
 						if l := len("entitlements"); len(elem) >= l && elem[0:l] == "entitlements" {
@@ -5297,29 +6579,675 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 						}
 
-					case 'm': // Prefix: "me"
+					case 'm': // Prefix: "m"
 
-						if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
+						if l := len("m"); len(elem) >= l && elem[0:l] == "m" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = MeOperation
-								r.summary = "The current bearer"
-								r.operationID = "me"
-								r.operationGroup = ""
-								r.pathPattern = "/v1/accounts/{account}/me"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
+							break
+						}
+						switch elem[0] {
+						case 'a': // Prefix: "achines"
+
+							if l := len("achines"); len(elem) >= l && elem[0:l] == "achines" {
+								elem = elem[l:]
+							} else {
+								break
 							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = IndexMachinesOperation
+									r.summary = "List machines"
+									r.operationID = "indexMachines"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/machines"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "POST":
+									r.name = CreateMachineOperation
+									r.summary = "Activate a machine"
+									r.operationID = "createMachine"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/machines"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "machineId"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
+								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
+
+								if len(elem) == 0 {
+									switch method {
+									case "DELETE":
+										r.name = DeleteMachineOperation
+										r.summary = "Delete a machine"
+										r.operationID = "deleteMachine"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/machines/{machineId}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "GET":
+										r.name = ShowMachineOperation
+										r.summary = "Retrieve a machine (by id or fingerprint)"
+										r.operationID = "showMachine"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/machines/{machineId}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "PATCH":
+										r.name = UpdateMachineOperation
+										r.summary = "Update a machine"
+										r.operationID = "updateMachine"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/machines/{machineId}"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										break
+									}
+									switch elem[0] {
+									case 'a': // Prefix: "actions/"
+
+										if l := len("actions/"); len(elem) >= l && elem[0:l] == "actions/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'c': // Prefix: "check-out"
+
+											if l := len("check-out"); len(elem) >= l && elem[0:l] == "check-out" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = CheckoutMachineRawOperation
+													r.summary = "Check out a machine license file (raw)"
+													r.operationID = "checkoutMachineRaw"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/check-out"
+													r.args = args
+													r.count = 2
+													return r, true
+												case "POST":
+													r.name = CheckoutMachineOperation
+													r.summary = "Check out a machine license file (JSON:API)"
+													r.operationID = "checkoutMachine"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/check-out"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										case 'g': // Prefix: "generate-offline-proof"
+
+											if l := len("generate-offline-proof"); len(elem) >= l && elem[0:l] == "generate-offline-proof" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "POST":
+													r.name = GenerateMachineProofOperation
+													r.summary = "Sign an offline proof of the machine (API v1.0)"
+													r.operationID = "generateMachineProof"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										case 'p': // Prefix: "ping"
+
+											if l := len("ping"); len(elem) >= l && elem[0:l] == "ping" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "POST":
+													r.name = PingMachineOperation
+													r.summary = "Ping a machine's heartbeat (short alias)"
+													r.operationID = "pingMachine"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/ping"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '-': // Prefix: "-heartbeat"
+
+												if l := len("-heartbeat"); len(elem) >= l && elem[0:l] == "-heartbeat" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "POST":
+														r.name = PingMachineHeartbeatOperation
+														r.summary = "Ping a machine's heartbeat"
+														r.operationID = "pingMachineHeartbeat"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat"
+														r.args = args
+														r.count = 2
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'r': // Prefix: "re"
+
+											if l := len("re"); len(elem) >= l && elem[0:l] == "re" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												break
+											}
+											switch elem[0] {
+											case 'p': // Prefix: "port-usage"
+
+												if l := len("port-usage"); len(elem) >= l && elem[0:l] == "port-usage" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "POST":
+														r.name = ReportMachineUsageOperation
+														r.summary = "Report the installation's signed usage chain (a backplane extension)"
+														r.operationID = "reportMachineUsage"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/report-usage"
+														r.args = args
+														r.count = 2
+														return r, true
+													default:
+														return
+													}
+												}
+
+											case 's': // Prefix: "set"
+
+												if l := len("set"); len(elem) >= l && elem[0:l] == "set" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												if len(elem) == 0 {
+													switch method {
+													case "POST":
+														r.name = ResetMachineOperation
+														r.summary = "Reset a machine's heartbeat (short alias)"
+														r.operationID = "resetMachine"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/reset"
+														r.args = args
+														r.count = 2
+														return r, true
+													default:
+														return
+													}
+												}
+												switch elem[0] {
+												case '-': // Prefix: "-heartbeat"
+
+													if l := len("-heartbeat"); len(elem) >= l && elem[0:l] == "-heartbeat" {
+														elem = elem[l:]
+													} else {
+														break
+													}
+
+													if len(elem) == 0 {
+														// Leaf node.
+														switch method {
+														case "POST":
+															r.name = ResetMachineHeartbeatOperation
+															r.summary = "Reset a machine's heartbeat"
+															r.operationID = "resetMachineHeartbeat"
+															r.operationGroup = ""
+															r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat"
+															r.args = args
+															r.count = 2
+															return r, true
+														default:
+															return
+														}
+													}
+
+												}
+
+											}
+
+										}
+
+									case 'c': // Prefix: "components"
+
+										if l := len("components"); len(elem) >= l && elem[0:l] == "components" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											switch method {
+											case "GET":
+												r.name = IndexMachineComponentsOperation
+												r.summary = "List a machine's components"
+												r.operationID = "indexMachineComponents"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/components"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+										switch elem[0] {
+										case '/': // Prefix: "/"
+
+											if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											// Param: "componentId"
+											// Leaf parameter, slashes are prohibited
+											idx := strings.IndexByte(elem, '/')
+											if idx >= 0 {
+												break
+											}
+											args[2] = elem
+											elem = ""
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowMachineComponentOperation
+													r.summary = "Retrieve one of a machine's components"
+													r.operationID = "showMachineComponent"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/components/{componentId}"
+													r.args = args
+													r.count = 3
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									case 'g': // Prefix: "group"
+
+										if l := len("group"); len(elem) >= l && elem[0:l] == "group" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "GET":
+												r.name = ShowMachineGroupOperation
+												r.summary = "Retrieve a machine's group"
+												r.operationID = "showMachineGroup"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/group"
+												r.args = args
+												r.count = 2
+												return r, true
+											case "PATCH":
+												r.name = UpdateMachineGroupOperation
+												r.summary = "Set a machine's group"
+												r.operationID = "updateMachineGroup"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/group"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+
+									case 'l': // Prefix: "license"
+
+										if l := len("license"); len(elem) >= l && elem[0:l] == "license" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "GET":
+												r.name = ShowMachineLicenseOperation
+												r.summary = "Retrieve a machine's license"
+												r.operationID = "showMachineLicense"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/license"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+
+									case 'o': // Prefix: "owner"
+
+										if l := len("owner"); len(elem) >= l && elem[0:l] == "owner" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											// Leaf node.
+											switch method {
+											case "GET":
+												r.name = ShowMachineOwnerOperation
+												r.summary = "Retrieve a machine's owner"
+												r.operationID = "showMachineOwner"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/owner"
+												r.args = args
+												r.count = 2
+												return r, true
+											case "PATCH":
+												r.name = UpdateMachineOwnerOperation
+												r.summary = "Set a machine's owner"
+												r.operationID = "updateMachineOwner"
+												r.operationGroup = ""
+												r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/owner"
+												r.args = args
+												r.count = 2
+												return r, true
+											default:
+												return
+											}
+										}
+
+									case 'p': // Prefix: "pro"
+
+										if l := len("pro"); len(elem) >= l && elem[0:l] == "pro" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'c': // Prefix: "cesses"
+
+											if l := len("cesses"); len(elem) >= l && elem[0:l] == "cesses" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												switch method {
+												case "GET":
+													r.name = IndexMachineProcessesOperation
+													r.summary = "List a machine's processes"
+													r.operationID = "indexMachineProcesses"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/processes"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+											switch elem[0] {
+											case '/': // Prefix: "/"
+
+												if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+													elem = elem[l:]
+												} else {
+													break
+												}
+
+												// Param: "processId"
+												// Leaf parameter, slashes are prohibited
+												idx := strings.IndexByte(elem, '/')
+												if idx >= 0 {
+													break
+												}
+												args[2] = elem
+												elem = ""
+
+												if len(elem) == 0 {
+													// Leaf node.
+													switch method {
+													case "GET":
+														r.name = ShowMachineProcessOperation
+														r.summary = "Retrieve one of a machine's processes"
+														r.operationID = "showMachineProcess"
+														r.operationGroup = ""
+														r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/processes/{processId}"
+														r.args = args
+														r.count = 3
+														return r, true
+													default:
+														return
+													}
+												}
+
+											}
+
+										case 'd': // Prefix: "duct"
+
+											if l := len("duct"); len(elem) >= l && elem[0:l] == "duct" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowMachineProductOperation
+													r.summary = "Retrieve a machine's product"
+													r.operationID = "showMachineProduct"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/product"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									case 'u': // Prefix: "us"
+
+										if l := len("us"); len(elem) >= l && elem[0:l] == "us" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'a': // Prefix: "age"
+
+											if l := len("age"); len(elem) >= l && elem[0:l] == "age" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowMachineUsageOperation
+													r.summary = "Read the machine's accepted usage chain (a backplane extension)"
+													r.operationID = "showMachineUsage"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/usage"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										case 'e': // Prefix: "er"
+
+											if l := len("er"); len(elem) >= l && elem[0:l] == "er" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowMachineUserAliasOperation
+													r.summary = "Retrieve a machine's owner (v1.5 alias)"
+													r.operationID = "showMachineUserAlias"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/machines/{machineId}/user"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									}
+
+								}
+
+							}
+
+						case 'e': // Prefix: "e"
+
+							if l := len("e"); len(elem) >= l && elem[0:l] == "e" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = MeOperation
+									r.summary = "The current bearer"
+									r.operationID = "me"
+									r.operationGroup = ""
+									r.pathPattern = "/v1/accounts/{account}/me"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
 						}
 
 					case 'p': // Prefix: "p"
@@ -5719,6 +7647,208 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								break
 							}
 							switch elem[0] {
+							case 'c': // Prefix: "cesses"
+
+								if l := len("cesses"); len(elem) >= l && elem[0:l] == "cesses" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = IndexProcessesOperation
+										r.summary = "List machine processes"
+										r.operationID = "indexProcesses"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/processes"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "POST":
+										r.name = CreateProcessOperation
+										r.summary = "Create a machine process"
+										r.operationID = "createProcess"
+										r.operationGroup = ""
+										r.pathPattern = "/v1/accounts/{account}/processes"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/"
+
+									if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									// Param: "processId"
+									// Match until "/"
+									idx := strings.IndexByte(elem, '/')
+									if idx < 0 {
+										idx = len(elem)
+									}
+									args[1] = elem[:idx]
+									elem = elem[idx:]
+
+									if len(elem) == 0 {
+										switch method {
+										case "DELETE":
+											r.name = DeleteProcessOperation
+											r.summary = "Delete a machine process"
+											r.operationID = "deleteProcess"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/processes/{processId}"
+											r.args = args
+											r.count = 2
+											return r, true
+										case "GET":
+											r.name = ShowProcessOperation
+											r.summary = "Retrieve a machine process"
+											r.operationID = "showProcess"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/processes/{processId}"
+											r.args = args
+											r.count = 2
+											return r, true
+										case "PATCH":
+											r.name = UpdateProcessOperation
+											r.summary = "Update a machine process"
+											r.operationID = "updateProcess"
+											r.operationGroup = ""
+											r.pathPattern = "/v1/accounts/{account}/processes/{processId}"
+											r.args = args
+											r.count = 2
+											return r, true
+										default:
+											return
+										}
+									}
+									switch elem[0] {
+									case '/': // Prefix: "/"
+
+										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+											elem = elem[l:]
+										} else {
+											break
+										}
+
+										if len(elem) == 0 {
+											break
+										}
+										switch elem[0] {
+										case 'a': // Prefix: "actions/ping"
+
+											if l := len("actions/ping"); len(elem) >= l && elem[0:l] == "actions/ping" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "POST":
+													r.name = PingProcessOperation
+													r.summary = "Ping a machine process's heartbeat"
+													r.operationID = "pingProcess"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/processes/{processId}/actions/ping"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										case 'l': // Prefix: "license"
+
+											if l := len("license"); len(elem) >= l && elem[0:l] == "license" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowProcessLicenseOperation
+													r.summary = "Retrieve a process's license"
+													r.operationID = "showProcessLicense"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/processes/{processId}/license"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										case 'm': // Prefix: "machine"
+
+											if l := len("machine"); len(elem) >= l && elem[0:l] == "machine" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowProcessMachineOperation
+													r.summary = "Retrieve a process's machine"
+													r.operationID = "showProcessMachine"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/processes/{processId}/machine"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										case 'p': // Prefix: "product"
+
+											if l := len("product"); len(elem) >= l && elem[0:l] == "product" {
+												elem = elem[l:]
+											} else {
+												break
+											}
+
+											if len(elem) == 0 {
+												// Leaf node.
+												switch method {
+												case "GET":
+													r.name = ShowProcessProductOperation
+													r.summary = "Retrieve a process's product"
+													r.operationID = "showProcessProduct"
+													r.operationGroup = ""
+													r.pathPattern = "/v1/accounts/{account}/processes/{processId}/product"
+													r.args = args
+													r.count = 2
+													return r, true
+												default:
+													return
+												}
+											}
+
+										}
+
+									}
+
+								}
+
 							case 'd': // Prefix: "ducts"
 
 								if l := len("ducts"); len(elem) >= l && elem[0:l] == "ducts" {

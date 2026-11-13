@@ -91,6 +91,20 @@ components:
       description: Machine id (UUID) or fingerprint.
       schema:
         type: string
+    ComponentPath:
+      name: componentId
+      in: path
+      required: true
+      description: Component id (UUID).
+      schema:
+        type: string
+    ProcessPath:
+      name: processId
+      in: path
+      required: true
+      description: Process id (UUID) or PID.
+      schema:
+        type: string
     TokenPath:
       name: tokenId
       in: path
@@ -824,17 +838,6 @@ components:
         links:
           $ref: "#/components/schemas/ListLinks"
 
-    MachineStubListDocument:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-        links:
-          $ref: "#/components/schemas/ListLinks"
-
     ProductUserListDocument:
       type: object
       required: [data]
@@ -1135,42 +1138,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/UserLicenseResource"
-        links:
-          $ref: "#/components/schemas/ListLinks"
-
-    UserMachineResource:
-      type: object
-      required: [type, id, links]
-      properties:
-        type:
-          type: string
-          enum: [machines]
-        id:
-          type: string
-        attributes:
-          type: ["object", "null"]
-          additionalProperties: true
-        relationships:
-          type: object
-          additionalProperties: true
-        links:
-          $ref: "#/components/schemas/ResourceLinks"
-
-    UserMachineDocument:
-      type: object
-      required: [data]
-      properties:
-        data:
-          $ref: "#/components/schemas/UserMachineResource"
-
-    UserMachineCollectionDocument:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/UserMachineResource"
         links:
           $ref: "#/components/schemas/ListLinks"
 
@@ -1557,6 +1524,83 @@ components:
             - $ref: "#/components/schemas/MachineResource"
             - type: "null"
 
+    UsageAck:
+      type: object
+      required: [epoch, seq, hash]
+      properties:
+        epoch:
+          type: integer
+          format: int64
+        seq:
+          type: integer
+          format: int64
+        hash:
+          type: string
+
+    MachineUsageAckDocument:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/MachineResource"
+        meta:
+          type: object
+          required: [ack]
+          properties:
+            ack:
+              $ref: "#/components/schemas/UsageAck"
+
+    MachineUsageDocument:
+      type: object
+      required: [meta]
+      properties:
+        meta:
+          type: object
+          required: [epoch, events, head, acks]
+          properties:
+            epoch:
+              type: integer
+              format: int64
+            events:
+              type: array
+              items:
+                type: object
+                required: [seq, event, hash]
+                properties:
+                  seq:
+                    type: integer
+                    format: int64
+                  event:
+                    type: string
+                  hash:
+                    type: string
+            head:
+              type: object
+              required: [seq, hash]
+              properties:
+                seq:
+                  type: integer
+                  format: int64
+                hash:
+                  type: string
+            acks:
+              type: array
+              items:
+                $ref: "#/components/schemas/UsageAck"
+
+    MachineProofDocument:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/MachineResource"
+        meta:
+          type: object
+          required: [proof]
+          properties:
+            proof:
+              type: string
+
     MachineListDocument:
       type: object
       required: [data]
@@ -1613,6 +1657,35 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/LicenseFileResource"
+
+    MachineFileResource:
+      type: object
+      required: [type, id, attributes, relationships]
+      properties:
+        type:
+          type: string
+          enum: [machine-files]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/LicenseFileAttributes"
+        relationships:
+          type: object
+          required: [account, license, machine]
+          properties:
+            account:
+              $ref: "#/components/schemas/ToOneRelationship"
+            license:
+              $ref: "#/components/schemas/ToOneRelationship"
+            machine:
+              $ref: "#/components/schemas/ToOneRelationship"
+
+    MachineFileDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/MachineFileResource"
 
     # --- webhooks ---
 

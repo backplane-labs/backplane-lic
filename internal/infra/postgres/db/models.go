@@ -349,3 +349,31 @@ type LicAutomationActivityResults struct {
 	Result       json.RawMessage
 	CreatedAt    time.Time
 }
+
+type LicMachineUsageHeads struct {
+	MachineID uuid.UUID
+	AccountID uuid.UUID
+	Epoch     int64
+	Seq       int64
+	Hash      string
+	UpdatedAt time.Time
+}
+
+type LicMachineUsageEvents struct {
+	MachineID uuid.UUID
+	Epoch     int64
+	Seq       int64
+	Event     []byte
+	Hash      string
+	CreatedAt time.Time
+}
+
+type LicMachineUsageAcks struct {
+	MachineID uuid.UUID
+	Epoch     int64
+	Seq       int64
+	Hash      string
+	Counters  json.RawMessage
+	Build     *string
+	CreatedAt time.Time
+}

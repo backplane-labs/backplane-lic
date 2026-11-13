@@ -235,7 +235,9 @@ type outcomeHooks struct {
 }
 
 func (h outcomeHooks) OnFailed(_ context.Context, message outbox.Message, _ error) { h.send(message) }
-func (h outcomeHooks) OnDead(_ context.Context, message outbox.Message)            { h.send(message) }
+
+func (h outcomeHooks) OnDead(_ context.Context, message outbox.Message) { h.send(message) }
+
 func (h outcomeHooks) OnPublished(_ context.Context, messages []outbox.Message) {
 	for i := range messages {
 		h.send(messages[i])

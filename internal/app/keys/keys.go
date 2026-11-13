@@ -107,7 +107,7 @@ func (s Scenario) Index(
 	ctx context.Context, account domain.Account, filterPolicyID, filterProductID *uuid.UUID, params paging.Params,
 ) (List, error) {
 	if err := access.Require(ctx, "key.read"); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -131,7 +131,7 @@ func (s Scenario) Index(
 	}
 
 	if err := access.KeyIndexPostCheck(principal, items); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	out := List{Items: items, Count: len(items)}
@@ -169,11 +169,11 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, id uuid.UUID
 	}
 
 	if err := access.Require(ctx, "key.read"); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	if err := access.KeyShow(access.PrincipalOf(ctx), key); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	return key, nil
@@ -182,12 +182,12 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, id uuid.UUID
 // Create writes a new pooled key.
 func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) (domain.Key, error) {
 	if err := access.Require(ctx, "key.create"); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	policy, err := s.policies.PolicyByID(ctx, account.ID, in.PolicyID)
 	if err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the policy lookup's own error
+		return domain.Key{}, err // the policy lookup's own error
 	}
 
 	key := domain.Key{
@@ -199,7 +199,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 	}
 
 	if err := access.KeyWrite(access.PrincipalOf(ctx), key); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	if err := s.validate(ctx, account.ID, key, policy); err != nil {
@@ -219,7 +219,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 
 		return nil
 	}); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Key{}, err // the transaction's own error
 	}
 
 	return key, nil
@@ -233,13 +233,13 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 	}
 
 	if err := access.Require(ctx, "key.update"); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
 
 	if err := access.KeyWrite(principal, key); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	if in.KeySet {
@@ -248,7 +248,7 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 
 	policy, err := s.policies.PolicyByID(ctx, account.ID, key.PolicyID)
 	if err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the policy lookup's own error
+		return domain.Key{}, err // the policy lookup's own error
 	}
 
 	if err := s.validate(ctx, account.ID, key, policy); err != nil {
@@ -266,7 +266,7 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 
 		return nil
 	}); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Key{}, err // the transaction's own error
 	}
 
 	return key, nil
@@ -280,11 +280,11 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, id uuid.U
 	}
 
 	if err := access.Require(ctx, "key.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.KeyWrite(access.PrincipalOf(ctx), key); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
@@ -296,7 +296,7 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, id uuid.U
 
 		return nil
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -339,7 +339,7 @@ func (s Scenario) validate(ctx context.Context, accountID uuid.UUID, key domain.
 	}
 
 	if err := apperr.MultiOf(errs...); err != nil {
-		return err //nolint:wrapcheck // the document itself
+		return err // the document itself
 	}
 
 	return nil

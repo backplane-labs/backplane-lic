@@ -58,6 +58,24 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/licenses/{licenseId}/actions/check-out
 	CheckoutLicenseFile(ctx context.Context, params CheckoutLicenseFileParams) (*CheckoutLicenseFileOKHeaders, error)
+	// CheckoutMachine implements checkoutMachine operation.
+	//
+	// Check out a machine license file (JSON:API).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/check-out
+	CheckoutMachine(ctx context.Context, req CheckoutMachineReq, params CheckoutMachineParams) (*MachineFileDocument, error)
+	// CheckoutMachineRaw implements checkoutMachineRaw operation.
+	//
+	// Check out a machine license file (raw).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/actions/check-out
+	CheckoutMachineRaw(ctx context.Context, params CheckoutMachineRawParams) (*CheckoutMachineRawOKHeaders, error)
+	// CreateComponent implements createComponent operation.
+	//
+	// Create a machine component.
+	//
+	// POST /v1/accounts/{account}/components
+	CreateComponent(ctx context.Context, req CreateComponentReq, params CreateComponentParams) (*ComponentDocumentHeaders, error)
 	// CreateEntitlement implements createEntitlement operation.
 	//
 	// Create an entitlement.
@@ -88,12 +106,24 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/tokens
 	CreateLicenseToken(ctx context.Context, req CreateLicenseTokenReq, params CreateLicenseTokenParams) (*TokenDocument, error)
+	// CreateMachine implements createMachine operation.
+	//
+	// Activate a machine.
+	//
+	// POST /v1/accounts/{account}/machines
+	CreateMachine(ctx context.Context, req CreateMachineReq, params CreateMachineParams) (*MachineDocumentHeaders, error)
 	// CreatePolicy implements createPolicy operation.
 	//
 	// Create a policy.
 	//
 	// POST /v1/accounts/{account}/policies
 	CreatePolicy(ctx context.Context, req CreatePolicyReq, params CreatePolicyParams) (*PolicyDocumentHeaders, error)
+	// CreateProcess implements createProcess operation.
+	//
+	// Create a machine process.
+	//
+	// POST /v1/accounts/{account}/processes
+	CreateProcess(ctx context.Context, req CreateProcessReq, params CreateProcessParams) (*ProcessDocumentHeaders, error)
 	// CreateProduct implements createProduct operation.
 	//
 	// Create a product.
@@ -137,12 +167,30 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/decrement-usage
 	DecrementLicenseUsage(ctx context.Context, req DecrementLicenseUsageReq, params DecrementLicenseUsageParams) (*LicenseDocument, error)
+	// DeleteComponent implements deleteComponent operation.
+	//
+	// Delete a machine component.
+	//
+	// DELETE /v1/accounts/{account}/components/{componentId}
+	DeleteComponent(ctx context.Context, params DeleteComponentParams) error
 	// DeleteGroup implements deleteGroup operation.
 	//
 	// Delete a group (members keep existing, group nulled).
 	//
 	// DELETE /v1/accounts/{account}/groups/{groupId}
 	DeleteGroup(ctx context.Context, params DeleteGroupParams) error
+	// DeleteMachine implements deleteMachine operation.
+	//
+	// Delete a machine.
+	//
+	// DELETE /v1/accounts/{account}/machines/{machineId}
+	DeleteMachine(ctx context.Context, params DeleteMachineParams) error
+	// DeleteProcess implements deleteProcess operation.
+	//
+	// Delete a machine process.
+	//
+	// DELETE /v1/accounts/{account}/processes/{processId}
+	DeleteProcess(ctx context.Context, params DeleteProcessParams) error
 	// DeleteUser implements deleteUser operation.
 	//
 	// Delete a user.
@@ -221,6 +269,12 @@ type Handler interface {
 	//
 	// DELETE /v1/accounts/{account}/policies/{policyId}/entitlements
 	DetachPolicyEntitlements(ctx context.Context, req DetachPolicyEntitlementsReq, params DetachPolicyEntitlementsParams) error
+	// GenerateMachineProof implements generateMachineProof operation.
+	//
+	// Sign an offline proof of the machine (API v1.0).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof
+	GenerateMachineProof(ctx context.Context, req GenerateMachineProofReq, params GenerateMachineProofParams) (*MachineProofDocument, error)
 	// GenerateToken implements generateToken operation.
 	//
 	// Basic email:password (with meta.otp for two-factor users) or any token authentication. The
@@ -246,6 +300,12 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
 	IncrementLicenseUsage(ctx context.Context, req IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (*LicenseDocument, error)
+	// IndexComponents implements indexComponents operation.
+	//
+	// List machine components.
+	//
+	// GET /v1/accounts/{account}/components
+	IndexComponents(ctx context.Context, params IndexComponentsParams) (*ComponentListDocument, error)
 	// IndexEntitlements implements indexEntitlements operation.
 	//
 	// List entitlements.
@@ -288,6 +348,24 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/licenses
 	IndexLicenses(ctx context.Context, params IndexLicensesParams) (*LicenseListDocument, error)
+	// IndexMachineComponents implements indexMachineComponents operation.
+	//
+	// List a machine's components.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/components
+	IndexMachineComponents(ctx context.Context, params IndexMachineComponentsParams) (*ComponentListDocument, error)
+	// IndexMachineProcesses implements indexMachineProcesses operation.
+	//
+	// List a machine's processes.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/processes
+	IndexMachineProcesses(ctx context.Context, params IndexMachineProcessesParams) (*ProcessListDocument, error)
+	// IndexMachines implements indexMachines operation.
+	//
+	// List machines.
+	//
+	// GET /v1/accounts/{account}/machines
+	IndexMachines(ctx context.Context, params IndexMachinesParams) (*MachineListDocument, error)
 	// IndexPolicies implements indexPolicies operation.
 	//
 	// List policies.
@@ -312,6 +390,12 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/pool
 	IndexPolicyPool(ctx context.Context, params IndexPolicyPoolParams) (*KeyListDocument, error)
+	// IndexProcesses implements indexProcesses operation.
+	//
+	// List machine processes.
+	//
+	// GET /v1/accounts/{account}/processes
+	IndexProcesses(ctx context.Context, params IndexProcessesParams) (*ProcessListDocument, error)
 	// IndexProductLicenses implements indexProductLicenses operation.
 	//
 	// List a product's licenses.
@@ -323,7 +407,7 @@ type Handler interface {
 	// List a product's machines.
 	//
 	// GET /v1/accounts/{account}/products/{productId}/machines
-	IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineStubListDocument, error)
+	IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (*MachineListDocument, error)
 	// IndexProductPolicies implements indexProductPolicies operation.
 	//
 	// List a product's policies.
@@ -359,7 +443,7 @@ type Handler interface {
 	// List a group's machines.
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/machines
-	ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*UserMachineCollectionDocument, error)
+	ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (*MachineListDocument, error)
 	// ListGroupOwners implements listGroupOwners operation.
 	//
 	// List a group's owners (group-owner join resources).
@@ -395,7 +479,7 @@ type Handler interface {
 	// List a user's machines.
 	//
 	// GET /v1/accounts/{account}/users/{userId}/machines
-	ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*UserMachineCollectionDocument, error)
+	ListUserMachines(ctx context.Context, params ListUserMachinesParams) (*MachineListDocument, error)
 	// ListUserProducts implements listUserProducts operation.
 	//
 	// List a user's products.
@@ -446,6 +530,24 @@ type Handler interface {
 	//
 	// GET /v1/ping
 	Ping(ctx context.Context) error
+	// PingMachine implements pingMachine operation.
+	//
+	// Ping a machine's heartbeat (short alias).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/ping
+	PingMachine(ctx context.Context, params PingMachineParams) (*MachineDocument, error)
+	// PingMachineHeartbeat implements pingMachineHeartbeat operation.
+	//
+	// Ping a machine's heartbeat.
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat
+	PingMachineHeartbeat(ctx context.Context, req PingMachineHeartbeatReq, params PingMachineHeartbeatParams) (*MachineDocument, error)
+	// PingProcess implements pingProcess operation.
+	//
+	// Ping a machine process's heartbeat.
+	//
+	// POST /v1/accounts/{account}/processes/{processId}/actions/ping
+	PingProcess(ctx context.Context, req PingProcessReq, params PingProcessParams) (*ProcessDocument, error)
 	// PopPolicyPool implements popPolicyPool operation.
 	//
 	// Destroys the newest pooled key and answers its document.
@@ -494,6 +596,12 @@ type Handler interface {
 	//
 	// PUT /v1/accounts/{account}/users/{userId}/second-factors/{secondFactorId}
 	ReplaceUserSecondFactor(ctx context.Context, req ReplaceUserSecondFactorReq, params ReplaceUserSecondFactorParams) (*SecondFactorDocument, error)
+	// ReportMachineUsage implements reportMachineUsage operation.
+	//
+	// Report the installation's signed usage chain (a backplane extension).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/report-usage
+	ReportMachineUsage(ctx context.Context, req ReportMachineUsageReq, params ReportMachineUsageParams) (*MachineUsageAckDocument, error)
 	// RequestPasswordReset implements requestPasswordReset operation.
 	//
 	// Always answers 204; unknown emails trigger nothing.
@@ -506,6 +614,18 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
 	ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (*LicenseDocument, error)
+	// ResetMachine implements resetMachine operation.
+	//
+	// Reset a machine's heartbeat (short alias).
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/reset
+	ResetMachine(ctx context.Context, params ResetMachineParams) (*MachineDocument, error)
+	// ResetMachineHeartbeat implements resetMachineHeartbeat operation.
+	//
+	// Reset a machine's heartbeat.
+	//
+	// POST /v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat
+	ResetMachineHeartbeat(ctx context.Context, req ResetMachineHeartbeatReq, params ResetMachineHeartbeatParams) (*MachineDocument, error)
 	// ResetUserPassword implements resetUserPassword operation.
 	//
 	// Reset a user's password with a reset token.
@@ -538,6 +658,30 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/search
 	Search(ctx context.Context, req SearchReq, params SearchParams) (jx.Raw, error)
+	// ShowComponent implements showComponent operation.
+	//
+	// Retrieve a machine component.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}
+	ShowComponent(ctx context.Context, params ShowComponentParams) (*ComponentDocument, error)
+	// ShowComponentLicense implements showComponentLicense operation.
+	//
+	// Retrieve a component's license.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}/license
+	ShowComponentLicense(ctx context.Context, params ShowComponentLicenseParams) (*LicenseDocument, error)
+	// ShowComponentMachine implements showComponentMachine operation.
+	//
+	// Retrieve a component's machine.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}/machine
+	ShowComponentMachine(ctx context.Context, params ShowComponentMachineParams) (*MachineDocument, error)
+	// ShowComponentProduct implements showComponentProduct operation.
+	//
+	// Retrieve a component's product.
+	//
+	// GET /v1/accounts/{account}/components/{componentId}/product
+	ShowComponentProduct(ctx context.Context, params ShowComponentProductParams) (*ProductDocument, error)
 	// ShowEntitlement implements showEntitlement operation.
 	//
 	// Retrieve an entitlement (by id or code).
@@ -561,7 +705,7 @@ type Handler interface {
 	// Show one of a group's machines (id or fingerprint alias).
 	//
 	// GET /v1/accounts/{account}/groups/{groupId}/machines/{machineId}
-	ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*UserMachineDocument, error)
+	ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (*MachineDocument, error)
 	// ShowGroupOwner implements showGroupOwner operation.
 	//
 	// Show one of a group's owners.
@@ -652,6 +796,60 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/licenses/{licenseId}/user
 	ShowLicenseUserAlias(ctx context.Context, params ShowLicenseUserAliasParams) (*LicenseOwnerDocument, error)
+	// ShowMachine implements showMachine operation.
+	//
+	// Retrieve a machine (by id or fingerprint).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}
+	ShowMachine(ctx context.Context, params ShowMachineParams) (*MachineDocument, error)
+	// ShowMachineComponent implements showMachineComponent operation.
+	//
+	// Retrieve one of a machine's components.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/components/{componentId}
+	ShowMachineComponent(ctx context.Context, params ShowMachineComponentParams) (*ComponentDocument, error)
+	// ShowMachineGroup implements showMachineGroup operation.
+	//
+	// Retrieve a machine's group.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/group
+	ShowMachineGroup(ctx context.Context, params ShowMachineGroupParams) (*GroupDocument, error)
+	// ShowMachineLicense implements showMachineLicense operation.
+	//
+	// Retrieve a machine's license.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/license
+	ShowMachineLicense(ctx context.Context, params ShowMachineLicenseParams) (*LicenseDocument, error)
+	// ShowMachineOwner implements showMachineOwner operation.
+	//
+	// Retrieve a machine's owner.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/owner
+	ShowMachineOwner(ctx context.Context, params ShowMachineOwnerParams) (*LicenseOwnerDocument, error)
+	// ShowMachineProcess implements showMachineProcess operation.
+	//
+	// Retrieve one of a machine's processes.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/processes/{processId}
+	ShowMachineProcess(ctx context.Context, params ShowMachineProcessParams) (*ProcessDocument, error)
+	// ShowMachineProduct implements showMachineProduct operation.
+	//
+	// Retrieve a machine's product.
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/product
+	ShowMachineProduct(ctx context.Context, params ShowMachineProductParams) (*ProductDocument, error)
+	// ShowMachineUsage implements showMachineUsage operation.
+	//
+	// Read the machine's accepted usage chain (a backplane extension).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/usage
+	ShowMachineUsage(ctx context.Context, params ShowMachineUsageParams) (*MachineUsageDocument, error)
+	// ShowMachineUserAlias implements showMachineUserAlias operation.
+	//
+	// Retrieve a machine's owner (v1.5 alias).
+	//
+	// GET /v1/accounts/{account}/machines/{machineId}/user
+	ShowMachineUserAlias(ctx context.Context, params ShowMachineUserAliasParams) (*LicenseOwnerDocument, error)
 	// ShowPolicy implements showPolicy operation.
 	//
 	// Retrieve a policy.
@@ -682,6 +880,30 @@ type Handler interface {
 	//
 	// GET /v1/accounts/{account}/policies/{policyId}/product
 	ShowPolicyProduct(ctx context.Context, params ShowPolicyProductParams) (*ProductDocument, error)
+	// ShowProcess implements showProcess operation.
+	//
+	// Retrieve a machine process.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}
+	ShowProcess(ctx context.Context, params ShowProcessParams) (*ProcessDocument, error)
+	// ShowProcessLicense implements showProcessLicense operation.
+	//
+	// Retrieve a process's license.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}/license
+	ShowProcessLicense(ctx context.Context, params ShowProcessLicenseParams) (*LicenseDocument, error)
+	// ShowProcessMachine implements showProcessMachine operation.
+	//
+	// Retrieve a process's machine.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}/machine
+	ShowProcessMachine(ctx context.Context, params ShowProcessMachineParams) (*MachineDocument, error)
+	// ShowProcessProduct implements showProcessProduct operation.
+	//
+	// Retrieve a process's product.
+	//
+	// GET /v1/accounts/{account}/processes/{processId}/product
+	ShowProcessProduct(ctx context.Context, params ShowProcessProductParams) (*ProductDocument, error)
 	// ShowProduct implements showProduct operation.
 	//
 	// Retrieve a product (by id or code).
@@ -747,7 +969,7 @@ type Handler interface {
 	// Show one of a user's machines (id or fingerprint alias).
 	//
 	// GET /v1/accounts/{account}/users/{userId}/machines/{machineId}
-	ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*UserMachineDocument, error)
+	ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (*MachineDocument, error)
 	// ShowUserProduct implements showUserProduct operation.
 	//
 	// Show one of a user's products.
@@ -790,6 +1012,12 @@ type Handler interface {
 	//
 	// POST /v1/accounts/{account}/users/{userId}/actions/unban
 	UnbanUser(ctx context.Context, params UnbanUserParams) (*UserDocument, error)
+	// UpdateComponent implements updateComponent operation.
+	//
+	// Update a machine component.
+	//
+	// PATCH /v1/accounts/{account}/components/{componentId}
+	UpdateComponent(ctx context.Context, req UpdateComponentReq, params UpdateComponentParams) (*ComponentDocument, error)
 	// UpdateEntitlement implements updateEntitlement operation.
 	//
 	// Update an entitlement.
@@ -838,12 +1066,36 @@ type Handler interface {
 	//
 	// PATCH /v1/accounts/{account}/licenses/{licenseId}/user
 	UpdateLicenseUserAlias(ctx context.Context, req UpdateLicenseUserAliasReq, params UpdateLicenseUserAliasParams) (*LicenseDocument, error)
+	// UpdateMachine implements updateMachine operation.
+	//
+	// Update a machine.
+	//
+	// PATCH /v1/accounts/{account}/machines/{machineId}
+	UpdateMachine(ctx context.Context, req UpdateMachineReq, params UpdateMachineParams) (*MachineDocument, error)
+	// UpdateMachineGroup implements updateMachineGroup operation.
+	//
+	// Set a machine's group.
+	//
+	// PATCH /v1/accounts/{account}/machines/{machineId}/group
+	UpdateMachineGroup(ctx context.Context, req UpdateMachineGroupReq, params UpdateMachineGroupParams) (*MachineDocument, error)
+	// UpdateMachineOwner implements updateMachineOwner operation.
+	//
+	// Set a machine's owner.
+	//
+	// PATCH /v1/accounts/{account}/machines/{machineId}/owner
+	UpdateMachineOwner(ctx context.Context, req UpdateMachineOwnerReq, params UpdateMachineOwnerParams) (*MachineDocument, error)
 	// UpdatePolicy implements updatePolicy operation.
 	//
 	// Scheme, encrypted and usePool are immutable; relationships are not accepted.
 	//
 	// PATCH /v1/accounts/{account}/policies/{policyId}
 	UpdatePolicy(ctx context.Context, req UpdatePolicyReq, params UpdatePolicyParams) (*PolicyDocument, error)
+	// UpdateProcess implements updateProcess operation.
+	//
+	// Update a machine process.
+	//
+	// PATCH /v1/accounts/{account}/processes/{processId}
+	UpdateProcess(ctx context.Context, req UpdateProcessReq, params UpdateProcessParams) (*ProcessDocument, error)
 	// UpdateProduct implements updateProduct operation.
 	//
 	// Update a product.

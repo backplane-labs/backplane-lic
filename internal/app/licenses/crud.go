@@ -68,7 +68,7 @@ func (s Scenario) Index(
 	ctx context.Context, account domain.Account, f Filter, params paging.Params,
 ) (List, error) {
 	if err := access.Require(ctx, "license.read"); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -98,7 +98,7 @@ func (s Scenario) Index(
 	}
 
 	if err := access.LicenseIndexPostCheck(principal, items, attached); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	out := List{Items: items, Count: len(items)}
@@ -124,7 +124,7 @@ func (s Scenario) Index(
 // Show answers one license by id or raw key.
 func (s Scenario) Show(ctx context.Context, account domain.Account, idOrKey string) (domain.License, error) {
 	if err := access.Require(ctx, "license.read"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	license, err := s.load(ctx, account, idOrKey)
@@ -138,7 +138,7 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, idOrKey stri
 	}
 
 	if err := access.LicenseShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	return license, nil
@@ -149,7 +149,7 @@ func (s Scenario) Create( //nolint:cyclop,funlen // the creation ladder, in the 
 	ctx context.Context, account domain.Account, in Input,
 ) (domain.License, error) {
 	if err := access.Require(ctx, "license.create"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if !in.PolicyID.Valid {
@@ -160,7 +160,7 @@ func (s Scenario) Create( //nolint:cyclop,funlen // the creation ladder, in the 
 	policy, err := s.policies.PolicyByID(ctx, account.ID, in.PolicyID.UUID)
 	if err != nil {
 		// The denormalized product association fails with it.
-		return domain.License{}, apperr.MultiOf( //nolint:wrapcheck // the document itself
+		return domain.License{}, apperr.MultiOf( // the document itself
 			apperr.Validation("POLICY_NOT_FOUND", "must exist",
 				"/data/relationships/policy", "licenses/#licenses-object-relationships-policy"),
 			apperr.Validation("PRODUCT_NOT_FOUND", "must exist",
@@ -253,7 +253,7 @@ func (s Scenario) Create( //nolint:cyclop,funlen // the creation ladder, in the 
 		}
 
 		if err := access.LicenseCreate(access.PrincipalOf(ctx), license); err != nil {
-			return err //nolint:wrapcheck // the authorization's own error
+			return err // the authorization's own error
 		}
 
 		if err := s.store.InsertLicense(ctx, license); err != nil {
@@ -278,11 +278,11 @@ func (s Scenario) Update( //nolint:cyclop,funlen // one branch per attribute
 	}
 
 	if err := access.Require(ctx, "license.update"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if err := access.LicenseUpdate(access.PrincipalOf(ctx), license); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if in.Name != nil {
@@ -363,11 +363,11 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, idOrKey s
 	}
 
 	if err := access.Require(ctx, "license.delete"); err != nil {
-		return license, err //nolint:wrapcheck // the authorization's own error
+		return license, err // the authorization's own error
 	}
 
 	if err := access.LicenseDestroy(access.PrincipalOf(ctx), license); err != nil {
-		return license, err //nolint:wrapcheck // the authorization's own error
+		return license, err // the authorization's own error
 	}
 
 	if err := s.write(ctx, func(ctx context.Context) error {
@@ -398,7 +398,7 @@ func (s Scenario) load(ctx context.Context, account domain.Account, idOrKey stri
 	}
 
 	switch licenseScopeOnly(principal) {
-	case "product":
+	case resourceProduct:
 		if license.ProductID != principal.BearerID {
 			return domain.License{}, apperr.NotFound("license", idOrKey)
 		}
@@ -636,7 +636,7 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 		}
 
 		if licensee {
-			rel("OWNER_INVALID", "already exists (user is attached through users)", "owner")
+			rel("OWNER_INVALID", "already exists (user is attached through users)", resourceOwner)
 		}
 	}
 
@@ -648,8 +648,9 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 		attr("METADATA_TOO_LONG", detail, "metadata")
 	}
 
+	// A zero override is no override (domain.Overridden): unvalidated.
 	num := func(value *int32, minimum int32, code, name string) {
-		if value == nil {
+		if !domain.Overridden(value) {
 			return
 		}
 
@@ -658,7 +659,7 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 		}
 	}
 
-	if m := license.MaxMachinesOverride; m != nil {
+	if m := license.MaxMachinesOverride; domain.Overridden(m) {
 		switch {
 		case *m < 0:
 			attr("MAX_MACHINES_INVALID", "must be greater than or equal to 0", "maxMachines")
@@ -675,7 +676,7 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 	num(license.MaxUsersOverride, 0, "MAX_USERS_INVALID", "maxUsers")
 
 	bignum := func(value *int64, minimum int64, code, name string) {
-		if value == nil {
+		if !domain.Overridden(value) {
 			return
 		}
 
@@ -688,7 +689,7 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 	bignum(license.MaxDiskOverride, 1, "MAX_DISK_INVALID", "maxDisk")
 
 	if err := apperr.MultiOf(errs...); err != nil {
-		return err //nolint:wrapcheck // the document itself
+		return err // the document itself
 	}
 
 	return nil
@@ -698,7 +699,7 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 func licenseScope(principal access.Principal) (string, uuid.UUID) {
 	switch principal.Role {
 	case domain.RoleProduct:
-		return "product", principal.BearerID
+		return resourceProduct, principal.BearerID
 	case domain.RoleUser:
 		return "user", principal.BearerID
 	case domain.RoleLicense:

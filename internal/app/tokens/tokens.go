@@ -73,7 +73,7 @@ func (s Scenario) Generate(
 	in GenerateInput,
 ) (domain.Token, string, error) {
 	if err := access.Require(ctx, "token.generate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, "", err // the authorization's own error
 	}
 
 	if principal.Console && in.BearerType == "" {

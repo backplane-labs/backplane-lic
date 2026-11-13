@@ -116,7 +116,7 @@ func (s Activities) ValidateKey(ctx context.Context, in port.ValidateKeyIn, key 
 				out.License = &result
 			}
 
-			return out, err //nolint:wrapcheck // execute wraps the scenario error with its activity identity
+			return out, err // execute wraps the scenario error with its activity identity
 		})
 }
 

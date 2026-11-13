@@ -23,16 +23,16 @@ func (s Scenario) Product(ctx context.Context, account domain.Account, id uuid.U
 	}
 
 	if err := access.Require(ctx, "product.read"); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	if err := access.PolicyRelationship(access.PrincipalOf(ctx), policy); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	product, err := s.products.ProductByID(ctx, account.ID, policy.ProductID)
 	if err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the product lookup's own error
+		return domain.Product{}, err // the product lookup's own error
 	}
 
 	return product, nil
@@ -48,7 +48,7 @@ type KeyList struct {
 // Pool answers the policy's key pool page.
 func (s Scenario) Pool(ctx context.Context, account domain.Account, id uuid.UUID, params paging.Params) (KeyList, error) { //nolint:lll // the wire name is long
 	if err := access.Require(ctx, "key.read"); err != nil {
-		return KeyList{}, err //nolint:wrapcheck // the authorization's own error
+		return KeyList{}, err // the authorization's own error
 	}
 
 	policy, err := s.load(ctx, account.ID, id)
@@ -59,7 +59,7 @@ func (s Scenario) Pool(ctx context.Context, account domain.Account, id uuid.UUID
 	principal := access.PrincipalOf(ctx)
 
 	if err := access.PolicyRelationship(principal, policy); err != nil {
-		return KeyList{}, err //nolint:wrapcheck // the authorization's own error
+		return KeyList{}, err // the authorization's own error
 	}
 
 	page := params.Window()
@@ -70,7 +70,7 @@ func (s Scenario) Pool(ctx context.Context, account domain.Account, id uuid.UUID
 	}
 
 	if err := access.PolicyPoolPostCheck(principal, policy, items); err != nil {
-		return KeyList{}, err //nolint:wrapcheck // the authorization's own error
+		return KeyList{}, err // the authorization's own error
 	}
 
 	out := KeyList{Items: items, Count: len(items)}
@@ -103,13 +103,13 @@ func (s Scenario) PoolKey(
 	}
 
 	if err := access.Require(ctx, "key.read"); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
 
 	if err := access.PolicyRelationship(principal, policy); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	whole := paging.Page{Limit: 1 << 30, Fetch: 1 << 30} //nolint:mnd // the whole pool
@@ -120,7 +120,7 @@ func (s Scenario) PoolKey(
 	}
 
 	if err := access.PolicyPoolPostCheck(principal, policy, pool); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	for _, key := range pool { //nolint:gocritic // mirrors the reference's shape
@@ -140,11 +140,11 @@ func (s Scenario) Pop(ctx context.Context, account domain.Account, id uuid.UUID)
 	}
 
 	if err := access.Require(ctx, "policy.pool.pop"); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	if err := access.PolicyPoolPop(access.PrincipalOf(ctx), policy); err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Key{}, err // the authorization's own error
 	}
 
 	if !policy.UsePool {
@@ -181,7 +181,7 @@ func (s Scenario) Pop(ctx context.Context, account domain.Account, id uuid.UUID)
 		return nil
 	})
 	if err != nil {
-		return domain.Key{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Key{}, err // the transaction's own error
 	}
 
 	return key, nil
@@ -197,11 +197,11 @@ func (s Scenario) Entitlements(
 	}
 
 	if err := access.Require(ctx, "entitlement.read"); err != nil {
-		return EntitlementList{}, err //nolint:wrapcheck // the authorization's own error
+		return EntitlementList{}, err // the authorization's own error
 	}
 
 	if err := access.PolicyRelationship(access.PrincipalOf(ctx), policy); err != nil {
-		return EntitlementList{}, err //nolint:wrapcheck // the authorization's own error
+		return EntitlementList{}, err // the authorization's own error
 	}
 
 	joins, err := s.entitlements.ListPolicyEntitlements(ctx, account.ID, policy.ID)
@@ -217,7 +217,7 @@ func (s Scenario) Entitlements(
 	for _, join := range joins[start:end] {
 		entitlement, err := s.entitlements.EntitlementByID(ctx, account.ID, join.EntitlementID)
 		if err != nil {
-			return EntitlementList{}, err //nolint:wrapcheck // the lookup's own error
+			return EntitlementList{}, err // the lookup's own error
 		}
 
 		items = append(items, entitlement)
@@ -242,11 +242,11 @@ func (s Scenario) Entitlement(
 	}
 
 	if err := access.Require(ctx, "entitlement.read"); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	if err := access.PolicyRelationship(access.PrincipalOf(ctx), policy); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	resolve := func() (uuid.UUID, error) {
@@ -256,7 +256,7 @@ func (s Scenario) Entitlement(
 
 		entitlement, err := s.entitlements.EntitlementByCode(ctx, account.ID, alias)
 		if err != nil {
-			return uuid.UUID{}, err //nolint:wrapcheck // the lookup's own error
+			return uuid.UUID{}, err // the lookup's own error
 		}
 
 		return entitlement.ID, nil
@@ -271,7 +271,7 @@ func (s Scenario) Entitlement(
 		return domain.Entitlement{}, apperr.NotFound("entitlement", alias)
 	}
 
-	return s.entitlements.EntitlementByID(ctx, account.ID, entitlementID) //nolint:wrapcheck // the lookup's own error
+	return s.entitlements.EntitlementByID(ctx, account.ID, entitlementID) // the lookup's own error
 }
 
 // EntitlementList is one policy-entitlements page.
@@ -287,7 +287,7 @@ func (s Scenario) Attach( //nolint:funlen,cyclop // the attribute table
 	ctx context.Context, account domain.Account, id uuid.UUID, entitlementIDs []uuid.UUID,
 ) ([]domain.PolicyEntitlement, error) {
 	if err := access.Require(ctx, "policy.entitlements.attach"); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
 	policy, err := s.load(ctx, account.ID, id)
@@ -296,7 +296,7 @@ func (s Scenario) Attach( //nolint:funlen,cyclop // the attribute table
 	}
 
 	if err := access.PolicyEntitlementsWrite(access.PrincipalOf(ctx), policy); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
 	var errs []*apperr.T
@@ -320,7 +320,7 @@ func (s Scenario) Attach( //nolint:funlen,cyclop // the attribute table
 	}
 
 	if err := apperr.MultiOf(errs...); err != nil {
-		return nil, err //nolint:wrapcheck // the document itself
+		return nil, err // the document itself
 	}
 
 	now := s.clock()
@@ -354,7 +354,7 @@ func (s Scenario) Attach( //nolint:funlen,cyclop // the attribute table
 	}
 
 	if err := s.store.Do(ctx, attach); err != nil {
-		return nil, err //nolint:wrapcheck // the transaction's own error
+		return nil, err // the transaction's own error
 	}
 
 	joins, err := s.entitlements.ListPolicyEntitlements(ctx, account.ID, policy.ID)
@@ -387,11 +387,11 @@ func (s Scenario) Detach(
 	}
 
 	if err := access.Require(ctx, "policy.entitlements.detach"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.PolicyEntitlementsWrite(access.PrincipalOf(ctx), policy); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	for index, entitlementID := range entitlementIDs {
@@ -429,7 +429,7 @@ func (s Scenario) Detach(
 	}
 
 	if err := s.store.Do(ctx, detach); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -478,11 +478,11 @@ func (s Scenario) RequireRelationship(
 	}
 
 	if err := access.Require(ctx, permission); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	if err := access.PolicyRelationship(access.PrincipalOf(ctx), policy); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	return policy, nil

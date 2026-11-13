@@ -4,6 +4,7 @@ package httpapi
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"strings"
 	"time"
 
@@ -63,14 +64,14 @@ func (a *API) IndexLicenses(ctx context.Context, _ oas.IndexLicensesParams) (*oa
 
 	page, err := a.licenses.Index(ctx, req.account, licenseFilter(req.query), params)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	now := a.licenseNow()
 
 	doc := &oas.LicenseListDocument{Data: make([]oas.LicenseResource, 0, len(page.Items))}
-	for _, license := range page.Items { //nolint:gocritic // mirrors the reference's shape
-		doc.Data = append(doc.Data, render.License(req.account.ID, license, now, nil))
+	for i := range page.Items {
+		doc.Data = append(doc.Data, render.License(req.account.ID, page.Items[i], now, nil))
 	}
 
 	doc.Links = render.Links(linksDoc(req, params, page.Count, page.Next))
@@ -88,7 +89,7 @@ func (a *API) ShowLicense(ctx context.Context, params oas.ShowLicenseParams) (*o
 
 	license, err := a.licenses.Show(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -111,7 +112,7 @@ func (a *API) CreateLicense(
 
 	license, err := a.licenses.Create(ctx, req.account, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocumentHeaders{
@@ -137,7 +138,7 @@ func (a *API) UpdateLicense(
 
 	license, err := a.licenses.Update(ctx, req.account, params.LicenseId, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -152,7 +153,7 @@ func (a *API) DestroyLicense(ctx context.Context, params oas.DestroyLicenseParam
 	}
 
 	if _, err := a.licenses.Destroy(ctx, req.account, params.LicenseId); err != nil {
-		return err //nolint:wrapcheck // the scenario's own error
+		return err
 	}
 
 	return nil
@@ -177,12 +178,12 @@ func (a *API) IndexLicenseMachines(
 
 	page, err := a.licenses.Machines(ctx, req.account, params.LicenseId, machineFilter(req), listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.MachineListDocument{Data: make([]oas.MachineResource, 0, len(page.Items))}
-	for _, machine := range page.Items { //nolint:gocritic // mirrors the reference's shape
-		doc.Data = append(doc.Data, render.Machine(req.account.ID, machine, uuid.Nil, nil))
+	for i := range page.Items {
+		doc.Data = append(doc.Data, render.Machine(req.account.ID, page.Items[i]))
 	}
 
 	doc.Links = render.Links(linksDoc(req, listParams, page.Count, page.Next))
@@ -202,11 +203,11 @@ func (a *API) ShowLicenseMachine(
 
 	machine, err := a.licenses.Machine(ctx, req.account, params.LicenseId, params.MachineId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.MachineDocument{Data: oas.NilMachineResource{
-		Value: render.Machine(req.account.ID, machine, uuid.Nil, nil),
+		Value: render.Machine(req.account.ID, machine),
 	}}, nil
 }
 
@@ -227,7 +228,7 @@ func (a *API) IndexLicenseTokens(
 
 	page, err := a.licenses.Tokens(ctx, req.account, params.LicenseId, listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.TokenCollectionDocument{Data: make([]oas.TokenResource, 0, len(page.Rows))}
@@ -252,7 +253,7 @@ func (a *API) ShowLicenseToken(
 
 	token, err := a.licenses.Token(ctx, req.account, params.LicenseId, tokenID(params.TokenId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, "")}, nil
@@ -275,7 +276,7 @@ func (a *API) CreateLicenseToken(
 
 	token, raw, err := a.licenses.GenerateToken(ctx, req.account, params.LicenseId, attrs)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.TokenDocument{Data: render.Token(req.account.ID, token, token.BearerRole, raw)}, nil
@@ -389,7 +390,7 @@ func (a *API) ShowLicenseProduct(
 
 	product, err := a.licenses.Product(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.ProductDocument{Data: render.ProductResource(req.account.ID, product)}, nil
@@ -407,7 +408,7 @@ func (a *API) ShowLicensePolicy(
 
 	policy, err := a.licenses.Policy(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.PolicyDocument{Data: render.PolicyResource(req.account.ID, policy)}, nil
@@ -434,7 +435,7 @@ func (a *API) UpdateLicensePolicy(
 
 	license, err := a.licenses.Transfer(ctx, req.account, params.LicenseId, link.UUID)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -452,7 +453,7 @@ func (a *API) ShowLicenseGroup(
 
 	group, err := a.licenses.Group(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.GroupDocument{Data: oas.NilGroupResource{Value: render.Group(group)}}, nil
@@ -475,7 +476,7 @@ func (a *API) UpdateLicenseGroup(
 
 	license, err := a.licenses.SetGroup(ctx, req.account, params.LicenseId, groupLinkOf(link, isNull))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -501,7 +502,7 @@ func (a *API) ShowLicenseOwner(
 
 	owner, present, err := a.licenses.Owner(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	if !present {
@@ -510,7 +511,7 @@ func (a *API) ShowLicenseOwner(
 
 	active, err := a.licenses.UserActive(ctx, req.account, owner.ID)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseOwnerDocument{Data: oas.NilUserResource{
@@ -560,7 +561,7 @@ func (a *API) updateLicenseOwner(
 
 	license, err := a.licenses.SetOwner(ctx, req.account, idOrKey, owner, kind == typeUserSingular)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -591,7 +592,7 @@ func (a *API) IndexLicenseUsers(
 
 	page, err := a.licenses.Users(ctx, req.account, params.LicenseId, listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.UserCollectionDocument{Data: make([]oas.UserResource, 0, len(page.Items))}
@@ -616,7 +617,7 @@ func (a *API) ShowLicenseUser(
 
 	listed, err := a.licenses.User(ctx, req.account, params.LicenseId, params.UserId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseOwnerDocument{Data: oas.NilUserResource{
@@ -641,7 +642,7 @@ func (a *API) AttachLicenseUsers(
 
 	rows, err := a.licenses.AttachUsers(ctx, req.account, params.LicenseId, ids)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.LicenseUserListDocument{Data: make([]oas.LicenseUserResource, 0, len(rows))}
@@ -667,7 +668,7 @@ func (a *API) DetachLicenseUsers(
 		return err
 	}
 
-	return a.licenses.DetachUsers(ctx, req.account, params.LicenseId, ids) //nolint:wrapcheck // the scenario's own error
+	return a.licenses.DetachUsers(ctx, req.account, params.LicenseId, ids)
 }
 
 // IndexLicenseEntitlements implements GET …/licenses/{licenseId}/entitlements.
@@ -687,7 +688,7 @@ func (a *API) IndexLicenseEntitlements(
 
 	items, count, err := a.licenses.Entitlements(ctx, req.account, params.LicenseId, listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.EntitlementListDocument{Data: make([]oas.EntitlementResource, 0, len(items))}
@@ -714,7 +715,7 @@ func (a *API) ShowLicenseEntitlement(
 
 	entitlement, err := a.licenses.Entitlement(ctx, req.account, params.LicenseId, id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.EntitlementDocument{Data: render.EntitlementResource(req.account.ID, entitlement)}, nil
@@ -737,7 +738,7 @@ func (a *API) AttachLicenseEntitlements(
 
 	rows, err := a.licenses.AttachEntitlements(ctx, req.account, params.LicenseId, ids)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	doc := &oas.LicenseEntitlementListDocument{Data: make([]oas.LicenseEntitlementResource, 0, len(rows))}
@@ -763,7 +764,7 @@ func (a *API) DetachLicenseEntitlements(
 		return err
 	}
 
-	return a.licenses.DetachEntitlements( //nolint:wrapcheck // the scenario's own error
+	return a.licenses.DetachEntitlements(
 		ctx, req.account, params.LicenseId, ids,
 	)
 }
@@ -784,7 +785,7 @@ func (a *API) QuickValidateLicense(
 
 	license, verdict, err := a.licenses.ValidateQuick(ctx, req.account, params.LicenseId, skipTouch)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseValidateDocument{
@@ -803,19 +804,19 @@ func (a *API) ValidateLicense(
 		return nil, err
 	}
 
-	nonce, scope, rawScope, _, _, err := validateValidationBody(req, false)
+	body, err := validateValidationBody(req, false)
 	if err != nil {
 		return nil, err
 	}
 
-	license, verdict, err := a.licenses.Validate(ctx, req.account, params.LicenseId, scope)
+	license, verdict, err := a.licenses.Validate(ctx, req.account, params.LicenseId, body.Scope)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseValidateDocument{
 		Data: a.licenseDocument(req, &license, nil),
-		Meta: validationMeta(a.licenseNow(), verdict, nonce, rawScope),
+		Meta: validationMeta(a.licenseNow(), verdict, body.Nonce, body.RawScope),
 	}, nil
 }
 
@@ -829,19 +830,19 @@ func (a *API) ValidateLicenseKey(
 		return nil, err
 	}
 
-	nonce, scope, rawScope, key, legacy, err := validateValidationBody(req, true)
+	body, err := validateValidationBody(req, true)
 	if err != nil {
 		return nil, err
 	}
 
-	license, verdict, err := a.licenses.ValidateKey(ctx, req.account, key, legacy, scope)
+	license, verdict, err := a.licenses.ValidateKey(ctx, req.account, body.Key, body.Legacy, body.Scope)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseValidateDocument{
 		Data: a.licenseDocument(req, license, nil),
-		Meta: validationMeta(a.licenseNow(), verdict, nonce, rawScope),
+		Meta: validationMeta(a.licenseNow(), verdict, body.Nonce, body.RawScope),
 	}, nil
 }
 
@@ -862,7 +863,7 @@ func (a *API) RevokeLicense(ctx context.Context, params oas.RevokeLicenseParams)
 		return err
 	}
 
-	return a.licenses.Revoke(ctx, req.account, params.LicenseId) //nolint:wrapcheck // the scenario's own error
+	return a.licenses.Revoke(ctx, req.account, params.LicenseId)
 }
 
 // RenewLicense implements POST …/licenses/{licenseId}/actions/renew.
@@ -875,7 +876,7 @@ func (a *API) RenewLicense(ctx context.Context, params oas.RenewLicenseParams) (
 
 	license, err := a.licenses.Renew(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -891,7 +892,7 @@ func (a *API) SuspendLicense(ctx context.Context, params oas.SuspendLicenseParam
 
 	license, err := a.licenses.Suspend(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -907,7 +908,7 @@ func (a *API) ReinstateLicense(ctx context.Context, params oas.ReinstateLicenseP
 
 	license, err := a.licenses.Reinstate(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -923,7 +924,7 @@ func (a *API) CheckInLicense(ctx context.Context, params oas.CheckInLicenseParam
 
 	license, err := a.licenses.CheckIn(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -946,7 +947,7 @@ func (a *API) IncrementLicenseUsage(
 
 	license, err := a.licenses.IncrementUsage(ctx, req.account, params.LicenseId, increment)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -969,7 +970,7 @@ func (a *API) DecrementLicenseUsage(
 
 	license, err := a.licenses.DecrementUsage(ctx, req.account, params.LicenseId, decrement)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -985,7 +986,7 @@ func (a *API) ResetLicenseUsage(ctx context.Context, params oas.ResetLicenseUsag
 
 	license, err := a.licenses.ResetUsage(ctx, req.account, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
@@ -1032,10 +1033,7 @@ func (a *API) CheckoutLicense(
 	}
 
 	// The meta wins over the query parameters.
-	query := checkoutQueryParams(req)
-	mergeCheckoutParams(&meta, &query)
-
-	checkout, cert, err := a.checkout(ctx, req, params.LicenseId, meta)
+	checkout, cert, err := a.checkout(ctx, req, params.LicenseId, mergeCheckoutParams(checkoutQueryParams(req), meta))
 	if err != nil {
 		return nil, err
 	}
@@ -1052,12 +1050,12 @@ func (a *API) checkout(
 ) (licenses.Checkout, string, error) {
 	checkout, err := a.licenses.Checkout(ctx, req.account, idOrKey, params)
 	if err != nil {
-		return checkout, "", err //nolint:wrapcheck // the scenario's own error
+		return checkout, "", err
 	}
 
 	payload, err := render.CheckoutPayload(req.account.ID, checkout, a.licenseNow())
 	if err != nil {
-		return checkout, "", err //nolint:wrapcheck // the renderer's own error
+		return checkout, "", fmt.Errorf("httpapi: license file payload: %w", err)
 	}
 
 	cert, err := crypto.BuildFileCertificate(crypto.FileCertificateInput{
@@ -1066,7 +1064,7 @@ func (a *API) checkout(
 		Prefix: "license/", Begin: "-----BEGIN LICENSE FILE-----", End: "-----END LICENSE FILE-----",
 	})
 	if err != nil {
-		return checkout, "", err //nolint:wrapcheck // the crypto's own error
+		return checkout, "", fmt.Errorf("httpapi: license file certificate: %w", err)
 	}
 
 	return checkout, cert, nil
@@ -1106,29 +1104,37 @@ func checkoutQueryParams(req *request) licenses.CheckoutParams {
 	}
 
 	params.Include = append(params.Include, query["include[]"]...)
-	params.Include = append(params.Include, query["include"]...)
+
+	// A plain include is coerced to an array by splitting on commas.
+	for _, value := range query["include"] {
+		params.Include = append(params.Include, strings.Split(value, ",")...)
+	}
 
 	return params
 }
 
 // mergeCheckoutParams overlays the meta over the query parameters
 // (present meta values win).
-func mergeCheckoutParams(dst, src *licenses.CheckoutParams) {
-	if src.Encrypt != nil {
-		dst.Encrypt = src.Encrypt
+func mergeCheckoutParams(query, meta licenses.CheckoutParams) licenses.CheckoutParams {
+	out := query
+
+	if meta.Encrypt != nil {
+		out.Encrypt = meta.Encrypt
 	}
 
-	if src.Algorithm != "" {
-		dst.Algorithm = src.Algorithm
+	if meta.Algorithm != "" {
+		out.Algorithm = meta.Algorithm
 	}
 
-	if src.TTL != nil {
-		dst.TTL = src.TTL
+	if meta.TTLSet {
+		out.TTL, out.TTLSet = meta.TTL, true
 	}
 
-	if len(src.Include) > 0 {
-		dst.Include = src.Include
+	if meta.Include != nil {
+		out.Include = meta.Include
 	}
+
+	return out
 }
 
 // licenseListDocument renders an index page (the shared envelope of

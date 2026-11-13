@@ -86,6 +86,33 @@ func (UnimplementedHandler) CheckoutLicenseFile(ctx context.Context, params Chec
 	return r, ht.ErrNotImplemented
 }
 
+// CheckoutMachine implements checkoutMachine operation.
+//
+// Check out a machine license file (JSON:API).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/check-out
+func (UnimplementedHandler) CheckoutMachine(ctx context.Context, req CheckoutMachineReq, params CheckoutMachineParams) (r *MachineFileDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CheckoutMachineRaw implements checkoutMachineRaw operation.
+//
+// Check out a machine license file (raw).
+//
+// GET /v1/accounts/{account}/machines/{machineId}/actions/check-out
+func (UnimplementedHandler) CheckoutMachineRaw(ctx context.Context, params CheckoutMachineRawParams) (r *CheckoutMachineRawOKHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateComponent implements createComponent operation.
+//
+// Create a machine component.
+//
+// POST /v1/accounts/{account}/components
+func (UnimplementedHandler) CreateComponent(ctx context.Context, req CreateComponentReq, params CreateComponentParams) (r *ComponentDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateEntitlement implements createEntitlement operation.
 //
 // Create an entitlement.
@@ -131,12 +158,30 @@ func (UnimplementedHandler) CreateLicenseToken(ctx context.Context, req CreateLi
 	return r, ht.ErrNotImplemented
 }
 
+// CreateMachine implements createMachine operation.
+//
+// Activate a machine.
+//
+// POST /v1/accounts/{account}/machines
+func (UnimplementedHandler) CreateMachine(ctx context.Context, req CreateMachineReq, params CreateMachineParams) (r *MachineDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreatePolicy implements createPolicy operation.
 //
 // Create a policy.
 //
 // POST /v1/accounts/{account}/policies
 func (UnimplementedHandler) CreatePolicy(ctx context.Context, req CreatePolicyReq, params CreatePolicyParams) (r *PolicyDocumentHeaders, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateProcess implements createProcess operation.
+//
+// Create a machine process.
+//
+// POST /v1/accounts/{account}/processes
+func (UnimplementedHandler) CreateProcess(ctx context.Context, req CreateProcessReq, params CreateProcessParams) (r *ProcessDocumentHeaders, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -204,12 +249,39 @@ func (UnimplementedHandler) DecrementLicenseUsage(ctx context.Context, req Decre
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteComponent implements deleteComponent operation.
+//
+// Delete a machine component.
+//
+// DELETE /v1/accounts/{account}/components/{componentId}
+func (UnimplementedHandler) DeleteComponent(ctx context.Context, params DeleteComponentParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteGroup implements deleteGroup operation.
 //
 // Delete a group (members keep existing, group nulled).
 //
 // DELETE /v1/accounts/{account}/groups/{groupId}
 func (UnimplementedHandler) DeleteGroup(ctx context.Context, params DeleteGroupParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteMachine implements deleteMachine operation.
+//
+// Delete a machine.
+//
+// DELETE /v1/accounts/{account}/machines/{machineId}
+func (UnimplementedHandler) DeleteMachine(ctx context.Context, params DeleteMachineParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteProcess implements deleteProcess operation.
+//
+// Delete a machine process.
+//
+// DELETE /v1/accounts/{account}/processes/{processId}
+func (UnimplementedHandler) DeleteProcess(ctx context.Context, params DeleteProcessParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -330,6 +402,15 @@ func (UnimplementedHandler) DetachPolicyEntitlements(ctx context.Context, req De
 	return ht.ErrNotImplemented
 }
 
+// GenerateMachineProof implements generateMachineProof operation.
+//
+// Sign an offline proof of the machine (API v1.0).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof
+func (UnimplementedHandler) GenerateMachineProof(ctx context.Context, req GenerateMachineProofReq, params GenerateMachineProofParams) (r *MachineProofDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GenerateToken implements generateToken operation.
 //
 // Basic email:password (with meta.otp for two-factor users) or any token authentication. The
@@ -364,6 +445,15 @@ func (UnimplementedHandler) Health(ctx context.Context) error {
 //
 // POST /v1/accounts/{account}/licenses/{licenseId}/actions/increment-usage
 func (UnimplementedHandler) IncrementLicenseUsage(ctx context.Context, req IncrementLicenseUsageReq, params IncrementLicenseUsageParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexComponents implements indexComponents operation.
+//
+// List machine components.
+//
+// GET /v1/accounts/{account}/components
+func (UnimplementedHandler) IndexComponents(ctx context.Context, params IndexComponentsParams) (r *ComponentListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -430,6 +520,33 @@ func (UnimplementedHandler) IndexLicenses(ctx context.Context, params IndexLicen
 	return r, ht.ErrNotImplemented
 }
 
+// IndexMachineComponents implements indexMachineComponents operation.
+//
+// List a machine's components.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/components
+func (UnimplementedHandler) IndexMachineComponents(ctx context.Context, params IndexMachineComponentsParams) (r *ComponentListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexMachineProcesses implements indexMachineProcesses operation.
+//
+// List a machine's processes.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/processes
+func (UnimplementedHandler) IndexMachineProcesses(ctx context.Context, params IndexMachineProcessesParams) (r *ProcessListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// IndexMachines implements indexMachines operation.
+//
+// List machines.
+//
+// GET /v1/accounts/{account}/machines
+func (UnimplementedHandler) IndexMachines(ctx context.Context, params IndexMachinesParams) (r *MachineListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // IndexPolicies implements indexPolicies operation.
 //
 // List policies.
@@ -466,6 +583,15 @@ func (UnimplementedHandler) IndexPolicyPool(ctx context.Context, params IndexPol
 	return r, ht.ErrNotImplemented
 }
 
+// IndexProcesses implements indexProcesses operation.
+//
+// List machine processes.
+//
+// GET /v1/accounts/{account}/processes
+func (UnimplementedHandler) IndexProcesses(ctx context.Context, params IndexProcessesParams) (r *ProcessListDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // IndexProductLicenses implements indexProductLicenses operation.
 //
 // List a product's licenses.
@@ -480,7 +606,7 @@ func (UnimplementedHandler) IndexProductLicenses(ctx context.Context, params Ind
 // List a product's machines.
 //
 // GET /v1/accounts/{account}/products/{productId}/machines
-func (UnimplementedHandler) IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (r *MachineStubListDocument, _ error) {
+func (UnimplementedHandler) IndexProductMachines(ctx context.Context, params IndexProductMachinesParams) (r *MachineListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -534,7 +660,7 @@ func (UnimplementedHandler) ListGroupLicenses(ctx context.Context, params ListGr
 // List a group's machines.
 //
 // GET /v1/accounts/{account}/groups/{groupId}/machines
-func (UnimplementedHandler) ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (r *UserMachineCollectionDocument, _ error) {
+func (UnimplementedHandler) ListGroupMachines(ctx context.Context, params ListGroupMachinesParams) (r *MachineListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -588,7 +714,7 @@ func (UnimplementedHandler) ListUserLicenses(ctx context.Context, params ListUse
 // List a user's machines.
 //
 // GET /v1/accounts/{account}/users/{userId}/machines
-func (UnimplementedHandler) ListUserMachines(ctx context.Context, params ListUserMachinesParams) (r *UserMachineCollectionDocument, _ error) {
+func (UnimplementedHandler) ListUserMachines(ctx context.Context, params ListUserMachinesParams) (r *MachineListDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -666,6 +792,33 @@ func (UnimplementedHandler) Ping(ctx context.Context) error {
 	return ht.ErrNotImplemented
 }
 
+// PingMachine implements pingMachine operation.
+//
+// Ping a machine's heartbeat (short alias).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/ping
+func (UnimplementedHandler) PingMachine(ctx context.Context, params PingMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// PingMachineHeartbeat implements pingMachineHeartbeat operation.
+//
+// Ping a machine's heartbeat.
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat
+func (UnimplementedHandler) PingMachineHeartbeat(ctx context.Context, req PingMachineHeartbeatReq, params PingMachineHeartbeatParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// PingProcess implements pingProcess operation.
+//
+// Ping a machine process's heartbeat.
+//
+// POST /v1/accounts/{account}/processes/{processId}/actions/ping
+func (UnimplementedHandler) PingProcess(ctx context.Context, req PingProcessReq, params PingProcessParams) (r *ProcessDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // PopPolicyPool implements popPolicyPool operation.
 //
 // Destroys the newest pooled key and answers its document.
@@ -738,6 +891,15 @@ func (UnimplementedHandler) ReplaceUserSecondFactor(ctx context.Context, req Rep
 	return r, ht.ErrNotImplemented
 }
 
+// ReportMachineUsage implements reportMachineUsage operation.
+//
+// Report the installation's signed usage chain (a backplane extension).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/report-usage
+func (UnimplementedHandler) ReportMachineUsage(ctx context.Context, req ReportMachineUsageReq, params ReportMachineUsageParams) (r *MachineUsageAckDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RequestPasswordReset implements requestPasswordReset operation.
 //
 // Always answers 204; unknown emails trigger nothing.
@@ -753,6 +915,24 @@ func (UnimplementedHandler) RequestPasswordReset(ctx context.Context, req Reques
 //
 // POST /v1/accounts/{account}/licenses/{licenseId}/actions/reset-usage
 func (UnimplementedHandler) ResetLicenseUsage(ctx context.Context, params ResetLicenseUsageParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ResetMachine implements resetMachine operation.
+//
+// Reset a machine's heartbeat (short alias).
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/reset
+func (UnimplementedHandler) ResetMachine(ctx context.Context, params ResetMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ResetMachineHeartbeat implements resetMachineHeartbeat operation.
+//
+// Reset a machine's heartbeat.
+//
+// POST /v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat
+func (UnimplementedHandler) ResetMachineHeartbeat(ctx context.Context, req ResetMachineHeartbeatReq, params ResetMachineHeartbeatParams) (r *MachineDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -803,6 +983,42 @@ func (UnimplementedHandler) Search(ctx context.Context, req SearchReq, params Se
 	return r, ht.ErrNotImplemented
 }
 
+// ShowComponent implements showComponent operation.
+//
+// Retrieve a machine component.
+//
+// GET /v1/accounts/{account}/components/{componentId}
+func (UnimplementedHandler) ShowComponent(ctx context.Context, params ShowComponentParams) (r *ComponentDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowComponentLicense implements showComponentLicense operation.
+//
+// Retrieve a component's license.
+//
+// GET /v1/accounts/{account}/components/{componentId}/license
+func (UnimplementedHandler) ShowComponentLicense(ctx context.Context, params ShowComponentLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowComponentMachine implements showComponentMachine operation.
+//
+// Retrieve a component's machine.
+//
+// GET /v1/accounts/{account}/components/{componentId}/machine
+func (UnimplementedHandler) ShowComponentMachine(ctx context.Context, params ShowComponentMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowComponentProduct implements showComponentProduct operation.
+//
+// Retrieve a component's product.
+//
+// GET /v1/accounts/{account}/components/{componentId}/product
+func (UnimplementedHandler) ShowComponentProduct(ctx context.Context, params ShowComponentProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ShowEntitlement implements showEntitlement operation.
 //
 // Retrieve an entitlement (by id or code).
@@ -835,7 +1051,7 @@ func (UnimplementedHandler) ShowGroupLicense(ctx context.Context, params ShowGro
 // Show one of a group's machines (id or fingerprint alias).
 //
 // GET /v1/accounts/{account}/groups/{groupId}/machines/{machineId}
-func (UnimplementedHandler) ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (r *UserMachineDocument, _ error) {
+func (UnimplementedHandler) ShowGroupMachine(ctx context.Context, params ShowGroupMachineParams) (r *MachineDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -974,6 +1190,87 @@ func (UnimplementedHandler) ShowLicenseUserAlias(ctx context.Context, params Sho
 	return r, ht.ErrNotImplemented
 }
 
+// ShowMachine implements showMachine operation.
+//
+// Retrieve a machine (by id or fingerprint).
+//
+// GET /v1/accounts/{account}/machines/{machineId}
+func (UnimplementedHandler) ShowMachine(ctx context.Context, params ShowMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineComponent implements showMachineComponent operation.
+//
+// Retrieve one of a machine's components.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/components/{componentId}
+func (UnimplementedHandler) ShowMachineComponent(ctx context.Context, params ShowMachineComponentParams) (r *ComponentDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineGroup implements showMachineGroup operation.
+//
+// Retrieve a machine's group.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/group
+func (UnimplementedHandler) ShowMachineGroup(ctx context.Context, params ShowMachineGroupParams) (r *GroupDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineLicense implements showMachineLicense operation.
+//
+// Retrieve a machine's license.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/license
+func (UnimplementedHandler) ShowMachineLicense(ctx context.Context, params ShowMachineLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineOwner implements showMachineOwner operation.
+//
+// Retrieve a machine's owner.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/owner
+func (UnimplementedHandler) ShowMachineOwner(ctx context.Context, params ShowMachineOwnerParams) (r *LicenseOwnerDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineProcess implements showMachineProcess operation.
+//
+// Retrieve one of a machine's processes.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/processes/{processId}
+func (UnimplementedHandler) ShowMachineProcess(ctx context.Context, params ShowMachineProcessParams) (r *ProcessDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineProduct implements showMachineProduct operation.
+//
+// Retrieve a machine's product.
+//
+// GET /v1/accounts/{account}/machines/{machineId}/product
+func (UnimplementedHandler) ShowMachineProduct(ctx context.Context, params ShowMachineProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineUsage implements showMachineUsage operation.
+//
+// Read the machine's accepted usage chain (a backplane extension).
+//
+// GET /v1/accounts/{account}/machines/{machineId}/usage
+func (UnimplementedHandler) ShowMachineUsage(ctx context.Context, params ShowMachineUsageParams) (r *MachineUsageDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowMachineUserAlias implements showMachineUserAlias operation.
+//
+// Retrieve a machine's owner (v1.5 alias).
+//
+// GET /v1/accounts/{account}/machines/{machineId}/user
+func (UnimplementedHandler) ShowMachineUserAlias(ctx context.Context, params ShowMachineUserAliasParams) (r *LicenseOwnerDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ShowPolicy implements showPolicy operation.
 //
 // Retrieve a policy.
@@ -1016,6 +1313,42 @@ func (UnimplementedHandler) ShowPolicyPoolKey(ctx context.Context, params ShowPo
 //
 // GET /v1/accounts/{account}/policies/{policyId}/product
 func (UnimplementedHandler) ShowPolicyProduct(ctx context.Context, params ShowPolicyProductParams) (r *ProductDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProcess implements showProcess operation.
+//
+// Retrieve a machine process.
+//
+// GET /v1/accounts/{account}/processes/{processId}
+func (UnimplementedHandler) ShowProcess(ctx context.Context, params ShowProcessParams) (r *ProcessDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProcessLicense implements showProcessLicense operation.
+//
+// Retrieve a process's license.
+//
+// GET /v1/accounts/{account}/processes/{processId}/license
+func (UnimplementedHandler) ShowProcessLicense(ctx context.Context, params ShowProcessLicenseParams) (r *LicenseDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProcessMachine implements showProcessMachine operation.
+//
+// Retrieve a process's machine.
+//
+// GET /v1/accounts/{account}/processes/{processId}/machine
+func (UnimplementedHandler) ShowProcessMachine(ctx context.Context, params ShowProcessMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ShowProcessProduct implements showProcessProduct operation.
+//
+// Retrieve a process's product.
+//
+// GET /v1/accounts/{account}/processes/{processId}/product
+func (UnimplementedHandler) ShowProcessProduct(ctx context.Context, params ShowProcessProductParams) (r *ProductDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1114,7 +1447,7 @@ func (UnimplementedHandler) ShowUserLicense(ctx context.Context, params ShowUser
 // Show one of a user's machines (id or fingerprint alias).
 //
 // GET /v1/accounts/{account}/users/{userId}/machines/{machineId}
-func (UnimplementedHandler) ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (r *UserMachineDocument, _ error) {
+func (UnimplementedHandler) ShowUserMachine(ctx context.Context, params ShowUserMachineParams) (r *MachineDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1178,6 +1511,15 @@ func (UnimplementedHandler) SuspendLicense(ctx context.Context, params SuspendLi
 //
 // POST /v1/accounts/{account}/users/{userId}/actions/unban
 func (UnimplementedHandler) UnbanUser(ctx context.Context, params UnbanUserParams) (r *UserDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateComponent implements updateComponent operation.
+//
+// Update a machine component.
+//
+// PATCH /v1/accounts/{account}/components/{componentId}
+func (UnimplementedHandler) UpdateComponent(ctx context.Context, req UpdateComponentReq, params UpdateComponentParams) (r *ComponentDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1253,12 +1595,48 @@ func (UnimplementedHandler) UpdateLicenseUserAlias(ctx context.Context, req Upda
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateMachine implements updateMachine operation.
+//
+// Update a machine.
+//
+// PATCH /v1/accounts/{account}/machines/{machineId}
+func (UnimplementedHandler) UpdateMachine(ctx context.Context, req UpdateMachineReq, params UpdateMachineParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateMachineGroup implements updateMachineGroup operation.
+//
+// Set a machine's group.
+//
+// PATCH /v1/accounts/{account}/machines/{machineId}/group
+func (UnimplementedHandler) UpdateMachineGroup(ctx context.Context, req UpdateMachineGroupReq, params UpdateMachineGroupParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateMachineOwner implements updateMachineOwner operation.
+//
+// Set a machine's owner.
+//
+// PATCH /v1/accounts/{account}/machines/{machineId}/owner
+func (UnimplementedHandler) UpdateMachineOwner(ctx context.Context, req UpdateMachineOwnerReq, params UpdateMachineOwnerParams) (r *MachineDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdatePolicy implements updatePolicy operation.
 //
 // Scheme, encrypted and usePool are immutable; relationships are not accepted.
 //
 // PATCH /v1/accounts/{account}/policies/{policyId}
 func (UnimplementedHandler) UpdatePolicy(ctx context.Context, req UpdatePolicyReq, params UpdatePolicyParams) (r *PolicyDocument, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateProcess implements updateProcess operation.
+//
+// Update a machine process.
+//
+// PATCH /v1/accounts/{account}/processes/{processId}
+func (UnimplementedHandler) UpdateProcess(ctx context.Context, req UpdateProcessReq, params UpdateProcessParams) (r *ProcessDocument, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

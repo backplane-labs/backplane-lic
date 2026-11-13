@@ -50,7 +50,8 @@ func (fakeManage) RegenerateToken(context.Context, uuid.UUID, uuid.UUID, string,
 
 func (fakeUsers) DeleteUserTokens(context.Context, uuid.UUID, uuid.UUID) error { return nil }
 
-func aside(t *testing.T) valkeyaside.CacheAsideClient { //nolint:ireturn // the client library's interface
+// aside returns the client library's interface.
+func aside(t *testing.T) valkeyaside.CacheAsideClient {
 	t.Helper()
 
 	addr := os.Getenv("LIC_TEST_VALKEY_ADDR")

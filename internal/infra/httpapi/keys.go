@@ -28,7 +28,7 @@ func (a *API) IndexKeys(ctx context.Context, _ oas.IndexKeysParams) (*oas.KeyLis
 
 	page, err := a.keys.Index(ctx, req.account, filterPolicy, filterProduct, params)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.KeyListDocument{Data: make([]oas.KeyResource, 0, len(page.Items))}
@@ -51,7 +51,7 @@ func (a *API) ShowKey(ctx context.Context, params oas.ShowKeyParams) (*oas.KeyDo
 
 	key, err := a.keys.Show(ctx, req.account, keyID(params.KeyId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.KeyDocument{Data: render.KeyResource(req.account.ID, key)}, nil
@@ -74,7 +74,7 @@ func (a *API) CreateKey(
 
 	key, err := a.keys.Create(ctx, req.account, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.KeyDocumentHeaders{
@@ -95,7 +95,7 @@ func (a *API) UpdateKey(
 	}
 
 	if _, err := a.keys.Resolve(ctx, req.account, keyID(params.KeyId)); err != nil {
-		return nil, err //nolint:wrapcheck // the load's own error
+		return nil, err // the load's own error
 	}
 
 	in, err := validateKeyBody(req.body, true)
@@ -105,7 +105,7 @@ func (a *API) UpdateKey(
 
 	key, err := a.keys.Update(ctx, req.account, keyID(params.KeyId), in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.KeyDocument{Data: render.KeyResource(req.account.ID, key)}, nil
@@ -119,7 +119,7 @@ func (a *API) DestroyKey(ctx context.Context, params oas.DestroyKeyParams) error
 		return err
 	}
 
-	return a.keys.Destroy(ctx, req.account, keyID(params.KeyId)) //nolint:wrapcheck // the scenario's own error
+	return a.keys.Destroy(ctx, req.account, keyID(params.KeyId)) // the scenario's own error
 }
 
 // ShowKeyProduct implements GET /v1/accounts/{account}/keys/{keyId}/product.
@@ -132,7 +132,7 @@ func (a *API) ShowKeyProduct(ctx context.Context, params oas.ShowKeyProductParam
 
 	key, product, err := a.keys.Product(ctx, req.account, keyID(params.KeyId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	_ = key
@@ -150,7 +150,7 @@ func (a *API) ShowKeyPolicy(ctx context.Context, params oas.ShowKeyPolicyParams)
 
 	key, policy, err := a.keys.Policy(ctx, req.account, keyID(params.KeyId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	_ = key

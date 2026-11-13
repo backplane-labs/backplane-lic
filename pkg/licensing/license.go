@@ -123,6 +123,48 @@ func (c *Client) Me(ctx context.Context) (*License, error) {
 	return license, nil
 }
 
+// ValidateMachine looks up a machine by fingerprint, validates its
+// license with the fingerprint scope, and returns both. It works with
+// token-authenticated clients (admin/product tokens), unlike Validate
+// which uses Me (license-key authentication).
+func (c *Client) ValidateMachine(ctx context.Context, fingerprint string) (*Machine, *License, error) {
+	machine, err := c.Machine(ctx, fingerprint)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Fetch the license by ID so we can bind it and validate.
+	lic := &License{}
+
+	path, err := resourcePath("licenses", machine.LicenseID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err := c.do(ctx, "GET", path, nil, jsonapi.Body{}, func(doc jsonapi.Document) error {
+		res, err := doc.One()
+		if err != nil {
+			return fmt.Errorf("decode license: %w", err)
+		}
+
+		if err := jsonapi.DecodeAttributes(res, lic); err != nil {
+			return fmt.Errorf("decode license: %w", err)
+		}
+
+		lic.bind(c, res)
+
+		return nil
+	}); err != nil {
+		return nil, nil, err
+	}
+
+	if err := lic.Validate(ctx, WithFingerprint(fingerprint)); err != nil {
+		return machine, lic, err
+	}
+
+	return machine, lic, nil
+}
+
 // Validate performs a license validation, optionally scoped to a machine
 // fingerprint and component fingerprints. It fetches the license first,
 // then runs the scoped validation. The returned License carries the full
@@ -141,7 +183,7 @@ func (c *Client) Validate(ctx context.Context, options ...ValidationOption) (*Li
 	return license, nil
 }
 
-// Validate re-validates the license. See Client.Validate.
+// Validate validates the license. See Client.Validate.
 func (l *License) Validate(ctx context.Context, options ...ValidationOption) error {
 	if l.client == nil {
 		return fmt.Errorf("%w: license", ErrUnbound)
@@ -387,7 +429,12 @@ func (l *License) Deactivate(ctx context.Context, machineID string) error {
 		return fmt.Errorf("%w: license", ErrUnbound)
 	}
 
-	return l.client.do(ctx, "DELETE", "machines/"+machineID, nil, jsonapi.Body{}, nil)
+	path, err := resourcePath("machines", machineID)
+	if err != nil {
+		return err
+	}
+
+	return l.client.do(ctx, "DELETE", path, nil, jsonapi.Body{}, nil)
 }
 
 // Machine fetches a machine of the license by UUID or fingerprint.
@@ -396,9 +443,14 @@ func (l *License) Machine(ctx context.Context, machineID string) (*Machine, erro
 		return nil, fmt.Errorf("%w: license", ErrUnbound)
 	}
 
+	path, err := resourcePath("machines", machineID)
+	if err != nil {
+		return nil, err
+	}
+
 	machine := &Machine{}
 
-	err := l.client.do(ctx, "GET", "machines/"+machineID, nil, jsonapi.Body{}, func(doc jsonapi.Document) error {
+	err = l.client.do(ctx, "GET", path, nil, jsonapi.Body{}, func(doc jsonapi.Document) error {
 		return decodeMachine(l.client, doc, machine)
 	})
 	if err != nil {

@@ -142,7 +142,7 @@ func (c *Client) do(
 		body:   bodyBytes,
 		status: res.StatusCode,
 		header: res.Header,
-		id:     res.Header.Get("X-Request-Id"),
+		id:     res.Header.Get("X-Request-ID"),
 		req:    req,
 	}
 
@@ -175,7 +175,7 @@ func (c *Client) buildRequest(
 ) (*http.Request, int, error) {
 	var payload []byte
 
-	if body.Type != "" {
+	if !body.IsEmpty() {
 		encoded, err := body.Encode()
 		if err != nil {
 			return nil, 0, fmt.Errorf("licensing: encode request: %w", err)

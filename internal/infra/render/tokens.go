@@ -60,7 +60,7 @@ func Token(accountID uuid.UUID, token domain.Token, role domain.Role, raw string
 			Account: oas.ToOneRelationship{
 				Links: oas.RelationshipLinks{Related: oas.NewNilString(base)},
 				Data: oas.NilResourceIdentifier{
-					Value: oas.ResourceIdentifier{Type: "accounts", ID: accountID.String()},
+					Value: oas.ResourceIdentifier{Type: typeAccounts, ID: accountID.String()},
 				},
 			},
 			Bearer: oas.ToOneRelationship{

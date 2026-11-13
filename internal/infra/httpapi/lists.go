@@ -44,7 +44,7 @@ func checkEnvironment(req *request) error {
 func listParams(req *request) (paging.Params, error) {
 	params, err := paging.Parse(req.query)
 	if err != nil {
-		return params, err //nolint:wrapcheck // the pagination's own error
+		return params, err // the pagination's own error
 	}
 
 	return params, nil

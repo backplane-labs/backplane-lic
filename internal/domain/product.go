@@ -20,7 +20,9 @@ func ProductDistributionStrategies() []string {
 }
 
 // ReservedProductCodes: the two route-segment-colliding aliases.
-var ReservedProductCodes = []string{"actions", "action"} //nolint:gochecknoglobals // transcribed reference data
+var ReservedProductCodes = []string{ //nolint:gochecknoglobals // transcribed reference data
+	reservedActions, reservedAction,
+}
 
 // Product is an account's product: the top of the licensing tree.
 type Product struct {

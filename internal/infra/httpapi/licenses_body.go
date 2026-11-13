@@ -7,6 +7,7 @@ package httpapi
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -200,22 +201,22 @@ func licenseAttributes( //nolint:cyclop,funlen // the attribute ladder
 		return err
 	}
 
-	allowed := []string{"name", "metadata"}
+	allowed := []string{keyName, keyMetadata}
 	if !update {
 		allowed = append(allowed, "key")
 	}
 
 	if licenseAttrWriter(req, update) {
 		allowed = append(allowed, "protected", "expiry", "suspended",
-			"max_machines", "max_cores", "max_memory", "max_disk",
-			"max_uses", "max_processes", "max_users")
+			attrMaxMachines, "max_cores", "max_memory", "max_disk",
+			"max_uses", "max_processes", attrMaxUsers)
 	}
 
 	if err := unpermitted(attrs, "/data/attributes/", allowed...); err != nil {
 		return err
 	}
 
-	if nameRaw, hasName := attrs["name"]; hasName && nameRaw != nil {
+	if nameRaw, hasName := attrs[keyName]; hasName && nameRaw != nil {
 		value, err := str(nameRaw, "/data/attributes/name")
 		if err != nil {
 			return err
@@ -262,7 +263,7 @@ func licenseAttributes( //nolint:cyclop,funlen // the attribute ladder
 		}
 	}
 
-	if _, hasMeta := attrs["metadata"]; hasMeta {
+	if _, hasMeta := attrs[keyMetadata]; hasMeta {
 		meta, present, metaErr := metadataAttr(attrs)
 		if metaErr != nil {
 			return metaErr
@@ -287,7 +288,7 @@ func licenseAttrWriter(req *request, update bool) bool {
 func licenseLimitAttrs(attrs map[string]any, in *licenses.Input) error {
 	var err error
 
-	if in.MaxMachines, in.MaxMachinesSet, err = intAttr(attrs, "max_machines"); err != nil {
+	if in.MaxMachines, in.MaxMachinesSet, err = intAttr(attrs, attrMaxMachines); err != nil {
 		return err
 	}
 
@@ -311,7 +312,7 @@ func licenseLimitAttrs(attrs map[string]any, in *licenses.Input) error {
 		return err
 	}
 
-	in.MaxUsers, in.MaxUsersSet, err = intAttr(attrs, "max_users")
+	in.MaxUsers, in.MaxUsersSet, err = intAttr(attrs, attrMaxUsers)
 
 	return err
 }
@@ -346,7 +347,7 @@ func licenseCreateRelationships(req *request, raw any, in *licenses.Input) error
 		return err
 	}
 
-	allowed := []string{"policy", "owner", "user"}
+	allowed := []string{typePolicySingular, keyOwner, typeUserSingular}
 	if licenseGroupPrivileged(req) {
 		allowed = append(allowed, "group")
 	}
@@ -359,7 +360,7 @@ func licenseCreateRelationships(req *request, raw any, in *licenses.Input) error
 		return err
 	}
 
-	ownerRaw, hasOwner := rels["owner"]
+	ownerRaw, hasOwner := rels[keyOwner]
 	userRaw, hasUser := rels["user"]
 
 	if hasOwner && hasUser {
@@ -367,7 +368,7 @@ func licenseCreateRelationships(req *request, raw any, in *licenses.Input) error
 	}
 
 	linkRaw := ownerRaw
-	pointer := "owner"
+	pointer := keyOwner
 
 	if hasUser {
 		linkRaw, pointer = userRaw, "user"
@@ -381,7 +382,7 @@ func licenseCreateRelationships(req *request, raw any, in *licenses.Input) error
 	}
 
 	if groupRaw, ok := rels["group"]; ok && groupRaw != nil {
-		in.Group, _, err = groupLinkage(groupRaw)
+		in.Group, err = groupLinkage(groupRaw)
 		if err != nil {
 			return err
 		}
@@ -393,7 +394,7 @@ func licenseCreateRelationships(req *request, raw any, in *licenses.Input) error
 }
 
 func licensePolicyRelationship(rels map[string]any, in *licenses.Input) error {
-	raw, ok := rels["policy"]
+	raw, ok := rels[typePolicySingular]
 	if !ok || raw == nil {
 		return apperr.BadRequestSource("is missing", "/data/relationships/policy")
 	}
@@ -455,40 +456,42 @@ func userLinkage(raw any, name string) (uuid.NullUUID, bool, error) {
 	return uuid.NullUUID{UUID: id, Valid: true}, false, nil
 }
 
-func groupLinkage(raw any) (uuid.NullUUID, bool, error) {
+// groupLinkage reads the group linkage of a create body; a null linkage
+// is the invalid (absent) id.
+func groupLinkage(raw any) (uuid.NullUUID, error) {
 	rel, err := hash(raw, "/data/relationships/group")
 	if err != nil {
-		return uuid.NullUUID{}, false, err
+		return uuid.NullUUID{}, err
 	}
 
 	if err := unpermitted(rel, "/data/relationships/group/", "data"); err != nil {
-		return uuid.NullUUID{}, false, err
+		return uuid.NullUUID{}, err
 	}
 
 	dataRaw, ok := rel["data"]
 	if !ok {
-		return uuid.NullUUID{}, false, apperr.BadRequestSource("is missing", "/data/relationships/group/data")
+		return uuid.NullUUID{}, apperr.BadRequestSource("is missing", "/data/relationships/group/data")
 	}
 
 	if dataRaw == nil {
-		return uuid.NullUUID{}, true, nil
+		return uuid.NullUUID{}, nil
 	}
 
 	data, err := hash(dataRaw, "/data/relationships/group/data")
 	if err != nil {
-		return uuid.NullUUID{}, false, err
+		return uuid.NullUUID{}, err
 	}
 
 	if err := unpermitted(data, "/data/relationships/group/data/", "type", "id"); err != nil {
-		return uuid.NullUUID{}, false, err
+		return uuid.NullUUID{}, err
 	}
 
 	id, err := typedLinkage(data, "/data/relationships/group/data", typeGroupSingular, typeGroupPlural2)
 	if err != nil {
-		return uuid.NullUUID{}, false, err
+		return uuid.NullUUID{}, err
 	}
 
-	return uuid.NullUUID{UUID: id, Valid: true}, false, nil
+	return uuid.NullUUID{UUID: id, Valid: true}, nil
 }
 
 // typedLinkage reads a {type, id} linkage object, checking the type
@@ -568,7 +571,7 @@ func validateRelationshipPatchBody(
 	switch kind {
 	case typePolicySingular:
 		singular, plural = typePolicySingular, typePolicyPlural
-	case "owner", typeUserSingular:
+	case keyOwner, typeUserSingular:
 		singular, plural = typeUserSingular, typeUserPlural
 	case "group":
 	}
@@ -648,78 +651,117 @@ func itoa(i int) string {
 
 // validateValidationBody decodes the POST validate meta (nonce and
 // scope).
-func validateValidationBody( //nolint:cyclop,gocritic,nonamedreturns // the typed-params ladder
-	req *request, byKey bool,
-) (nonce *int64, scope licenses.Scope, rawScope map[string]any, key string, legacy bool, err error) {
+func validateValidationBody(req *request, byKey bool) (validationBody, error) {
+	var out validationBody
+
 	body := req.body
 	if body == nil {
 		body = map[string]any{}
 	}
 
 	if err := unpermitted(body, "/", "meta"); err != nil {
-		return nil, scope, nil, "", false, err
+		return out, err
 	}
 
 	metaRaw, ok := body["meta"]
 	if !ok || metaRaw == nil {
 		if byKey {
-			return nil, scope, nil, "", false, apperr.BadRequestSource("is missing", "/meta/key")
+			return out, apperr.BadRequestSource("is missing", "/meta/key")
 		}
 
-		return nil, scope, nil, "", false, nil
+		return out, nil
 	}
 
 	meta, err := hash(metaRaw, "/meta")
 	if err != nil {
-		return nil, scope, nil, "", false, err
+		return out, err
 	}
 
-	if byKey {
-		if err := unpermitted(meta, "/meta/", "key", "legacy_encrypted", "encrypted", "nonce", "scope"); err != nil {
-			return nil, scope, nil, "", false, err
-		}
-	} else if err := unpermitted(meta, "/meta/", "nonce", "scope"); err != nil {
-		return nil, scope, nil, "", false, err
+	if err := validationMetaKeys(meta, byKey); err != nil {
+		return out, err
 	}
 
-	if nonceRaw, hasNonce := meta["nonce"]; hasNonce && nonceRaw != nil {
-		value, err := int64Of(nonceRaw, "/meta/nonce")
-		if err != nil {
-			return nil, scope, nil, "", false, err
-		}
-
-		nonce = &value
+	nonce, hasNonce, err := validationNonce(meta)
+	if err != nil {
+		return out, err
 	}
 
-	legacy = meta["legacy_encrypted"] == true || meta["encrypted"] == true
+	if hasNonce {
+		out.Nonce = &nonce
+	}
 
-	if keyRaw, hasKey := meta["key"]; hasKey {
-		value, err := str(keyRaw, "/meta/key")
-		if err != nil {
-			return nil, scope, nil, "", false, err
-		}
+	out.Legacy = meta["legacy_encrypted"] == true || meta["encrypted"] == true
 
-		if value == "" {
-			return nil, scope, nil, "", false, apperr.BadRequestSource("cannot be blank", "/meta/key")
-		}
-
-		key = value
-	} else if byKey {
-		return nil, scope, nil, "", false, apperr.BadRequestSource("is missing", "/meta/key")
+	if out.Key, err = validationKey(meta, byKey); err != nil {
+		return out, err
 	}
 
 	if scopeRaw, hasScope := meta["scope"]; hasScope && scopeRaw != nil {
-		scope, err = validateScope(scopeRaw)
-		if err != nil {
-			return nil, scope, nil, "", false, err
+		if out.Scope, err = validateScope(scopeRaw); err != nil {
+			return out, err
 		}
 
-		rawScope = validationScopeEcho(scopeRaw)
+		out.RawScope = validationScopeEcho(scopeRaw)
 	}
 
-	scope.Nonce, scope.Echo = nonce, rawScope
+	out.Scope.Nonce, out.Scope.Echo = out.Nonce, out.RawScope
 
-	return nonce, scope, rawScope, key, legacy, nil
+	return out, nil
+}
+
+// validationBody is the decoded validate meta.
+type validationBody struct {
+	Nonce    *int64
+	Scope    licenses.Scope
+	RawScope map[string]any
+	// Key and Legacy are the validate-key body's key and its legacy flag.
+	Key    string
+	Legacy bool
+}
+
+func validationMetaKeys(meta map[string]any, byKey bool) error {
+	if byKey {
+		return unpermitted(meta, "/meta/", "key", "legacy_encrypted", "encrypted", "nonce", "scope")
+	}
+
+	return unpermitted(meta, "/meta/", "nonce", "scope")
+}
+
+// validationNonce reads the optional nonce; present is false when absent.
+func validationNonce(meta map[string]any) (int64, bool, error) {
+	nonceRaw, ok := meta["nonce"]
+	if !ok || nonceRaw == nil {
+		return 0, false, nil
+	}
+
+	value, err := int64Of(nonceRaw, "/meta/nonce")
+	if err != nil {
+		return 0, false, err
+	}
+
+	return value, true, nil
+}
+
+func validationKey(meta map[string]any, byKey bool) (string, error) {
+	keyRaw, ok := meta["key"]
+	if !ok {
+		if byKey {
+			return "", apperr.BadRequestSource("is missing", "/meta/key")
+		}
+
+		return "", nil
+	}
+
+	value, err := str(keyRaw, "/meta/key")
+	if err != nil {
+		return "", err
+	}
+
+	if value == "" {
+		return "", apperr.BadRequestSource("cannot be blank", "/meta/key")
+	}
+
+	return value, nil
 }
 
 // validationScopeEcho mirrors typed_params dropping optional nil fields,
@@ -769,7 +811,7 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop // the typ
 
 	scope.Present = true
 
-	for _, name := range []string{"product", "policy", "machine", "checksum", "version"} {
+	for _, name := range []string{typeProductSingular, typePolicySingular, "machine", "checksum", "version"} {
 		if _, has := obj[name]; has && obj[name] != nil {
 			ptr, err := scopeString(obj, name)
 			if err != nil {
@@ -777,9 +819,9 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop // the typ
 			}
 
 			switch name {
-			case "product":
+			case typeProductSingular:
 				scope.Product = ptr
-			case "policy":
+			case typePolicySingular:
 				scope.Policy = ptr
 			case "machine":
 				scope.Machine = ptr
@@ -810,7 +852,7 @@ func validateScope(raw any) (licenses.Scope, error) { //nolint:cyclop // the typ
 }
 
 func scopeLists(obj map[string]any, scope *licenses.Scope) error {
-	for _, name := range []string{"fingerprint", "fingerprints", "components", "entitlements"} {
+	for _, name := range []string{keyFingerprint, "fingerprints", typeComponentPlural, "entitlements"} {
 		if obj[name] == nil {
 			continue
 		}
@@ -822,7 +864,7 @@ func scopeLists(obj map[string]any, scope *licenses.Scope) error {
 			err  error
 		)
 
-		if name == "fingerprint" {
+		if name == keyFingerprint {
 			var single *string
 
 			single, err = scopeString(obj, name)
@@ -838,13 +880,13 @@ func scopeLists(obj map[string]any, scope *licenses.Scope) error {
 		}
 
 		switch name {
-		case "fingerprint", "fingerprints":
+		case keyFingerprint, "fingerprints":
 			if scope.Fingerprints == nil {
 				scope.Fingerprints = []string{}
 			}
 
 			scope.Fingerprints = append(scope.Fingerprints, list...)
-		case "components":
+		case typeComponentPlural:
 			scope.Components = list
 		case "entitlements":
 			scope.Entitlements = list
@@ -919,9 +961,7 @@ func validateUsageBody(req *request, key string) (int64, error) {
 
 // validateCheckoutMeta decodes the checkout meta (the query parameters
 // merge over it).
-func validateCheckoutMeta( //nolint:cyclop // the typed-params ladder
-	req *request,
-) (licenses.CheckoutParams, error) {
+func validateCheckoutMeta(req *request) (licenses.CheckoutParams, error) {
 	body := req.body
 	if body == nil {
 		body = map[string]any{}
@@ -947,44 +987,64 @@ func validateCheckoutMeta( //nolint:cyclop // the typed-params ladder
 		return params, err
 	}
 
-	if encRaw, hasEnc := meta["encrypt"]; hasEnc && encRaw != nil {
-		if value, isBool := encRaw.(bool); isBool {
-			params.Encrypt = &value
-		} else {
-			return params, apperr.BadRequestSource(
-				"type mismatch (received "+jsonKind(encRaw)+" expected boolean)", "/meta/encrypt")
-		}
-	}
-
-	if algRaw, hasAlg := meta["algorithm"]; hasAlg && algRaw != nil {
-		value, err := str(algRaw, "/meta/algorithm")
-		if err != nil {
-			return params, err
-		}
-
-		params.Algorithm = value
-	}
-
-	if ttlRaw, hasTTL := meta["ttl"]; hasTTL && ttlRaw != nil {
-		value, err := int64Of(ttlRaw, "/meta/ttl")
-		if err != nil {
-			return params, err
-		}
-
-		if value > 2147483647 || value < -2147483648 {
-			return params, apperr.BadRequestSource("integer is too large", "/meta/ttl")
-		}
-
-		ttl := int32(value)
-		params.TTL, params.TTLSet = &ttl, true
-	}
-
-	includes, _, err := stringsAttr(meta, "include")
+	encrypt, hasEncrypt, err := checkoutEncrypt(meta)
 	if err != nil {
 		return params, err
 	}
 
-	params.Include = includes
+	if hasEncrypt {
+		params.Encrypt = &encrypt
+	}
 
-	return params, nil
+	if algRaw, hasAlg := meta["algorithm"]; hasAlg && algRaw != nil {
+		if params.Algorithm, err = str(algRaw, "/meta/algorithm"); err != nil {
+			return params, err
+		}
+	}
+
+	if params.TTL, params.TTLSet, err = checkoutTTL(meta); err != nil {
+		return params, err
+	}
+
+	params.Include, _, err = stringsAttr(meta, "include")
+
+	return params, err
+}
+
+// checkoutEncrypt reads meta.encrypt; present is false when absent or null.
+func checkoutEncrypt(meta map[string]any) (bool, bool, error) {
+	encRaw, ok := meta["encrypt"]
+	if !ok || encRaw == nil {
+		return false, false, nil
+	}
+
+	switch value := encRaw.(type) {
+	case bool:
+		return value, true, nil
+	default:
+		return false, false, apperr.BadRequestSource(
+			"type mismatch (received "+jsonKind(encRaw)+" expected boolean)", "/meta/encrypt")
+	}
+}
+
+// checkoutTTL reads meta.ttl. An explicit null asks for a perpetual file:
+// set is true and the ttl nil.
+func checkoutTTL(meta map[string]any) (*int32, bool, error) {
+	ttlRaw, set := meta["ttl"]
+	if !set || ttlRaw == nil {
+		return nil, set, nil
+	}
+
+	value, err := int64Of(ttlRaw, "/meta/ttl")
+	if err != nil {
+		return nil, false, err
+	}
+
+	if value > math.MaxInt32 || value < math.MinInt32 {
+		return nil, false, apperr.BadRequestSource("integer is too large", "/meta/ttl")
+	}
+
+	ttl := int32(value)
+
+	return &ttl, true, nil
 }

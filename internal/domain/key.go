@@ -6,8 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// The route segments that collide with an id.
+const (
+	reservedActions = "actions"
+	reservedAction  = "action"
+)
+
 // ReservedKeys: the two route-segment-colliding key values.
-var ReservedKeys = []string{"actions", "action"} //nolint:gochecknoglobals // transcribed reference data
+var ReservedKeys = []string{reservedActions, reservedAction} //nolint:gochecknoglobals // transcribed reference data
 
 // Key is a member of a pooled policy's key pool.
 type Key struct {

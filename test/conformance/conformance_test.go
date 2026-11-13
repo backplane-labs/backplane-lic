@@ -81,8 +81,7 @@ func TestConformance(t *testing.T) {
 // serverUnderTest is the running backplane-lic at LIC_CONFORMANCE_TARGET,
 // or one served in-process over the database at LIC_TEST_DATABASE_URL with
 // the reference's account and admin.
-//
-//nolint:ireturn // either target
+// It returns either target.
 func serverUnderTest(t *testing.T) conformance.Target {
 	t.Helper()
 

@@ -52,6 +52,9 @@ type request struct {
 	// docsBase is the origin of the docs links, e.g.
 	// https://keygen.test.
 	docsBase string
+	// binary marks a certificate download route (it also negotiates
+	// application/octet-stream).
+	binary bool
 }
 
 type requestKey struct{}

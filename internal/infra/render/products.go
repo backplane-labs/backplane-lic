@@ -20,7 +20,7 @@ func accountLink(accountID uuid.UUID) oas.ToOneRelationship {
 	return oas.ToOneRelationship{
 		Links: oas.RelationshipLinks{Related: oas.NewNilString("/v1/accounts/" + accountID.String())},
 		Data: oas.NilResourceIdentifier{
-			Value: oas.ResourceIdentifier{Type: "accounts", ID: accountID.String()},
+			Value: oas.ResourceIdentifier{Type: typeAccounts, ID: accountID.String()},
 		},
 	}
 }

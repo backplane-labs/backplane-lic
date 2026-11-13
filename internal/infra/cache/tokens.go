@@ -110,7 +110,7 @@ type authnStore struct {
 func (s authnStore) TokenByDigest(ctx context.Context, accountID uuid.UUID, digest string) (domain.Token, error) {
 	generation, err := s.tokens.generation(ctx, accountID)
 	if err != nil {
-		return s.Store.TokenByDigest(ctx, accountID, digest) //nolint:wrapcheck // the port's own error
+		return s.Store.TokenByDigest(ctx, accountID, digest) // the port's own error
 	}
 
 	key := "lic:token:" + accountID.String() + ":" + strconv.FormatInt(generation, 10) + ":" + digest
@@ -118,7 +118,7 @@ func (s authnStore) TokenByDigest(ctx context.Context, accountID uuid.UUID, dige
 	raw, err := s.tokens.client.Get(ctx, s.tokens.ttl, key, func(ctx context.Context, _ string) (string, error) {
 		token, err := s.Store.TokenByDigest(ctx, accountID, digest)
 		if err != nil {
-			return "", err //nolint:wrapcheck // the port's own error, answered as is
+			return "", err // the port's own error, answered as is
 		}
 
 		var encoded bytes.Buffer
@@ -134,7 +134,7 @@ func (s authnStore) TokenByDigest(ctx context.Context, accountID uuid.UUID, dige
 
 	var token domain.Token
 	if err != nil || gob.NewDecoder(strings.NewReader(raw)).Decode(&token) != nil {
-		return s.Store.TokenByDigest(ctx, accountID, digest) //nolint:wrapcheck // the port's own error
+		return s.Store.TokenByDigest(ctx, accountID, digest) // the port's own error
 	}
 
 	return token, nil
@@ -150,7 +150,7 @@ func (s manageStore) RegenerateToken(
 	ctx context.Context, accountID, id uuid.UUID, digest string, expiry *time.Time,
 ) error {
 	if err := s.Store.RegenerateToken(ctx, accountID, id, digest, expiry); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	return s.tokens.bump(ctx, accountID)
@@ -158,7 +158,7 @@ func (s manageStore) RegenerateToken(
 
 func (s manageStore) DeleteToken(ctx context.Context, accountID, id uuid.UUID) error {
 	if err := s.Store.DeleteToken(ctx, accountID, id); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	return s.tokens.bump(ctx, accountID)
@@ -172,7 +172,7 @@ type usersStore struct {
 
 func (s usersStore) DeleteUserTokens(ctx context.Context, accountID, userID uuid.UUID) error {
 	if err := s.Store.DeleteUserTokens(ctx, accountID, userID); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	return s.tokens.bump(ctx, accountID)
@@ -180,7 +180,7 @@ func (s usersStore) DeleteUserTokens(ctx context.Context, accountID, userID uuid
 
 func (s usersStore) DeleteUserTokensExcept(ctx context.Context, accountID, userID, exceptID uuid.UUID) error {
 	if err := s.Store.DeleteUserTokensExcept(ctx, accountID, userID, exceptID); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	return s.tokens.bump(ctx, accountID)

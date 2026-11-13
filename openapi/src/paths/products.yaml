@@ -187,7 +187,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: "#/components/schemas/MachineStubListDocument"
+                $ref: "#/components/schemas/MachineListDocument"
         default:
           $ref: "#/components/responses/Error"
 

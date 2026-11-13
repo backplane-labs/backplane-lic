@@ -12,12 +12,19 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
+// The permissions a relationship listing requires.
+const (
+	permProductRead = "product.read"
+	permLicenseRead = "license.read"
+	permMachineRead = "machine.read"
+)
+
 // Group answers the user's group (nil when she has none).
 func (s Scenario) Group(
 	ctx context.Context, account domain.Account, principal access.Principal, alias string,
 ) (*domain.Group, error) {
 	if err := access.Require(ctx, "group.read"); err != nil {
-		return nil, err //nolint:wrapcheck // the port's own error
+		return nil, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -55,7 +62,7 @@ func (s Scenario) SetGroup(
 	groupID uuid.NullUUID,
 ) (Listed, error) {
 	if err := access.Require(ctx, "user.group.update"); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the port's own error
+		return Listed{}, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -83,7 +90,7 @@ func (s Scenario) SetGroup(
 
 		return s.events.Publish(ctx, "user.group.updated", user)
 	}); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the transaction's own error
+		return Listed{}, err // the transaction's own error
 	}
 
 	status, err := s.status(ctx, user)
@@ -150,13 +157,13 @@ func (s Scenario) Related(
 	ctx context.Context, account domain.Account, principal access.Principal, alias, kind string,
 ) ([]uuid.UUID, error) {
 	permission := map[string]string{
-		kindProducts: "product.read",
-		kindLicenses: "license.read",
-		kindMachines: "machine.read",
+		kindProducts: permProductRead,
+		kindLicenses: permLicenseRead,
+		kindMachines: permMachineRead,
 	}[kind]
 
 	if err := access.Require(ctx, permission); err != nil {
-		return nil, err //nolint:wrapcheck // the port's own error
+		return nil, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -170,11 +177,11 @@ func (s Scenario) Related(
 
 	switch kind {
 	case kindProducts:
-		return s.store.UserProductIDs(ctx, account.ID, user.ID) //nolint:wrapcheck // the port's own error
+		return s.store.UserProductIDs(ctx, account.ID, user.ID) // the port's own error
 	case kindLicenses:
-		return s.store.UserLicenseIDs(ctx, account.ID, user.ID) //nolint:wrapcheck // the port's own error
+		return s.store.UserLicenseIDs(ctx, account.ID, user.ID) // the port's own error
 	default:
-		return s.store.UserMachineIDs(ctx, account.ID, user.ID) //nolint:wrapcheck // the port's own error
+		return s.store.UserMachineIDs(ctx, account.ID, user.ID) // the port's own error
 	}
 }
 
@@ -187,13 +194,13 @@ func (s Scenario) RelatedShow(
 	alias, kind, recordAlias string,
 ) (uuid.UUID, error) {
 	permission := map[string]string{
-		kindProducts: "product.read",
-		kindLicenses: "license.read",
-		kindMachines: "machine.read",
+		kindProducts: permProductRead,
+		kindLicenses: permLicenseRead,
+		kindMachines: permMachineRead,
 	}[kind]
 
 	if err := access.Require(ctx, permission); err != nil {
-		return uuid.Nil, err //nolint:wrapcheck // the port's own error
+		return uuid.Nil, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -260,7 +267,7 @@ func (s Scenario) authorizeProductScope(
 ) error {
 	ids, err := s.store.UserProductIDs(ctx, account.ID, user.ID)
 	if err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	for _, id := range ids {
@@ -296,13 +303,13 @@ func (s Scenario) RelatedUser(
 	alias, kind string,
 ) (domain.User, error) {
 	permission := map[string]string{
-		kindProducts: "product.read",
-		kindLicenses: "license.read",
-		kindMachines: "machine.read",
+		kindProducts: permProductRead,
+		kindLicenses: permLicenseRead,
+		kindMachines: permMachineRead,
 	}[kind]
 
 	if err := access.Require(ctx, permission); err != nil {
-		return domain.User{}, err //nolint:wrapcheck // the port's own error
+		return domain.User{}, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)

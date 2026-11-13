@@ -24,6 +24,9 @@ import (
 	"time"
 )
 
+// headerAuthorization is the credentials request header.
+const headerAuthorization = "Authorization"
+
 // The reference deployment and our server are configured with the same
 // single account and admin credentials.
 const (
@@ -107,7 +110,7 @@ func (tgt *HTTPTarget) NewRequest(
 
 // Do implements Target.
 func (tgt *HTTPTarget) Do(req *http.Request) (*http.Response, error) {
-	resp, err := tgt.Client.Do(req) //nolint:gosec // conformance harness calls local, operator-configured servers
+	resp, err := tgt.Client.Do(req) // conformance harness calls local, operator-configured servers
 	if err != nil {
 		return nil, fmt.Errorf("conformance: %s %s: %w", req.Method, req.URL.Path, err)
 	}
@@ -167,7 +170,7 @@ func WaitForEvent(
 		status, raw := call(tb, target, http.MethodGet,
 			"/v1/accounts/"+AccountSlug+"/webhook-events?events%5B%5D="+event+"&limit=100",
 			"", map[string]string{
-				"Authorization": "Bearer " + AdminToken(tb, target),
+				headerAuthorization: "Bearer " + AdminToken(tb, target),
 			})
 
 		if status == http.StatusOK {
@@ -489,15 +492,15 @@ func applyAuth(tb testing.TB, target Target, req *http.Request, auth Auth, vars 
 			vars[adminTokenVar] = AdminToken(tb, target)
 		}
 
-		req.Header.Set("Authorization", "Bearer "+vars[adminTokenVar])
+		req.Header.Set(headerAuthorization, "Bearer "+vars[adminTokenVar])
 	case AuthTokenVar:
-		req.Header.Set("Authorization", "Bearer "+varValue(tb, auth.Var, vars))
+		req.Header.Set(headerAuthorization, "Bearer "+varValue(tb, auth.Var, vars))
 	case AuthLicenseVar:
-		req.Header.Set("Authorization", "License "+varValue(tb, auth.Var, vars))
+		req.Header.Set(headerAuthorization, "License "+varValue(tb, auth.Var, vars))
 	case AuthBasic:
 		user := interpolate(tb, auth.BasicUser, vars)
 		pass := interpolate(tb, auth.BasicPass, vars)
-		req.Header.Set("Authorization", basicAuth(user, pass))
+		req.Header.Set(headerAuthorization, basicAuth(user, pass))
 	}
 }
 
@@ -507,7 +510,7 @@ func UserToken(tb testing.TB, target Target, userID string) string {
 
 	status, raw := call(tb, target, http.MethodPost,
 		"/v1/accounts/"+AccountSlug+"/users/"+userID+"/tokens", "", map[string]string{
-			"Authorization": "Bearer " + AdminToken(tb, target),
+			headerAuthorization: "Bearer " + AdminToken(tb, target),
 		})
 	if status != http.StatusOK {
 		tb.Fatalf("conformance: mint user fixture: status %d: %s", status, raw)
@@ -563,7 +566,7 @@ func mintAdminToken(tb testing.TB, target Target) string {
 
 	status, raw := call(tb, target, http.MethodPost, "/v1/accounts/"+AccountSlug+"/tokens",
 		`{"data":{"type":"tokens"}}`, map[string]string{
-			"Authorization": basicAuth(AdminEmail, AdminPass),
+			headerAuthorization: basicAuth(AdminEmail, AdminPass),
 		})
 	if status != http.StatusCreated {
 		tb.Fatalf("conformance: admin token: unexpected status %d: %s", status, raw)

@@ -168,20 +168,33 @@ type requestResource struct {
 	Relationships map[string]Relationship `json:"relationships,omitempty"`
 }
 
-// Encode renders the body as a JSON:API document.
+// IsEmpty reports whether the body carries neither a resource nor meta,
+// i.e. the request has no body at all.
+func (b Body) IsEmpty() bool {
+	return b.Type == "" && b.Meta == nil
+}
+
+// Encode renders the body as a JSON:API document. A body without a
+// resource type is a meta-only document: the data member is omitted.
 func (b Body) Encode() ([]byte, error) {
-	res := requestResource{
-		ID:            b.ID,
-		Type:          b.Type,
-		Attributes:    b.Attributes,
-		Relationships: b.Relationships,
+	doc := requestBody{Meta: b.Meta}
+
+	if b.Type != "" {
+		res := requestResource{
+			ID:            b.ID,
+			Type:          b.Type,
+			Attributes:    b.Attributes,
+			Relationships: b.Relationships,
+		}
+
+		if len(b.Relationships) == 0 {
+			res.Relationships = nil
+		}
+
+		doc.Data = res
 	}
 
-	if len(b.Relationships) == 0 {
-		res.Relationships = nil
-	}
-
-	out, err := json.Marshal(requestBody{Data: res, Meta: b.Meta})
+	out, err := json.Marshal(doc)
 	if err != nil {
 		return nil, fmt.Errorf("jsonapi: encode document: %w", err)
 	}

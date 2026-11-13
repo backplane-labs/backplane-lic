@@ -1,0 +1,2446 @@
+{
+  "scenario": "machines_processes",
+  "steps": [
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "machines-procProduct-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "product procProduct",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": null,
+            "checkInIntervalCount": null,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": null,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": true,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": 3600,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 5,
+            "maxMemory": null,
+            "maxProcesses": 1,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "machines-procMachinePolicy-\u003crun\u003e",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_MACHINE",
+            "protected": true,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": false,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:3\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:3\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "policy procMachinePolicy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "authenticationStrategy": "TOKEN",
+            "checkInInterval": null,
+            "checkInIntervalCount": null,
+            "componentMatchingStrategy": "MATCH_ANY",
+            "componentUniquenessStrategy": "UNIQUE_PER_MACHINE",
+            "created": "\u003cts\u003e",
+            "duration": null,
+            "encrypted": false,
+            "expirationBasis": "FROM_CREATION",
+            "expirationStrategy": "RESTRICT_ACCESS",
+            "floating": true,
+            "heartbeatBasis": "FROM_FIRST_PING",
+            "heartbeatCullStrategy": "DEACTIVATE_DEAD",
+            "heartbeatDuration": null,
+            "heartbeatResurrectionStrategy": "NO_REVIVE",
+            "machineLeasingStrategy": "PER_LICENSE",
+            "machineMatchingStrategy": "MATCH_ANY",
+            "machineUniquenessStrategy": "UNIQUE_PER_LICENSE",
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 5,
+            "maxMemory": null,
+            "maxProcesses": 2,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": "machines-procLicensePolicy-\u003crun\u003e",
+            "overageStrategy": "NO_OVERAGE",
+            "processLeasingStrategy": "PER_LICENSE",
+            "protected": true,
+            "renewalBasis": "FROM_EXPIRY",
+            "requireCheckIn": false,
+            "requireChecksumScope": false,
+            "requireComponentsScope": false,
+            "requireFingerprintScope": false,
+            "requireHeartbeat": false,
+            "requireMachineScope": false,
+            "requirePolicyScope": false,
+            "requireProductScope": false,
+            "requireUserScope": false,
+            "requireVersionScope": false,
+            "scheme": null,
+            "strict": false,
+            "transferStrategy": "KEEP_EXPIRY",
+            "updated": "\u003cts\u003e",
+            "usePool": false
+          },
+          "id": "\u003cuuid:4\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/entitlements"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/licenses"
+              }
+            },
+            "pool": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/pool"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/policies/\u003cuuid:4\u003e/product"
+              }
+            }
+          },
+          "type": "policies"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "policy procLicensePolicy",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 5,
+            "maxMemory": null,
+            "maxProcesses": 1,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "license procLicense",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": true,
+            "key": "\u003clicense-key:2\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 5,
+            "maxMemory": null,
+            "maxProcesses": 2,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:6\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 0,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:4\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:6\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "license procPooled",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "cores": null,
+            "created": "\u003cts\u003e",
+            "disk": null,
+            "fingerprint": "proc-1-\u003crun\u003e",
+            "heartbeatDuration": 3600,
+            "heartbeatStatus": "NOT_STARTED",
+            "hostname": null,
+            "ip": null,
+            "lastCheckOut": null,
+            "lastHeartbeat": null,
+            "maxProcesses": 1,
+            "memory": null,
+            "metadata": {},
+            "name": null,
+            "nextHeartbeat": null,
+            "platform": null,
+            "requireHeartbeat": false,
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "components": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/components"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/group"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/license"
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "processes": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/processes"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/product"
+              }
+            }
+          },
+          "type": "machines"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "activate",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "cores": null,
+            "created": "\u003cts\u003e",
+            "disk": null,
+            "fingerprint": "proc-2-\u003crun\u003e",
+            "heartbeatDuration": 600,
+            "heartbeatStatus": "NOT_STARTED",
+            "hostname": null,
+            "ip": null,
+            "lastCheckOut": null,
+            "lastHeartbeat": null,
+            "maxProcesses": 2,
+            "memory": null,
+            "metadata": {},
+            "name": null,
+            "nextHeartbeat": null,
+            "platform": null,
+            "requireHeartbeat": false,
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:8\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "components": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e/components"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e/group"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:6\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e/license"
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e/owner"
+              }
+            },
+            "processes": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e/processes"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:8\u003e/product"
+              }
+            }
+          },
+          "type": "machines"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "activate pooled a",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "cores": null,
+            "created": "\u003cts\u003e",
+            "disk": null,
+            "fingerprint": "proc-3-\u003crun\u003e",
+            "heartbeatDuration": 600,
+            "heartbeatStatus": "NOT_STARTED",
+            "hostname": null,
+            "ip": null,
+            "lastCheckOut": null,
+            "lastHeartbeat": null,
+            "maxProcesses": 2,
+            "memory": null,
+            "metadata": {},
+            "name": null,
+            "nextHeartbeat": null,
+            "platform": null,
+            "requireHeartbeat": false,
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:9\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "components": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e/components"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e/group"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:6\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e/license"
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e/owner"
+              }
+            },
+            "processes": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e/processes"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:9\u003e/product"
+              }
+            }
+          },
+          "type": "machines"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "activate pooled b",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 3600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1001",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:10\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "MACHINE_PROCESS_LIMIT_EXCEEDED",
+            "detail": "process count has exceeded maximum allowed for machine (1)",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object"
+            },
+            "source": {
+              "pointer": "/data"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:11\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn past machine limit",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "PID_TAKEN",
+            "detail": "has already been taken",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object-attrs-pid"
+            },
+            "source": {
+              "pointer": "/data/attributes/pid"
+            },
+            "title": "Unprocessable resource"
+          },
+          {
+            "code": "MACHINE_PROCESS_LIMIT_EXCEEDED",
+            "detail": "process count has exceeded maximum allowed for machine (1)",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object"
+            },
+            "source": {
+              "pointer": "/data"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:12\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn duplicate pid",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "PID_NOT_ALLOWED",
+            "detail": "is reserved",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object-attrs-pid"
+            },
+            "source": {
+              "pointer": "/data/attributes/pid"
+            },
+            "title": "Unprocessable resource"
+          },
+          {
+            "code": "MACHINE_PROCESS_LIMIT_EXCEEDED",
+            "detail": "process count has exceeded maximum allowed for machine (1)",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object"
+            },
+            "source": {
+              "pointer": "/data"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:13\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn reserved pid",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:14\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:6\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:8\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn pooled 1",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "2",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:15\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:6\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:9\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn pooled 2",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "MACHINE_PROCESS_LIMIT_EXCEEDED",
+            "detail": "process count has exceeded maximum allowed for license (2)",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object"
+            },
+            "source": {
+              "pointer": "/data"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:16\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn pooled past license limit",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "type mismatch (received string expected UUID string)",
+            "source": {
+              "pointer": "/data/id"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:17\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn with id",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "MACHINE_NOT_FOUND",
+            "detail": "must exist",
+            "links": {
+              "about": "https://\u003cdocs-host\u003e/docs/api/processes/#processes-object-relationships-machine"
+            },
+            "source": {
+              "pointer": "/data/relationships/machine"
+            },
+            "title": "Unprocessable resource"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:18\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn unknown machine",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 422
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 3600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1001",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:10\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 3600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1001",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:10\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "ping",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "interval": 3600,
+              "lastHeartbeat": "\u003cts\u003e",
+              "metadata": {},
+              "nextHeartbeat": "\u003cts\u003e",
+              "pid": "1001",
+              "status": "ALIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:10\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "license": {
+                "data": {
+                  "id": "\u003cuuid:5\u003e",
+                  "type": "licenses"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+                }
+              },
+              "machine": {
+                "data": {
+                  "id": "\u003cuuid:7\u003e",
+                  "type": "machines"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+                }
+              }
+            },
+            "type": "processes"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index alive",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index dead",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "interval": 600,
+              "lastHeartbeat": "\u003cts\u003e",
+              "metadata": {},
+              "nextHeartbeat": "\u003cts\u003e",
+              "pid": "2",
+              "status": "ALIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:15\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "license": {
+                "data": {
+                  "id": "\u003cuuid:6\u003e",
+                  "type": "licenses"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e/license"
+                }
+              },
+              "machine": {
+                "data": {
+                  "id": "\u003cuuid:9\u003e",
+                  "type": "machines"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e/machine"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:15\u003e/product"
+                }
+              }
+            },
+            "type": "processes"
+          },
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "interval": 600,
+              "lastHeartbeat": "\u003cts\u003e",
+              "metadata": {},
+              "nextHeartbeat": "\u003cts\u003e",
+              "pid": "1",
+              "status": "ALIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:14\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "license": {
+                "data": {
+                  "id": "\u003cuuid:6\u003e",
+                  "type": "licenses"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e/license"
+                }
+              },
+              "machine": {
+                "data": {
+                  "id": "\u003cuuid:8\u003e",
+                  "type": "machines"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e/machine"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:14\u003e/product"
+                }
+              }
+            },
+            "type": "processes"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "index by license",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": [
+          {
+            "attributes": {
+              "created": "\u003cts\u003e",
+              "interval": 3600,
+              "lastHeartbeat": "\u003cts\u003e",
+              "metadata": {},
+              "nextHeartbeat": "\u003cts\u003e",
+              "pid": "1001",
+              "status": "ALIVE",
+              "updated": "\u003cts\u003e"
+            },
+            "id": "\u003cuuid:10\u003e",
+            "links": {
+              "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+            },
+            "relationships": {
+              "account": {
+                "data": {
+                  "id": "\u003cuuid:2\u003e",
+                  "type": "accounts"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e"
+                }
+              },
+              "license": {
+                "data": {
+                  "id": "\u003cuuid:5\u003e",
+                  "type": "licenses"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+                }
+              },
+              "machine": {
+                "data": {
+                  "id": "\u003cuuid:7\u003e",
+                  "type": "machines"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+                }
+              },
+              "product": {
+                "data": {
+                  "id": "\u003cuuid:1\u003e",
+                  "type": "products"
+                },
+                "links": {
+                  "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+                }
+              }
+            },
+            "type": "processes"
+          }
+        ]
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "machine processes",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 3600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1001",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:10\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "machine process",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 3600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {
+              "worker": true
+            },
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1001",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:10\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:10\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "update metadata",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "detail": "unpermitted parameter",
+            "source": {
+              "pointer": "/data/attributes/pid"
+            },
+            "title": "Bad request"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:19\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "update pid",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 400
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "cores": null,
+            "created": "\u003cts\u003e",
+            "disk": null,
+            "fingerprint": "proc-1-\u003crun\u003e",
+            "heartbeatDuration": 3600,
+            "heartbeatStatus": "NOT_STARTED",
+            "hostname": null,
+            "ip": null,
+            "lastCheckOut": null,
+            "lastHeartbeat": null,
+            "maxProcesses": 1,
+            "memory": null,
+            "metadata": {},
+            "name": null,
+            "nextHeartbeat": null,
+            "platform": null,
+            "requireHeartbeat": false,
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:7\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "components": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/components"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/group"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/license"
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/owner"
+              }
+            },
+            "processes": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/processes"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/machines/\u003cuuid:7\u003e/product"
+              }
+            }
+          },
+          "type": "machines"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "machine relationship",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "encrypted": false,
+            "expiry": null,
+            "floating": true,
+            "key": "\u003clicense-key:1\u003e",
+            "lastCheckIn": null,
+            "lastCheckOut": null,
+            "lastValidated": null,
+            "maxCores": null,
+            "maxDisk": null,
+            "maxMachines": 5,
+            "maxMemory": null,
+            "maxProcesses": 1,
+            "maxUsers": null,
+            "maxUses": null,
+            "metadata": {},
+            "name": null,
+            "nextCheckIn": null,
+            "protected": true,
+            "requireCheckIn": false,
+            "requireHeartbeat": false,
+            "scheme": null,
+            "status": "ACTIVE",
+            "strict": false,
+            "suspended": false,
+            "updated": "\u003cts\u003e",
+            "uses": 0,
+            "version": null
+          },
+          "id": "\u003cuuid:5\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "entitlements": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/entitlements"
+              }
+            },
+            "group": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/group"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/machines"
+              },
+              "meta": {
+                "cores": 0,
+                "count": 1,
+                "disk": 0,
+                "memory": 0
+              }
+            },
+            "owner": {
+              "data": null,
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/owner"
+              }
+            },
+            "policy": {
+              "data": {
+                "id": "\u003cuuid:3\u003e",
+                "type": "policies"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/policy"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/product"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/licenses/\u003cuuid:5\u003e/users"
+              },
+              "meta": {
+                "count": 0
+              }
+            }
+          },
+          "type": "licenses"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "license relationship",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "code": null,
+            "created": "\u003cts\u003e",
+            "distributionStrategy": "LICENSED",
+            "metadata": {},
+            "name": "machines-procProduct-\u003crun\u003e",
+            "platforms": null,
+            "updated": "\u003cts\u003e",
+            "url": null
+          },
+          "id": "\u003cuuid:1\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "artifacts": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/artifacts"
+              }
+            },
+            "channels": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/channels"
+              }
+            },
+            "licenses": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/licenses"
+              }
+            },
+            "machines": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/machines"
+              }
+            },
+            "platforms": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/platforms"
+              }
+            },
+            "policies": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/policies"
+              }
+            },
+            "releases": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/releases"
+              }
+            },
+            "tokens": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/tokens"
+              }
+            },
+            "users": {
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/products/\u003cuuid:1\u003e/users"
+              }
+            }
+          },
+          "type": "products"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "product relationship",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "kill",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    },
+    {
+      "body": {
+        "errors": [
+          {
+            "code": "NOT_FOUND",
+            "detail": "The requested machine process '\u003cuuid:10\u003e' was not found",
+            "title": "Not found"
+          }
+        ],
+        "meta": {
+          "id": "\u003cuuid:20\u003e"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "show killed",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 404
+    },
+    {
+      "body": {
+        "data": {
+          "attributes": {
+            "created": "\u003cts\u003e",
+            "interval": 3600,
+            "lastHeartbeat": "\u003cts\u003e",
+            "metadata": {},
+            "nextHeartbeat": "\u003cts\u003e",
+            "pid": "1003",
+            "status": "ALIVE",
+            "updated": "\u003cts\u003e"
+          },
+          "id": "\u003cuuid:21\u003e",
+          "links": {
+            "self": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:21\u003e"
+          },
+          "relationships": {
+            "account": {
+              "data": {
+                "id": "\u003cuuid:2\u003e",
+                "type": "accounts"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e"
+              }
+            },
+            "license": {
+              "data": {
+                "id": "\u003cuuid:5\u003e",
+                "type": "licenses"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:21\u003e/license"
+              }
+            },
+            "machine": {
+              "data": {
+                "id": "\u003cuuid:7\u003e",
+                "type": "machines"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:21\u003e/machine"
+              }
+            },
+            "product": {
+              "data": {
+                "id": "\u003cuuid:1\u003e",
+                "type": "products"
+              },
+              "links": {
+                "related": "/v1/accounts/\u003cuuid:2\u003e/processes/\u003cuuid:21\u003e/product"
+              }
+            }
+          },
+          "type": "processes"
+        }
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "spawn after kill",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 201
+    },
+    {
+      "body": null,
+      "headers": {
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "deactivate machine",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 204
+    },
+    {
+      "body": {
+        "data": []
+      },
+      "headers": {
+        "Content-Type": "application/vnd.api+json; charset=utf-8",
+        "Keygen-Edition": "CE",
+        "Keygen-Mode": "singleplayer",
+        "Keygen-Version": "1.8"
+      },
+      "name": "processes of deactivated machine",
+      "present": [
+        "Keygen-Signature",
+        "Keygen-Digest",
+        "Digest",
+        "Keygen-Date",
+        "Date",
+        "X-Request-Id"
+      ],
+      "status": 200
+    }
+  ]
+}

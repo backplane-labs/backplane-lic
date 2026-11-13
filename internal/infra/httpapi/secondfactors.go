@@ -16,7 +16,7 @@ import (
 func (a *API) subUser(ctx context.Context, req *request, alias string) (domain.User, error) {
 	user, err := a.users.Show(ctx, req.account, req.principal, alias)
 	if err != nil {
-		return domain.User{}, err //nolint:wrapcheck // the scenario's own error
+		return domain.User{}, err // the scenario's own error
 	}
 
 	return user.User, nil
@@ -35,7 +35,7 @@ func (a *API) ListUserSecondFactors(
 
 	factors, err := a.secondFactors.List(ctx, req.account, req.principal, user.ID, limitOf(req))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.SecondFactorCollectionDocument{Data: make([]oas.SecondFactorResource, 0, len(factors))}
@@ -65,7 +65,7 @@ func (a *API) CreateUserSecondFactor(
 
 	factor, err := a.secondFactors.Create(ctx, req.account, req.principal, user.ID, password, otp)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.SecondFactorDocumentHeaders{
@@ -96,7 +96,7 @@ func (a *API) ShowUserSecondFactor(
 
 	factor, err := a.secondFactors.Show(ctx, req.account, req.principal, user.ID, factorID)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.SecondFactorDocument{
@@ -142,7 +142,7 @@ func (a *API) updateUserSecondFactor(
 		ctx, req.account, req.principal, user.ID, factorID, enabled, otp,
 	)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.SecondFactorDocument{
@@ -170,7 +170,7 @@ func (a *API) DeleteUserSecondFactor(
 
 	err = a.secondFactors.Delete(ctx, req.account, req.principal, user.ID, factorID, otp)
 
-	return err //nolint:wrapcheck // the scenario's own error
+	return err // the scenario's own error
 }
 
 // validateSecondFactorCreate decodes the create body: optional data with

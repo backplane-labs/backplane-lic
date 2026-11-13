@@ -35,7 +35,7 @@ func SecondFactor(accountID uuid.UUID, factor domain.SecondFactor, email string)
 			Account: oas.ToOneRelationship{
 				Links: oas.RelationshipLinks{Related: oas.NewNilString(base)},
 				Data: oas.NilResourceIdentifier{
-					Value: oas.ResourceIdentifier{Type: "accounts", ID: accountID.String()},
+					Value: oas.ResourceIdentifier{Type: typeAccounts, ID: accountID.String()},
 				},
 			},
 			User: oas.ToOneRelationship{

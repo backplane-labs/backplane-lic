@@ -25,6 +25,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// The license-key payload members several schemes share.
+const (
+	keyCreated  = "created"
+	keyDuration = "duration"
+	keyExpiry   = "expiry"
+	keyProduct  = "product"
+)
+
 // The crypto scheme names shared by the key and file builders.
 const (
 	SchemePKCS1Encrypt = "RSA_2048_PKCS1_ENCRYPT"
@@ -134,10 +142,10 @@ func SeedKey(in KeyInput, custom string) string {
 	switch in.Policy.Scheme {
 	case SchemePKCS1Encrypt:
 		return marshal(map[string]any{
-			"id":       in.LicenseID,
-			"created":  iso8601ms(in.CreatedAt),
-			"duration": in.Policy.Duration,
-			"expiry":   timeOrNil(in.Expiry),
+			"id":        in.LicenseID,
+			keyCreated:  iso8601ms(in.CreatedAt),
+			keyDuration: in.Policy.Duration,
+			keyExpiry:   timeOrNil(in.Expiry),
 		})
 
 	case SchemeJWT:
@@ -168,17 +176,17 @@ func SeedKey(in KeyInput, custom string) string {
 		}
 
 		return marshal(map[string]any{
-			"account": map[string]any{"id": in.AccountID.String()},
-			"product": map[string]any{"id": in.ProductID.String()},
+			"account":  map[string]any{"id": in.AccountID.String()},
+			keyProduct: map[string]any{"id": in.ProductID.String()},
 			"policy": map[string]any{
-				"id":       in.Policy.ID.String(),
-				"duration": in.Policy.Duration,
+				"id":        in.Policy.ID.String(),
+				keyDuration: in.Policy.Duration,
 			},
 			"user": user,
 			"license": map[string]any{
-				"id":      in.LicenseID.String(),
-				"created": iso8601ms(in.CreatedAt),
-				"expiry":  timeOrNil(in.Expiry),
+				"id":       in.LicenseID.String(),
+				keyCreated: iso8601ms(in.CreatedAt),
+				keyExpiry:  timeOrNil(in.Expiry),
 			},
 		})
 	}
@@ -361,13 +369,13 @@ func formatTemplate(template string, in KeyInput) string {
 
 	pairs := []string{
 		"account", in.AccountID.String(),
-		"product", in.ProductID.String(),
+		keyProduct, in.ProductID.String(),
 		"policy", in.Policy.ID.String(),
 		"user", in.OwnerID.UUID.String(),
 		"email", email,
-		"created", created,
-		"expiry", expiry,
-		"duration", duration,
+		keyCreated, created,
+		keyExpiry, expiry,
+		keyDuration, duration,
 		"id", in.LicenseID.String(),
 	}
 

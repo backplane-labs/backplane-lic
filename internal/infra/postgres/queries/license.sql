@@ -251,28 +251,8 @@ LEFT JOIN lic.license_entitlements le ON le.entitlement_id = e.id AND le.license
 WHERE e.account_id = @account_id AND (pe.id IS NOT NULL OR le.id IS NOT NULL)
 ORDER BY e.code;
 
--- License-scope validation helpers: the machines and processes behind
--- a license, with the heartbeat facts the alive/dead math needs.
-
--- name: GetLicenseMachineByID :one
-SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,
-  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,
-  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,
-  m.created_at, m.updated_at,
-  p.require_heartbeat, p.heartbeat_duration
-FROM lic.machines m
-JOIN lic.policies p ON p.id = m.policy_id
-WHERE m.account_id = @account_id AND m.id = @id AND m.license_id = @license_id;
-
--- name: GetLicenseMachineByFingerprint :one
-SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,
-  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,
-  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,
-  m.created_at, m.updated_at,
-  p.require_heartbeat, p.heartbeat_duration
-FROM lic.machines m
-JOIN lic.policies p ON p.id = m.policy_id
-WHERE m.account_id = @account_id AND m.fingerprint = @fingerprint AND m.license_id = @license_id;
+-- License-scope validation helpers: the processes behind a license (its
+-- machines load through the machines repository).
 
 -- name: CountLicenseProcesses :one
 SELECT count(*) AS count FROM lic.machine_processes mp
@@ -283,43 +263,6 @@ WHERE m.account_id = @account_id AND m.license_id = @license_id
 -- name: CountMachineProcesses :one
 SELECT count(*) AS count FROM lic.machine_processes mp
 WHERE mp.account_id = @account_id AND mp.machine_id = @machine_id;
-
--- The machine rows of a license (relationship index and validation).
--- heartbeat_status mirrors Machine#heartbeat_status with the default
--- TTL of 10 minutes.
--- name: ListLicenseMachines :many
-SELECT m.id, m.account_id, m.license_id, m.policy_id, m.owner_id, m.group_id,
-  m.name, m.fingerprint, m.ip, m.hostname, m.platform, m.cores, m.memory, m.disk,
-  m.max_processes_override, m.metadata, m.last_heartbeat_at, m.last_check_out_at,
-  m.created_at, m.updated_at,
-  p.require_heartbeat, p.heartbeat_duration,
-  CASE
-    WHEN m.last_heartbeat_at IS NULL
-      AND (p.require_heartbeat = false
-        OR m.created_at >= (@now::timestamptz - INTERVAL '1 second' * COALESCE(p.heartbeat_duration, @heartbeat_ttl)))
-      THEN 'NOT_STARTED'
-    WHEN m.last_heartbeat_at IS NOT NULL
-      AND m.last_heartbeat_at >= (@now::timestamptz - INTERVAL '1 second' * COALESCE(p.heartbeat_duration, @heartbeat_ttl))
-      THEN 'ALIVE'
-    ELSE 'DEAD'
-  END AS heartbeat_status
-FROM lic.machines m
-JOIN lic.policies p ON p.id = m.policy_id
-WHERE m.account_id = @account_id
-  AND m.license_id = @license_id
-  AND (@fingerprint::text IS NULL OR m.fingerprint = @fingerprint)
-  AND (@product_id::uuid IS NULL OR m.license_id IN (
-    SELECT l2.id FROM lic.licenses l2 WHERE l2.product_id = @product_id
-  ))
-  AND (
-    @user_id::uuid IS NULL OR EXISTS (
-      SELECT 1 FROM lic.licenses l3
-      LEFT JOIN lic.license_users lu ON lu.license_id = l3.id
-      WHERE l3.id = m.license_id AND (l3.user_id = @user_id OR lu.user_id = @user_id)
-    )
-  )
-ORDER BY m.created_at DESC, m.id DESC
-LIMIT @limit;
 
 -- name: CountLicenseMachines :one
 SELECT count(*) AS count FROM lic.machines

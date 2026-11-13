@@ -120,6 +120,9 @@ func scenarios() []conformance.Scenario {
 		passwordsScenarios(),
 		authScenarios(),
 		searchScenarios(),
+		searchMachineScenarios(),
+		machineScenarios(),
+		machineSubresourceScenarios(),
 	)
 
 	return scenarios

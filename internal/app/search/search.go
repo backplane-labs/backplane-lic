@@ -20,6 +20,15 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
+// The attribute names several resources share.
+const (
+	attrMetadata = "metadata"
+	attrName     = "name"
+	attrPolicy   = "policy"
+	attrProduct  = "product"
+	attrUser     = "user"
+)
+
 // errNotObject is a value that is not a JSON object.
 var errNotObject = errors.New("search: expected an object")
 
@@ -100,21 +109,21 @@ const (
 // attributes lists each resource's searchable attributes.
 var attributes = map[string]map[string]kind{ //nolint:gochecknoglobals // reference data
 	Licenses: {
-		"id": loose, "key": loose, "name": text, "metadata": meta, "owner": loose,
-		"user": loose, "product": loose, "policy": loose,
+		"id": loose, "key": loose, attrName: text, attrMetadata: meta, "owner": loose,
+		attrUser: loose, attrProduct: loose, attrPolicy: loose,
 	},
 	Machines: {
-		"id": loose, "fingerprint": loose, "name": text, "metadata": meta, "license": loose,
-		"owner": loose, "user": loose, "product": loose, "policy": loose,
+		"id": loose, "fingerprint": loose, attrName: text, attrMetadata: meta, "license": loose,
+		"owner": loose, attrUser: loose, attrProduct: loose, attrPolicy: loose,
 	},
 	Users: {
 		"id": loose, "email": text, "first_name": text, "last_name": text, "full_name": loose,
-		"name": loose, "metadata": meta, "role": loose,
+		attrName: loose, attrMetadata: meta, "role": loose,
 	},
-	Products:     {"id": loose, "name": text, "metadata": meta},
-	Policies:     {"id": loose, "name": text, "metadata": meta, "product": loose},
-	Groups:       {"name": text},
-	Entitlements: {"id": loose, "code": text, "name": text},
+	Products:     {"id": loose, attrName: text, attrMetadata: meta},
+	Policies:     {"id": loose, attrName: text, attrMetadata: meta, attrProduct: loose},
+	Groups:       {attrName: text},
+	Entitlements: {"id": loose, "code": text, attrName: text},
 }
 
 // searchers are the roles the search policy admits.
@@ -205,11 +214,7 @@ func (s Scenario) match(
 			fmt.Sprintf("search query for '%s' is too small (minimum %d characters)", lowerCamel(attribute), MinQuery), pointer)
 	}
 
-	if resource == Machines {
-		return []uuid.UUID{}, nil // devices: deferred, the account has none
-	}
-
-	if attribute == "full_name" || attribute == "name" && resource == Users {
+	if attribute == "full_name" || attribute == attrName && resource == Users {
 		return s.fullName(ctx, accountID, term)
 	}
 
@@ -263,10 +268,6 @@ func (s Scenario) metadata(
 		}
 	}
 
-	if resource == Machines {
-		return []uuid.UUID{}, nil
-	}
-
 	sets := make([][]uuid.UUID, 0, len(terms))
 
 	for _, field := range terms {
@@ -282,7 +283,7 @@ func (s Scenario) metadata(
 			return nil, fmt.Errorf("search: metadata: %w", err)
 		}
 
-		ids, err := s.store.SearchIDs(ctx, accountID, resource, "metadata", Term{Raw: raw, Cast: cast})
+		ids, err := s.store.SearchIDs(ctx, accountID, resource, attrMetadata, Term{Raw: raw, Cast: cast})
 		if err != nil {
 			return nil, fmt.Errorf("search: %s metadata: %w", resource, err)
 		}
@@ -429,8 +430,8 @@ func combine(sets [][]uuid.UUID, union bool) []uuid.UUID {
 func resourceOf(kind string) string {
 	name := underscore(kind)
 	singular := map[string]string{
-		"license": Licenses, "machine": Machines, "user": Users, "product": Products,
-		"policy": Policies, "group": Groups, "entitlement": Entitlements,
+		"license": Licenses, "machine": Machines, attrUser: Users, attrProduct: Products,
+		attrPolicy: Policies, "group": Groups, "entitlement": Entitlements,
 	}
 
 	if resource, ok := singular[name]; ok {

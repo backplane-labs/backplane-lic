@@ -28,18 +28,23 @@ var includePage = paging.Page{Limit: includeWindow, Fetch: includeWindow} //noli
 
 const (
 	includeUserAlias = "user"
-	includeProduct   = "product"
 	includeWindow    = 100
+)
+
+// The related resources the includes and scopes name.
+const (
+	resourceProduct = "product"
+	resourceOwner   = "owner"
 )
 
 // The checkout include whitelist.
 var checkoutIncludes = map[string]bool{ //nolint:gochecknoglobals // a constant table
-	"entitlements": true,
-	"product":      true,
-	"policy":       true,
-	"group":        true,
-	"owner":        true,
-	"users":        true,
+	"entitlements":  true,
+	resourceProduct: true,
+	"policy":        true,
+	"group":         true,
+	resourceOwner:   true,
+	"users":         true,
 }
 
 // CheckoutParams are the merged query and meta parameters of a
@@ -91,7 +96,7 @@ func (s Scenario) Checkout( //nolint:cyclop,funlen // the parameter ladder, verb
 	}
 
 	if err := access.Require(ctx, "license.check-out"); err != nil {
-		return Checkout{}, err //nolint:wrapcheck // the authorization's own error
+		return Checkout{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -100,7 +105,7 @@ func (s Scenario) Checkout( //nolint:cyclop,funlen // the parameter ladder, verb
 	}
 
 	if err := access.LicenseAction(access.PrincipalOf(ctx), license, "check-out", attached); err != nil {
-		return Checkout{}, err //nolint:wrapcheck // the authorization's own error
+		return Checkout{}, err // the authorization's own error
 	}
 
 	// "user" is the legacy spelling of the owner include.
@@ -178,13 +183,24 @@ func (s Scenario) Checkout( //nolint:cyclop,funlen // the parameter ladder, verb
 	return out, nil
 }
 
+// Included resolves includes of the license for another file that embeds
+// it (a machine file's license.* includes).
+func (s Scenario) Included(
+	ctx context.Context, account domain.Account, license domain.License, includes []string,
+) (Checkout, error) {
+	out := Checkout{License: license, Includes: includes}
+	err := s.loadIncludes(ctx, account, license, &out)
+
+	return out, err
+}
+
 // loadIncludes resolves the requested included relationships.
 func (s Scenario) loadIncludes( //nolint:cyclop,funlen // one branch per include
 	ctx context.Context, account domain.Account, license domain.License, out *Checkout,
 ) error {
 	for _, include := range out.Includes {
 		switch include {
-		case includeProduct:
+		case resourceProduct:
 			product, err := s.products.ProductByID(ctx, account.ID, license.ProductID)
 			if err != nil {
 				return fmt.Errorf("licenses: checkout product: %w", err)
@@ -194,7 +210,7 @@ func (s Scenario) loadIncludes( //nolint:cyclop,funlen // one branch per include
 		case "policy":
 			policy := license.Policy
 			out.Policy = &policy
-		case "owner":
+		case resourceOwner:
 			if !license.OwnerID.Valid {
 				continue
 			}

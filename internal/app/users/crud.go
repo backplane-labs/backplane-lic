@@ -63,7 +63,7 @@ func (s Scenario) Create(
 	}
 
 	if err := access.UserCreate(principal, account.Protected, role); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the authorization's own error
+		return Listed{}, err // the authorization's own error
 	}
 
 	now := s.clock()
@@ -106,7 +106,7 @@ func (s Scenario) Create(
 
 		return nil
 	}); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the transaction's own error
+		return Listed{}, err // the transaction's own error
 	}
 
 	return Listed{User: user, Status: user.Status(false, s.clock())}, nil
@@ -121,7 +121,7 @@ func (s Scenario) Show(
 	alias string,
 ) (Listed, error) {
 	if err := access.Require(ctx, "user.read"); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the port's own error
+		return Listed{}, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -146,7 +146,7 @@ func (s Scenario) Update(
 	attrs Attrs,
 ) (Listed, error) {
 	if err := access.Require(ctx, "user.update"); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the port's own error
+		return Listed{}, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -203,7 +203,7 @@ func (s Scenario) Update(
 
 		return nil
 	}); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the transaction's own error
+		return Listed{}, err // the transaction's own error
 	}
 
 	user.Role = role
@@ -224,7 +224,7 @@ func (s Scenario) Delete(
 	alias string,
 ) error {
 	if err := access.Require(ctx, "user.delete"); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -233,13 +233,13 @@ func (s Scenario) Delete(
 	}
 
 	if err := access.UserDestroy(principal, user); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if user.Role == domain.RoleAdmin {
 		admins, err := s.store.CountAdmins(ctx, account.ID)
 		if err != nil {
-			return err //nolint:wrapcheck // the port's own error
+			return err // the port's own error
 		}
 
 		if admins <= 1 {
@@ -258,7 +258,7 @@ func (s Scenario) Delete(
 
 		return s.events.Publish(ctx, "user.deleted", user)
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -273,7 +273,7 @@ func (s Scenario) List(
 	p paging.Params,
 ) (Page, error) {
 	if err := access.Require(ctx, "user.read"); err != nil {
-		return Page{}, err //nolint:wrapcheck // the port's own error
+		return Page{}, err // the port's own error
 	}
 
 	scope := access.UserScopeKind(principal)
@@ -318,10 +318,10 @@ func (s Scenario) visible(
 // byAlias resolves a UUID or email alias.
 func (s Scenario) byAlias(ctx context.Context, accountID uuid.UUID, alias string) (domain.User, error) {
 	if id, err := uuid.Parse(strings.ToLower(alias)); err == nil {
-		return s.store.UserByID(ctx, accountID, id) //nolint:wrapcheck // the caller maps the sentinel
+		return s.store.UserByID(ctx, accountID, id) // the caller maps the sentinel
 	}
 
-	return s.store.UserByEmail(ctx, accountID, strings.ToLower(alias)) //nolint:wrapcheck // ditto
+	return s.store.UserByEmail(ctx, accountID, strings.ToLower(alias)) // ditto
 }
 
 // inScope answers the authorized_scope visibility of the record
@@ -365,7 +365,7 @@ func (s Scenario) prepareUpdate(
 	}
 
 	if err := access.UserUpdate(principal, *user, role); err != nil {
-		return role, err //nolint:wrapcheck // the authorization's own error
+		return role, err // the authorization's own error
 	}
 
 	return role, nil
@@ -462,7 +462,7 @@ func (s Scenario) validateUpdate(
 	if original.Role == domain.RoleAdmin && role != domain.RoleAdmin {
 		admins, err := s.store.CountAdmins(ctx, accountID)
 		if err != nil {
-			return err //nolint:wrapcheck // the port's own error
+			return err // the port's own error
 		}
 
 		if admins <= 1 {
@@ -518,7 +518,7 @@ func (s Scenario) checkGroupJoin(
 	if group.MaxUsers != nil {
 		count, err := s.store.CountGroupUsers(ctx, accountID, group.ID)
 		if err != nil {
-			return err //nolint:wrapcheck // the port's own error
+			return err // the port's own error
 		}
 
 		// Staying in the same group does not add a member.
@@ -546,10 +546,10 @@ func (s Scenario) revokeTokens(
 	if principal.TokenID != uuid.Nil {
 		err := s.store.DeleteUserTokensExcept(ctx, accountID, userID, principal.TokenID)
 
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
-	return s.store.DeleteUserTokens(ctx, accountID, userID) //nolint:wrapcheck // the port's own error
+	return s.store.DeleteUserTokens(ctx, accountID, userID) // the port's own error
 }
 
 // docsOrigin is the reference's hardcoded docs origin of validation

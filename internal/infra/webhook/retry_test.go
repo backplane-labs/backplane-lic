@@ -132,7 +132,12 @@ func (s invalidSigningStore) Account(ctx context.Context, id uuid.UUID) (domain.
 
 func TestPruneRunnerStillRuns(t *testing.T) { //nolint:paralleltest // shared database
 	store, _ := deliveryAccount(t.Context(), t)
-	if err := jobs.NewRunner(store, time.Now).Tick(t.Context()); err != nil {
+	if err := jobs.NewRunner(store, noCull{}, time.Now).Tick(t.Context()); err != nil {
 		t.Fatalf("prune runner: %v", err)
 	}
 }
+
+// noCull is a runner without machines to cull.
+type noCull struct{}
+
+func (noCull) Cull(context.Context, time.Time) error { return nil }

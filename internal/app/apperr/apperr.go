@@ -23,6 +23,9 @@ const (
 	TitleInternalServerError   = "Internal server error"
 )
 
+// codeNotFound is the machine code of every 404.
+const codeNotFound = "NOT_FOUND"
+
 // The canonical default details.
 const (
 	detailBadRequest    = "The request could not be completed"
@@ -133,7 +136,7 @@ func ForbiddenReason(reason string) *T {
 
 // NotFoundDefault is the endpoint-not-found 404.
 func NotFoundDefault() *T {
-	return &T{Status: http.StatusNotFound, Title: TitleNotFound, Detail: detailNotFound, Code: "NOT_FOUND"}
+	return &T{Status: http.StatusNotFound, Title: TitleNotFound, Detail: detailNotFound, Code: codeNotFound}
 }
 
 // NotFound is a record-not-found 404: "The requested <resource> '<id>'
@@ -143,7 +146,24 @@ func NotFound(resource, id string) *T {
 		Status: http.StatusNotFound,
 		Title:  TitleNotFound,
 		Detail: "The requested " + resource + " '" + id + "' was not found",
-		Code:   "NOT_FOUND",
+		Code:   codeNotFound,
+	}
+}
+
+// BadRequestParameter is a 400 pointing at a query parameter.
+func BadRequestParameter(detail, parameter string) *T {
+	return &T{
+		Status: http.StatusBadRequest, Title: TitleBadRequest, Detail: detail,
+		Source: Source{Parameter: parameter},
+	}
+}
+
+// NotFoundModel is a record-not-found 404 without an id ("The
+// requested <resource> was not found"), e.g. a missing association.
+func NotFoundModel(resource string) *T {
+	return &T{
+		Status: http.StatusNotFound, Title: TitleNotFound,
+		Detail: "The requested " + resource + " was not found", Code: codeNotFound,
 	}
 }
 

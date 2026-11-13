@@ -1,0 +1,254 @@
+# Machine components: the account-level CRUD with the machine, license
+# and product relationships, and the components of one machine.
+paths:
+  /v1/accounts/{account}/components:
+    get:
+      operationId: indexComponents
+      summary: List machine components
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Component collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ComponentListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createComponent
+      summary: Create a machine component
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Component document.
+          headers:
+            Location:
+              description: The new component's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ComponentDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/components/{componentId}:
+    get:
+      operationId: showComponent
+      summary: Retrieve a machine component
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ComponentPath"
+      responses:
+        "200":
+          description: Component document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ComponentDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateComponent
+      summary: Update a machine component
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ComponentPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Component document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ComponentDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteComponent
+      summary: Delete a machine component
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ComponentPath"
+      responses:
+        "204":
+          description: Component deleted.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/components/{componentId}/machine:
+    get:
+      operationId: showComponentMachine
+      summary: Retrieve a component's machine
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ComponentPath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/components/{componentId}/license:
+    get:
+      operationId: showComponentLicense
+      summary: Retrieve a component's license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ComponentPath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/components/{componentId}/product:
+    get:
+      operationId: showComponentProduct
+      summary: Retrieve a component's product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ComponentPath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/components:
+    get:
+      operationId: indexMachineComponents
+      summary: List a machine's components
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Component collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ComponentListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/components/{componentId}:
+    get:
+      operationId: showMachineComponent
+      summary: Retrieve one of a machine's components
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+        - $ref: "#/components/parameters/ComponentPath"
+      responses:
+        "200":
+          description: Component document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ComponentDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+components:
+  schemas:
+    ComponentAttributes:
+      type: object
+      required: [fingerprint, name, metadata, created, updated]
+      properties:
+        fingerprint:
+          type: string
+        name:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    ComponentRelationships:
+      type: object
+      required: [account, product, license, machine]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        product:
+          $ref: "#/components/schemas/ToOneRelationship"
+        license:
+          $ref: "#/components/schemas/ToOneRelationship"
+        machine:
+          $ref: "#/components/schemas/ToOneRelationship"
+
+    ComponentResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [components]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/ComponentAttributes"
+        relationships:
+          $ref: "#/components/schemas/ComponentRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    ComponentDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/ComponentResource"
+            - type: "null"
+
+    ComponentListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"

@@ -134,19 +134,19 @@ var errRedirect = errors.New("webhook: redirect")
 // pg-outbox applies a Publisher outcome to the whole batch.
 func (w *Worker) Publish(ctx context.Context, messages []outbox.Message) error {
 	if len(messages) != 1 {
-		return outbox.Permanent(errBatchSize) //nolint:wrapcheck // relay control marker
+		return outbox.Permanent(errBatchSize) // relay control marker
 	}
 
 	message := messages[0]
 
 	id, err := uuid.Parse(string(message.Payload))
 	if err != nil {
-		return outbox.Permanent(fmt.Errorf("webhook: invalid event reference: %w", err)) //nolint:wrapcheck // control marker
+		return outbox.Permanent(fmt.Errorf("webhook: invalid event reference: %w", err)) // control marker
 	}
 
 	event, err := w.store.WebhookEventByID(ctx, w.accountID, id)
 	if errors.Is(err, webhooks.ErrNotFound) {
-		return outbox.Discard(err) //nolint:wrapcheck // relay control marker
+		return outbox.Discard(err) // relay control marker
 	}
 
 	if err != nil {
@@ -172,17 +172,17 @@ func (w *Worker) Publish(ctx context.Context, messages []outbox.Message) error {
 		return errors.Join(err, fmt.Errorf("webhook: record exhaustion: %w", markErr))
 	}
 
-	return outbox.Permanent(err) //nolint:wrapcheck // relay control marker
+	return outbox.Permanent(err) // relay control marker
 }
 
 func (w *Worker) publish(ctx context.Context, message outbox.Message, event domain.WebhookEvent) error {
 	if !event.EndpointID.Valid {
-		return outbox.Discard(webhooks.ErrNotFound) //nolint:wrapcheck // relay control marker
+		return outbox.Discard(webhooks.ErrNotFound) // relay control marker
 	}
 
 	endpoint, err := w.store.WebhookEndpointByID(ctx, w.accountID, event.EndpointID.UUID)
 	if errors.Is(err, webhooks.ErrNotFound) {
-		return outbox.Discard(err) //nolint:wrapcheck // relay control marker
+		return outbox.Discard(err) // relay control marker
 	}
 
 	if err != nil {
@@ -258,7 +258,7 @@ func (w *Worker) deliver(
 	}
 
 	if resp.StatusCode/100 == 2 { //nolint:mnd // the 2xx family
-		return w.store.SetWebhookEventDelivered( //nolint:wrapcheck // the store's own error
+		return w.store.SetWebhookEventDelivered( // the store's own error
 			ctx, w.accountID, delivery.Event.ID, resp.StatusCode, recorded)
 	}
 
@@ -406,7 +406,7 @@ func (w *Worker) fail(
 	}
 
 	if terminal {
-		return outbox.Permanent(errDelivery) //nolint:wrapcheck // relay control marker
+		return outbox.Permanent(errDelivery) // relay control marker
 	}
 
 	return errDelivery
@@ -424,7 +424,7 @@ func (w *Worker) failAndDisable(ctx context.Context, delivery delivery, code int
 		return fmt.Errorf("webhook: auto-disable: %w", err)
 	}
 
-	return outbox.Permanent(errDelivery) //nolint:wrapcheck // relay control marker
+	return outbox.Permanent(errDelivery) // relay control marker
 }
 
 // disable empties the endpoint's subscriptions (auto-disable).
@@ -433,7 +433,7 @@ func (w *Worker) disable(ctx context.Context, delivery delivery) error {
 		return nil
 	}
 
-	return w.store.DisableWebhookEndpoint( //nolint:wrapcheck // the store's own error
+	return w.store.DisableWebhookEndpoint( // the store's own error
 		ctx, w.accountID, delivery.Event.EndpointID.UUID)
 }
 

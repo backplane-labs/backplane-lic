@@ -21,6 +21,14 @@ type CheckoutLicenseReq interface {
 	checkoutLicenseReq()
 }
 
+type CheckoutMachineReq interface {
+	checkoutMachineReq()
+}
+
+type CreateComponentReq interface {
+	createComponentReq()
+}
+
 type CreateEntitlementReq interface {
 	createEntitlementReq()
 }
@@ -41,8 +49,16 @@ type CreateLicenseTokenReq interface {
 	createLicenseTokenReq()
 }
 
+type CreateMachineReq interface {
+	createMachineReq()
+}
+
 type CreatePolicyReq interface {
 	createPolicyReq()
+}
+
+type CreateProcessReq interface {
+	createProcessReq()
 }
 
 type CreateProductReq interface {
@@ -93,6 +109,10 @@ type DetachPolicyEntitlementsReq interface {
 	detachPolicyEntitlementsReq()
 }
 
+type GenerateMachineProofReq interface {
+	generateMachineProofReq()
+}
+
 type GenerateTokenReq interface {
 	generateTokenReq()
 }
@@ -101,12 +121,28 @@ type IncrementLicenseUsageReq interface {
 	incrementLicenseUsageReq()
 }
 
+type PingMachineHeartbeatReq interface {
+	pingMachineHeartbeatReq()
+}
+
+type PingProcessReq interface {
+	pingProcessReq()
+}
+
 type ReplaceUserSecondFactorReq interface {
 	replaceUserSecondFactorReq()
 }
 
+type ReportMachineUsageReq interface {
+	reportMachineUsageReq()
+}
+
 type RequestPasswordResetReq interface {
 	requestPasswordResetReq()
+}
+
+type ResetMachineHeartbeatReq interface {
+	resetMachineHeartbeatReq()
 }
 
 type ResetUserPasswordReq interface {
@@ -119,6 +155,10 @@ type RetryWebhookEventReq interface {
 
 type SearchReq interface {
 	searchReq()
+}
+
+type UpdateComponentReq interface {
+	updateComponentReq()
 }
 
 type UpdateEntitlementReq interface {
@@ -153,8 +193,24 @@ type UpdateLicenseUserAliasReq interface {
 	updateLicenseUserAliasReq()
 }
 
+type UpdateMachineGroupReq interface {
+	updateMachineGroupReq()
+}
+
+type UpdateMachineOwnerReq interface {
+	updateMachineOwnerReq()
+}
+
+type UpdateMachineReq interface {
+	updateMachineReq()
+}
+
 type UpdatePolicyReq interface {
 	updatePolicyReq()
+}
+
+type UpdateProcessReq interface {
+	updateProcessReq()
 }
 
 type UpdateProductReq interface {

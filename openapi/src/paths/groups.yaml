@@ -223,7 +223,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: "#/components/schemas/UserMachineCollectionDocument"
+                $ref: "#/components/schemas/MachineListDocument"
         default:
           $ref: "#/components/responses/Error"
 
@@ -249,7 +249,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: "#/components/schemas/UserMachineDocument"
+                $ref: "#/components/schemas/MachineDocument"
         default:
           $ref: "#/components/responses/Error"
 

@@ -71,7 +71,8 @@ type Store struct {
 	// Webhooks is the webhook endpoints and events repository.
 	Webhooks WebhooksRepo
 	// Jobs is the periodic-jobs repository.
-	Jobs JobsRepo
+	Jobs     JobsRepo
+	Machines MachinesRepo
 }
 
 // New is the provider: the postgres driver with the schema and the
@@ -126,6 +127,7 @@ func Open(ctx context.Context, log *xlog.Logger, cfg postgres.Config) (*Store, e
 		Webhooks:      WebhooksRepo{q: queries},
 		SecondFactors: SecondFactorsRepo{q: queries, txRunner: runner},
 		Jobs:          JobsRepo{q: queries},
+		Machines:      MachinesRepo{q: queries},
 	}, nil
 }
 

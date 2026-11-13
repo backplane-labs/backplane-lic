@@ -35,7 +35,7 @@ func (s Scenario) Machines(
 	}
 
 	if err := access.Require(ctx, "machine.read"); err != nil {
-		return MachinePage{}, err //nolint:wrapcheck // the authorization's own error
+		return MachinePage{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -44,7 +44,7 @@ func (s Scenario) Machines(
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return MachinePage{}, err //nolint:wrapcheck // the authorization's own error
+		return MachinePage{}, err // the authorization's own error
 	}
 
 	machines, err := s.store.LicenseMachines(ctx, account.ID, license.ID, f, s.now())
@@ -72,7 +72,7 @@ func (s Scenario) Machine(
 	}
 
 	if err := access.Require(ctx, "machine.read"); err != nil {
-		return domain.Machine{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Machine{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -81,7 +81,7 @@ func (s Scenario) Machine(
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return domain.Machine{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Machine{}, err // the authorization's own error
 	}
 
 	var (
@@ -114,10 +114,10 @@ func (s Scenario) Tokens(
 	}
 
 	if err := access.LicenseTokenIndex(access.PrincipalOf(ctx), license); err != nil {
-		return tokens.Page{}, err //nolint:wrapcheck // the authorization's own error
+		return tokens.Page{}, err // the authorization's own error
 	}
 
-	return s.tokens.List( //nolint:wrapcheck // the manager's own error
+	return s.tokens.List( // the manager's own error
 		ctx, account, access.PrincipalOf(ctx), tokens.Filter{
 			BearerType: "License", BearerID: uuid.NullUUID{UUID: license.ID, Valid: true},
 		}, params)
@@ -133,12 +133,12 @@ func (s Scenario) Token(
 	}
 
 	if err := access.LicenseTokenIndex(access.PrincipalOf(ctx), license); err != nil {
-		return domain.Token{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, err // the authorization's own error
 	}
 
 	token, err := s.tokens.Show(ctx, account, access.PrincipalOf(ctx), tokenID)
 	if err != nil {
-		return domain.Token{}, err //nolint:wrapcheck // the scenario's own error
+		return domain.Token{}, err // the scenario's own error
 	}
 
 	if token.BearerType != "License" || token.BearerID != license.ID {
@@ -158,10 +158,10 @@ func (s Scenario) GenerateToken(
 	}
 
 	if err := access.LicenseTokenCreate(access.PrincipalOf(ctx), license); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, "", err // the authorization's own error
 	}
 
-	return s.tokens.CreateForLicense( //nolint:wrapcheck // the manager's own error
+	return s.tokens.CreateForLicense( // the manager's own error
 		ctx, account, access.PrincipalOf(ctx), license.ID, attrs,
 	)
 }
@@ -174,7 +174,7 @@ func (s Scenario) Product(ctx context.Context, account domain.Account, idOrKey s
 	}
 
 	if err := access.Require(ctx, "product.read"); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -183,12 +183,12 @@ func (s Scenario) Product(ctx context.Context, account domain.Account, idOrKey s
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	product, err := s.products.ProductByID(ctx, account.ID, license.ProductID)
 	if err != nil {
-		return domain.Product{}, apperr.NotFound("product", license.ProductID.String())
+		return domain.Product{}, apperr.NotFound(resourceProduct, license.ProductID.String())
 	}
 
 	return product, nil
@@ -202,7 +202,7 @@ func (s Scenario) Policy(ctx context.Context, account domain.Account, idOrKey st
 	}
 
 	if err := access.Require(ctx, "policy.read"); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -211,7 +211,7 @@ func (s Scenario) Policy(ctx context.Context, account domain.Account, idOrKey st
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	return license.Policy, nil
@@ -233,7 +233,7 @@ func (s Scenario) Transfer(
 	}
 
 	if err := access.Require(ctx, "license.policy.update"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -244,7 +244,7 @@ func (s Scenario) Transfer(
 	_ = attached
 
 	if err := access.LicensePolicyUpdate(access.PrincipalOf(ctx), license, target); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if detail, bad := transferConflict(license.Policy, target); bad {
@@ -326,7 +326,7 @@ func (s Scenario) Group(ctx context.Context, account domain.Account, idOrKey str
 	}
 
 	if err := access.Require(ctx, "group.read"); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Group{}, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -335,7 +335,7 @@ func (s Scenario) Group(ctx context.Context, account domain.Account, idOrKey str
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Group{}, err // the authorization's own error
 	}
 
 	if !license.GroupID.Valid {
@@ -343,7 +343,7 @@ func (s Scenario) Group(ctx context.Context, account domain.Account, idOrKey str
 			Status: 404, //nolint:mnd // the reference's literal status
 			Title:  apperr.TitleNotFound,
 			Detail: "The requested group was not found",
-			Code:   "NOT_FOUND",
+			Code:   codeNotFound,
 		}
 	}
 
@@ -353,7 +353,7 @@ func (s Scenario) Group(ctx context.Context, account domain.Account, idOrKey str
 			Status: 404, //nolint:mnd // the reference's literal status
 			Title:  apperr.TitleNotFound,
 			Detail: "The requested group was not found",
-			Code:   "NOT_FOUND",
+			Code:   codeNotFound,
 		}
 	}
 
@@ -378,11 +378,11 @@ func (s Scenario) SetGroup(
 	}
 
 	if err := access.Require(ctx, "license.group.update"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if err := access.LicenseGroupUpdate(access.PrincipalOf(ctx), license); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if group.Valid {
@@ -442,7 +442,7 @@ func (s Scenario) Owner(ctx context.Context, account domain.Account, idOrKey str
 	}
 
 	if err := access.Require(ctx, "user.read"); err != nil {
-		return domain.User{}, false, err //nolint:wrapcheck // the authorization's own error
+		return domain.User{}, false, err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -451,7 +451,7 @@ func (s Scenario) Owner(ctx context.Context, account domain.Account, idOrKey str
 	}
 
 	if err := access.LicenseRelationshipShow(access.PrincipalOf(ctx), license, attached); err != nil {
-		return domain.User{}, false, err //nolint:wrapcheck // the authorization's own error
+		return domain.User{}, false, err // the authorization's own error
 	}
 
 	if !license.OwnerID.Valid {
@@ -484,11 +484,11 @@ func (s Scenario) SetOwner( //nolint:cyclop // the transfer's validations, verba
 	}
 
 	if err := access.Require(ctx, "license.owner.update"); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	if err := access.LicenseOwnerUpdate(access.PrincipalOf(ctx), license); err != nil {
-		return domain.License{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.License{}, err // the authorization's own error
 	}
 
 	var user domain.User

@@ -65,7 +65,7 @@ func License(accountID uuid.UUID, l domain.License, now time.Time, rawKey *strin
 		Attributes: attrs,
 		Relationships: oas.LicenseRelationships{
 			Account: accountLink(accountID),
-			Product: toOne(base, "/product", "products", l.ProductID),
+			Product: toOne(base, "/product", typeProducts, l.ProductID),
 			Policy:  toOne(base, "/policy", "policies", l.PolicyID),
 			Group:   nullableToOne(base, "/group", "groups", l.GroupID),
 			Owner:   nullableToOne(base, "/owner", "users", l.OwnerID),
@@ -89,20 +89,16 @@ func License(accountID uuid.UUID, l domain.License, now time.Time, rawKey *strin
 
 // Machine renders a machine document (the machines reached through a
 // license's relationship).
-func Machine(
-	accountID uuid.UUID, m domain.Machine, licenseProductID uuid.UUID, licenseMaxProcesses *int32,
-) oas.MachineResource {
+func Machine(accountID uuid.UUID, m domain.Machine) oas.MachineResource {
 	base := "/v1/accounts/" + accountID.String() + "/machines/" + m.ID.String()
 
-	requireHeartbeat := m.RequireHeartbeat || m.LastHeartbeatAt != nil
-
-	duration := m.HeartbeatDurationOrDefault()
+	requireHeartbeat := m.RequiresHeartbeat()
+	duration := m.Heartbeat.DurationSeconds()
 
 	nextHeartbeat := (*string)(nil)
 
-	if m.LastHeartbeatAt != nil {
-		next := m.LastHeartbeatAt.Add(time.Duration(duration) * time.Second)
-		formatted := formatTime(next)
+	if next := m.NextHeartbeatAt(); next != nil {
+		formatted := formatTime(*next)
 		nextHeartbeat = &formatted
 	}
 
@@ -121,7 +117,7 @@ func Machine(
 			RequireHeartbeat:  requireHeartbeat,
 			HeartbeatStatus:   m.HeartbeatStatus,
 			HeartbeatDuration: oas.NewNilInt(int(duration)),
-			MaxProcesses:      nilInt(m.MaxProcesses(licenseMaxProcesses)),
+			MaxProcesses:      nilInt(m.MaxProcesses()),
 			LastCheckOut:      NilString(formatTimePtr(m.LastCheckOutAt)),
 			LastHeartbeat:     NilString(formatTimePtr(m.LastHeartbeatAt)),
 			NextHeartbeat:     NilString(deref(nextHeartbeat)),
@@ -131,7 +127,7 @@ func Machine(
 		},
 		Relationships: oas.MachineRelationships{
 			Account:    accountLink(accountID),
-			Product:    toOne(base, "/product", "products", licenseProductID),
+			Product:    toOne(base, "/product", typeProducts, m.ProductID),
 			Group:      nullableToOne(base, "/group", "groups", m.GroupID),
 			License:    toOne(base, "/license", "licenses", m.LicenseID),
 			Owner:      nullableToOne(base, "/owner", "users", m.OwnerID),
@@ -221,6 +217,24 @@ func LicenseFile(accountID uuid.UUID, fileID uuid.UUID, certificate, algorithm s
 			Account: accountLink(accountID),
 			License: toOne("/v1/accounts/"+accountID.String()+"/licenses/"+licenseID.String(),
 				"", "licenses", licenseID),
+		},
+	}
+}
+
+// MachineFile renders a machine-file document (the license file's
+// attributes, plus the machine relationship).
+func MachineFile(accountID, fileID uuid.UUID, certificate, algorithm string,
+	includes []string, ttl *int32, issued time.Time, expiry *time.Time, licenseID, machineID uuid.UUID,
+) oas.MachineFileResource {
+	file := LicenseFile(accountID, fileID, certificate, algorithm, includes, ttl, issued, expiry, licenseID)
+	account := "/v1/accounts/" + accountID.String()
+
+	return oas.MachineFileResource{
+		Type: oas.MachineFileResourceTypeMachineFiles, ID: file.ID, Attributes: file.Attributes,
+		Relationships: oas.MachineFileResourceRelationships{
+			Account: file.Relationships.Account,
+			License: file.Relationships.License,
+			Machine: toOne(account+"/machines/"+machineID.String(), "", "machines", machineID),
 		},
 	}
 }

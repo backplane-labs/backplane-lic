@@ -69,7 +69,7 @@ func TokenKind(role string) string {
 		return "read-only-token"
 	case roleUser:
 		return "user-token"
-	case "product":
+	case keyProduct:
 		return "product-token"
 	case roleLicense:
 		return "activation-token"
@@ -93,7 +93,7 @@ func TokenPrefix(role string) string {
 		return "read"
 	case roleUser:
 		return roleUser
-	case "product":
+	case keyProduct:
 		return "prod"
 	case roleLicense:
 		return "activ"

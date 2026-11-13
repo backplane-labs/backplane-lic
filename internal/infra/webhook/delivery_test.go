@@ -27,6 +27,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
+	"github.com/backplane-labs/backplane-lic/internal/testkit"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing"
 )
 
@@ -586,13 +587,10 @@ func TestOutcomeIsolation(t *testing.T) { //nolint:paralleltest // bootstrap and
 func deliveryAccount(ctx context.Context, t *testing.T) (*postgres.Store, domain.Account) {
 	t.Helper()
 
-	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
-	if dsn == "" {
-		t.Skip("LIC_TEST_DATABASE_URL not set")
-	}
-
+	// Its own database: the relay must not share the outbox with the
+	// tests of other packages.
 	store, err := postgres.Open(ctx, xlog.NewJSON(xlog.WithWriter(io.Discard)),
-		sdkpg.Config{DSN: config.Secret(dsn)})
+		sdkpg.Config{DSN: config.Secret(testkit.Database(ctx, t))})
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

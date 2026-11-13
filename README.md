@@ -12,7 +12,9 @@ Managed from the Backplane console (internal gRPC + UI plugin, later phase).
 ```
 cmd/lic/                 the binary: Config, composition via internal/service
 internal/domain/         pure rules: entities, crypto helpers (account keys)
-internal/app/            scenarios (accounts bootstrap today)
+internal/app/            scenarios: licenses, machines (components, processes,
+                         usage journal, heartbeat cull), users, policies, …
+pkg/licensing/           Go client library; installation/, request/, usage/
 internal/infra/postgres/ schema.sql, sqld queries, generated db, repositories
 internal/infra/httpapi/  ogen handler: JSON:API rendering, error mapping
 internal/infra/portal/   embedded customer SPA and HTTP mount
@@ -96,12 +98,83 @@ Bearers are always read live. Account rows hold the private signing keys
 and are never cached. Valkey also shares the password-attempt windows
 between replicas.
 
+## Machines, components and processes
+
+Machines (devices), their components and their processes follow Keygen.
+Every route lives under `/v1/accounts/{account}`; `{id}` of a machine is its
+UUID or its fingerprint. A `PUT` on an update route is the same as `PATCH`.
+
+| Resource | Routes |
+|---|---|
+| Machines | `GET`/`POST /machines`, `GET`/`PATCH`/`DELETE /machines/{id}` (create is an activation, delete a deactivation) |
+| Machine relationships | `GET /machines/{id}/product`, `/license`, `/owner`, `/user` (the license's owner), `/group`; `PATCH /machines/{id}/owner`, `/group` |
+| Heartbeat | `POST /machines/{id}/actions/ping`, `ping-heartbeat`, `reset`, `reset-heartbeat` |
+| Check-out and proof | `GET`/`POST /machines/{id}/actions/check-out`, `POST /machines/{id}/actions/generate-offline-proof` |
+| Usage journal | `POST /machines/{id}/actions/report-usage`, `GET /machines/{id}/usage` |
+| Components | `GET`/`POST /components`, `GET`/`PATCH`/`DELETE /components/{id}`, `GET /components/{id}/machine`, `/license`, `/product`, `GET /machines/{id}/components`, `GET /machines/{id}/components/{componentId}` |
+| Processes | `GET`/`POST /processes` (spawn), `GET`/`PATCH`/`DELETE /processes/{id}` (kill), `POST /processes/{id}/actions/ping`, `GET /processes/{id}/machine`, `/license`, `/product`, `GET /machines/{id}/processes`, `GET /machines/{id}/processes/{processId}` |
+
+A component is a named hardware fingerprint of a machine; its fingerprint is
+unique within the policy's component uniqueness scope (default
+`UNIQUE_PER_MACHINE`). A machine's fingerprint is unique within the policy's
+machine uniqueness scope (default `UNIQUE_PER_LICENSE`). A process is a
+running instance on a machine, identified by a pid unique per machine; the
+policy's process leasing (`PER_MACHINE` by default, `PER_LICENSE`,
+`PER_USER`) counts them against the machine's own `maxProcesses` override
+or else the license's.
+
+### Check-out: machine files and offline proofs
+
+`GET …/actions/check-out` answers the signed certificate itself
+(`-----BEGIN MACHINE FILE-----`, as an attachment named `{machine}.lic`);
+`POST …/actions/check-out` answers it inside a machine-file document. The
+parameters are `encrypt`, `algorithm`, `ttl` and `include`: query
+parameters on `GET`, `meta` merged with the query on `POST`. The algorithm
+is `<encoding>+<signature>`; encoding is `base64` or, with `encrypt`,
+`aes-256-gcm` keyed by the license key and the machine fingerprint. The ttl
+defaults to one month and is at least one hour; an explicit `null` asks for
+a perpetual file. `include` embeds `license`, `license.entitlements`,
+`license.product`, `license.policy`, `license.owner` (alias `license.user`),
+`license.users`, `components`, `environment`, `group` and `owner`.
+
+`POST …/actions/generate-offline-proof` answers the machine with
+`meta.proof`: `proof/<dataset>.<signature>`, the dataset JSON (account,
+product, policy, license, machine, timestamp) and its RSA-SHA256 signature
+by the account key, both URL-safe base64. Admins, developers, sales and
+support agents and the product bearer can send their own dataset in
+`meta.dataset`.
+
+### Heartbeats and the cull
+
+A machine's heartbeat duration is the policy's `heartbeatDuration`, else 600
+seconds. With the `FROM_CREATION` heartbeat basis the clock starts at
+activation, otherwise at the first ping. A machine is `NOT_STARTED` before
+its first ping (while still inside the duration), `ALIVE` until the next
+ping is due, then `DEAD`; `RESURRECTED` is the status right after a ping
+revived a dead one. Processes follow the same rules with their own pings.
+
+A dead machine is revived by a ping while its policy's resurrection
+strategy allows it: `ALWAYS_REVIVE`, or within the window after death of
+`1_MINUTE_REVIVE`, `2_MINUTE_REVIVE`, `5_MINUTE_REVIVE`, `10_MINUTE_REVIVE`
+or `15_MINUTE_REVIVE`. `NO_REVIVE` (the default) never revives; a ping
+outside the window answers `422 MACHINE_HEARTBEAT_DEAD`.
+
+The `heartbeat-cull` job runs every 2 minutes, under an advisory lock so one
+replica works per tick, and visits up to 500 dead machines and 500 dead
+processes per pass. For each it sends the death event once
+(`machine.heartbeat.dead`, `process.heartbeat.dead`), then applies the
+policy's cull strategy: `DEACTIVATE_DEAD` (the default when unset) deletes
+the record once its resurrection window has passed and updates the license's
+machine counters; `KEEP_DEAD` keeps it. `ALWAYS_REVIVE` records are never
+culled.
+
 ## Search
 
 `POST /v1/accounts/{account}/search` follows Keygen: licenses, users,
 products, policies, groups and entitlements by their searchable
 attributes, AND or OR combined, answered as the type's list document.
-Machines are accepted and answer nothing while devices are deferred. Where
+Machines are accepted as a search type, but their search is not implemented
+and answers an empty list. Where
 Keygen fails with a server error (an unknown `op`, a non-string term for a
 text attribute, `meta` of the wrong kind, the EE request-log search), lic
 answers a 400 in Keygen's error style instead.
@@ -284,3 +357,121 @@ expiry: deleting one permits an old retry to repeat its mutation. They may
 contain a license key, including the one-time plaintext of a legacy-encrypted
 key, so treat this table as credential storage. Domain validation errors fail
 without retry; storage and transport failures remain retryable.
+
+## Client library: installation, request signing, usage journal
+
+Three packages under `pkg/licensing` (`installation`, `request`, `usage`)
+extend the Go client library for machine-bound installations with Ed25519
+keys and RFC 9421 HTTP Message Signatures.
+
+### `pkg/licensing/installation` — installation key management
+
+- `installation.NewKey()` generates an Ed25519 key pair.
+- The machine fingerprint is lowercase hex SHA-256 of the raw public key.
+- `installation.Activate(ctx, license, key, opts...)` activates with the
+  fingerprint and metadata (publicKey).
+- `installation.PublicKeyOf(machine)` reads the publicKey from metadata and
+  verifies it hashes to the fingerprint.
+- `installation.ActivationRequest` is the air-gapped activation payload
+  (JSON, camelCase field names).
+
+### `pkg/licensing/request` — RFC 9421 request signing and verification
+
+- Client side: `request.NewTransport(base, key)` wraps an `http.RoundTripper`
+  and signs every request with Ed25519 (`alg="ed25519"`, `keyid` = fingerprint).
+- Server side: `request.NewAuthenticator(licensingClient, opts)` verifies
+  signatures, checks the nonce (in-memory replay guard), validates the
+  machine's licence, and caches the result with single-flight.
+- `request.Authenticator.Middleware` is an `http.Handler` that also covers
+  ConnectRPC handlers (they implement `http.Handler`).
+
+#### Wire contract: request signing
+
+Covered components: `@method`, `@target-uri`, plus `content-digest`
+(sha-256) for requests with a body. Signature parameters: `created`
+(UNIX timestamp), `nonce` (random), `keyid` (fingerprint), `alg`
+(`ed25519`). The signing base and header format follow RFC 9421.
+
+Implemented directly from the RFC; no external library is used
+(`github.com/yaronf/httpsign` requires Go 1.27+; the project is on
+Go 1.26).
+
+### `pkg/licensing/usage` — signed usage hash chain
+
+- `usage.NewJournal(domain, fingerprint, epoch, acked)` maintains an
+  in-memory hash chain. `Append(event)` returns (seq, hash).
+- `usage.NewReport(domain, fingerprint)` builds a report; `Sign(priv)`
+  and `Verify(pub, acked)` handle Ed25519 signatures.
+- Typed sentinels: `ErrInvalidSignature`, `ErrGap`, `ErrFork`,
+  `ErrChainBroken`, `ErrFormat`.
+- `usage.Journal` persists nothing — the product owns storage.
+
+#### Wire contract: report JSON
+
+```json
+{
+  "format": 1,
+  "domain": "komeet-usage/v1",
+  "fingerprint": "<hex>",
+  "epoch": <uint64>,
+  "seqFrom": <uint64>,
+  "seqTo": <uint64>,
+  "prevHash": "<hex sha256>",
+  "events": "<base64 of length-prefixed canonical encoding>",
+  "head": "<hex sha256>",
+  "counters": {"ops": 5},
+  "build": "1.0.0",
+  "signature": "<base64 ed25519>"
+}
+```
+
+Canonical event encoding: each event is `[4-byte big-endian length][event bytes]`,
+concatenated.
+
+Signing payload: `"backplane-usage-sig/v1" || domain || fingerprint || epoch(be64) || seqFrom(be64) || seqTo(be64) || prevHash || head`.
+
+#### Server endpoints
+
+```
+POST /v1/accounts/{account}/machines/{id}/actions/report-usage
+  Body:  {"meta": {"report": <Report>}}
+  Reply: {"data": <machine>, "meta": {"ack": {"epoch": ..., "seq": ..., "hash": "..."}}}
+
+GET /v1/accounts/{account}/machines/{id}/usage?after=<seq>&limit=<n>
+  Reply: {"meta": {"epoch": ..., "events": [...], "head": {...}, "acks": [...]}}
+```
+
+The journal is a backplane extension to the machine resource. Reporting
+needs the heartbeat-ping permission on the machine (the same callers that
+may ping it); the report is signed by the Ed25519 key in the machine's
+`publicKey` metadata and must continue the accepted head. Re-sending an
+accepted report answers its ack again. Reading the journal is for the vendor
+side only: the admin family and the machine's product. `after` is a
+sequence number; `limit` defaults to 100 and is capped at 1000. The journal
+is deleted together with its machine.
+
+Refusals:
+
+| Code | Status | Meaning |
+|---|---|---|
+| `USAGE_KEY_MISSING` | 422 | the machine has no `publicKey` metadata |
+| `USAGE_KEY_INVALID` | 422 | the `publicKey` is not an Ed25519 key |
+| `USAGE_FINGERPRINT_MISMATCH` | 422 | the report's fingerprint is not the machine's |
+| `USAGE_SIGNATURE_INVALID` | 422 | the signature does not verify |
+| `USAGE_CHAIN_BROKEN` | 422 | the head does not match the reported events |
+| `USAGE_FORMAT_INVALID` | 422 | the report is malformed |
+| `USAGE_FORK` | 409 | the report forks the accepted chain |
+| `USAGE_GAP` | 409 | the report skips events after the accepted head |
+
+Client methods: `*licensing.Machine.ReportUsage(ctx, report)` and
+`*licensing.Machine.Usage(ctx, afterSeq, limit)`. The wire contract is
+documented in `pkg/licensing/usage/doc.go`.
+
+#### API additions to the licensing client
+
+- `*licensing.Client.Machine(ctx, idOrFingerprint)` — looks up a machine
+  by UUID or fingerprint with token authentication. The identifier is
+  validated to contain only hex digits and hyphens, then escaped with
+  `url.PathEscape`.
+- `*licensing.Client.ValidateMachine(ctx, fingerprint)` — looks up the
+  machine, fetches its licence, and validates it with the fingerprint scope.

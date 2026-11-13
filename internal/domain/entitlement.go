@@ -7,7 +7,9 @@ import (
 )
 
 // ReservedEntitlementCodes: the two route-segment-colliding aliases.
-var ReservedEntitlementCodes = []string{"actions", "action"} //nolint:gochecknoglobals // transcribed reference data
+var ReservedEntitlementCodes = []string{ //nolint:gochecknoglobals // transcribed reference data
+	reservedActions, reservedAction,
+}
 
 // Entitlement is an account-wide feature policies and licenses attach.
 type Entitlement struct {

@@ -8,12 +8,19 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/policies"
 )
 
+// The attribute names several request bodies share.
+const (
+	attrScheme      = "scheme"
+	attrMaxMachines = "max_machines"
+	attrMaxUsers    = "max_users"
+)
+
 // The policy attributes the typed params admit, in wire (underscored)
 // spelling. The update admits the same set minus the immutable three
 // (sending those answers the same "unpermitted parameter").
 var policyCreateAttrs = []string{ //nolint:gochecknoglobals // transcribed reference data
-	"scheme", "encrypted", "use_pool", "name", "duration", "strict", "floating",
-	"protected", "max_machines", "max_processes", "max_users", "max_cores",
+	attrScheme, "encrypted", "use_pool", "name", "duration", "strict", "floating",
+	"protected", attrMaxMachines, "max_processes", attrMaxUsers, "max_cores",
 	"max_memory", "max_disk", "max_uses", "machine_uniqueness_strategy",
 	"machine_matching_strategy", "component_uniqueness_strategy",
 	"component_matching_strategy", "expiration_strategy", "expiration_basis",
@@ -27,7 +34,7 @@ var policyCreateAttrs = []string{ //nolint:gochecknoglobals // transcribed refer
 	"require_heartbeat", "metadata",
 }
 
-var policyUpdateAttrs = filterOut(policyCreateAttrs, "scheme", "encrypted", "use_pool") //nolint:gochecknoglobals,lll // transcribed reference data
+var policyUpdateAttrs = filterOut(policyCreateAttrs, attrScheme, "encrypted", "use_pool") //nolint:gochecknoglobals,lll // transcribed reference data
 
 func filterOut(list []string, drop ...string) []string {
 	out := make([]string, 0, len(list))
@@ -178,8 +185,8 @@ func readPolicyAttrs(attrs map[string]any, in *policies.Input) error { //nolint:
 		dst  **string
 		name string
 	}{
-		{&in.Scheme, "scheme"},
-		{&in.Scheme, "scheme"},
+		{&in.Scheme, attrScheme},
+		{&in.Scheme, attrScheme},
 		{&in.MachineUniquenessStrategy, "machine_uniqueness_strategy"},
 		{&in.MachineMatchingStrategy, "machine_matching_strategy"},
 		{&in.ComponentUniquenessStrategy, "component_uniqueness_strategy"},
@@ -213,9 +220,9 @@ func readPolicyAttrs(attrs map[string]any, in *policies.Input) error { //nolint:
 		name string
 	}{
 		{&in.Duration, &in.DurationSet, "duration"},
-		{&in.MaxMachines, &in.MaxMachinesSet, "max_machines"},
+		{&in.MaxMachines, &in.MaxMachinesSet, attrMaxMachines},
 		{&in.MaxProcesses, &in.MaxProcessesSet, "max_processes"},
-		{&in.MaxUsers, &in.MaxUsersSet, "max_users"},
+		{&in.MaxUsers, &in.MaxUsersSet, attrMaxUsers},
 		{&in.MaxCores, &in.MaxCoresSet, "max_cores"},
 		{&in.MaxUses, &in.MaxUsesSet, "max_uses"},
 		{&in.CheckInIntervalCount, &in.CheckInIntervalCountSet, "check_in_interval_count"},

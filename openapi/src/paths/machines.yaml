@@ -1,0 +1,452 @@
+# Machines: CRUD with the full attribute surface, relationships
+# (product, license, policy, owner, group, components, processes),
+# actions (ping-heartbeat, reset-heartbeat, check-out).
+paths:
+  /v1/accounts/{account}/machines:
+    get:
+      operationId: indexMachines
+      summary: List machines
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createMachine
+      summary: Activate a machine
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Machine document.
+          headers:
+            Location:
+              description: The new machine's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}:
+    get:
+      operationId: showMachine
+      summary: Retrieve a machine (by id or fingerprint)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateMachine
+      summary: Update a machine
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteMachine
+      summary: Delete a machine
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "204":
+          description: Machine deleted.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat:
+    post:
+      operationId: pingMachineHeartbeat
+      summary: Ping a machine's heartbeat
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat:
+    post:
+      operationId: resetMachineHeartbeat
+      summary: Reset a machine's heartbeat
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/check-out:
+    get:
+      operationId: checkoutMachineRaw
+      summary: Check out a machine license file (raw)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Signed machine file (.lic).
+          headers:
+            Content-Disposition:
+              description: attachment; filename="<machine-id>.lic"
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: checkoutMachine
+      summary: Check out a machine license file (JSON:API)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine file document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineFileDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/ping:
+    post:
+      operationId: pingMachine
+      summary: Ping a machine's heartbeat (short alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/reset:
+    post:
+      operationId: resetMachine
+      summary: Reset a machine's heartbeat (short alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof:
+    post:
+      operationId: generateMachineProof
+      summary: Sign an offline proof of the machine (API v1.0)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine document with the proof.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineProofDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/actions/report-usage:
+    post:
+      operationId: reportMachineUsage
+      summary: Report the installation's signed usage chain (a backplane extension)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: The machine and the accepted chain state.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineUsageAckDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/usage:
+    get:
+      operationId: showMachineUsage
+      summary: Read the machine's accepted usage chain (a backplane extension)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: The current epoch's events and acks after a sequence number, and the head.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineUsageDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/product:
+    get:
+      operationId: showMachineProduct
+      summary: Retrieve a machine's product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/license:
+    get:
+      operationId: showMachineLicense
+      summary: Retrieve a machine's license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/owner:
+    get:
+      operationId: showMachineOwner
+      summary: Retrieve a machine's owner
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: User document (null data when unowned).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseOwnerDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateMachineOwner
+      summary: Set a machine's owner
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/user:
+    get:
+      operationId: showMachineUserAlias
+      summary: Retrieve a machine's owner (v1.5 alias)
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: User document (null data when unowned).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseOwnerDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/group:
+    get:
+      operationId: showMachineGroup
+      summary: Retrieve a machine's group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/GroupDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateMachineGroup
+      summary: Set a machine's group
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"

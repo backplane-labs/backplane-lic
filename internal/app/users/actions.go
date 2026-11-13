@@ -27,7 +27,7 @@ func (s Scenario) UpdatePassword(
 	alias, oldPassword, newPassword string,
 ) (Listed, error) {
 	if err := access.Require(ctx, "user.password.update"); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the port's own error
+		return Listed{}, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -36,7 +36,7 @@ func (s Scenario) UpdatePassword(
 	}
 
 	if err := access.UserPasswordUpdate(principal, user); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the authorization's own error
+		return Listed{}, err // the authorization's own error
 	}
 
 	valid := user.Authenticates(oldPassword)
@@ -71,7 +71,7 @@ func (s Scenario) ResetPassword(
 	// reset (nothing to prove the claim with).
 	if principal.BearerType != "" {
 		if err := access.Require(ctx, "user.password.reset"); err != nil {
-			return Listed{}, err //nolint:wrapcheck // the port's own error
+			return Listed{}, err // the port's own error
 		}
 	}
 
@@ -135,7 +135,7 @@ func (s Scenario) setBanned(
 	}
 
 	if err := access.Require(ctx, permission); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the port's own error
+		return Listed{}, err // the port's own error
 	}
 
 	user, err := s.visible(ctx, account, principal, alias)
@@ -144,7 +144,7 @@ func (s Scenario) setBanned(
 	}
 
 	if err := access.UserBan(principal, user); err != nil {
-		return Listed{}, err //nolint:wrapcheck // the authorization's own error
+		return Listed{}, err // the authorization's own error
 	}
 
 	var bannedAt *time.Time
@@ -162,7 +162,7 @@ func (s Scenario) setBanned(
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
 		if err := s.store.SetUserBannedAt(ctx, account.ID, user.ID, bannedAt); err != nil {
-			return err //nolint:wrapcheck // the port's own error
+			return err // the port's own error
 		}
 
 		return s.events.Publish(ctx, event, user)
@@ -207,14 +207,14 @@ func (s Scenario) setPassword(ctx context.Context, accountID, id uuid.UUID, pass
 		return err
 	}
 
-	return s.store.UpdateUserPassword(ctx, accountID, id, digest) //nolint:wrapcheck // the store's own error
+	return s.store.UpdateUserPassword(ctx, accountID, id, digest) // the store's own error
 }
 
 // show loads the user fresh (post-write) with her status.
 func (s Scenario) show(ctx context.Context, accountID, id uuid.UUID) (Listed, error) {
 	user, err := s.store.UserByID(ctx, accountID, id)
 	if err != nil {
-		return Listed{}, err //nolint:wrapcheck // the caller maps the sentinel
+		return Listed{}, err // the caller maps the sentinel
 	}
 
 	status, err := s.status(ctx, user)

@@ -138,69 +138,40 @@ type License struct {
 	OwnerEmail *string
 }
 
+// Overridden answers the reference's `<limit>_override?`: an override
+// is in effect only when set and non-zero (Rails' query method on an
+// integer column is false for 0, so a zero override reads the policy's).
+func Overridden[T int32 | int64](override *T) bool { return override != nil && *override != 0 }
+
+func limitOf[T int32 | int64](override, policy *T) *T {
+	if Overridden(override) {
+		return override
+	}
+
+	return policy
+}
+
 // MaxMachines answers the effective machine limit (override else
 // policy).
-func (l License) MaxMachines() *int32 {
-	if l.MaxMachinesOverride != nil {
-		return l.MaxMachinesOverride
-	}
-
-	return l.Policy.MaxMachines
-}
+func (l License) MaxMachines() *int32 { return limitOf(l.MaxMachinesOverride, l.Policy.MaxMachines) }
 
 // MaxProcesses answers the effective process limit.
-func (l License) MaxProcesses() *int32 {
-	if l.MaxProcessesOverride != nil {
-		return l.MaxProcessesOverride
-	}
-
-	return l.Policy.MaxProcesses
-}
+func (l License) MaxProcesses() *int32 { return limitOf(l.MaxProcessesOverride, l.Policy.MaxProcesses) }
 
 // MaxUsers answers the effective user limit.
-func (l License) MaxUsers() *int32 {
-	if l.MaxUsersOverride != nil {
-		return l.MaxUsersOverride
-	}
-
-	return l.Policy.MaxUsers
-}
+func (l License) MaxUsers() *int32 { return limitOf(l.MaxUsersOverride, l.Policy.MaxUsers) }
 
 // MaxCores answers the effective core limit.
-func (l License) MaxCores() *int32 {
-	if l.MaxCoresOverride != nil {
-		return l.MaxCoresOverride
-	}
-
-	return l.Policy.MaxCores
-}
+func (l License) MaxCores() *int32 { return limitOf(l.MaxCoresOverride, l.Policy.MaxCores) }
 
 // MaxMemory answers the effective memory limit.
-func (l License) MaxMemory() *int64 {
-	if l.MaxMemoryOverride != nil {
-		return l.MaxMemoryOverride
-	}
-
-	return l.Policy.MaxMemory
-}
+func (l License) MaxMemory() *int64 { return limitOf(l.MaxMemoryOverride, l.Policy.MaxMemory) }
 
 // MaxDisk answers the effective disk limit.
-func (l License) MaxDisk() *int64 {
-	if l.MaxDiskOverride != nil {
-		return l.MaxDiskOverride
-	}
-
-	return l.Policy.MaxDisk
-}
+func (l License) MaxDisk() *int64 { return limitOf(l.MaxDiskOverride, l.Policy.MaxDisk) }
 
 // MaxUses answers the effective usage limit.
-func (l License) MaxUses() *int32 {
-	if l.MaxUsesOverride != nil {
-		return l.MaxUsesOverride
-	}
-
-	return l.Policy.MaxUses
-}
+func (l License) MaxUses() *int32 { return limitOf(l.MaxUsesOverride, l.Policy.MaxUses) }
 
 // UsersCount answers the users count (licensees plus the owner).
 func (l License) UsersCount() int32 {

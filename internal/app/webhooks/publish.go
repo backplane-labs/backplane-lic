@@ -49,7 +49,7 @@ func NewPublisher(
 // the rows land in the caller's transaction — the change and its
 // events commit together or not at all.
 func (p *Publisher) Publish(ctx context.Context, event string, resource any) error {
-	return p.store.Do(ctx, func(ctx context.Context) error { //nolint:wrapcheck // preserve the transaction error
+	return p.store.Do(ctx, func(ctx context.Context) error { // preserve the transaction error
 		return p.publish(ctx, event, resource)
 	})
 }
@@ -236,6 +236,12 @@ func encode(document any, encoder *jx.Encoder) error { //nolint:cyclop // one en
 	case oas.LicenseUserListDocument:
 		doc.Encode(encoder)
 	case oas.LicenseEntitlementListDocument:
+		doc.Encode(encoder)
+	case oas.MachineDocument:
+		doc.Encode(encoder)
+	case oas.ComponentDocument:
+		doc.Encode(encoder)
+	case oas.ProcessDocument:
 		doc.Encode(encoder)
 	default:
 		return fmt.Errorf("unsupported document %T: %w", document, ErrNoResource)

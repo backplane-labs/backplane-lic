@@ -161,7 +161,7 @@ func (s Scenario) Search(ctx context.Context, account domain.Account, matches []
 // index pages the bearer's scope; matches (nil: all) narrows the admin side.
 func (s Scenario) index(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
 	if err := access.Require(ctx, "product.read"); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -195,7 +195,7 @@ func (s Scenario) index(ctx context.Context, account domain.Account, matches []u
 	// The user scope may include a CLOSED product through an owned
 	// license, but the policy still denies a page containing that product.
 	if err := access.ProductIndex(principal, allOpenOrLicensed(items)); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	out := List{Items: items, Count: len(items)}
@@ -236,7 +236,7 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 	}
 
 	if err := access.Require(ctx, "product.read"); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -261,7 +261,7 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 	}
 
 	if err := access.ProductShow(principal, product, licensed); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	return product, nil
@@ -270,11 +270,11 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 // Create writes a new product.
 func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) (domain.Product, error) {
 	if err := access.Require(ctx, "product.create"); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	if err := access.ProductWrite(access.PrincipalOf(ctx), domain.Product{}); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	now := s.clock()
@@ -309,7 +309,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 
 		return nil
 	}); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Product{}, err // the transaction's own error
 	}
 
 	return product, nil
@@ -332,11 +332,11 @@ func (s Scenario) Update(
 	}
 
 	if err := access.Require(ctx, "product.update"); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	if err := access.ProductWrite(access.PrincipalOf(ctx), product); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	if in.NameOn {
@@ -382,7 +382,7 @@ func (s Scenario) Update(
 
 		return nil
 	}); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Product{}, err // the transaction's own error
 	}
 
 	return product, nil
@@ -396,11 +396,11 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 	}
 
 	if err := access.Require(ctx, "product.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.ProductWrite(access.PrincipalOf(ctx), product); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
@@ -412,7 +412,7 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 
 		return nil
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -428,11 +428,11 @@ func (s Scenario) GenerateProductToken(
 	}
 
 	if err := access.Require(ctx, "product.tokens.generate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, "", err // the authorization's own error
 	}
 
 	if err := access.ProductTokenCreate(access.PrincipalOf(ctx)); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, "", err // the authorization's own error
 	}
 
 	raw, err := crypto.GenerateTokenSecret(s.rng, string(domain.RoleProduct))
@@ -466,7 +466,7 @@ func (s Scenario) GenerateProductToken(
 
 		return nil
 	}); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the transaction's own error
+		return domain.Token{}, "", err // the transaction's own error
 	}
 
 	return token, raw, nil
@@ -629,7 +629,7 @@ func (s Scenario) validate(product domain.Product) error {
 	}
 
 	if err := apperr.MultiOf(errs...); err != nil {
-		return err //nolint:wrapcheck // the document itself
+		return err // the document itself
 	}
 
 	return nil
@@ -716,11 +716,11 @@ func (s Scenario) Relationship(
 	}
 
 	if err := access.Require(ctx, permission); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	if err := access.ProductRelationship(access.PrincipalOf(ctx), product); err != nil {
-		return domain.Product{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Product{}, err // the authorization's own error
 	}
 
 	return product, nil
@@ -736,11 +736,11 @@ func (s Scenario) Tokens(
 	}
 
 	if err := access.Require(ctx, "token.read"); err != nil {
-		return TokenList{}, err //nolint:wrapcheck // the authorization's own error
+		return TokenList{}, err // the authorization's own error
 	}
 
 	if err := access.ProductTokenIndex(access.PrincipalOf(ctx), product); err != nil {
-		return TokenList{}, err //nolint:wrapcheck // the authorization's own error
+		return TokenList{}, err // the authorization's own error
 	}
 
 	return s.tokenPage(ctx, account.ID, product.ID, params)
@@ -749,7 +749,7 @@ func (s Scenario) Tokens(
 // Token shows one of the product's tokens.
 func (s Scenario) Token(ctx context.Context, account domain.Account, alias string, tokenID uuid.UUID) (domain.Token, error) { //nolint:lll // the wire name is long
 	if err := access.Require(ctx, "token.read"); err != nil {
-		return domain.Token{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, err // the authorization's own error
 	}
 
 	product, err := s.loadScoped(ctx, account, alias)
@@ -767,7 +767,7 @@ func (s Scenario) Token(ctx context.Context, account domain.Account, alias strin
 	}
 
 	if err := access.ProductTokenShow(access.PrincipalOf(ctx), product, token.BearerID); err != nil {
-		return domain.Token{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, err // the authorization's own error
 	}
 
 	return token, nil
@@ -820,11 +820,11 @@ func (s Scenario) Users(
 	}
 
 	if err := access.Require(ctx, "user.read"); err != nil {
-		return UserList{}, err //nolint:wrapcheck // the authorization's own error
+		return UserList{}, err // the authorization's own error
 	}
 
 	if err := access.ProductRelationship(access.PrincipalOf(ctx), product); err != nil {
-		return UserList{}, err //nolint:wrapcheck // the authorization's own error
+		return UserList{}, err // the authorization's own error
 	}
 
 	page := params.Window()
@@ -873,11 +873,11 @@ func (s Scenario) User(
 	}
 
 	if err := access.Require(ctx, "user.read"); err != nil {
-		return UserEntry{}, err //nolint:wrapcheck // the authorization's own error
+		return UserEntry{}, err // the authorization's own error
 	}
 
 	if err := access.ProductRelationship(access.PrincipalOf(ctx), product); err != nil {
-		return UserEntry{}, err //nolint:wrapcheck // the authorization's own error
+		return UserEntry{}, err // the authorization's own error
 	}
 
 	var user domain.User

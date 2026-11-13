@@ -35,7 +35,7 @@ func (a *API) ListWebhookEndpoints(
 
 	items, count, err := a.webhooks.Index(ctx, req.account, req.principal, params)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.WebhookEndpointListDocument{Data: make([]oas.WebhookEndpointResource, 0, len(items))}
@@ -65,7 +65,7 @@ func (a *API) CreateWebhookEndpoint(
 
 	endpoint, err := a.webhooks.Create(ctx, req.account, req.principal, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.WebhookEndpointDocumentHeaders{
@@ -87,7 +87,7 @@ func (a *API) ShowWebhookEndpoint(
 
 	endpoint, err := a.webhooks.Show(ctx, req.account, req.principal, webhookEndpointID(params.WebhookEndpointId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.WebhookEndpointDocument{Data: render.WebhookEndpoint(req.account.ID, endpoint)}, nil
@@ -111,7 +111,7 @@ func (a *API) UpdateWebhookEndpoint(
 	endpoint, err := a.webhooks.Update(
 		ctx, req.account, req.principal, webhookEndpointID(params.WebhookEndpointId), in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.WebhookEndpointDocument{Data: render.WebhookEndpoint(req.account.ID, endpoint)}, nil
@@ -125,7 +125,7 @@ func (a *API) DestroyWebhookEndpoint(ctx context.Context, params oas.DestroyWebh
 		return err
 	}
 
-	return a.webhooks.Destroy( //nolint:wrapcheck // the scenario's own error
+	return a.webhooks.Destroy( // the scenario's own error
 		ctx, req.account, req.principal, webhookEndpointID(params.WebhookEndpointId))
 }
 
@@ -150,7 +150,7 @@ func (a *API) ListWebhookEvents(
 
 	items, count, err := a.webhooks.EventsIndex(ctx, req.account, req.principal, filter, params)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.WebhookEventListDocument{Data: make([]oas.WebhookEventResource, 0, len(items))}
@@ -175,7 +175,7 @@ func (a *API) ShowWebhookEvent(
 
 	event, err := a.webhooks.EventShow(ctx, req.account, req.principal, webhookEventID(params.WebhookEventId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.WebhookEventDocument{Data: render.WebhookEvent(req.account.ID, event)}, nil
@@ -189,7 +189,7 @@ func (a *API) DestroyWebhookEvent(ctx context.Context, params oas.DestroyWebhook
 		return err
 	}
 
-	return a.webhooks.EventDestroy( //nolint:wrapcheck // the scenario's own error
+	return a.webhooks.EventDestroy( // the scenario's own error
 		ctx, req.account, req.principal, webhookEventID(params.WebhookEventId))
 }
 
@@ -205,7 +205,7 @@ func (a *API) RetryWebhookEvent(
 
 	retry, err := a.webhooks.Retry(ctx, req.account, req.principal, webhookEventID(params.WebhookEventId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.WebhookEventDocumentHeaders{

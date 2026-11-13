@@ -101,7 +101,7 @@ func (s Scenario) Search(ctx context.Context, account domain.Account, matches []
 // index pages the bearer's scope; matches (nil: all) narrows the admin side.
 func (s Scenario) index(ctx context.Context, account domain.Account, matches []uuid.UUID, params paging.Params) (List, error) { //nolint:lll // the scope's arguments
 	if err := access.Require(ctx, "entitlement.read"); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -128,7 +128,7 @@ func (s Scenario) index(ctx context.Context, account domain.Account, matches []u
 
 	for _, item := range items {
 		if err := access.EntitlementShow(principal, item.ID, owned); err != nil {
-			return List{}, err //nolint:wrapcheck // the authorization's own error
+			return List{}, err // the authorization's own error
 		}
 	}
 
@@ -173,7 +173,7 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 	}
 
 	if err := access.Require(ctx, "entitlement.read"); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -186,7 +186,7 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 	owned := idSet(ids)
 
 	if err := access.EntitlementShow(principal, entitlement.ID, owned); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	return entitlement, nil
@@ -195,11 +195,11 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, alias string
 // Create writes a new entitlement.
 func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) (domain.Entitlement, error) {
 	if err := access.Require(ctx, "entitlement.create"); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	if err := access.EntitlementWrite(access.PrincipalOf(ctx)); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	now := s.clock()
@@ -227,7 +227,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 
 		return nil
 	}); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Entitlement{}, err // the transaction's own error
 	}
 
 	return entitlement, nil
@@ -243,11 +243,11 @@ func (s Scenario) Update(
 	}
 
 	if err := access.Require(ctx, "entitlement.update"); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	if err := access.EntitlementWrite(access.PrincipalOf(ctx)); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Entitlement{}, err // the authorization's own error
 	}
 
 	if in.NameSet {
@@ -277,7 +277,7 @@ func (s Scenario) Update(
 
 		return nil
 	}); err != nil {
-		return domain.Entitlement{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Entitlement{}, err // the transaction's own error
 	}
 
 	return entitlement, nil
@@ -291,11 +291,11 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 	}
 
 	if err := access.Require(ctx, "entitlement.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.EntitlementWrite(access.PrincipalOf(ctx)); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
@@ -307,7 +307,7 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, alias str
 
 		return nil
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -421,7 +421,7 @@ func (s Scenario) validate(
 	}
 
 	if err := apperr.MultiOf(errs...); err != nil {
-		return err //nolint:wrapcheck // the document itself
+		return err // the document itself
 	}
 
 	_ = create // the unique index answers the taken check on both writes

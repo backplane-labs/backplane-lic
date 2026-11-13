@@ -88,7 +88,7 @@ func (m Manager) List(
 	p paging.Params,
 ) (Page, error) {
 	if err := access.Require(ctx, "token.read"); err != nil {
-		return Page{}, err //nolint:wrapcheck // the port's own error
+		return Page{}, err // the port's own error
 	}
 
 	rows, err := m.store.ListTokens(ctx, account.ID, f, access.TokenScopeKind(principal), principal.BearerID, p)
@@ -112,7 +112,7 @@ func (m Manager) Show(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) (domain.Token, error) {
 	if err := access.Require(ctx, "token.read"); err != nil {
-		return domain.Token{}, err //nolint:wrapcheck // the port's own error
+		return domain.Token{}, err // the port's own error
 	}
 
 	token, err := m.load(ctx, account, id)
@@ -124,7 +124,7 @@ func (m Manager) Show(
 		m.userOfProduct(ctx, account.ID, token),
 		m.licenseOfProduct(ctx, account.ID, token),
 	); err != nil {
-		return domain.Token{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, err // the authorization's own error
 	}
 
 	return token, nil
@@ -140,7 +140,7 @@ func (m Manager) CreateForUser(
 	attrs CreateAttrs,
 ) (domain.Token, string, error) {
 	if err := access.Require(ctx, "token.generate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the port's own error
+		return domain.Token{}, "", err // the port's own error
 	}
 
 	if err := access.TokenGenerateForUser(principal, user, func() bool {
@@ -148,7 +148,7 @@ func (m Manager) CreateForUser(
 
 		return err == nil && ok
 	}); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, "", err // the authorization's own error
 	}
 
 	return m.insert(ctx, account, user.ID, "User", user.Role, attrs)
@@ -165,7 +165,7 @@ func (m Manager) CreateForLicense(
 	attrs CreateAttrs,
 ) (domain.Token, string, error) {
 	if err := access.Require(ctx, "token.generate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the port's own error
+		return domain.Token{}, "", err // the port's own error
 	}
 
 	if attrs.MaxActivations != nil && *attrs.MaxActivations < 0 {
@@ -199,7 +199,7 @@ func (m Manager) Regenerate(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) (domain.Token, string, error) {
 	if err := access.Require(ctx, "token.regenerate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the port's own error
+		return domain.Token{}, "", err // the port's own error
 	}
 
 	token, err := m.loadScoped(ctx, account, principal, id)
@@ -211,7 +211,7 @@ func (m Manager) Regenerate(
 		m.userOfProduct(ctx, account.ID, token),
 		m.licenseOfProduct(ctx, account.ID, token),
 	); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the authorization's own error
+		return domain.Token{}, "", err // the authorization's own error
 	}
 
 	return m.regenerate(ctx, account, token)
@@ -223,7 +223,7 @@ func (m Manager) RegenerateCurrent(
 	ctx context.Context, account domain.Account, principal access.Principal,
 ) (domain.Token, string, error) {
 	if err := access.Require(ctx, "token.regenerate"); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the port's own error
+		return domain.Token{}, "", err // the port's own error
 	}
 
 	if !principal.IsTokenAuthn() {
@@ -243,7 +243,7 @@ func (m Manager) Revoke(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) error {
 	if err := access.Require(ctx, "token.revoke"); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	token, err := m.loadScoped(ctx, account, principal, id)
@@ -255,7 +255,7 @@ func (m Manager) Revoke(
 		m.userOfProduct(ctx, account.ID, token),
 		m.licenseOfProduct(ctx, account.ID, token),
 	); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := m.store.Do(ctx, func(ctx context.Context) error {
@@ -265,7 +265,7 @@ func (m Manager) Revoke(
 
 		return m.events.Publish(ctx, "token.revoked", token)
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -296,7 +296,7 @@ func (m Manager) regenerate(
 
 		return m.events.Publish(ctx, "token.regenerated", token)
 	}); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the transaction's own error
+		return domain.Token{}, "", err // the transaction's own error
 	}
 
 	return token, raw, nil
@@ -342,7 +342,7 @@ func (m Manager) insert(
 
 		return m.events.Publish(ctx, "token.generated", token)
 	}); err != nil {
-		return domain.Token{}, "", err //nolint:wrapcheck // the transaction's own error
+		return domain.Token{}, "", err // the transaction's own error
 	}
 
 	return token, raw, nil

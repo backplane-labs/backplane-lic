@@ -675,3 +675,37 @@ CREATE TABLE lic.automation_activity_results (
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (account_id, execution_key)
 );
+
+-- ---------------------------------------------------------------------------
+-- Machine usage journals (a backplane extension): the signed usage hash
+-- chain each installation reports. The head is the last accepted state;
+-- events and acks are append-only. All of it goes with the machine.
+CREATE TABLE lic.machine_usage_heads (
+  machine_id uuid PRIMARY KEY REFERENCES lic.machines (id) ON DELETE CASCADE,
+  account_id uuid NOT NULL REFERENCES lic.accounts (id) ON DELETE CASCADE,
+  epoch      bigint NOT NULL,
+  seq        bigint NOT NULL,
+  hash       text NOT NULL,
+  updated_at timestamptz NOT NULL
+);
+
+CREATE TABLE lic.machine_usage_events (
+  machine_id uuid NOT NULL REFERENCES lic.machines (id) ON DELETE CASCADE,
+  epoch      bigint NOT NULL,
+  seq        bigint NOT NULL,
+  event      bytea NOT NULL,
+  hash       text NOT NULL,
+  created_at timestamptz NOT NULL,
+  PRIMARY KEY (machine_id, epoch, seq)
+);
+
+CREATE TABLE lic.machine_usage_acks (
+  machine_id uuid NOT NULL REFERENCES lic.machines (id) ON DELETE CASCADE,
+  epoch      bigint NOT NULL,
+  seq        bigint NOT NULL,
+  hash       text NOT NULL,
+  counters   jsonb NOT NULL DEFAULT '{}'::jsonb,
+  build      text,
+  created_at timestamptz NOT NULL,
+  PRIMARY KEY (machine_id, epoch, seq)
+);

@@ -53,7 +53,7 @@ func User(accountID uuid.UUID, user domain.User, status string) oas.UserResource
 				Links: oas.RelationshipLinks{Related: oas.NewNilString("/v1/accounts/" + accountID.String())},
 				Data: oas.NilResourceIdentifier{
 					Value: oas.ResourceIdentifier{
-						Type: "accounts",
+						Type: typeAccounts,
 						ID:   accountID.String(),
 					},
 				},
@@ -92,17 +92,6 @@ func ProductStub(accountID, id uuid.UUID) oas.UserProductResource {
 		ID:         id.String(),
 		Attributes: oas.NewOptNilUserProductResourceAttributes(oas.UserProductResourceAttributes{}),
 		Links:      oas.ResourceLinks{Self: "/v1/accounts/" + accountID.String() + "/products/" + id.String()},
-	}
-}
-
-// MachineStub renders the minimal machine document of the user/group
-// relationship indexes.
-func MachineStub(accountID, id uuid.UUID) oas.UserMachineResource {
-	return oas.UserMachineResource{
-		Type:       oas.UserMachineResourceTypeMachines,
-		ID:         id.String(),
-		Attributes: oas.NewOptNilUserMachineResourceAttributes(oas.UserMachineResourceAttributes{}),
-		Links:      oas.ResourceLinks{Self: "/v1/accounts/" + accountID.String() + "/machines/" + id.String()},
 	}
 }
 

@@ -92,7 +92,7 @@ func (f *fakeKeygen) write(w http.ResponseWriter, r *http.Request, status int, b
 
 	w.Header().Set("Digest", digest)
 	w.Header().Set("Date", date)
-	w.Header().Set("X-Request-Id", "req-1")
+	w.Header().Set("X-Request-ID", "req-1")
 	w.Header().Set("Keygen-Signature", fmt.Sprintf(
 		`keyid="acc-1", algorithm="ed25519", signature=%q, headers="(request-target) host date digest"`,
 		base64.StdEncoding.EncodeToString(ed25519.Sign(f.account.ed25519Priv, []byte(signingData))),

@@ -22,11 +22,11 @@ func (s Scenario) Revoke(ctx context.Context, account domain.Account, idOrKey st
 	}
 
 	if err := access.Require(ctx, "license.revoke"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.LicenseDestroy(access.PrincipalOf(ctx), license); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return s.write(ctx, func(ctx context.Context) error {
@@ -348,7 +348,7 @@ func (s Scenario) action(ctx context.Context, account domain.Account, license do
 	}
 
 	if err := access.Require(ctx, permissions[clause]); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	attached, err := s.userAttached(ctx, account.ID, access.PrincipalOf(ctx).BearerID, license)
@@ -357,7 +357,7 @@ func (s Scenario) action(ctx context.Context, account domain.Account, license do
 	}
 
 	if err := access.LicenseAction(access.PrincipalOf(ctx), license, clause, attached); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return nil
@@ -365,11 +365,11 @@ func (s Scenario) action(ctx context.Context, account domain.Account, license do
 
 func (s Scenario) usageWrite(ctx context.Context, license domain.License, kind string) error {
 	if err := access.Require(ctx, "license.usage."+kind); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.LicenseUsageWrite(access.PrincipalOf(ctx), license, kind); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return nil

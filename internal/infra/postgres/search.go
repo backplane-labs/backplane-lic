@@ -11,126 +11,54 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres/db"
 )
 
+// The attributes several resources are searched by.
+const (
+	attrMetadata = "metadata"
+	attrName     = "name"
+	attrProduct  = "product"
+)
+
 var _ search.Store = (*Store)(nil)
 
-// SearchIDs answers one attribute's matching ids of a resource type.
-func (s *Store) SearchIDs( //nolint:cyclop,funlen // one query per searchable attribute
+var errUnsearchable = errors.New("attribute is not searchable")
+
+// lookup is one attribute search: the term in the forms the queries take.
+type lookup struct {
+	q       *db.Queries
+	account uuid.UUID
+	t       search.Term
+	id      *uuid.UUID
+	like    string
+}
+
+// SearchIDs answers the ids the term matches in one attribute of a resource.
+func (s *Store) SearchIDs(
 	ctx context.Context, accountID uuid.UUID, resource, attribute string, t search.Term,
 ) ([]uuid.UUID, error) {
-	queries := s.Q
-	id := nullUUIDPtr(t.ID)
-	like := t.Like
+	w := lookup{q: s.Q, account: accountID, t: t, id: nullUUIDPtr(t.ID), like: t.Like}
 
 	var (
 		ids []uuid.UUID
 		err error
 	)
 
-	switch resource + "." + attribute {
-	case "licenses.id":
-		ids, err = collect(queries.SearchLicensesByID(ctx, db.SearchLicensesByIDParams{
-			AccountID: accountID, ID: id, Like: like,
-		}))
-	case "licenses.key":
-		ids, err = collect(queries.SearchLicensesByKey(ctx, db.SearchLicensesByKeyParams{
-			AccountID: accountID, Term: t.Text,
-		}))
-	case "licenses.name":
-		ids, err = collect(queries.SearchLicensesByName(ctx, db.SearchLicensesByNameParams{
-			AccountID: accountID, Like: &like,
-		}))
-	case "licenses.metadata":
-		ids, err = collect(queries.SearchLicensesByMetadata(ctx, db.SearchLicensesByMetadataParams{
-			AccountID: accountID, Raw: t.Raw, Cast: t.Cast,
-		}))
-	case "licenses.owner":
-		ids, err = collect(queries.SearchLicensesByOwner(ctx, db.SearchLicensesByOwnerParams{
-			AccountID: accountID, ID: id, Term: &t.Text, Like: &like, Prefix: t.Prefix, Tsv: t.TSV,
-		}))
-	case "licenses.user":
-		ids, err = collect(queries.SearchLicensesByUser(ctx, db.SearchLicensesByUserParams{
-			AccountID: accountID, ID: id, Term: &t.Text, Like: &like, Prefix: t.Prefix, Tsv: t.TSV,
-		}))
-	case "licenses.product":
-		ids, err = collect(queries.SearchLicensesByProduct(ctx, db.SearchLicensesByProductParams{
-			AccountID: accountID, ID: id, Like: &like, Prefix: t.Prefix, Tsv: t.TSV,
-		}))
-	case "licenses.policy":
-		ids, err = collect(queries.SearchLicensesByPolicy(ctx, db.SearchLicensesByPolicyParams{
-			AccountID: accountID, ID: id, Like: like, Prefix: t.Prefix, Tsv: t.TSV,
-		}))
-	case "users.id":
-		ids, err = collect(queries.SearchUsersByID(ctx, db.SearchUsersByIDParams{
-			AccountID: accountID, ID: id, Like: like,
-		}))
-	case "users.email":
-		ids, err = collect(queries.SearchUsersByEmail(ctx, db.SearchUsersByEmailParams{
-			AccountID: accountID, Like: &like,
-		}))
-	case "users.first_name":
-		ids, err = collect(queries.SearchUsersByFirstName(ctx, db.SearchUsersByFirstNameParams{
-			AccountID: accountID, Like: &like,
-		}))
-	case "users.last_name":
-		ids, err = collect(queries.SearchUsersByLastName(ctx, db.SearchUsersByLastNameParams{
-			AccountID: accountID, Like: &like,
-		}))
-	case "users.metadata":
-		ids, err = collect(queries.SearchUsersByMetadata(ctx, db.SearchUsersByMetadataParams{
-			AccountID: accountID, Raw: t.Raw, Cast: t.Cast,
-		}))
-	case "users.role":
-		if t.ID.Valid {
-			return []uuid.UUID{}, nil // roles have no ids of their own here
-		}
-
-		ids, err = collect(queries.SearchUsersByRole(ctx, db.SearchUsersByRoleParams{AccountID: accountID, Like: like}))
-	case "products.id":
-		ids, err = collect(queries.SearchProductsByID(ctx, db.SearchProductsByIDParams{
-			AccountID: accountID, ID: id, Like: like,
-		}))
-	case "products.name":
-		ids, err = collect(queries.SearchProductsByName(ctx, db.SearchProductsByNameParams{
-			AccountID: accountID, Like: &like,
-		}))
-	case "products.metadata":
-		ids, err = collect(queries.SearchProductsByMetadata(ctx, db.SearchProductsByMetadataParams{
-			AccountID: accountID, Raw: t.Raw, Cast: t.Cast,
-		}))
-	case "policies.id":
-		ids, err = collect(queries.SearchPoliciesByID(ctx, db.SearchPoliciesByIDParams{
-			AccountID: accountID, ID: id, Like: like,
-		}))
-	case "policies.name":
-		ids, err = collect(queries.SearchPoliciesByName(ctx, db.SearchPoliciesByNameParams{
-			AccountID: accountID, Like: like,
-		}))
-	case "policies.metadata":
-		ids, err = collect(queries.SearchPoliciesByMetadata(ctx, db.SearchPoliciesByMetadataParams{
-			AccountID: accountID, Raw: t.Raw, Cast: t.Cast,
-		}))
-	case "policies.product":
-		ids, err = collect(queries.SearchPoliciesByProduct(ctx, db.SearchPoliciesByProductParams{
-			AccountID: accountID, ID: id, Like: &like, Prefix: t.Prefix, Tsv: t.TSV,
-		}))
-	case "groups.name":
-		ids, err = collect(queries.SearchGroupsByName(ctx, db.SearchGroupsByNameParams{
-			AccountID: accountID, Like: &like,
-		}))
-	case "entitlements.id":
-		ids, err = collect(queries.SearchEntitlementsByID(ctx, db.SearchEntitlementsByIDParams{
-			AccountID: accountID, ID: id, Like: like,
-		}))
-	case "entitlements.code":
-		ids, err = collect(queries.SearchEntitlementsByCode(ctx, db.SearchEntitlementsByCodeParams{
-			AccountID: accountID, Like: like,
-		}))
-	case "entitlements.name":
-		ids, err = collect(queries.SearchEntitlementsByName(ctx, db.SearchEntitlementsByNameParams{
-			AccountID: accountID, Like: like,
-		}))
+	switch resource {
+	case search.Licenses:
+		ids, err = w.licenses(ctx, attribute)
+	case search.Users:
+		ids, err = w.users(ctx, attribute)
+	case search.Products:
+		ids, err = w.products(ctx, attribute)
+	case search.Policies:
+		ids, err = w.policies(ctx, attribute)
+	case search.Groups:
+		ids, err = w.groups(ctx, attribute)
+	case search.Entitlements:
+		ids, err = w.entitlements(ctx, attribute)
+	case search.Machines:
+		ids, err = w.machines(ctx, attribute)
 	default:
-		return nil, fmt.Errorf("postgres: search %s.%s: %w", resource, attribute, errUnsearchable)
+		err = errUnsearchable
 	}
 
 	if err != nil {
@@ -140,10 +68,269 @@ func (s *Store) SearchIDs( //nolint:cyclop,funlen // one query per searchable at
 	return ids, nil
 }
 
-// errUnsearchable is an attribute the search scenario never routes here.
-var errUnsearchable = errors.New("attribute is not searchable")
+func (w lookup) licenses(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case "id":
+		return collect(w.q.SearchLicensesByID(ctx, db.SearchLicensesByIDParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+		}))
+	case "key":
+		return collect(w.q.SearchLicensesByKey(ctx, db.SearchLicensesByKeyParams{
+			AccountID: w.account,
+			Term:      w.t.Text,
+		}))
+	case attrName:
+		return collect(w.q.SearchLicensesByName(ctx, db.SearchLicensesByNameParams{
+			AccountID: w.account,
+			Like:      &w.like,
+		}))
+	case attrMetadata:
+		return collect(w.q.SearchLicensesByMetadata(ctx, db.SearchLicensesByMetadataParams{
+			AccountID: w.account,
+			Raw:       w.t.Raw,
+			Cast:      w.t.Cast,
+		}))
+	case "owner":
+		return collect(w.q.SearchLicensesByOwner(ctx, db.SearchLicensesByOwnerParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Term:      &w.t.Text,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case "user":
+		return collect(w.q.SearchLicensesByUser(ctx, db.SearchLicensesByUserParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Term:      &w.t.Text,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case attrProduct:
+		return collect(w.q.SearchLicensesByProduct(ctx, db.SearchLicensesByProductParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case "policy":
+		return collect(w.q.SearchLicensesByPolicy(ctx, db.SearchLicensesByPolicyParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	default:
+		return nil, errUnsearchable
+	}
+}
 
-// collect reads the ids of a search query; every one answers bare ids.
+func (w lookup) users(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case "id":
+		return collect(w.q.SearchUsersByID(ctx, db.SearchUsersByIDParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+		}))
+	case "email":
+		return collect(w.q.SearchUsersByEmail(ctx, db.SearchUsersByEmailParams{AccountID: w.account, Like: &w.like}))
+	case "first_name":
+		return collect(w.q.SearchUsersByFirstName(ctx, db.SearchUsersByFirstNameParams{
+			AccountID: w.account,
+			Like:      &w.like,
+		}))
+	case "last_name":
+		return collect(w.q.SearchUsersByLastName(ctx, db.SearchUsersByLastNameParams{
+			AccountID: w.account,
+			Like:      &w.like,
+		}))
+	case attrMetadata:
+		return collect(w.q.SearchUsersByMetadata(ctx, db.SearchUsersByMetadataParams{
+			AccountID: w.account,
+			Raw:       w.t.Raw,
+			Cast:      w.t.Cast,
+		}))
+	case "role":
+		if w.t.ID.Valid {
+			return []uuid.UUID{}, nil
+		}
+
+		return collect(w.q.SearchUsersByRole(ctx, db.SearchUsersByRoleParams{
+			AccountID: w.account,
+			Like:      w.like,
+		}))
+	default:
+		return nil, errUnsearchable
+	}
+}
+
+func (w lookup) products(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case "id":
+		return collect(w.q.SearchProductsByID(ctx, db.SearchProductsByIDParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+		}))
+	case attrName:
+		return collect(w.q.SearchProductsByName(ctx, db.SearchProductsByNameParams{
+			AccountID: w.account,
+			Like:      &w.like,
+		}))
+	case attrMetadata:
+		return collect(w.q.SearchProductsByMetadata(ctx, db.SearchProductsByMetadataParams{
+			AccountID: w.account,
+			Raw:       w.t.Raw,
+			Cast:      w.t.Cast,
+		}))
+	default:
+		return nil, errUnsearchable
+	}
+}
+
+func (w lookup) policies(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case "id":
+		return collect(w.q.SearchPoliciesByID(ctx, db.SearchPoliciesByIDParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+		}))
+	case attrName:
+		return collect(w.q.SearchPoliciesByName(ctx, db.SearchPoliciesByNameParams{
+			AccountID: w.account,
+			Like:      w.like,
+		}))
+	case attrMetadata:
+		return collect(w.q.SearchPoliciesByMetadata(ctx, db.SearchPoliciesByMetadataParams{
+			AccountID: w.account,
+			Raw:       w.t.Raw,
+			Cast:      w.t.Cast,
+		}))
+	case attrProduct:
+		return collect(w.q.SearchPoliciesByProduct(ctx, db.SearchPoliciesByProductParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	default:
+		return nil, errUnsearchable
+	}
+}
+
+func (w lookup) groups(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case attrName:
+		return collect(w.q.SearchGroupsByName(ctx, db.SearchGroupsByNameParams{AccountID: w.account, Like: &w.like}))
+	default:
+		return nil, errUnsearchable
+	}
+}
+
+func (w lookup) entitlements(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case "id":
+		return collect(w.q.SearchEntitlementsByID(ctx, db.SearchEntitlementsByIDParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+		}))
+	case "code":
+		return collect(w.q.SearchEntitlementsByCode(ctx, db.SearchEntitlementsByCodeParams{
+			AccountID: w.account,
+			Like:      w.like,
+		}))
+	case attrName:
+		return collect(w.q.SearchEntitlementsByName(ctx, db.SearchEntitlementsByNameParams{
+			AccountID: w.account,
+			Like:      w.like,
+		}))
+	default:
+		return nil, errUnsearchable
+	}
+}
+
+func (w lookup) machines(ctx context.Context, attribute string) ([]uuid.UUID, error) {
+	switch attribute {
+	case "id":
+		return collect(w.q.SearchMachinesByID(ctx, db.SearchMachinesByIDParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+		}))
+	case "fingerprint":
+		return collect(w.q.SearchMachinesByFingerprint(ctx, db.SearchMachinesByFingerprintParams{
+			AccountID: w.account,
+			Like:      w.like,
+		}))
+	case attrName:
+		return collect(w.q.SearchMachinesByName(ctx, db.SearchMachinesByNameParams{
+			AccountID: w.account,
+			Like:      &w.like,
+		}))
+	case attrMetadata:
+		return collect(w.q.SearchMachinesByMetadata(ctx, db.SearchMachinesByMetadataParams{
+			AccountID: w.account,
+			Raw:       w.t.Raw,
+			Cast:      w.t.Cast,
+		}))
+	case "license":
+		return collect(w.q.SearchMachinesByLicense(ctx, db.SearchMachinesByLicenseParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Term:      w.t.Text,
+			Like:      w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case "owner":
+		return collect(w.q.SearchMachinesByOwner(ctx, db.SearchMachinesByOwnerParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Term:      &w.t.Text,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case "user":
+		return collect(w.q.SearchMachinesByUser(ctx, db.SearchMachinesByUserParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Term:      &w.t.Text,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case attrProduct:
+		return collect(w.q.SearchMachinesByProduct(ctx, db.SearchMachinesByProductParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      &w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	case "policy":
+		return collect(w.q.SearchMachinesByPolicy(ctx, db.SearchMachinesByPolicyParams{
+			AccountID: w.account,
+			ID:        w.id,
+			Like:      w.like,
+			Prefix:    w.t.Prefix,
+			Tsv:       w.t.TSV,
+		}))
+	default:
+		return nil, errUnsearchable
+	}
+}
+
 func collect[R ~struct{ ID uuid.UUID }](rows []R, err error) ([]uuid.UUID, error) {
 	if err != nil {
 		return nil, err

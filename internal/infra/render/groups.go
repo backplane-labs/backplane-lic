@@ -32,7 +32,7 @@ func Group(group domain.Group) oas.GroupResource {
 			Account: oas.ToOneRelationship{
 				Links: oas.RelationshipLinks{Related: oas.NewNilString(base)},
 				Data: oas.NilResourceIdentifier{
-					Value: oas.ResourceIdentifier{Type: "accounts", ID: group.AccountID.String()},
+					Value: oas.ResourceIdentifier{Type: typeAccounts, ID: group.AccountID.String()},
 				},
 			},
 			Owners:   many("/owners"),
@@ -63,7 +63,7 @@ func GroupOwner(owner domain.GroupOwner) oas.GroupOwnerResource {
 			Updated: Timestamp(owner.UpdatedAt),
 		},
 		Relationships: oas.GroupOwnerResourceRelationships{
-			Account: one("accounts", owner.AccountID.String(), ""),
+			Account: one(typeAccounts, owner.AccountID.String(), ""),
 			Group:   one("groups", owner.GroupID.String(), "/groups/"+owner.GroupID.String()),
 			User:    one("users", owner.UserID.String(), "/users/"+owner.UserID.String()),
 		},

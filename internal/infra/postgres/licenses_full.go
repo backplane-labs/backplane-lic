@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
+	"github.com/backplane-labs/backplane-lic/internal/app/machines"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres/db"
 )
@@ -497,63 +498,24 @@ func (r LicensesRepo) LicenseUserMatches(
 func (r LicensesRepo) LicenseMachines(
 	ctx context.Context, accountID, licenseID uuid.UUID, f licenses.MachineFilter, now time.Time,
 ) ([]domain.Machine, error) {
-	var fingerprint *string
-	if f.Fingerprint != "" {
-		fingerprint = &f.Fingerprint
-	}
-
-	var productID, userID *uuid.UUID
-	if f.ProductID.Valid {
-		productID = &f.ProductID.UUID
+	filter := machines.Filter{
+		LicenseID: uuid.NullUUID{UUID: licenseID, Valid: true}, Fingerprint: f.Fingerprint, ProductID: f.ProductID,
 	}
 
 	if f.UserID.Valid {
-		userID = &f.UserID.UUID
+		filter.User = f.UserID.UUID.String()
 	}
 
-	rows, err := r.q.ListLicenseMachines(ctx, db.ListLicenseMachinesParams{
-		AccountID: accountID, LicenseID: licenseID, Fingerprint: fingerprint,
-		ProductID: productID, UserID: userID,
-		Now: now, HeartbeatTtl: ttlPtr(domain.HeartbeatTTLSeconds), Limit: machineLimit,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("postgres: license machines: %w", err)
-	}
-
-	out := make([]domain.Machine, 0, len(rows))
-	for i := range rows {
-		row := &rows[i]
-		out = append(out, machineDomain(row.ID, row.AccountID, row.LicenseID, row.PolicyID,
-			row.OwnerID, row.GroupID, row.Name, row.Fingerprint, row.IP, row.Hostname,
-			row.Platform, row.Cores, row.Memory, row.Disk, row.MaxProcessesOverride,
-			row.Metadata, row.LastHeartbeatAt, row.LastCheckOutAt, row.HeartbeatStatus,
-			row.RequireHeartbeat, row.HeartbeatDuration, row.CreatedAt, row.UpdatedAt))
-	}
-
-	return out, nil
+	return MachinesRepo(r).ListMachines(ctx, accountID, filter, machines.Scope{}, Page{Fetch: machineLimit}, now)
 }
 
 // LicenseMachineByID loads one of the license's machines by id.
 func (r LicensesRepo) LicenseMachineByID(
 	ctx context.Context, accountID, licenseID, id uuid.UUID, now time.Time,
 ) (domain.Machine, error) {
-	row, err := r.q.GetLicenseMachineByID(ctx, db.GetLicenseMachineByIDParams{
-		AccountID: accountID, LicenseID: licenseID, ID: id,
-	})
-	if errors.Is(err, pgx.ErrNoRows) {
-		return domain.Machine{}, fmt.Errorf("postgres: machine: %w", errLicenseNotFound)
-	}
-
-	if err != nil {
-		return domain.Machine{}, fmt.Errorf("postgres: license machine: %w", err)
-	}
-
-	return machineDomain(row.ID, row.AccountID, row.LicenseID, row.PolicyID, row.OwnerID,
-		row.GroupID, row.Name, row.Fingerprint, row.IP, row.Hostname, row.Platform,
-		row.Cores, row.Memory, row.Disk, row.MaxProcessesOverride, row.Metadata,
-		row.LastHeartbeatAt, row.LastCheckOutAt,
-		machineHeartbeatStatus(now, row.CreatedAt, row.LastHeartbeatAt, row.HeartbeatDuration),
-		row.RequireHeartbeat, row.HeartbeatDuration, row.CreatedAt, row.UpdatedAt), nil
+	return r.licenseMachine(ctx, accountID, machines.Filter{
+		LicenseID: uuid.NullUUID{UUID: licenseID, Valid: true}, IDs: []uuid.UUID{id},
+	}, now)
 }
 
 // LicenseMachineByFingerprint loads one of the license's machines by
@@ -561,23 +523,24 @@ func (r LicensesRepo) LicenseMachineByID(
 func (r LicensesRepo) LicenseMachineByFingerprint(
 	ctx context.Context, accountID, licenseID uuid.UUID, fingerprint string, now time.Time,
 ) (domain.Machine, error) {
-	row, err := r.q.GetLicenseMachineByFingerprint(ctx, db.GetLicenseMachineByFingerprintParams{
-		AccountID: accountID, LicenseID: licenseID, Fingerprint: fingerprint,
-	})
-	if errors.Is(err, pgx.ErrNoRows) {
+	return r.licenseMachine(ctx, accountID, machines.Filter{
+		LicenseID: uuid.NullUUID{UUID: licenseID, Valid: true}, Fingerprint: fingerprint,
+	}, now)
+}
+
+func (r LicensesRepo) licenseMachine(
+	ctx context.Context, accountID uuid.UUID, f machines.Filter, now time.Time,
+) (domain.Machine, error) {
+	found, err := MachinesRepo(r).ListMachines(ctx, accountID, f, machines.Scope{}, Page{Fetch: 1, Asc: true}, now)
+	if err != nil {
+		return domain.Machine{}, err
+	}
+
+	if len(found) == 0 {
 		return domain.Machine{}, fmt.Errorf("postgres: machine: %w", errLicenseNotFound)
 	}
 
-	if err != nil {
-		return domain.Machine{}, fmt.Errorf("postgres: license machine: %w", err)
-	}
-
-	return machineDomain(row.ID, row.AccountID, row.LicenseID, row.PolicyID, row.OwnerID,
-		row.GroupID, row.Name, row.Fingerprint, row.IP, row.Hostname, row.Platform,
-		row.Cores, row.Memory, row.Disk, row.MaxProcessesOverride, row.Metadata,
-		row.LastHeartbeatAt, row.LastCheckOutAt,
-		machineHeartbeatStatus(now, row.CreatedAt, row.LastHeartbeatAt, row.HeartbeatDuration),
-		row.RequireHeartbeat, row.HeartbeatDuration, row.CreatedAt, row.UpdatedAt), nil
+	return found[0], nil
 }
 
 // SumLicenseMachinesForOwner answers the owner-scoped machine count and
@@ -938,75 +901,6 @@ func metadataJSON(m map[string]any) (json.RawMessage, json.RawMessage) {
 func pageNone() Page { return Page{Limit: 1, Fetch: 1} }
 
 func timePtr(t time.Time) *time.Time { return &t }
-
-func ttlPtr(ttl int32) *int32 { return &ttl }
-
-// machineHeartbeatStatus computes NOT_STARTED/ALIVE/DEAD (the default
-// TTL applies when the policy sets none).
-func machineHeartbeatStatus(now, createdAt time.Time, lastHeartbeat *time.Time, duration *int32) string {
-	ttl := domain.HeartbeatTTLSeconds
-	if duration != nil {
-		ttl = *duration
-	}
-
-	if lastHeartbeat == nil {
-		if now.Sub(createdAt) < time.Duration(ttl)*time.Second {
-			return domain.MachineNotStarted
-		}
-
-		return domain.MachineDead
-	}
-
-	if now.Sub(*lastHeartbeat) < time.Duration(ttl)*time.Second {
-		return domain.MachineAlive
-	}
-
-	return domain.MachineDead
-}
-
-// machineDomain assembles a machine domain value from a row's columns.
-func machineDomain(
-	id, accountID, licenseID, policyID uuid.UUID,
-	ownerID, groupID *uuid.UUID,
-	name *string, fingerprint string,
-	ipAddr, hostname, platform *string,
-	cores *int32, memory, disk *int64,
-	maxProcesses *int32,
-	metadata json.RawMessage,
-	lastHeartbeat, lastCheckOut *time.Time,
-	heartbeatStatus string,
-	requireHeartbeat bool, heartbeatDuration *int32,
-	createdAt, updatedAt time.Time,
-) domain.Machine {
-	meta := map[string]any{}
-	_ = json.Unmarshal(metadata, &meta)
-
-	return domain.Machine{
-		ID:                   id,
-		AccountID:            accountID,
-		LicenseID:            licenseID,
-		PolicyID:             policyID,
-		OwnerID:              nullUUID(ownerID),
-		GroupID:              nullUUID(groupID),
-		Name:                 name,
-		Fingerprint:          fingerprint,
-		IP:                   ipAddr,
-		Hostname:             hostname,
-		Platform:             platform,
-		Cores:                cores,
-		Memory:               memory,
-		Disk:                 disk,
-		MaxProcessesOverride: maxProcesses,
-		Metadata:             meta,
-		LastHeartbeatAt:      lastHeartbeat,
-		LastCheckOutAt:       lastCheckOut,
-		HeartbeatStatus:      heartbeatStatus,
-		RequireHeartbeat:     requireHeartbeat,
-		HeartbeatDuration:    heartbeatDuration,
-		CreatedAt:            createdAt,
-		UpdatedAt:            updatedAt,
-	}
-}
 
 // castMetaValue mirrors the reference's metadata type-cast attempt for
 // querystring values.

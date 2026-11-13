@@ -3,6 +3,8 @@ package httpapi
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
@@ -26,7 +28,7 @@ func (a *API) IndexProducts( //nolint:dupl // route handlers share the envelope
 
 	page, err := a.products.Index(ctx, req.account, params)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.ProductListDocument{Data: make([]oas.ProductResource, 0, len(page.Items))}
@@ -49,7 +51,7 @@ func (a *API) ShowProduct(ctx context.Context, params oas.ShowProductParams) (*o
 
 	product, err := a.products.Show(ctx, req.account, params.ProductId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.ProductDocument{Data: render.ProductResource(req.account.ID, product)}, nil
@@ -72,7 +74,7 @@ func (a *API) CreateProduct(
 
 	product, err := a.products.Create(ctx, req.account, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.ProductDocumentHeaders{
@@ -93,7 +95,7 @@ func (a *API) UpdateProduct(
 	}
 
 	if _, err := a.products.Resolve(ctx, req.account, params.ProductId); err != nil {
-		return nil, err //nolint:wrapcheck // the load's own error
+		return nil, err // the load's own error
 	}
 
 	in, err := validateProductBody(req.body, true)
@@ -103,7 +105,7 @@ func (a *API) UpdateProduct(
 
 	product, err := a.products.Update(ctx, req.account, params.ProductId, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.ProductDocument{Data: render.ProductResource(req.account.ID, product)}, nil
@@ -117,7 +119,7 @@ func (a *API) DestroyProduct(ctx context.Context, params oas.DestroyProductParam
 		return err
 	}
 
-	return a.products.Destroy(ctx, req.account, params.ProductId) //nolint:wrapcheck // the scenario's own error
+	return a.products.Destroy(ctx, req.account, params.ProductId) // the scenario's own error
 }
 
 // IndexProductPolicies implements GET /v1/accounts/{account}/products/{productId}/policies.
@@ -137,14 +139,14 @@ func (a *API) IndexProductPolicies(
 
 	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "policy.read")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	filter := product.ID
 
 	page, err := a.policies.Index(ctx, req.account, &filter, listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.PolicyListDocument{Data: make([]oas.PolicyResource, 0, len(page.Items))}
@@ -169,12 +171,12 @@ func (a *API) ShowProductPolicy(
 
 	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "policy.read")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	policy, err := a.policies.Show(ctx, req.account, policyID(params.PolicyId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	if policy.ProductID != product.ID {
@@ -203,12 +205,12 @@ func (a *API) IndexProductLicenses(
 
 	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "license.read")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	page, err := a.licenses.OfProduct(ctx, req.account, product, licenseFilter(req.query), listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return a.licenseListDocument(req, page, listParams), nil
@@ -228,22 +230,21 @@ func (a *API) ShowProductLicense(
 
 	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "license.read")
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	license, err := a.licenses.OfProductShow(ctx, req.account, product, params.LicenseId)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.LicenseDocument{Data: a.licenseDocument(req, &license, nil)}, nil
 }
 
-// IndexProductMachines implements GET /v1/accounts/{account}/products/{productId}/machines
-// (empty until the machines group lands).
+// IndexProductMachines implements GET /v1/accounts/{account}/products/{productId}/machines.
 func (a *API) IndexProductMachines(
 	ctx context.Context, params oas.IndexProductMachinesParams,
-) (*oas.MachineStubListDocument, error) {
+) (*oas.MachineListDocument, error) {
 	req := requestOf(ctx)
 
 	if err := checkEnvironment(req); err != nil {
@@ -255,14 +256,15 @@ func (a *API) IndexProductMachines(
 		return nil, err
 	}
 
-	if _, err := a.products.Relationship(ctx, req.account, params.ProductId, "machine.read"); err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+	product, err := a.products.Relationship(ctx, req.account, params.ProductId, "machine.read")
+	if err != nil {
+		return nil, err // the scenario's own error
 	}
 
-	doc := &oas.MachineStubListDocument{Data: []oas.MachineStubListDocumentDataItem{}}
-	doc.Links = render.Links(linksDoc(req, listParams, 0, uuidNil()))
+	filter := machinesFilter(req)
+	filter.ProductID = uuid.NullUUID{UUID: product.ID, Valid: true}
 
-	return doc, nil
+	return a.machinePage(ctx, req, filter, listParams)
 }
 
 // ShowProductMachine implements GET /v1/accounts/{account}/products/{productId}/machines/{machineId}
@@ -277,7 +279,7 @@ func (a *API) ShowProductMachine(
 	}
 
 	if _, err := a.products.Relationship(ctx, req.account, params.ProductId, "machine.read"); err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return nil, notFound("machine", params.MachineId)
@@ -300,7 +302,7 @@ func (a *API) IndexProductTokens(
 
 	page, err := a.products.Tokens(ctx, req.account, params.ProductId, listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.ProductTokenListDocument{Data: make([]oas.TokenResource, 0, len(page.Items))}
@@ -331,7 +333,7 @@ func (a *API) CreateProductToken(
 
 	token, raw, err := a.products.GenerateProductToken(ctx, req.account, params.ProductId, in)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := render.Token(req.account.ID, token, token.BearerRole, raw)
@@ -351,7 +353,7 @@ func (a *API) ShowProductToken(
 
 	token, err := a.products.Token(ctx, req.account, params.ProductId, tokenID(params.TokenId))
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := render.Token(req.account.ID, token, token.BearerRole, "")
@@ -378,7 +380,7 @@ func (a *API) IndexProductUsers(
 
 	page, err := a.products.Users(ctx, req.account, params.ProductId, roles, listParams)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	doc := &oas.ProductUserListDocument{Data: make([]oas.UserResource, 0, len(page.Items))}
@@ -405,7 +407,7 @@ func (a *API) ShowProductUser(
 
 	entry, err := a.products.User(ctx, req.account, params.ProductId, params.UserId, roles)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	return &oas.UserDocument{Data: render.User(req.account.ID, entry.User, entry.Status)}, nil

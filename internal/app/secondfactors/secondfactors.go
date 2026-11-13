@@ -74,7 +74,7 @@ func (s Scenario) List(
 	ctx context.Context, account domain.Account, principal access.Principal, userID uuid.UUID, limit int,
 ) ([]domain.SecondFactor, error) {
 	if err := access.Require(ctx, "user.second-factors.read"); err != nil {
-		return nil, err //nolint:wrapcheck // the port's own error
+		return nil, err // the port's own error
 	}
 
 	user, err := s.target(ctx, account, principal, userID)
@@ -83,10 +83,10 @@ func (s Scenario) List(
 	}
 
 	if err := access.SecondFactorShow(principal, user.ID); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
-	return s.store.ListSecondFactors(ctx, account.ID, user.ID, limit) //nolint:wrapcheck // the port's own error
+	return s.store.ListSecondFactors(ctx, account.ID, user.ID, limit) // the port's own error
 }
 
 // Show loads one factor.
@@ -94,7 +94,7 @@ func (s Scenario) Show(
 	ctx context.Context, account domain.Account, principal access.Principal, userID, factorID uuid.UUID,
 ) (domain.SecondFactor, error) {
 	if err := access.Require(ctx, "user.second-factors.read"); err != nil {
-		return domain.SecondFactor{}, err //nolint:wrapcheck // the port's own error
+		return domain.SecondFactor{}, err // the port's own error
 	}
 
 	user, err := s.target(ctx, account, principal, userID)
@@ -103,7 +103,7 @@ func (s Scenario) Show(
 	}
 
 	if err := access.SecondFactorShow(principal, user.ID); err != nil {
-		return domain.SecondFactor{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.SecondFactor{}, err // the authorization's own error
 	}
 
 	factor, err := s.store.SecondFactorByID(ctx, account.ID, user.ID, factorID)
@@ -127,7 +127,7 @@ func (s Scenario) create(
 	password, otp string,
 ) (domain.SecondFactor, error) {
 	if err := access.Require(ctx, "user.second-factors.create"); err != nil {
-		return domain.SecondFactor{}, err //nolint:wrapcheck // the port's own error
+		return domain.SecondFactor{}, err // the port's own error
 	}
 
 	user, err := s.target(ctx, account, principal, userID)
@@ -136,7 +136,7 @@ func (s Scenario) create(
 	}
 
 	if err := access.SecondFactorWrite(principal, user.ID); err != nil {
-		return domain.SecondFactor{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.SecondFactor{}, err // the authorization's own error
 	}
 
 	enabled, err := s.enabledFactor(ctx, user.ID)
@@ -208,7 +208,7 @@ func (s Scenario) update(
 	otp string,
 ) (domain.SecondFactor, error) {
 	if err := access.Require(ctx, "user.second-factors.update"); err != nil {
-		return domain.SecondFactor{}, err //nolint:wrapcheck // the port's own error
+		return domain.SecondFactor{}, err // the port's own error
 	}
 
 	user, err := s.target(ctx, account, principal, userID)
@@ -217,7 +217,7 @@ func (s Scenario) update(
 	}
 
 	if err := access.SecondFactorWrite(principal, user.ID); err != nil {
-		return domain.SecondFactor{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.SecondFactor{}, err // the authorization's own error
 	}
 
 	factor, err := s.store.SecondFactorByID(ctx, account.ID, user.ID, factorID)
@@ -263,7 +263,7 @@ func (s Scenario) delete(
 	otp string,
 ) error {
 	if err := access.Require(ctx, "user.second-factors.delete"); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	user, err := s.target(ctx, account, principal, userID)
@@ -272,7 +272,7 @@ func (s Scenario) delete(
 	}
 
 	if err := access.SecondFactorWrite(principal, user.ID); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	factor, err := s.store.SecondFactorByID(ctx, account.ID, user.ID, factorID)
@@ -281,7 +281,7 @@ func (s Scenario) delete(
 	}
 
 	if err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	enabled, err := s.enabledFactor(ctx, user.ID)
@@ -301,7 +301,7 @@ func (s Scenario) delete(
 		return fmt.Errorf("second factors: delete: %w", err)
 	}
 
-	return s.events.Publish(ctx, "second-factor.deleted", factor) //nolint:wrapcheck // the port's own error
+	return s.events.Publish(ctx, "second-factor.deleted", factor) // the port's own error
 }
 
 // target resolves the user (scoped for the sub-route) or 404s.
@@ -324,7 +324,7 @@ func (s Scenario) target(
 func (s Scenario) enabledFactor(ctx context.Context, userID uuid.UUID) (*domain.SecondFactor, error) {
 	secret, ok, err := s.store.EnabledSecondFactorSecret(ctx, userID)
 	if err != nil || !ok {
-		return nil, err //nolint:wrapcheck // the store's own error
+		return nil, err // the store's own error
 	}
 
 	factor, err := s.store.AnySecondFactor(ctx, userID)
@@ -432,7 +432,7 @@ func (s Scenario) Create(
 		return domain.SecondFactor{}, conflict()
 	}
 
-	return factor, err //nolint:wrapcheck // scenario error
+	return factor, err // scenario error
 }
 
 // Update serializes OTP verification and the state change with its event.
@@ -450,7 +450,7 @@ func (s Scenario) Update(
 		return err
 	})
 
-	return factor, err //nolint:wrapcheck // scenario error
+	return factor, err // scenario error
 }
 
 // Delete removes the factor and records its event atomically.

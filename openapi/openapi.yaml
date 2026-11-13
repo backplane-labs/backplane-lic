@@ -15,6 +15,185 @@ info:
     '
   version: 1.7.0
 paths:
+  /v1/accounts/{account}/components:
+    get:
+      operationId: indexComponents
+      summary: List machine components
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Component collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ComponentListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createComponent
+      summary: Create a machine component
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Component document.
+          headers:
+            Location:
+              description: The new component's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ComponentDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/components/{componentId}:
+    get:
+      operationId: showComponent
+      summary: Retrieve a machine component
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ComponentPath'
+      responses:
+        '200':
+          description: Component document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ComponentDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateComponent
+      summary: Update a machine component
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ComponentPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Component document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ComponentDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: deleteComponent
+      summary: Delete a machine component
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ComponentPath'
+      responses:
+        '204':
+          description: Component deleted.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/components/{componentId}/machine:
+    get:
+      operationId: showComponentMachine
+      summary: Retrieve a component's machine
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ComponentPath'
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/components/{componentId}/license:
+    get:
+      operationId: showComponentLicense
+      summary: Retrieve a component's license
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ComponentPath'
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/components/{componentId}/product:
+    get:
+      operationId: showComponentProduct
+      summary: Retrieve a component's product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ComponentPath'
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/components:
+    get:
+      operationId: indexMachineComponents
+      summary: List a machine's components
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Component collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ComponentListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/components/{componentId}:
+    get:
+      operationId: showMachineComponent
+      summary: Retrieve one of a machine's components
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      - $ref: '#/components/parameters/ComponentPath'
+      responses:
+        '200':
+          description: Component document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ComponentDocument'
+        default:
+          $ref: '#/components/responses/Error'
   /v1/ping:
     get:
       operationId: ping
@@ -399,7 +578,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/UserMachineCollectionDocument'
+                $ref: '#/components/schemas/MachineListDocument'
         default:
           $ref: '#/components/responses/Error'
   /v1/accounts/{account}/groups/{groupId}/machines/{machineId}:
@@ -424,7 +603,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/UserMachineDocument'
+                $ref: '#/components/schemas/MachineDocument'
         default:
           $ref: '#/components/responses/Error'
   /v1/accounts/{account}/groups/{groupId}/owners:
@@ -1456,6 +1635,440 @@ paths:
                 $ref: '#/components/schemas/LicenseFileDocument'
         default:
           $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines:
+    get:
+      operationId: indexMachines
+      summary: List machines
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Machine collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createMachine
+      summary: Activate a machine
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Machine document.
+          headers:
+            Location:
+              description: The new machine's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}:
+    get:
+      operationId: showMachine
+      summary: Retrieve a machine (by id or fingerprint)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateMachine
+      summary: Update a machine
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: deleteMachine
+      summary: Delete a machine
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '204':
+          description: Machine deleted.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/ping-heartbeat:
+    post:
+      operationId: pingMachineHeartbeat
+      summary: Ping a machine's heartbeat
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/reset-heartbeat:
+    post:
+      operationId: resetMachineHeartbeat
+      summary: Reset a machine's heartbeat
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/check-out:
+    get:
+      operationId: checkoutMachineRaw
+      summary: Check out a machine license file (raw)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Signed machine file (.lic).
+          headers:
+            Content-Disposition:
+              description: attachment; filename="<machine-id>.lic"
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: checkoutMachine
+      summary: Check out a machine license file (JSON:API)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine file document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineFileDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/ping:
+    post:
+      operationId: pingMachine
+      summary: Ping a machine's heartbeat (short alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/reset:
+    post:
+      operationId: resetMachine
+      summary: Reset a machine's heartbeat (short alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/generate-offline-proof:
+    post:
+      operationId: generateMachineProof
+      summary: Sign an offline proof of the machine (API v1.0)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine document with the proof.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineProofDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/actions/report-usage:
+    post:
+      operationId: reportMachineUsage
+      summary: Report the installation's signed usage chain (a backplane extension)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: The machine and the accepted chain state.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineUsageAckDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/usage:
+    get:
+      operationId: showMachineUsage
+      summary: Read the machine's accepted usage chain (a backplane extension)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: The current epoch's events and acks after a sequence number, and the head.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineUsageDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/product:
+    get:
+      operationId: showMachineProduct
+      summary: Retrieve a machine's product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/license:
+    get:
+      operationId: showMachineLicense
+      summary: Retrieve a machine's license
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/owner:
+    get:
+      operationId: showMachineOwner
+      summary: Retrieve a machine's owner
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: User document (null data when unowned).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseOwnerDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateMachineOwner
+      summary: Set a machine's owner
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/user:
+    get:
+      operationId: showMachineUserAlias
+      summary: Retrieve a machine's owner (v1.5 alias)
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: User document (null data when unowned).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseOwnerDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/group:
+    get:
+      operationId: showMachineGroup
+      summary: Retrieve a machine's group
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Group document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GroupDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateMachineGroup
+      summary: Set a machine's group
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
   /v1/accounts/{account}/passwords:
     post:
       operationId: requestPasswordReset
@@ -1757,6 +2370,212 @@ paths:
                 $ref: '#/components/schemas/EntitlementDocument'
         default:
           $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/processes:
+    get:
+      operationId: indexProcesses
+      summary: List machine processes
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      responses:
+        '200':
+          description: Process collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createProcess
+      summary: Create a machine process
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Process document.
+          headers:
+            Location:
+              description: The new process's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/processes/{processId}:
+    get:
+      operationId: showProcess
+      summary: Retrieve a machine process
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      responses:
+        '200':
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: updateProcess
+      summary: Update a machine process
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessDocument'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      operationId: deleteProcess
+      summary: Delete a machine process
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      responses:
+        '204':
+          description: Process deleted.
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/processes/{processId}/actions/ping:
+    post:
+      operationId: pingProcess
+      summary: Ping a machine process's heartbeat
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/processes/{processId}/machine:
+    get:
+      operationId: showProcessMachine
+      summary: Retrieve a process's machine
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      responses:
+        '200':
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MachineDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/processes/{processId}/license:
+    get:
+      operationId: showProcessLicense
+      summary: Retrieve a process's license
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      responses:
+        '200':
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LicenseDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/processes/{processId}/product:
+    get:
+      operationId: showProcessProduct
+      summary: Retrieve a process's product
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/ProcessPath'
+      responses:
+        '200':
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProductDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/processes:
+    get:
+      operationId: indexMachineProcesses
+      summary: List a machine's processes
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      responses:
+        '200':
+          description: Process collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessListDocument'
+        default:
+          $ref: '#/components/responses/Error'
+  /v1/accounts/{account}/machines/{machineId}/processes/{processId}:
+    get:
+      operationId: showMachineProcess
+      summary: Retrieve one of a machine's processes
+      parameters:
+      - $ref: '#/components/parameters/AccountPath'
+      - $ref: '#/components/parameters/MachinePath'
+      - $ref: '#/components/parameters/ProcessPath'
+      responses:
+        '200':
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ProcessDocument'
+        default:
+          $ref: '#/components/responses/Error'
   /v1/accounts/{account}/products:
     get:
       operationId: indexProducts
@@ -1934,7 +2753,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/MachineStubListDocument'
+                $ref: '#/components/schemas/MachineListDocument'
         default:
           $ref: '#/components/responses/Error'
   /v1/accounts/{account}/products/{productId}/machines/{machineId}:
@@ -2698,7 +3517,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/UserMachineCollectionDocument'
+                $ref: '#/components/schemas/MachineListDocument'
         default:
           $ref: '#/components/responses/Error'
   /v1/accounts/{account}/users/{userId}/machines/{machineId}:
@@ -2723,7 +3542,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/UserMachineDocument'
+                $ref: '#/components/schemas/MachineDocument'
         default:
           $ref: '#/components/responses/Error'
   /v1/accounts/{account}/users/{userId}/tokens:
@@ -3153,6 +3972,20 @@ components:
       in: path
       required: true
       description: Machine id (UUID) or fingerprint.
+      schema:
+        type: string
+    ComponentPath:
+      name: componentId
+      in: path
+      required: true
+      description: Component id (UUID).
+      schema:
+        type: string
+    ProcessPath:
+      name: processId
+      in: path
+      required: true
+      description: Process id (UUID) or PID.
       schema:
         type: string
     TokenPath:
@@ -4077,17 +4910,6 @@ components:
             type: object
         links:
           $ref: '#/components/schemas/ListLinks'
-    MachineStubListDocument:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-        links:
-          $ref: '#/components/schemas/ListLinks'
     ProductUserListDocument:
       type: object
       required:
@@ -4430,47 +5252,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserLicenseResource'
-        links:
-          $ref: '#/components/schemas/ListLinks'
-    UserMachineResource:
-      type: object
-      required:
-      - type
-      - id
-      - links
-      properties:
-        type:
-          type: string
-          enum:
-          - machines
-        id:
-          type: string
-        attributes:
-          type:
-          - object
-          - 'null'
-          additionalProperties: true
-        relationships:
-          type: object
-          additionalProperties: true
-        links:
-          $ref: '#/components/schemas/ResourceLinks'
-    UserMachineDocument:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          $ref: '#/components/schemas/UserMachineResource'
-    UserMachineCollectionDocument:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserMachineResource'
         links:
           $ref: '#/components/schemas/ListLinks'
     LicenseAttributes:
@@ -4985,6 +5766,98 @@ components:
           oneOf:
           - $ref: '#/components/schemas/MachineResource'
           - type: 'null'
+    UsageAck:
+      type: object
+      required:
+      - epoch
+      - seq
+      - hash
+      properties:
+        epoch:
+          type: integer
+          format: int64
+        seq:
+          type: integer
+          format: int64
+        hash:
+          type: string
+    MachineUsageAckDocument:
+      type: object
+      required:
+      - data
+      - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/MachineResource'
+        meta:
+          type: object
+          required:
+          - ack
+          properties:
+            ack:
+              $ref: '#/components/schemas/UsageAck'
+    MachineUsageDocument:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          required:
+          - epoch
+          - events
+          - head
+          - acks
+          properties:
+            epoch:
+              type: integer
+              format: int64
+            events:
+              type: array
+              items:
+                type: object
+                required:
+                - seq
+                - event
+                - hash
+                properties:
+                  seq:
+                    type: integer
+                    format: int64
+                  event:
+                    type: string
+                  hash:
+                    type: string
+            head:
+              type: object
+              required:
+              - seq
+              - hash
+              properties:
+                seq:
+                  type: integer
+                  format: int64
+                hash:
+                  type: string
+            acks:
+              type: array
+              items:
+                $ref: '#/components/schemas/UsageAck'
+    MachineProofDocument:
+      type: object
+      required:
+      - data
+      - meta
+      properties:
+        data:
+          $ref: '#/components/schemas/MachineResource'
+        meta:
+          type: object
+          required:
+          - proof
+          properties:
+            proof:
+              type: string
     MachineListDocument:
       type: object
       required:
@@ -5057,6 +5930,42 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/LicenseFileResource'
+    MachineFileResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - machine-files
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/LicenseFileAttributes'
+        relationships:
+          type: object
+          required:
+          - account
+          - license
+          - machine
+          properties:
+            account:
+              $ref: '#/components/schemas/ToOneRelationship'
+            license:
+              $ref: '#/components/schemas/ToOneRelationship'
+            machine:
+              $ref: '#/components/schemas/ToOneRelationship'
+    MachineFileDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/MachineFileResource'
     WebhookEndpointAttributes:
       type: object
       required:
@@ -5222,6 +6131,82 @@ components:
             $ref: '#/components/schemas/WebhookEventResource'
         links:
           $ref: '#/components/schemas/ListLinks'
+    ComponentAttributes:
+      type: object
+      required:
+      - fingerprint
+      - name
+      - metadata
+      - created
+      - updated
+      properties:
+        fingerprint:
+          type: string
+        name:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    ComponentRelationships:
+      type: object
+      required:
+      - account
+      - product
+      - license
+      - machine
+      properties:
+        account:
+          $ref: '#/components/schemas/ToOneRelationship'
+        product:
+          $ref: '#/components/schemas/ToOneRelationship'
+        license:
+          $ref: '#/components/schemas/ToOneRelationship'
+        machine:
+          $ref: '#/components/schemas/ToOneRelationship'
+    ComponentResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - components
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/ComponentAttributes'
+        relationships:
+          $ref: '#/components/schemas/ComponentRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    ComponentDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          oneOf:
+          - $ref: '#/components/schemas/ComponentResource'
+          - type: 'null'
+    ComponentListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
     AccountAttributes:
       type: object
       required:
@@ -5366,6 +6351,95 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/AccountResource'
+    ProcessAttributes:
+      type: object
+      required:
+      - pid
+      - status
+      - interval
+      - lastHeartbeat
+      - nextHeartbeat
+      - metadata
+      - created
+      - updated
+      properties:
+        pid:
+          type: string
+        status:
+          type: string
+          enum:
+          - ALIVE
+          - DEAD
+          - RESURRECTED
+        interval:
+          type: integer
+        lastHeartbeat:
+          $ref: '#/components/schemas/Timestamp'
+        nextHeartbeat:
+          $ref: '#/components/schemas/Timestamp'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        created:
+          $ref: '#/components/schemas/Timestamp'
+        updated:
+          $ref: '#/components/schemas/Timestamp'
+    ProcessRelationships:
+      type: object
+      required:
+      - account
+      - product
+      - license
+      - machine
+      properties:
+        account:
+          $ref: '#/components/schemas/ToOneRelationship'
+        product:
+          $ref: '#/components/schemas/ToOneRelationship'
+        license:
+          $ref: '#/components/schemas/ToOneRelationship'
+        machine:
+          $ref: '#/components/schemas/ToOneRelationship'
+    ProcessResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      - links
+      properties:
+        type:
+          type: string
+          enum:
+          - processes
+        id:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/ProcessAttributes'
+        relationships:
+          $ref: '#/components/schemas/ProcessRelationships'
+        links:
+          $ref: '#/components/schemas/ResourceLinks'
+    ProcessDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          oneOf:
+          - $ref: '#/components/schemas/ProcessResource'
+          - type: 'null'
+    ProcessListDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessResource'
+        links:
+          $ref: '#/components/schemas/ListLinks'
   responses:
     Error:
       description: Keygen JSON:API error document.

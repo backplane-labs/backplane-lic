@@ -22,7 +22,7 @@ func Ed25519Key(tb testing.TB, target Target) ed25519.PublicKey {
 	tb.Helper()
 
 	status, raw := call(tb, target, http.MethodGet, "/v1/accounts/"+AccountID, "", map[string]string{
-		"Authorization": "Bearer " + AdminToken(tb, target),
+		headerAuthorization: "Bearer " + AdminToken(tb, target),
 	})
 	if status != http.StatusOK {
 		tb.Fatalf("conformance: fetch account keys: unexpected status %d: %s", status, raw)

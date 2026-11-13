@@ -130,11 +130,10 @@ func (s Scenario) validateScopes( //nolint:gocognit,gocyclo,cyclop,funlen,mainti
 			dead, alive := 0, 0
 
 			for i := range machines {
-				switch machines[i].HeartbeatStatus {
-				case domain.MachineDead:
-					dead++
-				case domain.MachineAlive:
+				if machines[i].InAliveScope() {
 					alive++
+				} else {
+					dead++
 				}
 			}
 
@@ -180,7 +179,7 @@ func (s Scenario) validateScopes( //nolint:gocognit,gocyclo,cyclop,funlen,mainti
 
 			if policy.RequireHeartbeat {
 				for i := range machines {
-					if machines[i].Alive() && machines[i].NotStarted() {
+					if machines[i].NotStarted() {
 						return fail("machine heartbeat is required", "HEARTBEAT_NOT_STARTED")
 					}
 				}
@@ -349,15 +348,16 @@ func (s Scenario) validateProcesses( //nolint:cyclop // the leasing-strategy lad
 		machines := s.machinesOfFingerprints(ctx, account, license, scope.Fingerprints, s.now())
 		if machine := firstAlive(machines); machine != nil {
 			count, _ = s.store.CountMachineProcesses(ctx, account.ID, machine.ID)
-			if mp := machine.MaxProcesses(maxProcesses); mp != nil {
+			if mp := machine.MaxProcesses(); mp != nil {
 				limit = int(*mp)
 			}
 		}
 
 	case policy.ProcessLeasingStrategy == "PER_MACHINE" && scope.Machine != nil:
-		if machine, err := s.machineOfScope(ctx, account, license, *scope.Machine, s.now()); err == nil && machine.Alive() {
+		machine, err := s.machineOfScope(ctx, account, license, *scope.Machine, s.now())
+		if err == nil && machine.InAliveScope() {
 			count, _ = s.store.CountMachineProcesses(ctx, account.ID, machine.ID)
-			if mp := machine.MaxProcesses(maxProcesses); mp != nil {
+			if mp := machine.MaxProcesses(); mp != nil {
 				limit = int(*mp)
 			}
 		}
@@ -402,7 +402,7 @@ func (s Scenario) validateProcesses( //nolint:cyclop // the leasing-strategy lad
 // firstAlive answers the first alive machine of the list.
 func firstAlive(machines []domain.Machine) *domain.Machine {
 	for index := range machines {
-		if machines[index].Alive() {
+		if machines[index].InAliveScope() {
 			return &machines[index]
 		}
 	}
@@ -427,10 +427,10 @@ func (s Scenario) machineOfScope(
 	ctx context.Context, account domain.Account, license domain.License, idOrFingerprint string, now time.Time,
 ) (domain.Machine, error) {
 	if id, err := uuid.Parse(idOrFingerprint); err == nil {
-		return s.store.LicenseMachineByID(ctx, account.ID, license.ID, id, now) //nolint:wrapcheck // the store's own error
+		return s.store.LicenseMachineByID(ctx, account.ID, license.ID, id, now) // the store's own error
 	}
 
-	return s.store.LicenseMachineByFingerprint( //nolint:wrapcheck // the store's own error
+	return s.store.LicenseMachineByFingerprint( // the store's own error
 		ctx, account.ID, license.ID, idOrFingerprint, now,
 	)
 }
@@ -439,7 +439,7 @@ func (s Scenario) machineOfScope(
 func (s Scenario) machineOfFingerprint(
 	ctx context.Context, account domain.Account, license domain.License, fingerprint string, now time.Time,
 ) (domain.Machine, error) {
-	return s.store.LicenseMachineByFingerprint( //nolint:wrapcheck // the store's own error
+	return s.store.LicenseMachineByFingerprint( // the store's own error
 		ctx, account.ID, license.ID, fingerprint, now,
 	)
 }
@@ -473,7 +473,7 @@ func (s Scenario) machinesOfFingerprints(
 // user's (or unowned).
 func (s Scenario) aliveMachinesForUser(machines []domain.Machine, ident string) bool {
 	for i := range machines {
-		if !machines[i].Alive() || !machines[i].OwnerID.Valid {
+		if !machines[i].InAliveScope() || !machines[i].OwnerID.Valid {
 			continue
 		}
 

@@ -34,6 +34,7 @@ import (
 // The canonical default header values.
 const (
 	editionCE        = "CE"
+	challengeBearer  = "Bearer"
 	modeSingleplayer = "singleplayer"
 	apiVersion       = "1.8"
 	poweredBy        = "Ruby, Rails, and a lot of coffee. (And the occasional Islay.)"
@@ -72,7 +73,7 @@ type pipeline struct {
 func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	req := &request{
 		id:          newRequestID(),
-		challenge:   "Bearer",
+		challenge:   challengeBearer,
 		method:      r.Method,
 		query:       r.URL.Query(),
 		headers:     r.Header,
@@ -86,6 +87,14 @@ func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	accountScoped := strings.HasPrefix(routePath, "/v1/accounts/")
 
 	route, ok := p.server.FindRoute(r.Method, routePath)
+	if !ok && r.Method == http.MethodPut {
+		// The reference routes an update by PATCH and by PUT alike (Rails
+		// resources); the spec declares PATCH where PUT means nothing
+		// else. The signature keeps the method as sent (req.method).
+		r.Method = http.MethodPatch
+		route, ok = p.server.FindRoute(r.Method, routePath)
+	}
+
 	if !ok {
 		// No route for this method+path: the reference's endpoint-level
 		// 404 (it has no distinct 405).
@@ -93,6 +102,9 @@ func (p *pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	// The certificate downloads also negotiate the binary format.
+	req.binary = route.Name() == oas.CheckoutLicenseFileOperation || route.Name() == oas.CheckoutMachineRawOperation
 
 	switch route.Name() {
 	case oas.PingOperation, oas.HealthOperation:
@@ -206,7 +218,7 @@ func (p *pipeline) serveAccountScoped(
 
 	// Rack::Attack runs before authentication and typed body validation.
 	if name, count, window := p.limited(r, routePath); name != "" {
-		w.Header().Set("X-Request-Id", req.id.String())
+		w.Header().Set("X-Request-ID", req.id.String())
 		p.throttleError(w, name, count, window, p.clock())
 
 		return
@@ -284,7 +296,7 @@ func (p *pipeline) resolve(
 	req *request,
 	routePath string,
 ) (domain.Account, string, bool) {
-	if !acceptable(r.Header) {
+	if !acceptable(r.Header, req.binary) {
 		p.middlewareError(w, req.id, errMimeInvalid)
 
 		return domain.Account{}, "", false
@@ -418,7 +430,7 @@ func (p *pipeline) addDefaults(h http.Header, req *request) {
 	h.Set("Keygen-Revision", p.revision)
 	h.Set("Keygen-Version", apiVersion)
 	h.Set("X-Powered-By", poweredBy)
-	h.Set("X-Request-Id", req.id.String())
+	h.Set("X-Request-ID", req.id.String())
 	h.Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	h.Set("Vary", "Accept, Origin")
 }
@@ -447,7 +459,7 @@ func (p *pipeline) fail(w http.ResponseWriter, req *request, t *apperr.T, alg st
 func (p *pipeline) middlewareError(w http.ResponseWriter, id uuid.UUID, e *apperr.T) {
 	h := w.Header()
 	h.Set("Content-Type", jsonapiCT)
-	h.Set("X-Request-Id", id.String())
+	h.Set("X-Request-ID", id.String())
 	h.Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	h.Set("Vary", "Origin")
 	h["Date"] = nil
@@ -650,8 +662,9 @@ func rewriteBare(path string, spec Spec) string {
 
 // acceptable answers whether the request's Accept header admits the
 // JSON:API response (the reference's mime constraint on account-scoped
-// routes: jsonapi, json, or a wildcard; a missing header accepts).
-func acceptable(h http.Header) bool {
+// routes: jsonapi, json, or a wildcard; a missing header accepts). A
+// binary route admits application/octet-stream too.
+func acceptable(h http.Header, binary bool) bool {
 	accept := strings.TrimSpace(h.Get("Accept"))
 	if accept == "" {
 		return true
@@ -665,6 +678,10 @@ func acceptable(h http.Header) bool {
 		switch media {
 		case "*/*", "application/*", "application/vnd.api+json", "application/json":
 			return true
+		case "application/octet-stream":
+			if binary {
+				return true
+			}
 		}
 	}
 
@@ -714,7 +731,7 @@ func queryCredential(r *http.Request) string {
 // scheme, capitalized, or the Bearer default.
 func challenge(cred authn.Credentials) string {
 	if cred.Scheme == "" {
-		return "Bearer"
+		return challengeBearer
 	}
 
 	return strings.ToUpper(cred.Scheme[:1]) + strings.ToLower(cred.Scheme[1:])

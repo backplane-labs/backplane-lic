@@ -24,6 +24,9 @@ const (
 // algParts is the <enc>+<sig> pair part count.
 const algParts = 2
 
+// detailAlgorithm is the detail of a refused encoding algorithm.
+const detailAlgorithm = "invalid encoding algorithm"
+
 // defaultTTLSeconds is the checkout TTL default (1 month).
 const defaultTTLSeconds = 2629746
 
@@ -65,13 +68,13 @@ func ResolveFileAlgorithm(algorithm string, encrypt bool, signingDefault string,
 
 	parts := strings.SplitN(algorithm, "+", algParts)
 	if len(parts) != algParts {
-		return "", &FileAlgorithmError{Detail: "invalid encoding algorithm"}
+		return "", &FileAlgorithmError{Detail: detailAlgorithm}
 	}
 
 	switch parts[0] {
 	case EncodingAES256GCM, EncodingBase64:
 	default:
-		return "", &FileAlgorithmError{Detail: "invalid encoding algorithm"}
+		return "", &FileAlgorithmError{Detail: detailAlgorithm}
 	}
 
 	switch parts[1] {
@@ -132,7 +135,7 @@ type FileCertificateInput struct {
 func BuildFileCertificate(in FileCertificateInput) (string, error) {
 	parts := strings.SplitN(in.Algorithm, "+", algParts)
 	if len(parts) != algParts {
-		return "", &FileAlgorithmError{Detail: "invalid encoding algorithm"}
+		return "", &FileAlgorithmError{Detail: detailAlgorithm}
 	}
 
 	encoding, signing := parts[0], parts[1]

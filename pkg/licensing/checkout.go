@@ -117,7 +117,7 @@ func (l *License) Checkout(ctx context.Context, options ...CheckoutOption) (*Lic
 	}
 
 	opts := CheckoutOptions{}
-	opts.apply(CheckoutOptions{Encrypt: true, Include: []string{"entitlements"}}, options...)
+	opts.apply(CheckoutOptions{Encrypt: true, Include: []string{typeEntitlements}}, options...)
 
 	file := &LicenseFile{clock: fileClock{skew: l.client.skew}}
 
@@ -152,9 +152,14 @@ func (m *Machine) Checkout(ctx context.Context, options ...CheckoutOption) (*Mac
 		options...,
 	)
 
+	path, err := resourcePath("machines", m.ID, "actions", "check-out")
+	if err != nil {
+		return nil, err
+	}
+
 	file := &MachineFile{clock: fileClock{skew: m.client.skew}}
 
-	err := m.client.do(ctx, "POST", "machines/"+m.ID+"/actions/check-out", opts.query(),
+	err = m.client.do(ctx, "POST", path, opts.query(),
 		jsonapi.Body{}, func(doc jsonapi.Document) error {
 			return decodeMachineFile(doc, file)
 		})

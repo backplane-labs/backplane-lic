@@ -111,7 +111,7 @@ func (s Scenario) Authenticate(
 }
 
 func (s Scenario) token(ctx context.Context, account domain.Account, value string) (access.Principal, Result, error) {
-	result := Result{ChallengeScheme: "Bearer"}
+	result := Result{ChallengeScheme: challengeBearer}
 
 	if value == "" {
 		return access.Principal{}, result, apperr.TokenUnauthorized("TOKEN_MISSING", "")
@@ -193,7 +193,7 @@ func (s Scenario) tokenLookup(
 	ctx context.Context, account domain.Account, value string,
 ) (domain.Token, error) {
 	if crypto.Versioned(value) && version(value) == "v3" {
-		return s.store.TokenByDigest( //nolint:wrapcheck // the repository's own error
+		return s.store.TokenByDigest( // the repository's own error
 			ctx, account.ID, crypto.DigestV3(account.Keys.SecretKey, value))
 	}
 
@@ -267,7 +267,7 @@ func (s Scenario) activationLicense(
 }
 
 func (s Scenario) license(ctx context.Context, account domain.Account, key string) (access.Principal, Result, error) {
-	result := Result{ChallengeScheme: "Bearer"}
+	result := Result{ChallengeScheme: challengeBearer}
 
 	if key == "" {
 		return access.Principal{}, result, apperr.TokenUnauthorized("TOKEN_MISSING", "")

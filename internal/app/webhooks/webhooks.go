@@ -87,7 +87,7 @@ func (s Scenario) Create(
 	in Input,
 ) (domain.WebhookEndpoint, error) {
 	if err := access.Require(ctx, "webhook-endpoint.create"); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEndpoint{}, err // the authorization's own error
 	}
 
 	endpoint := domain.WebhookEndpoint{
@@ -110,7 +110,7 @@ func (s Scenario) Create(
 	}
 
 	if err := access.WebhookEndpointWrite(principal, endpoint); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEndpoint{}, err // the authorization's own error
 	}
 
 	if err := s.validate(endpoint); err != nil {
@@ -138,13 +138,13 @@ func (s Scenario) Update(
 	}
 
 	if err := access.Require(ctx, "webhook-endpoint.update"); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEndpoint{}, err // the authorization's own error
 	}
 
 	applyInput(&endpoint, in)
 
 	if err := access.WebhookEndpointWrite(principal, endpoint); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEndpoint{}, err // the authorization's own error
 	}
 
 	if err := s.validate(endpoint); err != nil {
@@ -170,7 +170,7 @@ func (s Scenario) Show(
 	}
 
 	if err := access.Require(ctx, "webhook-endpoint.read"); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEndpoint{}, err // the authorization's own error
 	}
 
 	return endpoint, nil
@@ -191,11 +191,11 @@ func (s Scenario) show(
 	}
 
 	if err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the store's own error
+		return domain.WebhookEndpoint{}, err // the store's own error
 	}
 
 	if err := access.WebhookEndpointShow(principal, endpoint); err != nil {
-		return domain.WebhookEndpoint{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEndpoint{}, err // the authorization's own error
 	}
 
 	return endpoint, nil
@@ -206,7 +206,7 @@ func (s Scenario) Index(
 	ctx context.Context, account domain.Account, principal access.Principal, page paging.Params,
 ) ([]domain.WebhookEndpoint, int, error) {
 	if err := access.Require(ctx, "webhook-endpoint.read"); err != nil {
-		return nil, 0, err //nolint:wrapcheck // the authorization's own error
+		return nil, 0, err // the authorization's own error
 	}
 
 	// The product bearer's authorized scope is empty (the reference's
@@ -217,16 +217,16 @@ func (s Scenario) Index(
 
 	items, err := s.store.ListWebhookEndpoints(ctx, account.ID, uuid.NullUUID{}, page)
 	if err != nil {
-		return nil, 0, err //nolint:wrapcheck // the store's own error
+		return nil, 0, err // the store's own error
 	}
 
 	if err := access.WebhookEndpointIndex(principal, items); err != nil {
-		return nil, 0, err //nolint:wrapcheck // the authorization's own error
+		return nil, 0, err // the authorization's own error
 	}
 
 	count, err := s.store.CountWebhookEndpoints(ctx, account.ID, uuid.NullUUID{})
 	if err != nil {
-		return nil, 0, err //nolint:wrapcheck // the store's own error
+		return nil, 0, err // the store's own error
 	}
 
 	return items, count, nil
@@ -242,11 +242,11 @@ func (s Scenario) Destroy(
 	}
 
 	if err := access.Require(ctx, "webhook-endpoint.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.WebhookEndpointWrite(principal, endpoint); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.DeleteWebhookEndpoint(ctx, account.ID, endpoint.ID); err != nil {
@@ -262,14 +262,14 @@ func (s Scenario) EventsIndex(
 	filter EventFilter, page paging.Params,
 ) ([]domain.WebhookEvent, int, error) {
 	if err := access.Require(ctx, "webhook-event.read"); err != nil {
-		return nil, 0, err //nolint:wrapcheck // the authorization's own error
+		return nil, 0, err // the authorization's own error
 	}
 
 	scope := productScope(principal)
 
 	items, err := s.store.ListWebhookEvents(ctx, account.ID, filter, scope, page)
 	if err != nil {
-		return nil, 0, err //nolint:wrapcheck // the store's own error
+		return nil, 0, err // the store's own error
 	}
 
 	productOf := func(endpointID uuid.UUID) uuid.UUID {
@@ -282,12 +282,12 @@ func (s Scenario) EventsIndex(
 	}
 
 	if err := access.WebhookEventIndex(principal, items, productOf); err != nil {
-		return nil, 0, err //nolint:wrapcheck // the authorization's own error
+		return nil, 0, err // the authorization's own error
 	}
 
 	count, err := s.store.CountWebhookEvents(ctx, account.ID, filter, scope)
 	if err != nil {
-		return nil, 0, err //nolint:wrapcheck // the store's own error
+		return nil, 0, err // the store's own error
 	}
 
 	return items, count, nil
@@ -303,7 +303,7 @@ func (s Scenario) EventShow(
 	}
 
 	if err := access.Require(ctx, "webhook-event.read"); err != nil {
-		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEvent{}, err // the authorization's own error
 	}
 
 	product, err := s.eventProduct(ctx, account.ID, event)
@@ -312,7 +312,7 @@ func (s Scenario) EventShow(
 	}
 
 	if err := access.WebhookEventShow(principal, event, product.UUID, product.Valid); err != nil {
-		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEvent{}, err // the authorization's own error
 	}
 
 	return event, nil
@@ -328,11 +328,11 @@ func (s Scenario) EventDestroy(
 	}
 
 	if err := access.Require(ctx, "webhook-event.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.WebhookEventManage(principal); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.DeleteWebhookEvent(ctx, account.ID, event.ID); err != nil {
@@ -355,11 +355,11 @@ func (s Scenario) Retry(
 	}
 
 	if err := access.Require(ctx, "webhook-event.retry"); err != nil {
-		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEvent{}, err // the authorization's own error
 	}
 
 	if err := access.WebhookEventManage(principal); err != nil {
-		return domain.WebhookEvent{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.WebhookEvent{}, err // the authorization's own error
 	}
 
 	endpoint, err := s.retryEndpoint(ctx, account.ID, original)
@@ -404,11 +404,11 @@ func (s Scenario) retryEndpoint(
 	if event.EndpointID.Valid {
 		endpoint, err := s.store.WebhookEndpointByID(ctx, accountID, event.EndpointID.UUID)
 		if err == nil || !errors.Is(err, ErrNotFound) {
-			return endpoint, err //nolint:wrapcheck // the store's own error
+			return endpoint, err // the store's own error
 		}
 	}
 
-	return s.store.WebhookEndpointByURL(ctx, accountID, event.Endpoint) //nolint:wrapcheck // the store's own error
+	return s.store.WebhookEndpointByURL(ctx, accountID, event.Endpoint) // the store's own error
 }
 
 func (s Scenario) loadEventScoped(
@@ -429,7 +429,7 @@ func (s Scenario) load(ctx context.Context, accountID, id uuid.UUID) (domain.Web
 		return domain.WebhookEvent{}, apperr.NotFound("webhook event", id.String())
 	}
 
-	return event, err //nolint:wrapcheck // the store's own error
+	return event, err // the store's own error
 }
 
 func (s Scenario) eventProduct(
@@ -439,7 +439,7 @@ func (s Scenario) eventProduct(
 		return uuid.NullUUID{}, nil
 	}
 
-	return s.store.WebhookEndpointProduct( //nolint:wrapcheck // the store's own error
+	return s.store.WebhookEndpointProduct( // the store's own error
 		ctx, accountID, event.EndpointID.UUID)
 }
 
@@ -483,7 +483,7 @@ func (s Scenario) validate(endpoint domain.WebhookEndpoint) error {
 		return nil
 	}
 
-	return apperr.MultiOf(errs...) //nolint:wrapcheck // the validations' own errors
+	return apperr.MultiOf(errs...) // the validations' own errors
 }
 
 // applyInput layers the body over the endpoint (subscriptions deduped

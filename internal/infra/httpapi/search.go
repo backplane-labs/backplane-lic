@@ -10,6 +10,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
+	"github.com/backplane-labs/backplane-lic/internal/app/machines"
 	"github.com/backplane-labs/backplane-lic/internal/app/search"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/infra/render"
@@ -37,7 +38,7 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 
 	result, err := a.search.Search(ctx, req.account, request)
 	if err != nil {
-		return nil, err //nolint:wrapcheck // the scenario's own error
+		return nil, err // the scenario's own error
 	}
 
 	params, err := listParams(req)
@@ -51,7 +52,7 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 	case search.Licenses:
 		page, err := a.licenses.Index(ctx, req.account, licenses.Filter{IDs: result.IDs}, params)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err // the scenario's own error
 		}
 
 		now := a.licenseNow()
@@ -66,14 +67,14 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 	case search.Users:
 		page, err := a.users.List(ctx, req.account, req.principal, users.Filter{IDs: result.IDs}, params)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err // the scenario's own error
 		}
 
 		doc = listedUsers(req, page, params)
 	case search.Products:
 		page, err := a.products.Search(ctx, req.account, result.IDs, params)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err // the scenario's own error
 		}
 
 		list := &oas.ProductListDocument{Data: make([]oas.ProductResource, 0, len(page.Items))}
@@ -86,7 +87,7 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 	case search.Policies:
 		page, err := a.policies.Search(ctx, req.account, result.IDs, params)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err // the scenario's own error
 		}
 
 		list := &oas.PolicyListDocument{Data: make([]oas.PolicyResource, 0, len(page.Items))}
@@ -99,7 +100,7 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 	case search.Groups:
 		page, err := a.groups.Search(ctx, req.account, req.principal, result.IDs, params)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err // the scenario's own error
 		}
 
 		list := &oas.GroupCollectionDocument{
@@ -115,7 +116,7 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 	case search.Entitlements:
 		page, err := a.entitlements.Search(ctx, req.account, result.IDs, params)
 		if err != nil {
-			return nil, err //nolint:wrapcheck // the scenario's own error
+			return nil, err // the scenario's own error
 		}
 
 		list := &oas.EntitlementListDocument{Data: make([]oas.EntitlementResource, 0, len(page.Items))}
@@ -125,8 +126,13 @@ func (a *API) Search( //nolint:cyclop,funlen // one branch per resource
 
 		list.Links = render.Links(linksDoc(req, params, page.Count, page.Next))
 		doc = list
-	default: // machines: devices are deferred, so the account has none
-		doc = &oas.MachineStubListDocument{Data: []oas.MachineStubListDocumentDataItem{}}
+	default: // machines
+		list, err := a.machinePage(ctx, req, machines.Filter{IDs: result.IDs}, params)
+		if err != nil {
+			return nil, err // the scenario's own error
+		}
+
+		doc = list
 	}
 
 	var e jx.Encoder

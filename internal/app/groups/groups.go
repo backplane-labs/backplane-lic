@@ -135,7 +135,7 @@ func (s Scenario) Show(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) (domain.Group, error) {
 	if err := access.Require(ctx, "group.read"); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the port's own error
+		return domain.Group{}, err // the port's own error
 	}
 
 	group, err := s.load(ctx, account, principal, id)
@@ -144,7 +144,7 @@ func (s Scenario) Show(
 	}
 
 	if err := access.GroupShow(principal, group, s.memberOrOwner(ctx, account.ID, principal)); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Group{}, err // the authorization's own error
 	}
 
 	return group, nil
@@ -169,7 +169,7 @@ func (s Scenario) list(
 	ctx context.Context, account domain.Account, principal access.Principal, matches []uuid.UUID, p paging.Params,
 ) (Page, error) {
 	if err := access.Require(ctx, "group.read"); err != nil {
-		return Page{}, err //nolint:wrapcheck // the port's own error
+		return Page{}, err // the port's own error
 	}
 
 	member := uuid.NullUUID{}
@@ -199,11 +199,11 @@ func (s Scenario) Create(
 	ctx context.Context, account domain.Account, principal access.Principal, attrs Attrs,
 ) (domain.Group, error) {
 	if err := access.Require(ctx, "group.create"); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the port's own error
+		return domain.Group{}, err // the port's own error
 	}
 
 	if err := access.GroupWrite(principal); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Group{}, err // the authorization's own error
 	}
 
 	if attrs.Name == nil {
@@ -245,7 +245,7 @@ func (s Scenario) Create(
 
 		return s.events.Publish(ctx, "group.created", group)
 	}); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Group{}, err // the transaction's own error
 	}
 
 	return group, nil
@@ -256,7 +256,7 @@ func (s Scenario) Update(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID, attrs Attrs,
 ) (domain.Group, error) {
 	if err := access.Require(ctx, "group.update"); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the port's own error
+		return domain.Group{}, err // the port's own error
 	}
 
 	group, err := s.load(ctx, account, principal, id)
@@ -265,7 +265,7 @@ func (s Scenario) Update(
 	}
 
 	if err := access.GroupWrite(principal); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Group{}, err // the authorization's own error
 	}
 
 	if attrs.Name != nil {
@@ -309,7 +309,7 @@ func (s Scenario) Update(
 
 		return s.events.Publish(ctx, "group.updated", group)
 	}); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Group{}, err // the transaction's own error
 	}
 
 	return group, nil
@@ -320,7 +320,7 @@ func (s Scenario) Delete(
 	ctx context.Context, account domain.Account, principal access.Principal, id uuid.UUID,
 ) error {
 	if err := access.Require(ctx, "group.delete"); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	group, err := s.load(ctx, account, principal, id)
@@ -329,7 +329,7 @@ func (s Scenario) Delete(
 	}
 
 	if err := access.GroupWrite(principal); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
@@ -339,7 +339,7 @@ func (s Scenario) Delete(
 
 		return s.events.Publish(ctx, "group.deleted", group)
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -358,7 +358,7 @@ func (s Scenario) Users(
 		return []domain.User{}, nil
 	}
 
-	return s.store.ListGroupUsers(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
+	return s.store.ListGroupUsers(ctx, account.ID, id, limit) // the port's own error
 }
 
 // LicenseIDs answers the group's license ids.
@@ -374,7 +374,7 @@ func (s Scenario) LicenseIDs(
 		return []uuid.UUID{}, nil
 	}
 
-	return s.store.ListGroupLicenseIDs(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
+	return s.store.ListGroupLicenseIDs(ctx, account.ID, id, limit) // the port's own error
 }
 
 // MachineIDs answers the group's machine ids.
@@ -390,7 +390,7 @@ func (s Scenario) MachineIDs(
 		return []uuid.UUID{}, nil
 	}
 
-	return s.store.ListGroupMachineIDs(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
+	return s.store.ListGroupMachineIDs(ctx, account.ID, id, limit) // the port's own error
 }
 
 // Owners answers the group's owners (the join resource).
@@ -403,10 +403,10 @@ func (s Scenario) Owners(
 	}
 
 	if err := access.GroupOwnersRead(principal, group, s.memberOrOwner(ctx, account.ID, principal)); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
-	return s.store.ListGroupOwners(ctx, account.ID, id, limit) //nolint:wrapcheck // the port's own error
+	return s.store.ListGroupOwners(ctx, account.ID, id, limit) // the port's own error
 }
 
 // Owner loads one group-owner row.
@@ -419,7 +419,7 @@ func (s Scenario) Owner(
 	}
 
 	if err := access.GroupOwnersRead(principal, group, s.memberOrOwner(ctx, account.ID, principal)); err != nil {
-		return domain.GroupOwner{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.GroupOwner{}, err // the authorization's own error
 	}
 
 	owner, err := s.store.GetGroupOwner(ctx, account.ID, groupID, ownerID)
@@ -441,7 +441,7 @@ func (s Scenario) AttachOwners(
 	userIDs []uuid.UUID,
 ) ([]domain.GroupOwner, error) {
 	if err := access.Require(ctx, "group.owners.attach"); err != nil {
-		return nil, err //nolint:wrapcheck // the port's own error
+		return nil, err // the port's own error
 	}
 
 	group, err := s.load(ctx, account, principal, groupID)
@@ -450,7 +450,7 @@ func (s Scenario) AttachOwners(
 	}
 
 	if err := access.GroupOwnersWrite(principal); err != nil {
-		return nil, err //nolint:wrapcheck // the authorization's own error
+		return nil, err // the authorization's own error
 	}
 
 	attached := make([]domain.GroupOwner, 0, len(userIDs))
@@ -463,13 +463,13 @@ func (s Scenario) AttachOwners(
 					return groupOwnerUnprocessable("USER_NOT_FOUND", "must exist")
 				}
 
-				return err //nolint:wrapcheck // the port's own error
+				return err // the port's own error
 			}
 
 			if _, err := s.store.GetGroupOwnerByUser(ctx, account.ID, group.ID, userID); err == nil {
 				return groupOwnerUnprocessable("USER_TAKEN", "already exists")
 			} else if !errors.Is(err, ErrNotFound) {
-				return err //nolint:wrapcheck // the port's own error
+				return err // the port's own error
 			}
 
 			owner := domain.GroupOwner{
@@ -492,7 +492,7 @@ func (s Scenario) AttachOwners(
 	}
 
 	if err := s.store.Do(ctx, attach); err != nil {
-		return nil, err //nolint:wrapcheck // the transaction's own error
+		return nil, err // the transaction's own error
 	}
 
 	return attached, nil
@@ -505,7 +505,7 @@ func (s Scenario) DetachOwners(
 	userIDs []uuid.UUID,
 ) error {
 	if err := access.Require(ctx, "group.owners.detach"); err != nil {
-		return err //nolint:wrapcheck // the port's own error
+		return err // the port's own error
 	}
 
 	group, err := s.load(ctx, account, principal, groupID)
@@ -514,7 +514,7 @@ func (s Scenario) DetachOwners(
 	}
 
 	if err := access.GroupOwnersWrite(principal); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	for index, userID := range userIDs {
@@ -526,7 +526,7 @@ func (s Scenario) DetachOwners(
 				Source: apperr.Source{Pointer: fmt.Sprintf("/data/%d", index)},
 			}
 		} else if err != nil {
-			return err //nolint:wrapcheck // the port's own error
+			return err // the port's own error
 		}
 	}
 
@@ -537,7 +537,7 @@ func (s Scenario) DetachOwners(
 	for _, userID := range userIDs {
 		owner, err := s.store.GetGroupOwnerByUser(ctx, account.ID, group.ID, userID)
 		if err != nil {
-			return err //nolint:wrapcheck // the port's own error
+			return err // the port's own error
 		}
 
 		detached = append(detached, owner)
@@ -550,7 +550,7 @@ func (s Scenario) DetachOwners(
 
 		return s.events.Publish(ctx, "group.owners.detached", detached)
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -647,7 +647,7 @@ func (s Scenario) readRelationshipGroup(
 	}
 
 	if err := access.Require(ctx, permission); err != nil {
-		return domain.Group{}, err //nolint:wrapcheck // the port's own error
+		return domain.Group{}, err // the port's own error
 	}
 
 	return group, nil

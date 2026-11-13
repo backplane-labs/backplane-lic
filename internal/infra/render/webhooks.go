@@ -25,7 +25,7 @@ func WebhookEndpoint(accountID uuid.UUID, e domain.WebhookEndpoint) oas.WebhookE
 	if e.ProductID.Valid {
 		product.Links.Related = oas.NewNilString(base + "/products/" + e.ProductID.UUID.String())
 		product.Data = oas.NilResourceIdentifier{
-			Value: oas.ResourceIdentifier{Type: "products", ID: e.ProductID.UUID.String()},
+			Value: oas.ResourceIdentifier{Type: typeProducts, ID: e.ProductID.UUID.String()},
 		}
 	}
 
@@ -91,13 +91,20 @@ func WebhookEvent(accountID uuid.UUID, e domain.WebhookEvent) oas.WebhookEventRe
 // that need extra inputs (the user's status, the second factor's email)
 // are resolved by the caller before this; an unknown type is an error,
 // never a wrong payload.
-func PayloadDocument( //nolint:cyclop,funlen // one branch per resource
-	accountID uuid.UUID, resource any,
-) (any, error) {
+func PayloadDocument(accountID uuid.UUID, resource any) (any, error) {
+	for _, render := range []func(uuid.UUID, any) (any, error){catalogPayload, licensePayload, machinePayload} {
+		doc, err := render(accountID, resource)
+		if !errors.Is(err, ErrUnsupportedPayload) {
+			return doc, err
+		}
+	}
+
+	return nil, fmt.Errorf("%w: %T", ErrUnsupportedPayload, resource)
+}
+
+// catalogPayload renders the products, policies, entitlements and groups.
+func catalogPayload(accountID uuid.UUID, resource any) (any, error) {
 	switch v := resource.(type) {
-	case domain.User:
-		// The caller renders users itself (the status needs a lookup).
-		return nil, fmt.Errorf("render: webhook payload: user %s: %w", v.ID, errWebhookExtras)
 	case domain.Product:
 		return oas.ProductDocument{Data: ProductResource(accountID, v)}, nil
 	case domain.Policy:
@@ -121,6 +128,17 @@ func PayloadDocument( //nolint:cyclop,funlen // one branch per resource
 		return oas.PolicyEntitlementListDocument{
 			Data: []oas.PolicyEntitlementResource{PolicyEntitlementResource(accountID, v)},
 		}, nil
+	default:
+		return nil, ErrUnsupportedPayload
+	}
+}
+
+// licensePayload renders the users, licenses and their joins.
+func licensePayload(accountID uuid.UUID, resource any) (any, error) {
+	switch v := resource.(type) {
+	case domain.User:
+		// The caller renders users itself (the status needs a lookup).
+		return nil, fmt.Errorf("render: webhook payload: user %s: %w", v.ID, errWebhookExtras)
 	case domain.License:
 		// Webhook renders use the live status clock of the publisher.
 		return nil, fmt.Errorf("render: webhook payload: license %s: %w", v.ID, errWebhookExtras)
@@ -144,13 +162,27 @@ func PayloadDocument( //nolint:cyclop,funlen // one branch per resource
 		}
 
 		return oas.LicenseEntitlementListDocument{Data: rows}, nil
+	default:
+		return nil, ErrUnsupportedPayload
+	}
+}
+
+// machinePayload renders the keys, machines, their subresources and tokens.
+func machinePayload(accountID uuid.UUID, resource any) (any, error) {
+	switch v := resource.(type) {
 	case domain.Key:
 		return oas.KeyDocument{Data: KeyResource(accountID, v)}, nil
+	case domain.Machine:
+		return oas.MachineDocument{Data: oas.NilMachineResource{Value: Machine(accountID, v)}}, nil
+	case domain.MachineComponent:
+		return oas.ComponentDocument{Data: oas.NilComponentResource{Value: Component(accountID, v)}}, nil
+	case domain.MachineProcess:
+		return oas.ProcessDocument{Data: oas.NilProcessResource{Value: Process(accountID, v)}}, nil
 	case domain.Token:
 		// The raw secret never rides webhooks.
 		return oas.TokenDocument{Data: Token(accountID, v, v.BearerRole, "")}, nil
 	default:
-		return nil, fmt.Errorf("%w: %T", ErrUnsupportedPayload, resource)
+		return nil, ErrUnsupportedPayload
 	}
 }
 

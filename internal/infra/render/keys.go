@@ -22,7 +22,7 @@ func KeyResource(accountID uuid.UUID, k domain.Key) oas.KeyResource {
 		},
 		Relationships: oas.KeyRelationships{
 			Account: accountLink(accountID),
-			Product: toOne(base, "/product", "products", k.ProductID),
+			Product: toOne(base, "/product", typeProducts, k.ProductID),
 			Policy:  toOne(base, "/policy", "policies", k.PolicyID),
 		},
 		Links: oas.ResourceLinks{Self: base},

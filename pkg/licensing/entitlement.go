@@ -7,6 +7,10 @@ import (
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/internal/jsonapi"
 )
 
+// typeEntitlements is the JSON:API resource type of an entitlement,
+// both as a checkout include and in a document's included block.
+const typeEntitlements = "entitlements"
+
 // Entitlement is a license's entitlement (a feature flag with an
 // expiration date).
 type Entitlement struct {

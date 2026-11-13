@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -37,6 +36,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres/db"
+	"github.com/backplane-labs/backplane-lic/internal/testkit"
 )
 
 const portalBase = "https://licenses.example.com/portal"
@@ -49,12 +49,10 @@ var testBrand = domain.Brand{
 func automationFixture(t *testing.T) (*postgres.Store, domain.Account, domain.User) {
 	t.Helper()
 
-	dsn := os.Getenv("LIC_TEST_DATABASE_URL")
-	if dsn == "" {
-		t.Skip("LIC_TEST_DATABASE_URL not set")
-	}
-
-	store, err := postgres.Open(t.Context(), xlog.NewJSON(xlog.WithWriter(io.Discard)), sdkpg.Config{DSN: config.Secret(dsn)})
+	// Its own database: the relay must not share the outbox with the
+	// tests of other packages.
+	store, err := postgres.Open(t.Context(), xlog.NewJSON(xlog.WithWriter(io.Discard)),
+		sdkpg.Config{DSN: config.Secret(testkit.Database(t.Context(), t))})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +157,8 @@ func TestPasswordAutomation(t *testing.T) { //nolint:paralleltest // shared inte
 				return app.NewPublisher(store, publisher, queue, contracts, portalBase, "ru", testBrand, time.Now)
 			}
 			handler := handler(store, httpapi.NewMemoryThrottler(), liccache.None{},
-				accounts.Spec{ID: account.ID, Slug: account.Slug}, HTTP{}, "", "automation-test", queue, decorate)
+				accounts.Spec{ID: account.ID, Slug: account.Slug}, HTTP{}, "", "automation-test", queue, decorate,
+				slog.Default())
 			request := httptest.NewRequest(http.MethodPost, "/v1/accounts/"+account.ID.String()+"/passwords",
 				strings.NewReader(`{"meta":{"email":"alex@example.com"`+tc.deliver+`}}`))
 			request.Header.Set("Content-Type", "application/vnd.api+json")

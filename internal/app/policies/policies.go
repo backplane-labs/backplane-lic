@@ -214,7 +214,7 @@ func (s Scenario) index( //nolint:cyclop // one branch per rule
 	ctx context.Context, account domain.Account, filterProductID *uuid.UUID, matches []uuid.UUID, params paging.Params,
 ) (List, error) {
 	if err := access.Require(ctx, "policy.read"); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	principal := access.PrincipalOf(ctx)
@@ -263,7 +263,7 @@ func (s Scenario) index( //nolint:cyclop // one branch per rule
 	}
 
 	if err := access.PolicyIndexPostCheck(principal, items, userPolicies, licensePolicyID); err != nil {
-		return List{}, err //nolint:wrapcheck // the authorization's own error
+		return List{}, err // the authorization's own error
 	}
 
 	out := List{Items: items, Count: len(items)}
@@ -298,7 +298,7 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, id uuid.UUID
 	}
 
 	if err := access.Require(ctx, "policy.read"); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	if err := s.showCheck(ctx, account.ID, policy); err != nil {
@@ -334,7 +334,7 @@ func (s Scenario) showCheck(ctx context.Context, accountID uuid.UUID, policy dom
 	}
 
 	if err := access.PolicyShow(principal, policy, ownedByUser, ownedByLicense); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	return nil
@@ -343,7 +343,7 @@ func (s Scenario) showCheck(ctx context.Context, accountID uuid.UUID, policy dom
 // Create writes a new policy.
 func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) (domain.Policy, error) {
 	if err := access.Require(ctx, "policy.create"); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	// The product relationship is required; its existence is a model
@@ -355,7 +355,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 	}
 
 	if err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the product lookup's own error
+		return domain.Policy{}, err // the product lookup's own error
 	}
 
 	now := s.clock()
@@ -385,7 +385,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 	}
 
 	if err := access.PolicyWrite(access.PrincipalOf(ctx), policy, false); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	if err := s.validate(policy); err != nil {
@@ -401,7 +401,7 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 
 		return nil
 	}); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Policy{}, err // the transaction's own error
 	}
 
 	return policy, nil
@@ -422,11 +422,11 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 	}
 
 	if err := access.Require(ctx, "policy.update"); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	if err := access.PolicyWrite(access.PrincipalOf(ctx), policy, false); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the authorization's own error
+		return domain.Policy{}, err // the authorization's own error
 	}
 
 	s.applyInput(&policy, in, false)
@@ -445,7 +445,7 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 
 		return nil
 	}); err != nil {
-		return domain.Policy{}, err //nolint:wrapcheck // the transaction's own error
+		return domain.Policy{}, err // the transaction's own error
 	}
 
 	return policy, nil
@@ -459,11 +459,11 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, id uuid.U
 	}
 
 	if err := access.Require(ctx, "policy.delete"); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := access.PolicyWrite(access.PrincipalOf(ctx), policy, true); err != nil {
-		return err //nolint:wrapcheck // the authorization's own error
+		return err // the authorization's own error
 	}
 
 	if err := s.store.Do(ctx, func(ctx context.Context) error {
@@ -475,7 +475,7 @@ func (s Scenario) Destroy(ctx context.Context, account domain.Account, id uuid.U
 
 		return nil
 	}); err != nil {
-		return err //nolint:wrapcheck // the transaction's own error
+		return err // the transaction's own error
 	}
 
 	return nil
@@ -729,7 +729,7 @@ func (s Scenario) validate( //nolint:gocognit,gocyclo,cyclop,funlen // the table
 	}
 
 	if err := apperr.MultiOf(errs...); err != nil {
-		return err //nolint:wrapcheck // the document itself
+		return err // the document itself
 	}
 
 	return nil

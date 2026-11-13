@@ -1,0 +1,290 @@
+# Machine processes: the account-level CRUD with the machine, license
+# and product relationships, the processes of one machine, and the
+# heartbeat ping action.
+paths:
+  /v1/accounts/{account}/processes:
+    get:
+      operationId: indexProcesses
+      summary: List machine processes
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      responses:
+        "200":
+          description: Process collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createProcess
+      summary: Create a machine process
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "201":
+          description: Process document.
+          headers:
+            Location:
+              description: The new process's canonical URL.
+              schema:
+                type: string
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/processes/{processId}:
+    get:
+      operationId: showProcess
+      summary: Retrieve a machine process
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      responses:
+        "200":
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateProcess
+      summary: Update a machine process
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessDocument"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteProcess
+      summary: Delete a machine process
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      responses:
+        "204":
+          description: Process deleted.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/processes/{processId}/actions/ping:
+    post:
+      operationId: pingProcess
+      summary: Ping a machine process's heartbeat
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              additionalProperties: true
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/processes/{processId}/machine:
+    get:
+      operationId: showProcessMachine
+      summary: Retrieve a process's machine
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      responses:
+        "200":
+          description: Machine document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/MachineDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/processes/{processId}/license:
+    get:
+      operationId: showProcessLicense
+      summary: Retrieve a process's license
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      responses:
+        "200":
+          description: License document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/LicenseDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/processes/{processId}/product:
+    get:
+      operationId: showProcessProduct
+      summary: Retrieve a process's product
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/ProcessPath"
+      responses:
+        "200":
+          description: Product document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProductDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/processes:
+    get:
+      operationId: indexMachineProcesses
+      summary: List a machine's processes
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+      responses:
+        "200":
+          description: Process collection.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessListDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /v1/accounts/{account}/machines/{machineId}/processes/{processId}:
+    get:
+      operationId: showMachineProcess
+      summary: Retrieve one of a machine's processes
+      parameters:
+        - $ref: "#/components/parameters/AccountPath"
+        - $ref: "#/components/parameters/MachinePath"
+        - $ref: "#/components/parameters/ProcessPath"
+      responses:
+        "200":
+          description: Process document.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: "#/components/schemas/ProcessDocument"
+        default:
+          $ref: "#/components/responses/Error"
+
+components:
+  schemas:
+    ProcessAttributes:
+      type: object
+      required: [pid, status, interval, lastHeartbeat, nextHeartbeat, metadata, created, updated]
+      properties:
+        pid:
+          type: string
+        status:
+          type: string
+          enum: [ALIVE, DEAD, RESURRECTED]
+        interval:
+          type: integer
+        lastHeartbeat:
+          $ref: "#/components/schemas/Timestamp"
+        nextHeartbeat:
+          $ref: "#/components/schemas/Timestamp"
+        metadata:
+          $ref: "#/components/schemas/Metadata"
+        created:
+          $ref: "#/components/schemas/Timestamp"
+        updated:
+          $ref: "#/components/schemas/Timestamp"
+
+    ProcessRelationships:
+      type: object
+      required: [account, product, license, machine]
+      properties:
+        account:
+          $ref: "#/components/schemas/ToOneRelationship"
+        product:
+          $ref: "#/components/schemas/ToOneRelationship"
+        license:
+          $ref: "#/components/schemas/ToOneRelationship"
+        machine:
+          $ref: "#/components/schemas/ToOneRelationship"
+
+    ProcessResource:
+      type: object
+      required: [type, id, attributes, relationships, links]
+      properties:
+        type:
+          type: string
+          enum: [processes]
+        id:
+          type: string
+        attributes:
+          $ref: "#/components/schemas/ProcessAttributes"
+        relationships:
+          $ref: "#/components/schemas/ProcessRelationships"
+        links:
+          $ref: "#/components/schemas/ResourceLinks"
+
+    ProcessDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/ProcessResource"
+            - type: "null"
+
+    ProcessListDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessResource"
+        links:
+          $ref: "#/components/schemas/ListLinks"
