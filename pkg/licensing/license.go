@@ -200,11 +200,16 @@ func (l *License) Validate(ctx context.Context, options ...ValidationOption) err
 			return fmt.Errorf("decode validation: %w", err)
 		}
 
+		// A refresh replaces the license: decoding into the old value would
+		// merge maps and keep metadata keys the server no longer has.
+		client := l.client
+		*l = License{}
+
 		if err := jsonapi.DecodeAttributes(res, l); err != nil {
 			return fmt.Errorf("decode validation: %w", err)
 		}
 
-		l.bind(l.client, res)
+		l.bind(client, res)
 
 		result := &ValidationResult{}
 		if err := doc.DecodeMeta(result); err != nil {
@@ -360,7 +365,7 @@ func (l *License) Activate(
 	}
 
 	body := jsonapi.Body{
-		Type: "machines",
+		Type: typeMachines,
 		Attributes: machineActivationAttrs{
 			Fingerprint: fingerprint,
 			Name:        opts.Name,
@@ -380,7 +385,7 @@ func (l *License) Activate(
 
 	machine := &Machine{}
 
-	err := l.client.do(ctx, "POST", "machines", nil, body, func(doc jsonapi.Document) error {
+	err := l.client.do(ctx, "POST", typeMachines, nil, body, func(doc jsonapi.Document) error {
 		return decodeMachine(l.client, doc, machine)
 	})
 	if err != nil {
@@ -429,7 +434,7 @@ func (l *License) Deactivate(ctx context.Context, machineID string) error {
 		return fmt.Errorf("%w: license", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", machineID)
+	path, err := resourcePath(typeMachines, machineID)
 	if err != nil {
 		return err
 	}
@@ -443,7 +448,7 @@ func (l *License) Machine(ctx context.Context, machineID string) (*Machine, erro
 		return nil, fmt.Errorf("%w: license", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", machineID)
+	path, err := resourcePath(typeMachines, machineID)
 	if err != nil {
 		return nil, err
 	}

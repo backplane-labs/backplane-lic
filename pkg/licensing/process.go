@@ -60,6 +60,9 @@ func decodeProcess(client *Client, doc jsonapi.Document, target *Process) error 
 		return fmt.Errorf("decode process: %w", err)
 	}
 
+	// A refresh replaces the process (no merge into stale maps).
+	*target = Process{}
+
 	if err := jsonapi.DecodeAttributes(res, target); err != nil {
 		return fmt.Errorf("decode process: %w", err)
 	}

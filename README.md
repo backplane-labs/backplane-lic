@@ -132,8 +132,9 @@ parameters are `encrypt`, `algorithm`, `ttl` and `include`: query
 parameters on `GET`, `meta` merged with the query on `POST`. The algorithm
 is `<encoding>+<signature>`; encoding is `base64` or, with `encrypt`,
 `aes-256-gcm` keyed by the license key and the machine fingerprint. The ttl
-defaults to one month and is at least one hour; an explicit `null` asks for
-a perpetual file. `include` embeds `license`, `license.entitlements`,
+defaults to one month and is at least one hour (3600 seconds; less is a 400
+`CHECKOUT_TTL_INVALID` with source parameter `ttl`, no upper bound); an
+explicit `null` asks for a perpetual file. `include` embeds `license`, `license.entitlements`,
 `license.product`, `license.policy`, `license.owner` (alias `license.user`),
 `license.users`, `components`, `environment`, `group` and `owner`.
 
@@ -374,6 +375,14 @@ keys and RFC 9421 HTTP Message Signatures.
   verifies it hashes to the fingerprint.
 - `installation.ActivationRequest` is the air-gapped activation payload
   (JSON, camelCase field names).
+- `*licensing.Machine.UpdateMetadata(ctx, patch)` merges vendor-side values
+  into the machine's metadata (so they ride inside its signed machine file):
+  it reads the machine, applies the patch (a JSON `null` removes a key, every
+  other key is kept), sends the whole map with `PATCH …/machines/{id}` (the
+  server replaces metadata whole) and refreshes the machine. Concurrent
+  writers are last-write-wins; keys are camelCase on the wire. The keys
+  activation owns, `fingerprint` and `publicKey`, are refused with
+  `licensing.ErrReservedMetadata`.
 
 ### `pkg/licensing/request` — RFC 9421 request signing and verification
 

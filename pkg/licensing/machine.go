@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"net/url"
 	"strconv"
 	"strings"
@@ -13,6 +14,9 @@ import (
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/internal/jsonapi"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/usage"
 )
+
+// typeMachines is the machines resource type and path segment.
+const typeMachines = "machines"
 
 // defaultHeartbeatDuration is the server's default machine heartbeat
 // window when the policy leaves it unset.
@@ -80,6 +84,10 @@ func decodeMachine(client *Client, doc jsonapi.Document, target *Machine) error 
 		return fmt.Errorf("decode machine: %w", err)
 	}
 
+	// A refresh replaces the machine: decoding into the old value would
+	// merge maps and keep metadata keys the server no longer has.
+	*target = Machine{}
+
 	if err := jsonapi.DecodeAttributes(res, target); err != nil {
 		return fmt.Errorf("decode machine: %w", err)
 	}
@@ -120,7 +128,7 @@ func decodeMachines(client *Client, doc jsonapi.Document, target *[]Machine) err
 // url.PathEscape so metacharacters in the input cannot change the
 // request path.
 func (c *Client) Machine(ctx context.Context, idOrFingerprint string) (*Machine, error) {
-	path, err := resourcePath("machines", idOrFingerprint)
+	path, err := resourcePath(typeMachines, idOrFingerprint)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +189,7 @@ func (m *Machine) Deactivate(ctx context.Context) error {
 		return fmt.Errorf("%w: machine", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", m.ID)
+	path, err := resourcePath(typeMachines, m.ID)
 	if err != nil {
 		return err
 	}
@@ -196,7 +204,7 @@ func (m *Machine) Ping(ctx context.Context) error {
 		return fmt.Errorf("%w: machine", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", m.ID, "actions", "ping")
+	path, err := resourcePath(typeMachines, m.ID, "actions", "ping")
 	if err != nil {
 		return err
 	}
@@ -230,7 +238,7 @@ func (m *Machine) Components(ctx context.Context) ([]Component, error) {
 		return nil, fmt.Errorf("%w: machine", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", m.ID, "components")
+	path, err := resourcePath(typeMachines, m.ID, "components")
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +267,7 @@ func (m *Machine) Spawn(ctx context.Context, pid string) (*Process, error) {
 		Type:       "processes",
 		Attributes: processAttrs{Pid: pid},
 		Relationships: map[string]jsonapi.Relationship{
-			"machine": {Data: jsonapi.Identifier{Type: "machines", ID: m.ID}},
+			"machine": {Data: jsonapi.Identifier{Type: typeMachines, ID: m.ID}},
 		},
 	}
 
@@ -281,7 +289,7 @@ func (m *Machine) Processes(ctx context.Context) ([]Process, error) {
 		return nil, fmt.Errorf("%w: machine", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", m.ID, "processes")
+	path, err := resourcePath(typeMachines, m.ID, "processes")
 	if err != nil {
 		return nil, err
 	}
@@ -308,7 +316,7 @@ func (m *Machine) ReportUsage(ctx context.Context, report *usage.Report) (*usage
 		return nil, fmt.Errorf("%w: machine", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", m.ID, "actions", "report-usage")
+	path, err := resourcePath(typeMachines, m.ID, "actions", "report-usage")
 	if err != nil {
 		return nil, err
 	}
@@ -348,7 +356,7 @@ func (m *Machine) Usage(ctx context.Context, afterSeq uint64, limit int) (*usage
 		return nil, fmt.Errorf("%w: machine", ErrUnbound)
 	}
 
-	path, err := resourcePath("machines", m.ID, "usage")
+	path, err := resourcePath(typeMachines, m.ID, "usage")
 	if err != nil {
 		return nil, err
 	}
@@ -372,4 +380,65 @@ func (m *Machine) Usage(ctx context.Context, afterSeq uint64, limit int) (*usage
 	}
 
 	return &resp, nil
+}
+
+// ErrReservedMetadata reports a metadata update touching the keys the
+// installation activation owns ("fingerprint", "publicKey"): changing
+// them would unbind the installation key from the machine.
+var ErrReservedMetadata = errors.New("metadata key is reserved")
+
+// machineMetadataAttrs is the PATCH body's attributes: the whole
+// metadata, which the server replaces.
+type machineMetadataAttrs struct {
+	Metadata Metadata `json:"metadata"`
+}
+
+// UpdateMetadata merges patch into the machine's metadata and refreshes
+// the machine from the answer. The server replaces metadata whole, so
+// the machine is read first (GET) and the merged map is sent
+// (PATCH /v1/accounts/{account}/machines/{id}): keys of patch replace
+// their values, a JSON null value removes the key, every other key
+// (fingerprint, publicKey and the caller's own) is kept. Concurrent
+// writers are last-write-wins over the whole map. Keys are camelCase on
+// the wire (the server stores them snake_case and answers camelCase).
+// Changing "fingerprint" or "publicKey" is ErrReservedMetadata.
+func (m *Machine) UpdateMetadata(ctx context.Context, patch Metadata) error {
+	if m.client == nil {
+		return fmt.Errorf("%w: machine", ErrUnbound)
+	}
+
+	for _, key := range [...]string{"fingerprint", "publicKey"} {
+		if _, ok := patch[key]; ok {
+			return fmt.Errorf("%w: %s", ErrReservedMetadata, key)
+		}
+	}
+
+	current, err := m.client.Machine(ctx, m.ID)
+	if err != nil {
+		return err
+	}
+
+	merged := make(Metadata, len(current.Metadata)+len(patch))
+	maps.Copy(merged, current.Metadata)
+
+	for key, value := range patch {
+		if string(value) == "null" {
+			delete(merged, key)
+
+			continue
+		}
+
+		merged[key] = value
+	}
+
+	path, err := resourcePath(typeMachines, m.ID)
+	if err != nil {
+		return err
+	}
+
+	body := jsonapi.Body{Type: typeMachines, ID: m.ID, Attributes: machineMetadataAttrs{Metadata: merged}}
+
+	return m.client.do(ctx, "PATCH", path, nil, body, func(doc jsonapi.Document) error {
+		return decodeMachine(m.client, doc, m)
+	})
 }

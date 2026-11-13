@@ -74,8 +74,17 @@ func (d *usageDouble) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case strings.HasSuffix(r.URL.Path, "/usage"):
 		_, _ = io.WriteString(w, `{"meta":{"epoch":7,"events":[{"seq":3,"event":"ZXY=","hash":"ff"}],`+
 			`"head":{"seq":3,"hash":"ff"},"acks":[{"epoch":7,"seq":2,"hash":"abcd"}]}}`)
+	case r.Method == http.MethodPatch:
+		// The server replaces metadata whole: answer the sent resource.
+		var sent struct {
+			Data json.RawMessage `json:"data"`
+		}
+
+		_ = json.Unmarshal(body, &sent)
+		_, _ = io.WriteString(w, `{"data":`+string(sent.Data)+`}`)
 	default:
-		_, _ = io.WriteString(w, `{"data":{"id":"`+usageMachineID+`","type":"machines","attributes":{"fingerprint":"fp"},`+
+		_, _ = io.WriteString(w, `{"data":{"id":"`+usageMachineID+`","type":"machines","attributes":{"fingerprint":"fp",`+
+			`"metadata":{"fingerprint":"fp","publicKey":"pk","build":"1.2.0","mode":"online"}},`+
 			`"relationships":{"license":{"data":{"type":"licenses","id":"lic-1"}}}}}`)
 	}
 }
@@ -245,6 +254,92 @@ func TestClient_Machine_RejectsBadIdentifier(t *testing.T) {
 
 			if double.count() != 0 {
 				t.Errorf("invalid id reached the server (%d requests)", double.count())
+			}
+		})
+	}
+}
+
+func TestMachine_UpdateMetadata(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		patch licensing.Metadata
+		want  string
+		err   error
+	}{
+		{
+			name:  "merges over the current metadata",
+			patch: licensing.Metadata{"paymentDeadline": json.RawMessage(`"2026-12-01T00:00:00Z"`), "mode": json.RawMessage(`"offline"`)},
+			want: `{"build":"1.2.0","fingerprint":"fp","mode":"offline",` +
+				`"paymentDeadline":"2026-12-01T00:00:00Z","publicKey":"pk"}`,
+		},
+		{
+			name:  "null removes a key",
+			patch: licensing.Metadata{"mode": json.RawMessage(`null`)},
+			want:  `{"build":"1.2.0","fingerprint":"fp","publicKey":"pk"}`,
+		},
+		{
+			name:  "nested values survive",
+			patch: licensing.Metadata{"ack": json.RawMessage(`{"epoch":7,"seq":2,"hash":"abcd"}`)},
+			want: `{"ack":{"epoch":7,"hash":"abcd","seq":2},"build":"1.2.0","fingerprint":"fp",` +
+				`"mode":"online","publicKey":"pk"}`,
+		},
+		{name: "fingerprint is reserved", patch: licensing.Metadata{"fingerprint": json.RawMessage(`"x"`)}, err: licensing.ErrReservedMetadata},
+		{name: "publicKey is reserved", patch: licensing.Metadata{"publicKey": json.RawMessage(`"x"`)}, err: licensing.ErrReservedMetadata},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			machine, double := newUsageMachine(t)
+			before := double.count()
+
+			err := machine.UpdateMetadata(context.Background(), tc.patch)
+			if tc.err != nil {
+				if !errors.Is(err, tc.err) || double.count() != before {
+					t.Fatalf("err = %v, requests %d -> %d", err, before, double.count())
+				}
+
+				return
+			}
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			got := double.last(t)
+			if got.method != http.MethodPatch || got.rawPath != "/v1/machines/"+usageMachineID {
+				t.Fatalf("request = %s %s", got.method, got.rawPath)
+			}
+
+			var wire struct {
+				Data struct {
+					ID         string `json:"id"`
+					Type       string `json:"type"`
+					Attributes struct {
+						Metadata map[string]any `json:"metadata"`
+					} `json:"attributes"`
+				} `json:"data"`
+			}
+
+			if err := json.Unmarshal(got.body, &wire); err != nil {
+				t.Fatal(err)
+			}
+
+			sent, _ := json.Marshal(wire.Data.Attributes.Metadata)
+			if string(sent) != tc.want || wire.Data.Type != "machines" || wire.Data.ID != usageMachineID {
+				t.Errorf("sent %s %s metadata %s, want %s", wire.Data.Type, wire.Data.ID, sent, tc.want)
+			}
+
+			var normalized map[string]any
+
+			raw, _ := json.Marshal(machine.Metadata)
+			_ = json.Unmarshal(raw, &normalized)
+			refreshed, _ := json.Marshal(normalized)
+			if string(refreshed) != tc.want {
+				t.Errorf("machine refreshed to %s, want %s", refreshed, tc.want)
 			}
 		})
 	}

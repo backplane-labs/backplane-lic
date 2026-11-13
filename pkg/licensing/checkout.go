@@ -87,7 +87,8 @@ func (o CheckoutOptions) query() url.Values {
 	return query
 }
 
-// CheckoutTTL sets the file's time-to-live (minimum one hour).
+// CheckoutTTL sets the file's time-to-live in whole seconds. The server
+// takes at least one hour: less is an *APIError 400 CHECKOUT_TTL_INVALID.
 func CheckoutTTL(ttl time.Duration) CheckoutOption {
 	return func(o *CheckoutOptions) { o.TTL = ttl }
 }

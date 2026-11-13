@@ -235,6 +235,7 @@ func TestMachineLifecycleEndToEnd(t *testing.T) {
 
 	machine := e.activate(key)
 	e.checkOut(machine, key)
+	e.updateMetadata(key)
 	e.signedRequests(key, machine)
 	reports := e.reportUsage(machine, key)
 	e.readUsage(key, reports)
@@ -317,9 +318,80 @@ func (e *env) checkOut(machine *licensing.Machine, key installation.Key) {
 		e.t.Errorf("plain dataset = %+v, %v", decoded, err)
 	}
 
-	// A bad parameter is refused, not stamped.
-	if _, err := machine.Checkout(e.t.Context(), licensing.CheckoutTTL(time.Second)); err == nil {
-		e.t.Error("a check-out below the minimum ttl was accepted")
+	// The ttl minimum is one hour: below it is refused, not stamped.
+	var refused *licensing.APIError
+
+	_, err = machine.Checkout(e.t.Context(), licensing.CheckoutTTL(time.Hour-time.Second))
+	if !errors.As(err, &refused) || refused.Status != http.StatusBadRequest || refused.Code != "CHECKOUT_TTL_INVALID" {
+		e.t.Errorf("a check-out below the minimum ttl: %v", err)
+	}
+
+	if _, err := machine.Checkout(e.t.Context(), licensing.CheckoutTTL(time.Hour)); err != nil {
+		e.t.Errorf("a check-out at the minimum ttl: %v", err)
+	}
+}
+
+// updateMetadata sets vendor metadata with the product token and finds it
+// in the signed machine file, the installation's own keys kept.
+func (e *env) updateMetadata(key installation.Key) {
+	e.t.Helper()
+
+	ctx := e.t.Context()
+
+	vendor, err := e.client(licensing.Config{Token: e.productTok}).Machine(ctx, key.Fingerprint())
+	if err != nil {
+		e.t.Fatal(err)
+	}
+
+	err = vendor.UpdateMetadata(ctx, licensing.Metadata{
+		"paymentDeadline": json.RawMessage(`"2026-12-01T00:00:00Z"`),
+		"mode":            json.RawMessage(`"online"`),
+		"ack":             json.RawMessage(`{"epoch":7,"seq":2,"hash":"abcd"}`),
+	})
+	if err != nil {
+		e.t.Fatal(err)
+	}
+
+	if err := vendor.UpdateMetadata(ctx, licensing.Metadata{"mode": json.RawMessage(`null`)}); err != nil {
+		e.t.Fatal(err)
+	}
+
+	if _, ok := vendor.Metadata["mode"]; ok {
+		e.t.Errorf("a null value kept its key: %s", vendor.Metadata["mode"])
+	}
+
+	file, err := vendor.Checkout(ctx, licensing.CheckoutEncrypt(false))
+	if err != nil {
+		e.t.Fatal(err)
+	}
+
+	dataset, err := file.Decode()
+	if err != nil {
+		e.t.Fatal(err)
+	}
+
+	signed := dataset.Machine.Metadata
+	if deadline, _ := signed.String("paymentDeadline"); deadline != "2026-12-01T00:00:00Z" {
+		e.t.Errorf("signed metadata = %s", signed)
+	}
+
+	var ack struct {
+		Epoch int    `json:"epoch"`
+		Seq   int    `json:"seq"`
+		Hash  string `json:"hash"`
+	}
+
+	if err := json.Unmarshal(signed["ack"], &ack); err != nil || ack.Epoch != 7 || ack.Seq != 2 || ack.Hash != "abcd" {
+		e.t.Errorf("signed ack = %s, %v", signed["ack"], err)
+	}
+
+	if fp, _ := signed.String("fingerprint"); fp != key.Fingerprint() {
+		e.t.Errorf("fingerprint metadata lost: %q", fp)
+	}
+
+	if err := vendor.UpdateMetadata(ctx, licensing.Metadata{"publicKey": json.RawMessage(`"x"`)}); !errors.Is(
+		err, licensing.ErrReservedMetadata) {
+		e.t.Errorf("publicKey update: %v", err)
 	}
 }
 
