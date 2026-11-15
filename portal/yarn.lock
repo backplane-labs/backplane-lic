@@ -134,23 +134,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backplane-labs/backplane-theme@npm:0.6.12":
-  version: 0.6.12
-  resolution: "@backplane-labs/backplane-theme@npm:0.6.12::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40backplane-labs%2Fbackplane-theme%2F0.6.12%2Fd3e383f3cdcf7ae0b40e3df6897b6be3203aa823"
+"@backplane-labs/backplane-theme@npm:0.6.100":
+  version: 0.6.100
+  resolution: "@backplane-labs/backplane-theme@npm:0.6.100::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40backplane-labs%2Fbackplane-theme%2F0.6.100%2F35d8fb904a473548a764ff2fdee7427ffcf965b7"
   dependencies:
     "@grafana/data": "npm:13.2.3"
   peerDependencies:
     react: ">=19 <20"
     react-dom: ">=19 <20"
-  checksum: 10c0/484c9eae2dc0006cba1244c1c7092fbb3b4fb40180129db8541fe4a1e6cfbccdaec98094fd4a6b7b3e9f95f02422c93a3014379aec8e5e2ec1d5f8b858bb546b
+  checksum: 10c0/8acc6aeebe0cd173acac4a2f5bb23671df07db1d2cefe7074c2f0df46c2cbea5306a924c3e79f06509d688bd3206f50b6d184ee881825c94e76db8619381a89f
   languageName: node
   linkType: hard
 
-"@backplane-labs/backplane-ui@npm:0.6.12":
-  version: 0.6.12
-  resolution: "@backplane-labs/backplane-ui@npm:0.6.12::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40backplane-labs%2Fbackplane-ui%2F0.6.12%2F6b736fc549985537fa539a23dde7508f212001c7"
+"@backplane-labs/backplane-ui@npm:0.6.100":
+  version: 0.6.100
+  resolution: "@backplane-labs/backplane-ui@npm:0.6.100::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40backplane-labs%2Fbackplane-ui%2F0.6.100%2F05ab863bd6b48cee8f198d9b67c15dfca145f76a"
   dependencies:
-    "@backplane-labs/backplane-theme": "npm:0.6.12"
+    "@backplane-labs/backplane-theme": "npm:0.6.100"
     "@grafana/data": "npm:13.2.3"
     "@grafana/ui": "npm:13.2.3"
     "@tanstack/react-table": "npm:8.21.3"
@@ -172,7 +172,7 @@ __metadata:
     react: ">=19 <20"
     react-dom: ">=19 <20"
     react-i18next: ">=17 <18"
-  checksum: 10c0/f6452840b4884c6aeee51427a39bcf3ac30fab165f50c442b7c4fcf7c59dd0b6d2978782603fb3ae3ed8ab10f94e35ae238c4d9a2902dd10cbfb04870f8e06ad
+  checksum: 10c0/d0777508d03f057bc2b9a84ab635f662504d1405111757bbdb497f6d0a69f229a611c541daba423a77bc08db11705f6a036bbf26daf8503c0f49ed2b26ad5b33
   languageName: node
   linkType: hard
 
@@ -180,8 +180,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@backplane-labs/lic-portal@workspace:."
   dependencies:
-    "@backplane-labs/backplane-theme": "npm:0.6.12"
-    "@backplane-labs/backplane-ui": "npm:0.6.12"
+    "@backplane-labs/backplane-theme": "npm:0.6.100"
+    "@backplane-labs/backplane-ui": "npm:0.6.100"
     "@biomejs/biome": "npm:2.6.7"
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/react": "npm:16.3.2"

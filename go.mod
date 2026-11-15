@@ -3,14 +3,14 @@ module github.com/backplane-labs/backplane-lic
 go 1.27.4
 
 require (
-	github.com/backplane-labs/backplane v0.6.90
+	github.com/backplane-labs/backplane v0.6.100
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
 	github.com/gopherex/pg-outbox v1.1.0
 	github.com/gopherex/pgtx v1.1.5
-	github.com/gopherex/xlog v1.2.1
+	github.com/gopherex/xlog v1.3.1
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/ogen-go/ogen v1.20.3
 	github.com/valkey-io/valkey-go v1.0.79
@@ -53,7 +53,7 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/gopherex/schemapb/go v1.10.1 // indirect
 	github.com/gopherex/sqld v1.1.10 // indirect
-	github.com/gopherex/ws-proto v1.9.1 // indirect
+	github.com/gopherex/ws-proto v1.11.1 // indirect
 	github.com/gopherex/xconf v1.4.2 // indirect
 	github.com/gopherex/xconf/contrib/decoders/json v1.4.2 // indirect
 	github.com/gopherex/xconf/contrib/decoders/yaml v1.4.2 // indirect
@@ -61,11 +61,11 @@ require (
 	github.com/gopherex/xconf/contrib/sources/env v1.4.2 // indirect
 	github.com/gopherex/xconf/contrib/sources/file v1.4.2 // indirect
 	github.com/gopherex/xlog/contrib/libs/otel v1.2.1 // indirect
-	github.com/gopherex/xlog/contrib/libs/pgx v1.2.1 // indirect
+	github.com/gopherex/xlog/contrib/libs/pgx v1.3.1 // indirect
 	github.com/gopherex/xprobe v1.2.0 // indirect
 	github.com/gopherex/xprobe/pkg/transport/grpc v1.2.0 // indirect
 	github.com/gopherex/xshutdown v1.1.0 // indirect
-	github.com/gopherex/xtrace v1.1.6 // indirect
+	github.com/gopherex/xtrace v1.3.0 // indirect
 	github.com/gopherex/xtrace/contrib/libs/xlog v1.1.6 // indirect
 	github.com/gopherex/xtrace/contrib/sdk v1.2.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2 // indirect

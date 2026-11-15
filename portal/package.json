@@ -13,8 +13,8 @@
     "fmt": "biome check --write ."
   },
   "dependencies": {
-    "@backplane-labs/backplane-theme": "0.6.12",
-    "@backplane-labs/backplane-ui": "0.6.12",
+    "@backplane-labs/backplane-theme": "0.6.100",
+    "@backplane-labs/backplane-ui": "0.6.100",
     "i18next": "26.4.2",
     "qrcode": "1.5.4",
     "react": "19.2.4",
