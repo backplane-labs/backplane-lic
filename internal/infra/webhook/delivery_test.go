@@ -341,13 +341,7 @@ func (publicResolver) LookupHost(host string) ([]string, error) {
 // adds the test host mapping (real DNS knows nothing of it) and the
 // receiver's own certificate (its fixture covers example.com).
 func testClient(allowed []*net.IPNet, roots *x509.CertPool, receiverAddr string) *http.Client {
-	client := newClient(allowed)
-
-	transport, ok := client.Transport.(*http.Transport)
-	if !ok {
-		panic("webhook: test: transport")
-	}
-
+	transport := newTransport(allowed)
 	transport.TLSClientConfig = &tls.Config{RootCAs: roots, ServerName: "example.com"}
 
 	dial := transport.DialContext
@@ -359,7 +353,7 @@ func testClient(allowed []*net.IPNet, roots *x509.CertPool, receiverAddr string)
 		return dial(ctx, network, addr)
 	}
 
-	return client
+	return newClient(transport)
 }
 
 // TestRebindingBlocked pins the rebinding defense: the URL validation

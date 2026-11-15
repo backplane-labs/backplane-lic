@@ -75,34 +75,38 @@ func NewWorker(
 	return &Worker{
 		store:     store,
 		accountID: accountID,
-		client:    newClient(allowed),
+		client:    newClient(newTransport(allowed)),
 		resolver:  resolver,
 		allowed:   allowed,
 		clock:     clock,
 	}
 }
 
-// newClient builds the delivery client: the same timeouts as the
-// reference, redirects refused, and a dialer that re-checks the ACTUAL
-// remote address against the public-address rule. The URL is validated
-// (DNS included) before the request, but the transport resolves again
-// on dial — without the dial-time check a rebinding host would pass
-// validation and then be delivered to a loopback or link-local
-// address.
-func newClient(allowed []*net.IPNet) *http.Client {
-	dialer := &net.Dialer{
-		Timeout: requestTimeout,
-		Control: controlAddress(allowed),
-	}
-
+// newClient builds the delivery client over transport: the same timeouts as
+// the reference, redirects refused, and a client span per delivery (the
+// customer's endpoint gets no trace context).
+func newClient(transport *http.Transport) *http.Client {
 	return &http.Client{
 		Timeout: requestTimeout,
 		// Redirects are never followed: a redirect is the
 		// REDIRECT_ERROR outcome, not a delivery.
 		CheckRedirect: func(*http.Request, []*http.Request) error { return errRedirect },
-		// A client span per delivery; the customer's endpoint gets no trace context.
-		Transport: tracehttp.NewTransport(&http.Transport{DialContext: dialer.DialContext}),
+		Transport:     tracehttp.NewTransport(transport),
 	}
+}
+
+// newTransport is the delivery transport: a dialer that re-checks the
+// ACTUAL remote address against the public-address rule. The URL is
+// validated (DNS included) before the request, but the transport resolves
+// again on dial — without the dial-time check a rebinding host would pass
+// validation and then be delivered to a loopback or link-local address.
+func newTransport(allowed []*net.IPNet) *http.Transport {
+	dialer := &net.Dialer{
+		Timeout: requestTimeout,
+		Control: controlAddress(allowed),
+	}
+
+	return &http.Transport{DialContext: dialer.DialContext}
 }
 
 // controlAddress answers the dialer's Control hook: the address the
