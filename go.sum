@@ -131,8 +131,8 @@ github.com/google/go-tpm v0.9.8/go.mod h1:h9jEsEECg7gtLis0upRBQU+GhYVH6jMjrFxI8u
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/gopherex/pg-outbox v1.1.0 h1:vWmpWubuTVgoYM7GyhO7TCKJM7wl6KffGRR/DqRz8mQ=
-github.com/gopherex/pg-outbox v1.1.0/go.mod h1:ZF/GhTmvdgQRtCWM2H8S/WIZdvUZWbpm01A+umhKZVk=
+github.com/gopherex/pg-outbox v1.6.0 h1:gct1g6F2d3usk88rVLuKD3rCXNnpiB/iq/iBMzlsCNI=
+github.com/gopherex/pg-outbox v1.6.0/go.mod h1:ZF/GhTmvdgQRtCWM2H8S/WIZdvUZWbpm01A+umhKZVk=
 github.com/gopherex/pgtx v1.1.5 h1:iBQhzATech5F/eYSIB/Fb3cS4uSGdgGg5wVYzBetXic=
 github.com/gopherex/pgtx v1.1.5/go.mod h1:+i92NLuwKhT7DglyLxEJvh4slSv+Mgfq89alugrXBP4=
 github.com/gopherex/schemapb/go v1.10.1 h1:FD4J8TrQulbJ6aqI+Ae/J+XOp/Ek74fFN4se3BzzZ4g=

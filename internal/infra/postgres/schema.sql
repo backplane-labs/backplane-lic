@@ -621,7 +621,7 @@ CREATE INDEX webhook_events_account_created_at_id_idx ON lic.webhook_events (acc
 CREATE INDEX webhook_events_endpoint_idx ON lic.webhook_events (webhook_endpoint_id);
 CREATE INDEX webhook_events_idempotency_idx ON lic.webhook_events (idempotency_token);
 
--- pg-outbox v1.1.0: consolidated declarative form of 0001 + 0002.
+-- pg-outbox v1.6.0: consolidated declarative form of 0001 through 0004.
 CREATE TABLE lic.outbox_messages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   topic text NOT NULL,
@@ -641,6 +641,7 @@ CREATE TABLE lic.outbox_messages (
   published_at timestamptz,
   lease_token uuid,
   finished_at timestamptz,
+  seq bigserial,
   CONSTRAINT outbox_messages_status_check CHECK (
     status IN ('pending', 'processing', 'published', 'dead', 'discarded')
   )
@@ -650,10 +651,18 @@ CREATE INDEX outbox_messages_claim_idx ON lic.outbox_messages (next_attempt_at, 
   WHERE status IN ('pending', 'processing');
 CREATE INDEX outbox_messages_cleanup_idx ON lic.outbox_messages (published_at)
   WHERE status = 'published';
-CREATE INDEX outbox_messages_partition_idx ON lic.outbox_messages (partition_key, created_at)
+CREATE INDEX outbox_messages_partition_seq_idx ON lic.outbox_messages (partition_key, created_at, seq)
   WHERE partition_key IS NOT NULL;
 CREATE INDEX outbox_messages_finished_idx ON lic.outbox_messages (finished_at)
   WHERE status IN ('dead', 'discarded');
+
+CREATE TABLE lic.outbox_tombstones (
+  id uuid PRIMARY KEY,
+  status text NOT NULL CHECK (status IN ('dead', 'discarded')),
+  finished_at timestamptz NOT NULL
+);
+
+CREATE INDEX outbox_tombstones_finished_idx ON lic.outbox_tombstones (finished_at);
 
 CREATE FUNCTION lic.outbox_messages_notify() RETURNS trigger AS $$
 BEGIN

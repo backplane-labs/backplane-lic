@@ -8,7 +8,7 @@ require (
 	github.com/go-faster/jx v1.2.0
 	github.com/google/cel-go v0.30.0
 	github.com/google/uuid v1.6.0
-	github.com/gopherex/pg-outbox v1.1.0
+	github.com/gopherex/pg-outbox v1.6.0
 	github.com/gopherex/pgtx v1.1.5
 	github.com/gopherex/xlog v1.3.1
 	github.com/jackc/pgx/v5 v5.11.0
