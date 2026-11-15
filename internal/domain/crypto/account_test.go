@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
+	"errors"
 	"testing"
 
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
@@ -103,4 +104,55 @@ func pemBlock(t *testing.T, typ, pemStr string) []byte {
 	}
 
 	return block.Bytes
+}
+
+func TestParseEd25519Seed(t *testing.T) {
+	t.Parallel()
+
+	// RFC 8032's first ed25519 test vector.
+	const (
+		seed   = "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60"
+		public = "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+	)
+
+	tests := []struct {
+		name, in string
+		wantErr  bool
+	}{
+		{name: "seed", in: seed},
+		{name: "empty", in: "", wantErr: true},
+		{name: "not hex", in: "xx" + seed[2:], wantErr: true},
+		{name: "short", in: seed[:62], wantErr: true},
+		{name: "long", in: seed + "00", wantErr: true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := crypto.ParseEd25519Seed(tc.in)
+			if tc.wantErr {
+				if !errors.Is(err, crypto.ErrEd25519Seed) || !got.IsZero() {
+					t.Fatalf("ParseEd25519Seed(%q) = %v, %v; want ErrEd25519Seed", tc.in, got, err)
+				}
+
+				return
+			}
+
+			if err != nil || got.Private() != seed || got.Public() != public {
+				t.Fatalf("seed %s/%s, err %v", got.Private(), got.Public(), err)
+			}
+		})
+	}
+}
+
+func BenchmarkEd25519SeedPublic(b *testing.B) {
+	s, err := crypto.ParseEd25519Seed("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for b.Loop() {
+		_ = s.Public()
+	}
 }

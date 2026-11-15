@@ -61,7 +61,7 @@ func liveAdmin(t *testing.T, method, path string, body []byte) []byte {
 		request.Header.Set("Content-Type", "application/vnd.api+json")
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := liveHTTP().Do(request)
 	if err != nil {
 		t.Fatalf("admin request: %v", err)
 	}
@@ -108,7 +108,7 @@ var liveTokenOnce = sync.OnceValues(func() (string, error) {
 	request.Header.Set("Accept", "application/vnd.api+json")
 	request.SetBasicAuth(liveAdminEmail, liveAdminPass)
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := liveHTTP().Do(request)
 	if err != nil {
 		return "", fmt.Errorf("token request: %w", err)
 	}
@@ -484,4 +484,10 @@ func TestLiveLicensing(t *testing.T) {
 	if err := second.Deactivate(ctx); err != nil {
 		t.Fatalf("Deactivate: %v", err)
 	}
+}
+
+// liveHTTP is an HTTP client of its own: on the shared default transport,
+// another test's server Close (CloseIdleConnections) breaks its requests.
+func liveHTTP() *http.Client {
+	return &http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
 }

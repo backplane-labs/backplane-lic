@@ -75,6 +75,7 @@ File (`BACKPLANE_CONFIG_FILE`) < env `LIC_*` (the SDK block reads
 | `account.id` | `LIC_ACCOUNT_ID` | the single account's UUID, created at startup if missing |
 | `account.slug` | `LIC_ACCOUNT_SLUG` | the account's slug (also its API address) |
 | `account.name` | `LIC_ACCOUNT_NAME` | display name |
+| `account.ed25519_seed` | `LIC_ACCOUNT_ED25519_SEED` | secret: hex 32-byte ed25519 seed the account signs with instead of a generated one |
 | `http.portal.enabled` | `LIC_HTTP_PORTAL_ENABLED` | serve the customer portal; defaults to `false` |
 | `http.portal.basePath` | `LIC_HTTP_PORTAL_BASE_PATH` | mount path; defaults to `/portal`, cannot be `/` or under `/v1` |
 | `brand.name` | `LIC_BRAND_NAME` | vendor name in the portal and messages; defaults to `Licenses` |
@@ -89,7 +90,12 @@ File (`BACKPLANE_CONFIG_FILE`) < env `LIC_*` (the SDK block reads
 
 The account row is created at startup with generated keys (secret key,
 RSA-2048, ed25519, ECDSA P-256) that anchor token digests and response
-signatures.
+signatures. With `account.ed25519_seed` the ed25519 key is the vendor's own,
+so license and machine files verify against a public key already embedded in
+the vendor's binaries; the other keys stay generated. The seed is used only
+when the row is created: an existing account whose ed25519 key is another
+one stops startup (`ErrEd25519Mismatch`) — the key is never rotated
+silently.
 
 With `cache.addr` set, token lookups are cached in Valkey under the
 account's token generation. Regenerating or revoking a token, and the bulk

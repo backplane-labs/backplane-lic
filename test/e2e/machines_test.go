@@ -282,7 +282,7 @@ func (e *env) signedRequests(key installation.Key, machine *licensing.Machine) {
 	}{
 		{"signed GET", signed, http.MethodGet, "", http.StatusOK},
 		{"signed POST with a body", signed, http.MethodPost, `{"hello":"world"}`, http.StatusOK},
-		{"unsigned", http.DefaultClient, http.MethodGet, "", http.StatusUnauthorized},
+		{"unsigned", app.Client(), http.MethodGet, "", http.StatusUnauthorized},
 	} {
 		req, err := http.NewRequestWithContext(e.t.Context(), test.method, app.URL+"/work", strings.NewReader(test.body))
 		if err != nil {

@@ -66,4 +66,7 @@ type Account struct {
 	ID   string `json:"id"   schemapb:"description=The account's UUID (also its API address)"`
 	Slug string `json:"slug" schemapb:"description=The account's slug (also its API address)"`
 	Name string `json:"name" schemapb:"description=Display name of the account"`
+	// Ed25519Seed imports the vendor's signing key when the account row is
+	// created; an existing row with another key fails startup.
+	Ed25519Seed config.Secret `json:"ed25519_seed,omitempty" schemapb:"description=Hex ed25519 signing seed to import"`
 }

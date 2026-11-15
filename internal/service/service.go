@@ -45,6 +45,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
 	bpautomation "github.com/backplane-labs/backplane-lic/internal/infra/automation"
 	liccache "github.com/backplane-labs/backplane-lic/internal/infra/cache"
 	"github.com/backplane-labs/backplane-lic/internal/infra/console"
@@ -74,6 +75,24 @@ func newCache(root backplane.Root[Config], cfg *valkey.Config) deps.Optional[val
 	return deps.NewOptional(root, valkey.NewAside(*cfg), deps.Name("cache"))
 }
 
+// accountSpec is the configured account: its id and, when set, the
+// imported ed25519 seed.
+func accountSpec(cfg Account) (accounts.Spec, error) {
+	id, err := uuid.Parse(cfg.ID)
+	if err != nil {
+		return accounts.Spec{}, fmt.Errorf("account.id: %w", err)
+	}
+
+	spec := accounts.Spec{ID: id, Name: cfg.Name, Slug: cfg.Slug}
+	if seed := cfg.Ed25519Seed.Reveal(); seed != "" {
+		if spec.Ed25519, err = crypto.ParseEd25519Seed(seed); err != nil {
+			return accounts.Spec{}, fmt.Errorf("account.ed25519_seed: %w", err)
+		}
+	}
+
+	return spec, nil
+}
+
 // New builds the tree under root: the store and cache dependencies, and
 // a start step that creates the account row from configuration and
 // builds the HTTP handler over the started store.
@@ -83,12 +102,12 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	store := deps.NewDependency(root, postgres.New(cfg.Store), deps.Name("store"))
 	cache := newCache(root, cfg.Cache)
 
-	id, err := uuid.Parse(cfg.Account.ID)
+	spec, err := accountSpec(cfg.Account)
 	if err != nil {
-		return nil, fmt.Errorf("account.id: %w", err)
+		return nil, err
 	}
 
-	spec := accounts.Spec{ID: id, Name: cfg.Account.Name, Slug: cfg.Account.Slug}
+	id := spec.ID
 	late := &lateHandler{}
 	contracts := bpautomation.Declare(root)
 	activities := bpautomation.NewActivityServer(root)

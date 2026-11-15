@@ -11,6 +11,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -94,6 +95,34 @@ func GenerateAccountKeys(rng io.Reader) (AccountKeys, error) {
 		ECDSAPrivate:   ecPrivPEM,
 		ECDSAPublic:    ecPubPEM,
 	}, nil
+}
+
+// ErrEd25519Seed: an ed25519 seed that is not 32 bytes of hex.
+var ErrEd25519Seed = errors.New("crypto: ed25519 seed: want 64 hex characters (32 bytes)")
+
+// Ed25519Seed is an imported ed25519 signing seed: the account signs with
+// an existing vendor key instead of a generated one.
+type Ed25519Seed struct{ seed []byte }
+
+// ParseEd25519Seed reads a hex-encoded 32-byte seed.
+func ParseEd25519Seed(s string) (Ed25519Seed, error) {
+	seed, err := hex.DecodeString(s)
+	if err != nil || len(seed) != ed25519.SeedSize {
+		return Ed25519Seed{}, ErrEd25519Seed
+	}
+
+	return Ed25519Seed{seed: seed}, nil
+}
+
+// IsZero: no seed is configured; the account's key is generated.
+func (s Ed25519Seed) IsZero() bool { return len(s.seed) == 0 }
+
+// Private is the seed as AccountKeys keeps the ed25519 private key.
+func (s Ed25519Seed) Private() string { return hex.EncodeToString(s.seed) }
+
+// Public is the seed's public key as AccountKeys keeps it.
+func (s Ed25519Seed) Public() string {
+	return hex.EncodeToString(ed25519.NewKeyFromSeed(s.seed)[ed25519.SeedSize:])
 }
 
 func pemBlock(typ string, der []byte) string {
