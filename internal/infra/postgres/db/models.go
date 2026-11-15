@@ -340,6 +340,13 @@ type LicOutboxMessages struct {
 	PublishedAt   *time.Time
 	LeaseToken    *uuid.UUID
 	FinishedAt    *time.Time
+	Seq           *int64
+}
+
+type LicOutboxTombstones struct {
+	ID         uuid.UUID
+	Status     string
+	FinishedAt time.Time
 }
 
 type LicAutomationActivityResults struct {
