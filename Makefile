@@ -110,7 +110,7 @@ spec: ## Bundle openapi/src fragments into openapi/openapi.yaml (3.1)
 
 .PHONY: configure-web
 configure-web: ## Install the console plugin dependencies
-	cd "$(CURDIR)/web" && $(YARN) install --frozen-lockfile
+	cd "$(CURDIR)/web" && $(YARN) install --immutable
 
 .PHONY: gen
 gen: lint-proto ## Generate the console Go API and TypeScript client
@@ -179,7 +179,7 @@ conformance-record: ## Record Keygen CE (:3900); LIC_CONFORMANCE_REFERENCE_TOKEN
 .PHONY: portal
 portal: ## Build the standalone customer portal for embedding
 	cd "$(CURDIR)/portal"
-	env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn install --frozen-lockfile
+	env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn install --immutable
 	env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn build
 	rm -rf "$(CURDIR)/internal/infra/portal/dist"
 	mkdir -p "$(CURDIR)/internal/infra/portal/dist"

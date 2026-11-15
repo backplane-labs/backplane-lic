@@ -48,18 +48,25 @@ jobs:
           node-version: 22
           registry-url: https://npm.pkg.github.com
           scope: '@backplane-labs'
-      - run: corepack enable && corepack prepare yarn@1.22.22 --activate
+      - run: corepack enable
+      - name: GitHub Packages token for Yarn
+        working-directory: web
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          yarn config set --home npmScopes.backplane-labs.npmAuthToken "$NODE_AUTH_TOKEN"
+          yarn config set --home npmScopes.gopherex.npmAuthToken "$NODE_AUTH_TOKEN"
       - run: make configure configure-web
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cd portal && yarn install --frozen-lockfile
+      - run: cd portal && yarn install --immutable
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: bin/golangci-lint run ./...
       - run: make db && git diff --exit-code -- internal/infra/postgres/db internal/infra/postgres/migrations
       - run: make gen-api && git diff --exit-code -- openapi internal/oas
       - run: make gen && git diff --exit-code -- proto web/src/gen
-      - run: cd web && yarn -s typecheck && yarn -s test && yarn -s build
-      - run: cd portal && yarn -s typecheck && yarn -s test && yarn -s build
+      - run: cd web && yarn typecheck && yarn test && yarn build
+      - run: cd portal && yarn typecheck && yarn test && yarn build
       - run: go vet ./...
       - run: go test -race -p 1 -count=1 -timeout 15m ./...

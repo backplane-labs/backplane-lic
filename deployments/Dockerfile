@@ -2,9 +2,11 @@
 # Self-contained release image: the portal is embedded in the static binary.
 FROM node:22-alpine AS portal
 WORKDIR /src/portal
-COPY portal/package.json portal/yarn.lock portal/.npmrc ./
-RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
-    env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn install --frozen-lockfile
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
+COPY portal/package.json portal/yarn.lock portal/.yarnrc.yml ./
+RUN --mount=type=secret,id=yarnrc,target=/root/.yarnrc.yml \
+    env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn install --immutable
 COPY portal/ ./
 RUN env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy yarn build
 

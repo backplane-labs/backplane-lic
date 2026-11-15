@@ -254,18 +254,19 @@ usable, uses the license's own name as the heading, and omits inaccessible
 product and plan fields. Keys, status, expiry, usage and entitlements remain visible. If the public
 API permits those relationship reads, the portal displays the names normally.
 
-`make build` installs frontend dependencies with the frozen Yarn lockfile,
+`make build` installs frontend dependencies with the immutable Yarn lockfile,
 builds the SPA, copies it into `internal/infra/portal/dist`, then compiles Go.
 The release Dockerfile performs the same build in a Node stage before the Go
 stage. Like backplane-templates, the repository includes a minimal embed
 placeholder so plain `go build ./...` works without Node; this placeholder
 isn't a usable portal. Run `make portal` before a manual Go release build.
 Don't commit generated bundles over the placeholder. If GitHub Packages
-requires authentication in your build environment, pass an npmrc as a
-BuildKit secret instead of copying credentials into the image:
+requires authentication in your build environment, pass your user Yarn
+configuration (`~/.yarnrc.yml` with the scope tokens) as a BuildKit secret
+instead of copying credentials into the image:
 
 ```sh
-docker build --secret id=npmrc,src="$HOME/.npmrc" -f deployments/Dockerfile .
+docker build --secret id=yarnrc,src="$HOME/.yarnrc.yml" -f deployments/Dockerfile .
 ```
 
 The server serves deep links with the SPA index and injects the configured

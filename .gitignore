@@ -23,3 +23,7 @@ internal/ui/dist/*
 # local scratch state
 /.dev/
 .claude/
+# Yarn 4 state; patches and plugins would be committed.
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
