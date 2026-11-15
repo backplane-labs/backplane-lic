@@ -8,7 +8,9 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "biome check .",
+    "fmt": "biome check --write ."
   },
   "dependencies": {
     "@backplane-labs/backplane-theme": "0.6.12",
@@ -21,6 +23,7 @@
     "react-router-dom": "7.13.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.7",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
     "@types/node": "22.19.15",

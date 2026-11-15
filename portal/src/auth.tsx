@@ -1,10 +1,15 @@
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { API, APIError, type Resource, readSession, type Session, saveSession } from './api';
 import { CustomerError } from './errors';
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { API, APIError, readSession, saveSession, type Resource, type Session } from './api';
 
 interface Auth {
-  session: Session | null; user: Resource | null; api: API; checking: boolean; error: unknown;
-  login: (session: Session) => Promise<void>; logout: () => Promise<void>;
+  session: Session | null;
+  user: Resource | null;
+  api: API;
+  checking: boolean;
+  error: unknown;
+  login: (session: Session) => Promise<void>;
+  logout: () => Promise<void>;
   replaceSession: (session: Session | null) => void;
 }
 const AuthContext = createContext<Auth | null>(null);
@@ -17,35 +22,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const api = useMemo(() => new API(session?.token), [session?.token]);
   function replaceSession(value: Session | null) {
     activeSession.current = value;
-    saveSession(value); setSession(value);
+    saveSession(value);
+    setSession(value);
     if (!value) setUser(null);
   }
   useEffect(() => {
     function invalidate(event: Event) {
       // A late failure from a revoked or regenerated credential must not clear a newer session.
       if (!(event instanceof CustomEvent) || event.detail?.token !== activeSession.current?.token) return;
-      replaceSession(null); setError(new CustomerError('sessionExpired'));
+      replaceSession(null);
+      setError(new CustomerError('sessionExpired'));
     }
     window.addEventListener('lic-session-invalid', invalidate);
     return () => window.removeEventListener('lic-session-invalid', invalidate);
   }, []);
   useEffect(() => {
-    if (!session) { setChecking(false); return; }
+    if (!session) {
+      setChecking(false);
+      return;
+    }
     const controller = new AbortController();
     // Revalidating a regenerated session must not unmount its show-once secret dialog.
     if (!user) setChecking(true);
-    api.request('/profile', { signal: controller.signal }).then(response => {
-      if (controller.signal.aborted) return;
-      if (response.data.type !== 'users' || response.data.attributes.role !== 'user') {
-        replaceSession(null); setError(new CustomerError('customerOnly')); return;
-      }
-      setUser(response.data);
-    }).catch(cause => {
-      if (controller.signal.aborted) return;
-      if (cause instanceof APIError && (cause.status === 401 || cause.has('USER_BANNED'))) {
-        replaceSession(null); setError(new CustomerError('sessionExpired'));
-      } else setError(cause);
-    }).finally(() => { if (!controller.signal.aborted) setChecking(false); });
+    api
+      .request('/profile', { signal: controller.signal })
+      .then((response) => {
+        if (controller.signal.aborted) return;
+        if (response.data.type !== 'users' || response.data.attributes.role !== 'user') {
+          replaceSession(null);
+          setError(new CustomerError('customerOnly'));
+          return;
+        }
+        setUser(response.data);
+      })
+      .catch((cause) => {
+        if (controller.signal.aborted) return;
+        if (cause instanceof APIError && (cause.status === 401 || cause.has('USER_BANNED'))) {
+          replaceSession(null);
+          setError(new CustomerError('sessionExpired'));
+        } else setError(cause);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setChecking(false);
+      });
     return () => controller.abort();
   }, [api]);
   async function login(value: Session) {
@@ -56,7 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await client.request(`/tokens/${encodeURIComponent(value.tokenId)}`, { method: 'DELETE' });
         throw new CustomerError('customerOnly');
       }
-      setError(null); setUser(response.data); replaceSession(value);
+      setError(null);
+      setUser(response.data);
+      replaceSession(value);
     } catch (cause) {
       // A generated login token must not be persisted before its bearer is verified.
       throw cause;
@@ -64,9 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
   async function logout() {
     if (session) await api.request(`/tokens/${encodeURIComponent(session.tokenId)}`, { method: 'DELETE' });
-    setError(null); replaceSession(null);
+    setError(null);
+    replaceSession(null);
   }
-  return <AuthContext.Provider value={{ session, user, api, checking, error, login, logout, replaceSession }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ session, user, api, checking, error, login, logout, replaceSession }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 export function useAuth() {
   const auth = useContext(AuthContext);
