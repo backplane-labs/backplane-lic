@@ -13,7 +13,7 @@ import {
 } from '@backplane-labs/backplane-ui';
 import type { ReactNode } from 'react';
 import { useText } from './components';
-import type { Resource } from './model';
+import type { Resource, WireValue } from './model';
 
 const tones: Record<string, StatusTone> = {
   ACTIVE: 'success',
@@ -32,11 +32,11 @@ const tones: Record<string, StatusTone> = {
 };
 
 /** statusTone maps the API's status vocabulary onto the kit's tones. */
-export function statusTone(value: unknown): StatusTone {
+export function statusTone(value: WireValue): StatusTone {
   return tones[String(value)] ?? 'neutral';
 }
 
-export function Status({ value }: { value: unknown }) {
+export function Status({ value }: { value: WireValue }) {
   if (value === null || value === undefined || value === '') return <Text muted>—</Text>;
   return (
     <StatusBadge tone={statusTone(value)} dot>
@@ -48,7 +48,7 @@ export function Status({ value }: { value: unknown }) {
 const isoDate = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 
 /** Value renders one attribute the way a person reads it. */
-export function Value({ name, value }: { name: string; value: unknown }): ReactNode {
+export function Value({ name, value }: { name: string; value: WireValue }): ReactNode {
   const t = useText();
   if (value === null || value === undefined || value === '') return <Text muted>—</Text>;
   if (name === 'status') return <Status value={value} />;
@@ -57,7 +57,7 @@ export function Value({ name, value }: { name: string; value: unknown }): ReactN
   if (typeof value === 'string' && isoDate.test(value)) return <Timestamp value={new Date(value)} absolute />;
   if (Array.isArray(value)) return value.length ? value.map(String).join(', ') : <Text muted>—</Text>;
   if (typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>);
+    const entries = Object.entries(value);
     if (!entries.length) return <Text muted>—</Text>;
     return (
       <KeyValueList

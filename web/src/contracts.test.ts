@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { create, fromJson, toJson } from '@bufbuild/protobuf';
+import { create, fromJson, type JsonValue, toJson } from '@bufbuild/protobuf';
 import { structToNative } from '@gopherex/schemapb';
 import { CallRequestSchema, CallResponseSchema, InfoResponseSchema } from './gen/proto/lic/console/v1/console_pb.ts';
-import english from './locales/en.ts';
-import russian from './locales/ru.ts';
+import { english } from './locales/en.ts';
+import { ru as russian } from './locales/ru.ts';
 import { resources, secondFactors } from './resources.ts';
 import { formSchema, relationshipBody, validateDraft } from './schemas.ts';
 
@@ -17,8 +17,9 @@ test('generated Call bytes use base64 JSON and response bytes decode as UTF-8', 
     query: { 'page[number]': '2' },
     body,
   });
-  const encoded = toJson(CallRequestSchema, message);
-  assert.equal((encoded as Record<string, unknown>).body, Buffer.from(body).toString('base64'));
+  const encoded: JsonValue = toJson(CallRequestSchema, message);
+  const record = encoded && typeof encoded === 'object' && !Array.isArray(encoded) ? encoded : {};
+  assert.equal(record.body, Buffer.from(body).toString('base64'));
   assert.deepEqual(fromJson(CallRequestSchema, encoded).body, body);
   const response = fromJson(CallResponseSchema, { status: 200, body: Buffer.from(body).toString('base64') });
   assert.equal(new TextDecoder().decode(response.body), new TextDecoder().decode(body));
@@ -41,7 +42,8 @@ test('every management descriptor compiles, including all policy attrs and enums
       assert.doesNotThrow(() => validateDraft(formSchema(action.fields ?? []), {}), action.name);
   }
   const source = readFileSync(new URL('../../internal/infra/httpapi/policies_body.go', import.meta.url), 'utf8');
-  const block = source.match(/var policyCreateAttrs = \[\]string\{[^\n]*\n([\s\S]*?)\n\}/)![1];
+  const block = source.match(/var policyCreateAttrs = \[\]string\{[^\n]*\n([\s\S]*?)\n\}/)?.[1];
+  assert.ok(block, 'policyCreateAttrs block not found');
   // Entries are string literals or the file's named attribute constants.
   const constants = new Map(
     [...source.matchAll(/^\s*(attr\w+)\s*=\s*"([^"]+)"/gm)].map((match) => [match[1], match[2]]),
@@ -49,13 +51,9 @@ test('every management descriptor compiles, including all policy attrs and enums
   const allowed = [...block.matchAll(/"([^"]+)"|\b(attr\w+)\b/g)]
     .map((match) => match[1] ?? constants.get(match[2]) ?? assert.fail(`unknown constant ${match[2]}`))
     .map((name) => name.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()));
-  assert.deepEqual(
-    resources
-      .find((r) => r.name === 'policies')!
-      .attributes.map((field) => field.name)
-      .sort(),
-    allowed.sort(),
-  );
+  const policies = resources.find((r) => r.name === 'policies');
+  assert.ok(policies, 'policies resource not found');
+  assert.deepEqual(policies.attributes.map((field) => field.name).sort(), allowed.sort());
 });
 test('schema field errors block missing required values and invalid boolean types', () => {
   const schema = formSchema([
@@ -69,7 +67,9 @@ test('schema field errors block missing required values and invalid boolean type
 test('int64 descriptors preserve exact native values and nullable values', () => {
   const schema = formSchema([{ name: 'maxMemory', kind: 'int64', nullable: true }]);
   const result = validateDraft(schema, { maxMemory: 9223372036854775807n });
-  assert.equal(structToNative(result.baked!.values!).maxMemory, 9223372036854775807n);
+  const values = result.baked?.values;
+  assert.ok(values, 'expected baked values');
+  assert.equal(structToNative(values).maxMemory, 9223372036854775807n);
   assert.ok(validateDraft(schema, { maxMemory: null }).baked);
 });
 test('relationship IDs map to JSON:API linkage with omission distinct from clear', () => {
@@ -92,12 +92,12 @@ test('all console action paths and methods exist in the actual local OpenAPI', (
     const root = `/v1/accounts/:id/${spec.name}`;
     assert.ok(paths.get(root)?.includes('    get:'), spec.name);
     for (const action of spec.actions ?? []) {
-      const base = action.collection ? (action.suffix === 'passwords' ? '/v1/accounts/:id' : root) : root + '/:id';
+      const base = action.collection ? (action.suffix === 'passwords' ? '/v1/accounts/:id' : root) : `${root}/:id`;
       const path = [base, action.suffix].filter(Boolean).join('/');
       assert.ok(paths.get(path)?.includes(`    ${action.method.toLowerCase()}:`), `${action.method} ${path}`);
     }
     for (const rel of spec.relationships ?? []) {
-      const path = root + '/:id/' + rel.name;
+      const path = `${root}/:id/${rel.name}`;
       assert.ok(paths.get(path)?.includes('    get:'), path);
       if (rel.attach)
         for (const method of ['post', 'delete'])

@@ -14,7 +14,7 @@ import { I18nextProvider, initReactI18next, useTranslation } from 'react-i18next
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Embedded from './embedded';
 import { fixtureClient } from './fixtures';
-import ru, { schemaFormsRussian } from './locales/ru';
+import { ru, schemaFormsRussian } from './locales/ru';
 import navigation from './navigation';
 import '@backplane-labs/backplane-ui/style.css';
 import '@backplane-labs/backplane-theme/style.css';
@@ -80,10 +80,12 @@ function Standalone() {
     </ThemeContext.Provider>
   );
 }
-createRoot(document.getElementById('root')!).render(
-  <I18nextProvider i18n={i18n}>
-    <BrowserRouter>
-      <Standalone />
-    </BrowserRouter>
-  </I18nextProvider>,
-);
+const root = document.getElementById('root');
+if (root)
+  createRoot(root).render(
+    <I18nextProvider i18n={i18n}>
+      <BrowserRouter>
+        <Standalone />
+      </BrowserRouter>
+    </I18nextProvider>,
+  );

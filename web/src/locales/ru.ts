@@ -1,6 +1,6 @@
-import type en from './en';
+import type { english } from './en';
 
-const ru: Record<keyof typeof en, string> = {
+export const ru: Record<keyof typeof english, string> = {
   remove: 'Убрать',
   search: 'Поиск',
   searchDescription: 'Поиск лицензий, пользователей, продуктов, политик, групп и функций по атрибутам.',
@@ -251,7 +251,6 @@ const ru: Record<keyof typeof en, string> = {
   components: 'Контекст компонентов',
   checksum: 'Контрольная сумма',
 };
-export default ru;
 export const schemaFormsRussian = {
   save: 'Сохранить',
   saving: 'Сохранение…',

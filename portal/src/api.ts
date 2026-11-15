@@ -1,4 +1,6 @@
-export interface Brand {
+// Parsed JSON as the public API returns it.
+export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+export type Brand = {
   name: string;
   tagline?: string;
   logoUrl?: string;
@@ -8,12 +10,12 @@ export interface Brand {
   supportUrl?: string;
   termsUrl?: string;
   privacyUrl?: string;
-}
-export interface PortalConfig {
+};
+export type PortalConfig = {
   brand: Brand;
   basePath: string;
   account: string;
-}
+};
 declare global {
   interface Window {
     __PORTAL_CONFIG__?: PortalConfig;
@@ -26,7 +28,7 @@ export const config: PortalConfig = window.__PORTAL_CONFIG__ ?? {
   account: 'default',
 };
 
-export interface Attributes {
+export type Attributes = {
   name?: string | null;
   email?: string;
   fullName?: string | null;
@@ -44,24 +46,24 @@ export interface Attributes {
   secret?: string;
   uri?: string;
   code?: string;
-}
-export interface Resource {
+};
+export type Resource = {
   id: string;
   type: string;
   attributes: Attributes;
   relationships?: Record<string, { data?: { id: string; type: string } | null }>;
-}
-export interface Document<T = Resource> {
-  data: T;
+};
+export type Document<T = Resource> = {
+  data: T | null;
   meta?: { tokenId?: string };
   links?: { next?: string | null };
-}
-export interface APIErrorItem {
+};
+export type APIErrorItem = {
   code?: string;
   title?: string;
   detail?: string;
   source?: { pointer?: string; parameter?: string };
-}
+};
 export class APIError extends Error {
   constructor(
     public status: number,
@@ -84,16 +86,9 @@ const storageKey = `lic.portal:${config.account}:${config.basePath}`;
 
 export function readSession(): Session | null {
   try {
-    const value: unknown = JSON.parse(sessionStorage.getItem(storageKey) ?? 'null');
-    if (
-      value &&
-      typeof value === 'object' &&
-      'token' in value &&
-      'tokenId' in value &&
-      typeof value.token === 'string' &&
-      typeof value.tokenId === 'string'
-    )
-      return value as Session;
+    const value = JSON.parse(sessionStorage.getItem(storageKey) ?? 'null');
+    if (value && typeof value.token === 'string' && typeof value.tokenId === 'string')
+      return { token: value.token, tokenId: value.tokenId };
   } catch {
     /* A blocked storage area must not stop the portal from rendering. */
   }
@@ -118,7 +113,7 @@ export class API {
 
   async request<T = Resource>(
     path: string,
-    options: { method?: string; body?: unknown; authorization?: string; signal?: AbortSignal } = {},
+    options: { method?: string; body?: JSONValue; authorization?: string; signal?: AbortSignal } = {},
   ): Promise<Document<T>> {
     const response = await fetch(`${apiPath}${path}`, {
       method: options.method ?? 'GET',
@@ -135,7 +130,7 @@ export class API {
       ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
     });
     if (!response.ok) {
-      const error = (await response.json().catch(() => null)) as { errors?: APIErrorItem[] } | null;
+      const error: { errors?: APIErrorItem[] } | null = await response.json().catch(() => null);
       const failure = new APIError(
         response.status,
         error?.errors ?? [{ title: response.statusText || 'Request failed' }],
@@ -153,8 +148,8 @@ export class API {
       }
       throw failure;
     }
-    if (response.status === 204) return { data: null as T };
-    return response.json() as Promise<Document<T>>;
+    if (response.status === 204) return { data: null };
+    return response.json();
   }
 
   async list(path: string, signal?: AbortSignal): Promise<Resource[]> {
@@ -165,7 +160,7 @@ export class API {
       if (seen.has(next)) throw new Error('The API returned a repeated pagination link.');
       seen.add(next);
       const response: Document<Resource[]> = await this.request<Resource[]>(next, { signal });
-      resources.push(...response.data);
+      resources.push(...(response.data ?? []));
       const link: string | null | undefined = response.links?.next;
       if (!link) break;
       // Never forward the customer's token to a cross-origin pagination URL.
@@ -179,8 +174,8 @@ export class API {
   }
 }
 
-export function secretSession(resource: Resource): Session {
-  if (!resource.attributes.token) throw new Error('The API response did not include the new token secret.');
+export function secretSession(resource: Resource | null): Session {
+  if (!resource?.attributes.token) throw new Error('The API response did not include the new token secret.');
   return { token: resource.attributes.token, tokenId: resource.id };
 }
 

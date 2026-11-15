@@ -12,6 +12,12 @@ import {
 import { json, wireJSON } from './model.ts';
 import { type FieldSpec, resources } from './resources.ts';
 
+// The completion tests fail loudly when a fixture lookup returns nothing.
+function required<T>(value: T | undefined | null, what: string): T {
+  if (value === undefined || value === null) throw new Error(`Missing ${what}`);
+  return value;
+}
+
 const fields: FieldSpec[] = [
   {
     name: 'attributes',
@@ -34,14 +40,18 @@ test('descriptor scaffold fills required nested fields without overriding existi
     role: null,
     productId: '',
   });
-  assert.ok(!Object.hasOwn(result.attributes!, 'enabled'));
+  assert.ok(!Object.hasOwn(required(result.attributes, 'attributes'), 'enabled'));
   assert.ok(!Object.hasOwn(initial.attributes, 'name'));
   assert.deepEqual(scaffoldDraft(fields, result), result);
-  assert.equal((parseDraft(json(result)).attributes as Record<string, unknown>).maxMemory, 9223372036854775807n);
+  assert.deepEqual(parseDraft(json(result)).attributes, {
+    name: '',
+    maxMemory: 9223372036854775807n,
+    metadata: { existing: true },
+  });
 });
 test('advanced completion suggests missing descriptor properties in incomplete nested JSON', () => {
   const text = '{"attributes":{"na';
-  const result = completeEditor(fields, text, text.length)!;
+  const result = required(completeEditor(fields, text, text.length), 'completions');
   assert.equal(result.from, text.length - 2);
   assert.deepEqual(
     result.options.map((option) => option.label),
@@ -49,28 +59,32 @@ test('advanced completion suggests missing descriptor properties in incomplete n
   );
   assert.equal(result.options[0].apply, 'name": ""');
   const existing = '{"attributes":{"name":"a",';
-  const nested = completeEditor(fields, existing, existing.length)!;
+  const nested = required(completeEditor(fields, existing, existing.length), 'completions');
   assert.ok(!nested.options.some((option) => option.label === 'name'));
   assert.ok(nested.options.some((option) => option.label === 'maxMemory'));
-  assert.equal(completeEditor(fields, '', 0)!.options[0].apply, json(scaffoldDraft(fields)));
+  assert.equal(required(completeEditor(fields, '', 0), 'completions').options[0].apply, json(scaffoldDraft(fields)));
 });
 test('completion respects string escapes, braces in values, existing closing quotes, and nested object paths', () => {
   const text = '{"attributes":{"name":"} \\" {", "ma"}}';
   const position = text.indexOf('ma"') + 2;
-  const result = completeEditor(fields, text, position)!;
+  const result = required(completeEditor(fields, text, position), 'completions');
   assert.equal(result.options[0].label, 'maxMemory');
   assert.equal(result.options[0].apply, 'maxMemory');
   const freeJSON = '{"attributes":{"metadata":{';
-  assert.deepEqual(completeEditor(fields, freeJSON, freeJSON.length)!.options, []);
+  assert.deepEqual(required(completeEditor(fields, freeJSON, freeJSON.length), 'completions').options, []);
 });
 test('enum and nullable-value completions never mutate the descriptor', () => {
   const text = '{"role":"ad';
   assert.deepEqual(
-    completeEditor(fields, text, text.length)!.options.map((option) => option.apply),
+    required(completeEditor(fields, text, text.length), 'completions').options.map((option) => option.apply),
     ['admin"'],
   );
   const emptyValue = '{"role":';
-  assert.ok(completeEditor(fields, emptyValue, emptyValue.length)!.options.some((option) => option.apply === 'null'));
+  assert.ok(
+    required(completeEditor(fields, emptyValue, emptyValue.length), 'completions').options.some(
+      (option) => option.apply === 'null',
+    ),
+  );
   completeEditor(fields, emptyValue, emptyValue.length);
   assert.deepEqual(fields[1].choices, ['admin', 'user']);
 });
@@ -125,9 +139,16 @@ test('server pointers map to native schema attributes, relationship ID controls 
   assert.equal(errorFieldPath({ source: { pointer: '/missing' } }, fields), undefined);
 });
 test('validate-key serializes legacy_encrypted exactly and does not mutate form values', () => {
-  const action = resources
-    .find((resource) => resource.name === 'licenses')!
-    .actions!.find((action) => action.name === 'validateKey')!;
+  const action = required(
+    required(
+      required(
+        resources.find((resource) => resource.name === 'licenses'),
+        'licenses',
+      ).actions,
+      'actions',
+    ).find((candidate) => candidate.name === 'validateKey'),
+    'validateKey action',
+  );
   const values = { key: 'encrypted-key', legacyEncrypted: true, nonce: 9223372036854775807n };
   assert.deepEqual(actionPayload(action, values), {
     meta: { key: 'encrypted-key', legacy_encrypted: true, nonce: 9223372036854775807n },
@@ -141,19 +162,34 @@ test('validate-key serializes legacy_encrypted exactly and does not mutate form 
 test('both checkout forms expose exactly the algorithm combinations accepted by backend constants', () => {
   const file = readFileSync(new URL('../../internal/domain/crypto/licensefile.go', import.meta.url), 'utf8');
   const signatures = readFileSync(new URL('../../internal/domain/crypto/signature.go', import.meta.url), 'utf8');
-  const constant = (source: string, name: string) => source.match(new RegExp(name + '\\s*=\\s*"([^"]+)"'))![1];
+  const constant = (source: string, name: string) => {
+    const value = source.match(new RegExp(`${name}\\s*=\\s*"([^"]+)"`))?.[1];
+    if (value === undefined) throw new Error(`Constant ${name} not found`);
+    return value;
+  };
   const encodings = ['EncodingBase64', 'EncodingAES256GCM'].map((name) => constant(file, name));
   const signing = ['AlgEd25519', 'AlgRSAPSSSHA256', 'AlgRSASHA256', 'AlgECDSAP256'].map((name) =>
     constant(signatures, name),
   );
   const expected = encodings.flatMap((encoding) => signing.map((algorithm) => `${encoding}+${algorithm}`)).sort();
+  const licenses = required(
+    resources.find((resource) => resource.name === 'licenses'),
+    'licenses',
+  );
+  const licenseActions = required(licenses.actions, 'license actions');
   for (const name of ['checkout', 'downloadLicense']) {
-    const action = resources
-      .find((resource) => resource.name === 'licenses')!
-      .actions!.find((action) => action.name === name)!;
-    assert.deepEqual([...action.fields!.find((field) => field.name === 'algorithm')!.choices!].sort(), expected);
-    assert.deepEqual(validateEditor(action.fields!, '{}'), []); // Omission keeps the backend-derived default.
-    for (const algorithm of expected) assert.deepEqual(validateEditor(action.fields!, json({ algorithm })), []);
-    assert.ok(validateEditor(action.fields!, json({ algorithm: 'ed25519' })).length);
+    const action = required(
+      licenseActions.find((candidate) => candidate.name === name),
+      `${name} action`,
+    );
+    const actionFields = required(action.fields, `${name} fields`);
+    const algorithm = required(
+      actionFields.find((field) => field.name === 'algorithm'),
+      'algorithm field',
+    );
+    assert.deepEqual([...required(algorithm.choices, 'algorithm choices')].sort(), expected);
+    assert.deepEqual(validateEditor(actionFields, '{}'), []); // Omission keeps the backend-derived default.
+    for (const choice of expected) assert.deepEqual(validateEditor(actionFields, json({ algorithm: choice })), []);
+    assert.ok(validateEditor(actionFields, json({ algorithm: 'ed25519' })).length);
   }
 });

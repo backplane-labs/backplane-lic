@@ -1,7 +1,16 @@
 import { Button, Input } from '@backplane-labs/backplane-ui';
-import { type InputHTMLAttributes, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import {
+  type DependencyList,
+  type InputHTMLAttributes,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 import { Link } from 'react-router-dom';
-import { customerErrorMessage, isInvalidReset } from './errors';
+import { customerErrorMessage, isInvalidReset, toFailure } from './errors';
 import { type TranslationKey, useLocale } from './i18n';
 
 export { Button };
@@ -30,7 +39,7 @@ export function Notice({ children, error = false }: { children: ReactNode; error
     </div>
   );
 }
-export function ErrorNotice({ error, reset = false }: { error: unknown; reset?: boolean }) {
+export function ErrorNotice({ error, reset = false }: { error: Error | null; reset?: boolean }) {
   const { t } = useLocale();
   if (!error) return null;
   return (
@@ -67,31 +76,43 @@ export function Empty({ title, description }: { title: string; description: stri
     </div>
   );
 }
-export function useLoad<T>(loader: (signal: AbortSignal) => Promise<T>, dependencies: unknown[] = []) {
+export function useLoad<T>(loader: (signal: AbortSignal) => Promise<T>, dependencies: DependencyList = []) {
   const [value, setValue] = useState<T | null>(null);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
-  const [version, setVersion] = useState(0);
+  // The loader closure is refreshed through a ref so the fetch effect keys on
+  // the caller's dependencies, not on a new closure every render.
+  const loaderRef = useRef(loader);
   useEffect(() => {
+    loaderRef.current = loader;
+  }, [loader]);
+  const activeRef = useRef<AbortController | null>(null);
+  const fetchNow = useCallback(() => {
+    activeRef.current?.abort();
     const controller = new AbortController();
+    activeRef.current = controller;
     setLoading(true);
     setError(null);
     setValue(null);
-    loader(controller.signal)
+    loaderRef
+      .current(controller.signal)
       .then((result) => {
         if (!controller.signal.aborted) setValue(result);
       })
       .catch((cause) => {
-        if (!controller.signal.aborted) setError(cause);
+        if (!controller.signal.aborted) setError(toFailure(cause));
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
-    return () => controller.abort();
-  }, [...dependencies, version]);
-  return { value, loading, error, replace: setValue, reload: () => setVersion((x) => x + 1) };
+  }, []);
+  useEffect(() => {
+    fetchNow();
+    return () => activeRef.current?.abort();
+  }, [fetchNow, ...dependencies]);
+  return { value, loading, error, replace: setValue, reload: fetchNow };
 }
-export function LoadError({ error, retry }: { error: unknown; retry: () => void }) {
+export function LoadError({ error, retry }: { error: Error; retry: () => void }) {
   const { t } = useLocale();
   return (
     <div>

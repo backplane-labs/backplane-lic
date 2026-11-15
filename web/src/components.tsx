@@ -12,20 +12,30 @@ import {
   StatusBadge,
 } from '@backplane-labs/backplane-ui';
 import { type Baked, type NativeStruct, structToNative } from '@gopherex/schemapb';
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { completeEditor, errorFieldPath, fieldRange, parseDraft, scaffoldDraft, validateEditor } from './editor-model';
-import { type Document, humanize, json, parseJSON, RequestError, redact, secretsOf } from './model';
+import {
+  type Document,
+  humanize,
+  type JSONValue,
+  json,
+  parseJSON,
+  RequestError,
+  redact,
+  secretsOf,
+  toError,
+} from './model';
 import type { FieldSpec } from './resources';
 import { formSchema, validateDraft } from './schemas';
 
 export function useText() {
   const { t } = useTranslation('module.lic');
-  return (key: string, args?: Record<string, unknown>) => t(key, { defaultValue: humanize(key), ...args });
+  return (key: string, args?: Record<string, JSONValue>) => t(key, { defaultValue: humanize(key), ...args });
 }
 export const row = { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } as const;
 export const mono = { fontFamily: 'var(--font-mono)', overflowWrap: 'anywhere' } as const;
-export function ErrorNotice({ error, retry }: { error: unknown; retry?: () => void }) {
+export function ErrorNotice({ error, retry }: { error: Error; retry?: () => void }) {
   const t = useText();
   return (
     <div role="alert">
@@ -41,7 +51,7 @@ export function ErrorNotice({ error, retry }: { error: unknown; retry?: () => vo
     </div>
   );
 }
-export function ObjectView({ value, label }: { value: unknown; label: string }) {
+export function ObjectView({ value, label }: { value: Document | JSONValue | undefined; label: string }) {
   const { mode } = usePluginContext();
   return (
     <div style={{ minWidth: 0, maxWidth: '100%' }}>
@@ -50,7 +60,7 @@ export function ObjectView({ value, label }: { value: unknown; label: string }) 
   );
 }
 // AttributeList reads a record as label/value rows; nested values stay JSON.
-export function AttributeList({ value }: { value: Record<string, unknown> | undefined }) {
+export function AttributeList({ value }: { value: Record<string, JSONValue> | undefined }) {
   const t = useText();
   const entries = Object.entries(value ?? {});
   return (
@@ -171,25 +181,31 @@ export function OperationForm({
   const formInitial = useMemo(() => scaffoldDraft(operation.fields, operation.initial), [operation]);
   const baseline = useMemo(() => json(formInitial), [formInitial]);
   const [text, setText] = useState(baseline),
-    [error, setError] = useState<unknown>();
-  const [reveal, setReveal] = useState<{ from: number; to: number; key: number }>();
+    [error, setError] = useState<Error | undefined>();
+  const errorsId = useId();
+  const confirmId = useId();
   const active = useRef<AbortController | null>(null),
     mounted = useRef(true),
     formRoot = useRef<HTMLDivElement>(null);
-  const errorsId = useId();
+  const [reveal, setReveal] = useState<{ from: number; to: number; key: number }>();
   const fieldErrors = error instanceof RequestError ? error.errors : [];
-  const targetFor = (path: string[]) => {
-    const root = formRoot.current;
-    if (advanced) return root?.querySelector<HTMLElement>('[role="textbox"]');
-    const title = t(path.at(-1) ?? '');
-    const label = Array.from(root?.querySelectorAll<HTMLLabelElement>('label[for]') ?? []).find(
-      (label) => label.textContent?.replace(/\s*\*\s*$/, '').trim() === title,
-    );
-    const control = label?.htmlFor ? document.getElementById(label.htmlFor) : undefined;
-    return control && root?.contains(control)
-      ? control
-      : label?.closest('[data-slot="field"]')?.querySelector<HTMLElement>('input,textarea,button,[tabindex]');
-  };
+  // Per-render counters build unique list keys from repeated identical errors.
+  const keyCounts = new Map<string, number>();
+  const targetFor = useCallback(
+    (path: string[]) => {
+      const root = formRoot.current;
+      if (advanced) return root?.querySelector<HTMLElement>('[role="textbox"]');
+      const title = t(path.at(-1) ?? '');
+      const label = Array.from(root?.querySelectorAll<HTMLLabelElement>('label[for]') ?? []).find(
+        (label) => label.textContent?.replace(/\s*\*\s*$/, '').trim() === title,
+      );
+      const control = label?.htmlFor ? document.getElementById(label.htmlFor) : undefined;
+      return control && root?.contains(control)
+        ? control
+        : label?.closest('[data-slot="field"]')?.querySelector<HTMLElement>('input,textarea,button,[tabindex]');
+    },
+    [advanced, t],
+  );
   useEffect(() => {
     const restore: (() => void)[] = [];
     fieldErrors.forEach((failure, index) => {
@@ -210,7 +226,7 @@ export function OperationForm({
     return () => {
       for (const cleanup of restore.reverse()) cleanup();
     };
-  }, [error, advanced, operation, errorsId]);
+  }, [fieldErrors, operation, errorsId, targetFor]);
   const schema = useMemo(() => formSchema(operation.fields, t), [operation.fields, t]);
   // This component is keyed by the caller's selected operation, never by query refresh.
   useEffect(() => {
@@ -247,7 +263,7 @@ export function OperationForm({
         done(result);
       }
     } catch (failure) {
-      if (!controller.signal.aborted && mounted.current) setError(failure);
+      if (!controller.signal.aborted && mounted.current) setError(toError(failure));
       throw failure;
     } finally {
       parentSignal?.removeEventListener('abort', abort);
@@ -280,8 +296,12 @@ export function OperationForm({
           {operation.dangerous && (
             <div role="note">
               <p>{t('confirmHelp')}</p>
-              <label style={row}>
-                <Checkbox checked={confirmed} onCheckedChange={(value) => setConfirmed(value === true)} />
+              <label htmlFor={confirmId} style={row}>
+                <Checkbox
+                  id={confirmId}
+                  checked={confirmed}
+                  onCheckedChange={(value) => setConfirmed(value === true)}
+                />
                 {t('confirmTitle', { action: operation.title })}
               </label>
             </div>
@@ -304,7 +324,7 @@ export function OperationForm({
                     setText(next);
                     setDirty(next !== baseline);
                   } catch (failure) {
-                    setError(failure);
+                    setError(toError(failure));
                   }
                 }}
               >
@@ -335,9 +355,9 @@ export function OperationForm({
                     const parsed = parseJSON(text);
                     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
                       throw new Error(t('invalidJSON'));
-                    values = parsed as NativeStruct;
+                    values = parsed;
                   } catch (failure) {
-                    setError(failure);
+                    setError(toError(failure));
                     return;
                   }
                   try {
@@ -361,9 +381,9 @@ export function OperationForm({
                       );
                       return;
                     }
-                    void submit(structToNative(outcome.baked.values!)).catch(() => {});
+                    void submit(structToNative(outcome.baked.values)).catch(() => {});
                   } catch (failure) {
-                    setError(failure);
+                    setError(toError(failure));
                   }
                 }}
               >
@@ -378,7 +398,7 @@ export function OperationForm({
               disabled={busy || (operation.dangerous && !confirmed)}
               submitLabel={operation.submitLabel ?? t('confirm')}
               onDirtyChange={setDirty}
-              onSubmit={(baked: Baked, signal) => submit(structToNative(baked.values!), signal)}
+              onSubmit={(baked: Baked, signal) => submit(structToNative(baked.values), signal)}
             />
           )}
           {fieldErrors.length > 0 ? (
@@ -387,8 +407,12 @@ export function OperationForm({
               <ul>
                 {fieldErrors.map((failure, index) => {
                   const path = errorFieldPath(failure, operation.fields);
+                  // Keys derive from the error content; a counter separates repeated identical errors.
+                  const base = `${failure.source?.pointer ?? ''}:${failure.detail ?? failure.title ?? ''}`;
+                  const seen = keyCounts.get(base) ?? 0;
+                  keyCounts.set(base, seen + 1);
                   return (
-                    <li key={index} id={`${errorsId}-${index}`}>
+                    <li key={`${base}:${seen}`} id={`${errorsId}-${index}`}>
                       {path && (
                         <Button
                           variant="ghost"

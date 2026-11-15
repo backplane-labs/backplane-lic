@@ -1,3 +1,5 @@
+import type { NativeStruct } from '@gopherex/schemapb';
+
 export type Option = { value: string; label: string };
 export type FieldSpec = {
   name: string;
@@ -32,7 +34,7 @@ export type Action = {
   removes?: boolean;
   secret?: boolean;
   binary?: boolean;
-  initial?: Record<string, unknown>;
+  initial?: NativeStruct;
 };
 export type ResourceSpec = {
   name: string;
@@ -431,12 +433,14 @@ const policyChoices: Record<string, string[]> = {
   heartbeatBasis: ['FROM_CREATION', 'FROM_FIRST_PING'],
   checkInInterval: ['day', 'week', 'month', 'year'],
 };
-for (const field of resources.find((resource) => resource.name === 'policies')!.attributes) {
-  if (policyChoices[field.name]) {
-    field.choices = policyChoices[field.name];
-    field.nullable = true;
+const policySpec = resources.find((resource) => resource.name === 'policies');
+if (policySpec)
+  for (const field of policySpec.attributes) {
+    if (policyChoices[field.name]) {
+      field.choices = policyChoices[field.name];
+      field.nullable = true;
+    }
   }
-}
 
 export const secondFactors: ResourceSpec = {
   name: 'second-factors',

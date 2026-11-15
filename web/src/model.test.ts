@@ -4,6 +4,7 @@ import {
   accountPath,
   decodeDocument,
   humanize,
+  type JSONValue,
   json,
   labelOf,
   listData,
@@ -16,7 +17,7 @@ import {
   writableAttributes,
 } from './model.ts';
 
-const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
+const bytes = (value: JSONValue) => new TextEncoder().encode(JSON.stringify(value));
 test('account and resource identifiers are safely addressed without losing aliases', () => {
   assert.equal(accountPath('acme/team', 'licenses/key'), '/v1/accounts/acme%2Fteam/licenses/key');
 });
@@ -35,7 +36,7 @@ test('server field pointers, detail, code and status survive the RPC bridge', ()
           errors: [{ detail: 'must be positive', code: 'INVALID', source: { pointer: '/data/attributes/maxUses' } }],
         }),
       ),
-    (error: unknown) =>
+    (error) =>
       error instanceof RequestError &&
       error.status === 422 &&
       error.message.includes('/data/attributes/maxUses') &&
@@ -44,8 +45,8 @@ test('server field pointers, detail, code and status survive the RPC bridge', ()
   assert.throws(() => decodeDocument(502, new TextEncoder().encode('upstream unavailable')), /upstream unavailable/);
 });
 test('large integer values survive read, form, wire and preview without rounding', () => {
-  const value = parseJSON('{"maxMemory":9223372036854775807}') as Record<string, unknown>;
-  assert.equal(value.maxMemory, 9223372036854775807n);
+  const value = parseJSON('{"maxMemory":9223372036854775807}');
+  assert.deepEqual(value, { maxMemory: 9223372036854775807n });
   assert.equal(wireJSON(value), '{"maxMemory":9223372036854775807}');
   assert.match(json(value), /9223372036854775807/);
   assert.equal(wireJSON({ unset: undefined, clear: null, list: [1n, 'x'] }), '{"clear":null,"list":[1,"x"]}');

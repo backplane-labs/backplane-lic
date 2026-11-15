@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import App, { Providers } from './App';
-import { type Resource, readSession, saveSession } from './api';
+import { App, Providers } from './App';
+import { type JSONValue, type Resource, readSession, saveSession } from './api';
 import { useAuth } from './auth';
 import { ForgotPassword, Login, ResetPassword } from './auth-pages';
 import { LicenseDetail, Licenses } from './licenses';
@@ -17,7 +17,7 @@ const token = (id = 'session-1', secret?: string): Resource => ({
   type: 'tokens',
   attributes: { name: 'My token', ...(secret ? { token: secret } : {}) },
 });
-const json = (data: unknown, status = 200) =>
+const json = (data: JSONValue, status = 200) =>
   new Response(JSON.stringify({ data }), { status, headers: { 'Content-Type': 'application/vnd.api+json' } });
 const failure = (code: string, status = 401) =>
   new Response(JSON.stringify({ errors: [{ code, detail: code }] }), { status });
@@ -47,6 +47,15 @@ function signedIn() {
 function endpoint(input: string) {
   return new URL(input, window.location.origin).pathname.replace('/v1/accounts/default', '');
 }
+// Assertions fail loudly when a lookup or fixture returns nothing.
+function required<T>(value: T | undefined | null, what: string): T {
+  if (value === undefined || value === null) throw new Error(`Missing ${what}`);
+  return value;
+}
+function submitForm(trigger: HTMLElement) {
+  fireEvent.submit(required(trigger.closest('form'), 'form around button'));
+}
+
 beforeEach(() => {
   sessionStorage.clear();
   localStorage.clear();
@@ -66,7 +75,11 @@ afterEach(() => {
 
 function LogoutProbe() {
   const { logout, session } = useAuth();
-  return <button onClick={() => void logout()}>{session ? 'Revoke session' : 'Signed out'}</button>;
+  return (
+    <button type="button" onClick={() => void logout()}>
+      {session ? 'Revoke session' : 'Signed out'}
+    </button>
+  );
 }
 
 function InvalidationProbe() {
@@ -74,8 +87,10 @@ function InvalidationProbe() {
   return (
     <>
       <span>{session?.token}</span>
-      <button onClick={() => void api.request('/tokens').catch(() => {})}>Start old request</button>
-      <button onClick={() => replaceSession({ token: 'new-session-secret', tokenId: 'session-1' })}>
+      <button type="button" onClick={() => void api.request('/tokens').catch(() => {})}>
+        Start old request
+      </button>
+      <button type="button" onClick={() => replaceSession({ token: 'new-session-secret', tokenId: 'session-1' })}>
         Replace credential
       </button>
     </>
@@ -89,7 +104,7 @@ describe('customer authentication', () => {
     const pending = new Promise<Response>((resolve) => {
       complete = resolve;
     });
-    fetchMock.mockImplementation(async (url: string) => (endpoint(url) === '/profile' ? json(user) : pending));
+    fetchMock.mockImplementation((url: string) => (endpoint(url) === '/profile' ? json(user) : pending));
     route('/test', <InvalidationProbe />);
     fireEvent.click(await screen.findByRole('button', { name: 'Start old request' }));
     fireEvent.click(screen.getByRole('button', { name: 'Replace credential' }));
@@ -113,7 +128,7 @@ describe('customer authentication', () => {
   });
   it('revokes the session token before clearing local credentials on logout', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string, options: RequestInit) => {
+    fetchMock.mockImplementation((url: string, options: RequestInit) => {
       if (endpoint(url) === '/profile') return json(user);
       if (endpoint(url) === '/tokens/session-1' && options.method === 'DELETE')
         return new Response(null, { status: 204 });
@@ -129,7 +144,7 @@ describe('customer authentication', () => {
   });
   it('drops the ended-session notice once the customer tries again', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string) => {
+    fetchMock.mockImplementation((url: string) => {
       if (endpoint(url) === '/profile') return failure('TOKEN_INVALID', 401);
       if (endpoint(url) === '/tokens') return failure('PASSWORD_INVALID', 401);
       throw new Error(`Unexpected ${url}`);
@@ -138,13 +153,13 @@ describe('customer authentication', () => {
     expect((await screen.findByRole('alert')).textContent).toMatch(/no longer valid/);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'customer@example.test' } });
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrong' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Sign in' }));
     await screen.findByText('Incorrect email or password');
     expect(screen.queryByText(/no longer valid/)).toBeNull();
   });
   it('requests an OTP when required and logs in using Basic plus meta.otp', async () => {
     let attempts = 0;
-    fetchMock.mockImplementation(async (url: string) => {
+    fetchMock.mockImplementation((url: string) => {
       if (endpoint(url) === '/tokens')
         return ++attempts === 1 ? failure('OTP_REQUIRED') : json(token('session-1', 'new-secret'), 201);
       if (endpoint(url) === '/profile') return json(user);
@@ -153,10 +168,10 @@ describe('customer authentication', () => {
     route('/login', <Login />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'customer@example.test' } });
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'correct-password' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Sign in' }));
     const otp = await screen.findByLabelText('Authentication code');
     fireEvent.change(otp, { target: { value: '123456' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Sign in' }));
     await screen.findByText('License destination');
     const calls = fetchMock.mock.calls.filter((call) => endpoint(call[0]) === '/tokens');
     expect(calls[0][1].headers.Authorization).toMatch(/^Basic /);
@@ -167,7 +182,7 @@ describe('customer authentication', () => {
     expect(readSession()?.token).toBe('new-secret');
   });
   it('rejects operator accounts and revokes the just-created login token', async () => {
-    fetchMock.mockImplementation(async (url: string, options: RequestInit) => {
+    fetchMock.mockImplementation((url: string, options: RequestInit) => {
       if (endpoint(url) === '/tokens') return json(token('operator-token', 'operator-secret'), 201);
       if (endpoint(url) === '/profile') return json({ ...user, attributes: { role: 'admin' } });
       if (endpoint(url) === '/tokens/operator-token' && options.method === 'DELETE')
@@ -177,7 +192,7 @@ describe('customer authentication', () => {
     route('/login', <Login />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'admin@example.test' } });
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Sign in' }));
     expect((await screen.findByRole('alert')).textContent).toContain('customer accounts only');
     expect(readSession()).toBeNull();
     expect(
@@ -190,7 +205,7 @@ describe('customer authentication', () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
     route('/test', <ForgotPassword />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'unknown@example.test' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Send reset link' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Send reset link' }));
     expect((await screen.findByRole('status')).textContent).toContain('If your account exists');
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined();
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ meta: { email: 'unknown@example.test' } });
@@ -203,7 +218,7 @@ describe('customer authentication', () => {
     expect(window.location.hash).toBe('');
     fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'new-password' } });
     fireEvent.change(screen.getByLabelText('Confirm new password'), { target: { value: 'new-password' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Set new password' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Set new password' }));
     await screen.findByText('Your password has been reset. Sign in with your new password.');
     expect(fetchMock.mock.calls[0][0]).toBe('/v1/accounts/default/users/user-1/actions/reset-password');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
@@ -227,7 +242,7 @@ describe('customer authentication', () => {
 describe('customer tokens', () => {
   it('creates through /tokens and shows the secret only until the dialog closes', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string, options: RequestInit) => {
+    fetchMock.mockImplementation((url: string, options: RequestInit) => {
       if (endpoint(url) === '/profile') return json(user);
       if (endpoint(url) === '/tokens' && options.method === 'POST')
         return json(token('created-1', 'shown-once-secret'), 201);
@@ -238,22 +253,28 @@ describe('customer tokens', () => {
     await screen.findByText('My token');
     fireEvent.click(screen.getByRole('button', { name: 'Create token' }));
     fireEvent.change(screen.getByLabelText('Token name'), { target: { value: 'Build server' } });
-    fireEvent.submit(within(screen.getByRole('dialog')).getByRole('button', { name: 'Create token' }).closest('form')!);
+    submitForm(within(screen.getByRole('dialog')).getByRole('button', { name: 'Create token' }));
     await screen.findByText('shown-once-secret');
-    const call = fetchMock.mock.calls.find((call) => call[1].method === 'POST')!;
+    const call = required(
+      fetchMock.mock.calls.find((c) => c[1].method === 'POST'),
+      'POST call',
+    );
     expect(call[0]).toBe('/v1/accounts/default/tokens');
     expect(JSON.parse(call[1].body)).toEqual({ data: { type: 'tokens', attributes: { name: 'Build server' } } });
     fireEvent.click(
-      within(screen.getByRole('dialog'))
-        .getAllByRole('button', { name: 'Close' })
-        .find((button) => button.textContent === 'Close')!,
+      required(
+        within(screen.getByRole('dialog'))
+          .getAllByRole('button', { name: 'Close' })
+          .find((button) => button.textContent === 'Close'),
+        'plain close button',
+      ),
     );
     await waitFor(() => expect(screen.queryByText('shown-once-secret')).toBeNull());
     expect(sessionStorage.getItem('lic.portal:default:/portal')).not.toContain('shown-once-secret');
   });
   it('replaces the session secret after regenerating the current token', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string, options: RequestInit) => {
+    fetchMock.mockImplementation((url: string, options: RequestInit) => {
       if (endpoint(url) === '/profile') return json(user);
       if (endpoint(url) === '/tokens/session-1' && options.method === 'PUT')
         return json(token('session-1', 'replacement-secret'));
@@ -272,7 +293,7 @@ describe('customer tokens', () => {
 describe('profile security', () => {
   it('changes passwords through the public update-password action', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string) => {
+    fetchMock.mockImplementation((url: string) => {
       if (endpoint(url) === '/profile') return json(user);
       if (endpoint(url) === '/users/user-1/second-factors') return json([]);
       if (endpoint(url) === '/users/user-1/actions/update-password') return json(user);
@@ -283,16 +304,19 @@ describe('profile security', () => {
     fireEvent.change(screen.getByLabelText('Current password'), { target: { value: 'old-password' } });
     fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'new-password' } });
     fireEvent.change(screen.getByLabelText('Confirm new password'), { target: { value: 'new-password' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Update password' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Update password' }));
     await screen.findByText('Password updated. Other sessions have been signed out.');
-    const call = fetchMock.mock.calls.find((call) => endpoint(call[0]).endsWith('/actions/update-password'))!;
+    const call = required(
+      fetchMock.mock.calls.find((c) => endpoint(c[0]).endsWith('/actions/update-password')),
+      'update-password call',
+    );
     expect(JSON.parse(call[1].body)).toEqual({ meta: { oldPassword: 'old-password', newPassword: 'new-password' } });
     expect(readSession()?.token).toBe('session-secret');
   });
   it('requires an OTP when disabling an enabled factor', async () => {
     signedIn();
     let enabled = true;
-    fetchMock.mockImplementation(async (url: string, options: RequestInit) => {
+    fetchMock.mockImplementation((url: string, options: RequestInit) => {
       if (endpoint(url) === '/profile') return json(user);
       if (endpoint(url) === '/users/user-1/second-factors')
         return json(enabled ? [{ id: 'factor-1', type: 'second-factors', attributes: { enabled: true } }] : []);
@@ -305,15 +329,18 @@ describe('profile security', () => {
     route('/test', <Profile />);
     fireEvent.click(await screen.findByRole('button', { name: 'Disable two-factor authentication' }));
     fireEvent.change(screen.getByLabelText('Authentication code'), { target: { value: '123456' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Disable two-factor authentication' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Disable two-factor authentication' }));
     await screen.findByText('Two-factor authentication disabled.');
-    const call = fetchMock.mock.calls.find((call) => call[1].method === 'DELETE')!;
+    const call = required(
+      fetchMock.mock.calls.find((c) => c[1].method === 'DELETE'),
+      'DELETE call',
+    );
     expect(JSON.parse(call[1].body)).toEqual({ meta: { otp: '123456' } });
   });
   it('enrolls a local TOTP QR and enables only after OTP confirmation', async () => {
     signedIn();
     let factor: Resource | undefined;
-    fetchMock.mockImplementation(async (url: string, options: RequestInit) => {
+    fetchMock.mockImplementation((url: string, options: RequestInit) => {
       if (endpoint(url) === '/profile') return json(user);
       if (endpoint(url) === '/users/user-1/second-factors') {
         if (options.method === 'POST') {
@@ -327,23 +354,29 @@ describe('profile security', () => {
         return json(factor ? [factor] : []);
       }
       if (endpoint(url) === '/users/user-1/second-factors/factor-1' && options.method === 'PATCH') {
-        factor = { ...factor!, attributes: { enabled: true } };
+        factor = { ...required(factor, 'enrolled factor'), attributes: { enabled: true } };
         return json(factor);
       }
       throw new Error(`Unexpected ${url}`);
     });
     route('/test', <Profile />);
     fireEvent.click(await screen.findByRole('button', { name: 'Set up two-factor authentication' }));
-    const verify = screen.getByText('Confirm your current password to begin.').closest('form')!;
+    const verify = required(screen.getByText('Confirm your current password to begin.').closest('form'), 'verify form');
     fireEvent.change(within(verify).getByLabelText('Current password'), { target: { value: 'correct-password' } });
     fireEvent.submit(verify);
     await screen.findByAltText('Authenticator setup QR code');
     expect(screen.getByText('BASE32SECRET')).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Authentication code'), { target: { value: '123456' } });
-    fireEvent.submit(screen.getByRole('button', { name: 'Confirm setup' }).closest('form')!);
+    submitForm(screen.getByRole('button', { name: 'Confirm setup' }));
     await screen.findByText('Two-factor authentication enabled.');
-    const create = fetchMock.mock.calls.find((call) => call[1].method === 'POST')!;
-    const enable = fetchMock.mock.calls.find((call) => call[1].method === 'PATCH')!;
+    const create = required(
+      fetchMock.mock.calls.find((c) => c[1].method === 'POST'),
+      'POST call',
+    );
+    const enable = required(
+      fetchMock.mock.calls.find((c) => c[1].method === 'PATCH'),
+      'PATCH call',
+    );
     expect(JSON.parse(create[1].body)).toEqual({ meta: { password: 'correct-password' } });
     expect(JSON.parse(enable[1].body)).toEqual({
       data: { type: 'second-factors', id: 'factor-1', attributes: { enabled: true } },
@@ -380,7 +413,7 @@ describe('licenses', () => {
   }
   it('shows only the user licenses with product, policy, usage and entitlements', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string) => mockLicenses(url));
+    fetchMock.mockImplementation((url: string) => mockLicenses(url));
     route('/licenses', <Licenses />);
     await screen.findByText('Vendor Studio');
     expect(screen.getByText('Professional')).toBeTruthy();
@@ -391,7 +424,7 @@ describe('licenses', () => {
   });
   it.each(['list', 'detail'])('keeps the license %s usable when names are forbidden to default users', async (view) => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string) => {
+    fetchMock.mockImplementation((url: string) => {
       const path = endpoint(url);
       if (path.endsWith('/product') || path.endsWith('/policy')) return failure('FORBIDDEN', 403);
       return mockLicenses(url);
@@ -418,7 +451,7 @@ describe('licenses', () => {
   });
   it('does not hide server failures as restricted product names', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string) =>
+    fetchMock.mockImplementation((url: string) =>
       endpoint(url).endsWith('/product') ? failure('SERVER_ERROR', 500) : mockLicenses(url),
     );
     route('/licenses', <Licenses />);
@@ -428,7 +461,7 @@ describe('licenses', () => {
   });
   it('downloads the public checkout certificate as a .lic file without putting a bearer in the URL', async () => {
     signedIn();
-    fetchMock.mockImplementation(async (url: string) => mockLicenses(url));
+    fetchMock.mockImplementation((url: string) => mockLicenses(url));
     const createURL = vi.fn().mockReturnValue('blob:local-license');
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     URL.createObjectURL = createURL;
@@ -444,11 +477,16 @@ describe('licenses', () => {
     );
     fireEvent.click(await screen.findByRole('button', { name: 'Download license file' }));
     await waitFor(() => expect(createURL).toHaveBeenCalledOnce());
-    const request = fetchMock.mock.calls.find((call) => endpoint(call[0]).endsWith('/actions/check-out'))!;
+    const request = required(
+      fetchMock.mock.calls.find((c) => endpoint(c[0]).endsWith('/actions/check-out')),
+      'check-out call',
+    );
     expect(request[1].method).toBe('POST');
     expect(request[1].headers.Authorization).toBe('Bearer session-secret');
     expect(request[0]).not.toContain('token=');
-    expect((click.mock.contexts[0] as unknown as HTMLAnchorElement).download).toBe('license-1.lic');
+    const anchor = click.mock.contexts[0];
+    if (!(anchor instanceof HTMLAnchorElement)) throw new Error('Expected the download anchor');
+    expect(anchor.download).toBe('license-1.lic');
     click.mockRestore();
   });
 });

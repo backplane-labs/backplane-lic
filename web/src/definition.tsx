@@ -39,28 +39,23 @@ import {
 } from './components';
 import { Attributes, LicenseSummary, Status, Value } from './display';
 import { actionPayload } from './editor-model';
-import ru, { schemaFormsRussian } from './locales/ru';
+import { ru, schemaFormsRussian } from './locales/ru';
 import {
   type Document,
   decodeDocument,
+  type JSONValue,
   labelOf,
   listData,
   nextPage,
   parseJSON,
   type Resource,
   secretsOf,
+  toError,
+  type WireValue,
   writableAttributes,
 } from './model';
 import navigation from './navigation';
-import {
-  type Action,
-  byName,
-  type FieldSpec,
-  type Relationship,
-  type ResourceSpec,
-  resources,
-  tokenFields,
-} from './resources';
+import { type Action, byName, type Relationship, type ResourceSpec } from './resources';
 import { ConsoleServiceClient, call, type Info, info, request } from './rpc';
 import { relationFields, relationshipBody } from './schemas';
 
@@ -72,7 +67,7 @@ function useAPI() {
   return {
     installation,
     client,
-    call: (method: string, path: string, query: Record<string, string> = {}, body?: unknown, signal?: AbortSignal) =>
+    call: (method: string, path: string, query: Record<string, string> = {}, body?: WireValue, signal?: AbortSignal) =>
       call(client, installation.accountId, method, path, query, body, signal),
   };
 }
@@ -96,7 +91,7 @@ function Shell() {
         </Panel>
       )}
       {state.error !== undefined ? (
-        <ErrorNotice error={state.error} retry={state.refresh} />
+        <ErrorNotice error={toError(state.error)} retry={state.refresh} />
       ) : !state.value ? (
         <Loading />
       ) : (
@@ -128,9 +123,7 @@ function AccountPage() {
                 <h3>{algorithm}</h3>
                 <CopyButton value={key} />
               </div>
-              <pre tabIndex={0} style={{ ...mono, whiteSpace: 'pre-wrap' }}>
-                {key}
-              </pre>
+              <pre style={{ ...mono, whiteSpace: 'pre-wrap' }}>{key}</pre>
             </div>
           ))}
         </Stack>
@@ -162,11 +155,11 @@ function resourceOperation(
   const relations =
     !updating || spec.name === 'webhook-endpoints' ? (nested ? [] : (spec.createRelationships ?? [])) : [];
   const initial: NativeStruct = {
-    attributes: (resource ? writableAttributes(resource, spec.attributes, true) : {}) as NativeStruct,
+    attributes: resource ? writableAttributes(resource, spec.attributes, true) : {},
   };
   for (const rel of relations) {
     const linked = resource?.relationships?.[rel.name]?.data;
-    if (linked && !Array.isArray(linked)) initial[rel.name + 'Id'] = linked.id;
+    if (linked && !Array.isArray(linked)) initial[`${rel.name}Id`] = linked.id;
   }
   return {
     title: updating ? 'edit' : 'create',
@@ -227,7 +220,8 @@ const searchable: Record<string, string[]> = {
   entitlements: ['code', 'name', 'id'],
 };
 const withMetadata = new Set(['licenses', 'users', 'products', 'policies']);
-type Term = { key: string; value: string };
+type Term = { id: string; key: string; value: string };
+const newTerm = (): Term => ({ id: crypto.randomUUID(), key: '', value: '' });
 
 function SearchPage() {
   const t = useText(),
@@ -235,12 +229,13 @@ function SearchPage() {
     navigate = usePluginNavigate();
   const [type, setType] = useState('licenses'),
     [op, setOp] = useState('AND');
-  const [terms, setTerms] = useState<Term[]>([{ key: 'name', value: '' }]);
+  const [terms, setTerms] = useState<Term[]>([{ id: crypto.randomUUID(), key: 'name', value: '' }]);
   const [metadata, setMetadata] = useState<Term[]>([]);
   const [page, setPage] = useState(1),
     [size, setSize] = useState('25');
-  const [submitted, setSubmitted] = useState<{ body: unknown; type: string }>();
-  const spec = byName(submitted?.type ?? type)!;
+  const [submitted, setSubmitted] = useState<{ body: WireValue; type: string }>();
+  const spec = byName(submitted?.type ?? type);
+  if (!spec) throw new Error(`No resource named ${submitted?.type ?? type}`);
   const query = { 'page[number]': String(page), 'page[size]': size };
   const state = usePlatformQuery(`lic:search:${JSON.stringify(submitted)}:${JSON.stringify(query)}`, (signal) =>
     submitted ? api.call('POST', 'search', query, submitted.body, signal) : Promise.resolve<Document>({ data: [] }),
@@ -255,14 +250,14 @@ function SearchPage() {
   const run = () => {
     const filled = terms.filter((term) => term.value.trim());
     const meta = metadata.filter((term) => term.key.trim() && term.value.trim());
-    const body: Record<string, unknown> = Object.fromEntries(filled.map((term) => [term.key, term.value]));
+    const body: Record<string, WireValue> = Object.fromEntries(filled.map((term) => [term.key, term.value]));
     if (meta.length) body.metadata = Object.fromEntries(meta.map((term) => [term.key, term.value]));
     setPage(1);
     setSubmitted({ type, body: { meta: { type, op, query: body } } });
   };
   const pick = (next: string) => {
     setType(next);
-    setTerms([{ key: searchable[next][0], value: '' }]);
+    setTerms([{ ...newTerm(), key: searchable[next][0] }]);
     setMetadata([]);
     setSubmitted(undefined);
   };
@@ -296,7 +291,7 @@ function SearchPage() {
               />
             </div>
             {terms.map((term, index) => (
-              <div key={index} style={row}>
+              <div key={term.id} style={row}>
                 <SelectControl
                   aria-label={t('attribute')}
                   value={term.key}
@@ -326,7 +321,7 @@ function SearchPage() {
               </div>
             ))}
             {metadata.map((term, index) => (
-              <div key={`m${index}`} style={row}>
+              <div key={term.id} style={row}>
                 <span>{t('metadata')}</span>
                 <Input
                   aria-label={t('metadataKey')}
@@ -357,17 +352,12 @@ function SearchPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setTerms([...terms, { key: searchable[type][0], value: '' }])}
+                onClick={() => setTerms([...terms, { ...newTerm(), key: searchable[type][0] }])}
               >
                 {t('addTerm')}
               </Button>
               {withMetadata.has(type) && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMetadata([...metadata, { key: '', value: '' }])}
-                >
+                <Button type="button" variant="outline" size="sm" onClick={() => setMetadata([...metadata, newTerm()])}>
                   {t('addMetadataTerm')}
                 </Button>
               )}
@@ -381,7 +371,7 @@ function SearchPage() {
       {submitted && (
         <Panel title={t('results')} count={rows.length}>
           {state.error !== undefined ? (
-            <ErrorNotice error={state.error} />
+            <ErrorNotice error={toError(state.error)} />
           ) : state.loading ? (
             <Loading />
           ) : !rows.length ? (
@@ -491,13 +481,14 @@ function ResourceList({
       );
     }
   };
-  const relationAction = (attach: boolean) =>
+  const relationAction = (attach: boolean) => {
+    if (!relationship) return;
     setOperation({
       title: t(attach ? 'attach' : 'detach'),
       dangerous: !attach,
       fields: [{ name: 'ids', kind: 'json', required: true }],
       initial: { ids: [] },
-      execute: async (values, signal) => {
+      execute: (values, signal) => {
         if (
           !Array.isArray(values.ids) ||
           !values.ids.length ||
@@ -508,11 +499,12 @@ function ResourceList({
           attach ? 'POST' : 'DELETE',
           path,
           {},
-          { data: values.ids.map((id) => ({ type: relationship!.type, id })) },
+          { data: values.ids.map((id) => ({ type: relationship.type, id })) },
           signal,
         );
       },
     });
+  };
   return (
     <Stack gap={16}>
       {!relationship && <PageHeader title={t(spec.name)} description={t(`${spec.name}Description`)} />}
@@ -624,7 +616,7 @@ function ResourceList({
         {relationship?.name === 'users' && parentPath?.startsWith('groups/') && <p>{t('membersHelp')}</p>}
         {relationship?.name === 'owners' && <p>{t('ownerHelp')}</p>}
         {state.error !== undefined ? (
-          <ErrorNotice error={state.error} retry={state.refresh} />
+          <ErrorNotice error={toError(state.error)} retry={state.refresh} />
         ) : state.loading ? (
           <Loading />
         ) : !rows.length ? (
@@ -689,7 +681,7 @@ function actionOperation(
     title: t(action.name),
     dangerous: action.dangerous,
     fields: action.fields ?? [],
-    initial: action.initial as NativeStruct | undefined,
+    initial: action.initial,
     execute: async (values, signal) => {
       const base = action.collection ? (action.suffix === 'passwords' ? '' : spec.name) : path;
       const target = [base, action.suffix].filter(Boolean).join('/');
@@ -728,16 +720,18 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
     [relation, setRelation] = useState<Relationship>(),
     [factor, setFactor] = useState<Resource>(),
     [running, setRunning] = useState(false),
-    [failure, setFailure] = useState<unknown>(),
+    [failure, setFailure] = useState<Error | undefined>(),
     [raw, setRaw] = useState(false);
   const state = usePlatformQuery(`lic:detail:${path}`, (signal) => api.call('GET', path, {}, undefined, signal));
   const resource = listData(state.value)[0],
     back = onBack ?? (() => navigate(spec.name));
-  if (factor && relation?.type === 'second-factors')
+  const relationSpec = relation ? byName(relation.type) : undefined;
+  const factorSpec = byName('second-factors');
+  if (factor && relation?.type === 'second-factors' && factorSpec)
     return (
       <Detail
         key={factor.id}
-        spec={byName('second-factors')!}
+        spec={factorSpec}
         path={`${path}/second-factors/${encodeURIComponent(factor.id)}`}
         onBack={() => setFactor(undefined)}
       />
@@ -748,7 +742,7 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
         <Button variant="outline" onClick={back}>
           {t('back')}
         </Button>
-        <ErrorNotice error={state.error} retry={state.refresh} />
+        <ErrorNotice error={toError(state.error)} retry={state.refresh} />
       </Stack>
     );
   if (!resource) return <Loading />;
@@ -804,6 +798,7 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
   };
   const tabs = ['overview', ...(spec.relationships ?? []).map((rel) => rel.name), 'raw'];
   const created = typeof resource.attributes?.created === 'string' ? new Date(resource.attributes.created) : undefined;
+  const metadata = resource.attributes?.metadata;
   return (
     <Stack gap={16}>
       <EntityHeader
@@ -883,15 +878,17 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
         <ObjectView value={state.value} label={t('raw')} />
       ) : relation ? (
         relation.many ? (
-          <ResourceList
-            key={relation.name}
-            spec={byName(relation.type)!}
-            path={`${path}/${relation.name}`}
-            relationship={relation}
-            parentPath={path}
-            onChanged={state.refresh}
-            onInspect={relation.type === 'second-factors' ? setFactor : undefined}
-          />
+          relationSpec ? (
+            <ResourceList
+              key={relation.name}
+              spec={relationSpec}
+              path={`${path}/${relation.name}`}
+              relationship={relation}
+              parentPath={path}
+              onChanged={state.refresh}
+              onInspect={relation.type === 'second-factors' ? setFactor : undefined}
+            />
+          ) : null
         ) : (
           <ToOne
             key={relation.name}
@@ -951,11 +948,14 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
               ]}
             />
           </Panel>
-          {resource.attributes?.metadata && Object.keys(resource.attributes.metadata as object).length > 0 && (
-            <Panel title={t('metadata')}>
-              <Value name="metadata" value={resource.attributes.metadata} />
-            </Panel>
-          )}
+          {metadata !== null &&
+            metadata !== undefined &&
+            typeof metadata === 'object' &&
+            Object.keys(metadata).length > 0 && (
+              <Panel title={t('metadata')}>
+                <Value name="metadata" value={metadata} />
+              </Panel>
+            )}
           {spec.name === 'webhook-events' && (
             <Panel title={t('payload')}>
               <ObjectView value={payloadOf(resource.attributes?.payload) ?? state.value} label={t('payload')} />
@@ -1016,13 +1016,13 @@ function resourceColumns(
     },
   ];
 }
-function cellText(value: unknown): string {
+function cellText(value: WireValue): string {
   if (value === null || value === undefined || value === '') return '—';
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) return new Date(value).toLocaleString();
   if (Array.isArray(value)) return value.join(', ');
   return typeof value === 'object' ? JSON.stringify(value) : String(value);
 }
-function payloadOf(value: unknown) {
+function payloadOf(value: JSONValue | undefined): JSONValue | undefined {
   if (typeof value !== 'string') return value;
   try {
     return parseJSON(value);
@@ -1044,9 +1044,19 @@ function ToOne({
     navigate = usePluginNavigate(),
     { environment } = usePluginContext();
   const state = usePlatformQuery(`lic:relation:${path}`, (signal) => api.call('GET', path, {}, undefined, signal));
-  const [operation, setOperation] = useState<Operation>(),
-    [result, setResult] = useState<Document>();
+  const [operation, setOperation] = useState<Operation>();
   const resource = listData(state.value)[0];
+  const setRelationship = () => {
+    const method = rel.update;
+    if (!method) return;
+    setOperation({
+      title: t('setRelationship'),
+      fields: [{ name: 'id', nullable: rel.name !== 'policy', required: true }],
+      initial: { id: resource?.id ?? null },
+      execute: (values, signal) =>
+        api.call(method, path, {}, { data: values.id ? { type: rel.type, id: values.id } : null }, signal),
+    });
+  };
   return (
     <Stack gap={12}>
       {operation && (
@@ -1066,32 +1076,14 @@ function ToOne({
         title={t(rel.name)}
         actions={
           rel.update && (
-            <Button
-              disabled={environment === 'standalone'}
-              size="sm"
-              onClick={() =>
-                setOperation({
-                  title: t('setRelationship'),
-                  fields: [{ name: 'id', nullable: rel.name !== 'policy', required: true }],
-                  initial: { id: resource?.id ?? null },
-                  execute: (values, signal) =>
-                    api.call(
-                      rel.update!,
-                      path,
-                      {},
-                      { data: values.id ? { type: rel.type, id: values.id } : null },
-                      signal,
-                    ),
-                })
-              }
-            >
+            <Button disabled={environment === 'standalone'} size="sm" onClick={setRelationship}>
               {t('setRelationship')}
             </Button>
           )
         }
       >
         {state.error !== undefined ? (
-          <ErrorNotice error={state.error} retry={state.refresh} />
+          <ErrorNotice error={toError(state.error)} retry={state.refresh} />
         ) : state.loading ? (
           <Loading />
         ) : resource ? (

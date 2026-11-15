@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { type API, APIError, type Resource } from './api';
 import { useAuth } from './auth';
 import { Button, CopyButton, DateValue, Empty, ErrorNotice, LoadError, Loading, Status, useLoad } from './components';
+import { toFailure } from './errors';
 import { useLocale } from './i18n';
 
 interface LicenseView {
@@ -64,7 +65,8 @@ export function Licenses() {
   const { api, user } = useAuth();
   const result = useLoad(
     async (signal) => {
-      const licenses = await api.list(`/users/${encodeURIComponent(user!.id)}/licenses`, signal);
+      if (!user) throw new Error('Sign-in required');
+      const licenses = await api.list(`/users/${encodeURIComponent(user.id)}/licenses`, signal);
       return Promise.all(licenses.map((license) => enrich(api, license, signal)));
     },
     [api, user?.id],
@@ -134,12 +136,14 @@ export function LicenseDetail() {
   const { api, user } = useAuth();
   const { id } = useParams();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   const result = useLoad(
     async (signal) => {
-      const response = await api.request(`/users/${encodeURIComponent(user!.id)}/licenses/${encodeURIComponent(id!)}`, {
+      if (!user || !id) throw new Error('Sign-in and a license id are required');
+      const response = await api.request(`/users/${encodeURIComponent(user.id)}/licenses/${encodeURIComponent(id)}`, {
         signal,
       });
+      if (!response.data) throw new Error('The license response was empty.');
       return enrich(api, response.data, signal);
     },
     [api, user?.id, id],
@@ -216,7 +220,7 @@ export function LicenseDetail() {
                 `/licenses/${encodeURIComponent(license.id)}/actions/check-out`,
                 { method: 'POST', body: { meta: {} } },
               );
-              const certificate = response.data.attributes.certificate;
+              const certificate = response.data?.attributes.certificate;
               if (typeof certificate !== 'string' || !certificate)
                 throw new Error('The API returned no license certificate.');
               const url = URL.createObjectURL(new Blob([certificate], { type: 'application/octet-stream' }));
@@ -228,7 +232,7 @@ export function LicenseDetail() {
               anchor.remove();
               setTimeout(() => URL.revokeObjectURL(url), 1000);
             } catch (cause) {
-              setError(cause);
+              setError(toFailure(cause));
             } finally {
               setBusy(false);
             }

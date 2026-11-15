@@ -1,7 +1,7 @@
 import { create } from '@bufbuild/protobuf';
 import { CallRequestSchema, InfoRequestSchema } from './gen/proto/lic/console/v1/console_pb';
 import { ConsoleServiceClient } from './gen/proto/lic/console/v1/console_ws_pb';
-import { accountPath, decodeDocument, wireJSON } from './model';
+import { accountPath, decodeDocument, type WireValue, wireJSON } from './model';
 
 export type { CallResponse, InfoResponse as Info } from './gen/proto/lic/console/v1/console_pb';
 export { CallRequestSchema, ConsoleServiceClient, InfoRequestSchema };
@@ -13,7 +13,7 @@ export const request = (
   method: string,
   path: string,
   query: Record<string, string> = {},
-  body?: unknown,
+  body?: WireValue,
   signal?: AbortSignal,
 ) =>
   client.call(
@@ -32,7 +32,7 @@ export async function call(
   method: string,
   path: string,
   query: Record<string, string> = {},
-  body?: unknown,
+  body?: WireValue,
   signal?: AbortSignal,
 ) {
   const response = await request(client, account, method, path, query, body, signal);

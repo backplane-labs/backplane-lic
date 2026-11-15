@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useAuth } from './auth';
 import { Button, CopyButton, ErrorNotice, Field, LoadError, Loading, Notice, useLoad } from './components';
-import { CustomerError } from './errors';
+import { CustomerError, toFailure } from './errors';
 import { useLocale } from './i18n';
 
 function PasswordForm() {
@@ -12,19 +12,20 @@ function PasswordForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState(false);
   async function update(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setDone(false);
+    if (!user) return;
     if (newPassword !== confirm) {
       setError(new CustomerError('passwordsDiffer'));
       return;
     }
     setBusy(true);
     try {
-      await api.request(`/users/${encodeURIComponent(user!.id)}/actions/update-password`, {
+      await api.request(`/users/${encodeURIComponent(user.id)}/actions/update-password`, {
         method: 'POST',
         body: { meta: { oldPassword, newPassword } },
       });
@@ -33,7 +34,7 @@ function PasswordForm() {
       setConfirm('');
       setDone(true);
     } catch (cause) {
-      setError(cause);
+      setError(toFailure(cause));
     } finally {
       setBusy(false);
     }
@@ -82,7 +83,7 @@ function PasswordForm() {
 function QR({ uri }: { uri: string }) {
   const { t } = useLocale();
   const [image, setImage] = useState('');
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   useEffect(() => {
     let active = true;
     // Generate locally. Sending the provisioning URI to a QR service would leak the TOTP secret.
@@ -91,7 +92,7 @@ function QR({ uri }: { uri: string }) {
         if (active) setImage(value);
       })
       .catch((cause) => {
-        if (active) setError(cause);
+        if (active) setError(toFailure(cause));
       });
     return () => {
       active = false;
@@ -107,18 +108,19 @@ function QR({ uri }: { uri: string }) {
 function SecondFactor() {
   const { t } = useLocale();
   const { api, user } = useAuth();
-  const path = `/users/${encodeURIComponent(user!.id)}/second-factors`;
-  const factors = useLoad((signal) => api.list(path, signal), [api, path]);
+  const path = user ? `/users/${encodeURIComponent(user.id)}/second-factors` : undefined;
+  const factors = useLoad((signal) => (path ? api.list(path, signal) : Promise.resolve([])), [api, path]);
   const factor = factors.value?.[0];
   const [password, setPassword] = useState('');
   const [otp, setOTP] = useState('');
   const [begin, setBegin] = useState(false);
   const [disabling, setDisabling] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState('');
   async function create(event: FormEvent) {
     event.preventDefault();
+    if (!path) return;
     setBusy(true);
     setError(null);
     setMessage('');
@@ -128,30 +130,31 @@ function SecondFactor() {
       setBegin(false);
       factors.reload();
     } catch (cause) {
-      setError(cause);
+      setError(toFailure(cause));
     } finally {
       setBusy(false);
     }
   }
   async function confirm(event: FormEvent) {
     event.preventDefault();
+    if (!factor) return;
     setBusy(true);
     setError(null);
     setMessage('');
     try {
-      const response = await api.request(`${path}/${encodeURIComponent(factor!.id)}`, {
+      const response = await api.request(`${path}/${encodeURIComponent(factor.id)}`, {
         method: disabling ? 'DELETE' : 'PATCH',
         body: disabling
           ? { meta: { otp } }
-          : { data: { type: 'second-factors', id: factor!.id, attributes: { enabled: true } }, meta: { otp } },
+          : { data: { type: 'second-factors', id: factor.id, attributes: { enabled: true } }, meta: { otp } },
       });
-      factors.replace(disabling ? [] : [response.data]);
+      factors.replace(disabling ? [] : response.data ? [response.data] : []);
       setOTP('');
       setDisabling(false);
       setMessage(t(disabling ? 'factorDisabled' : 'factorEnabled'));
       factors.reload();
     } catch (cause) {
-      setError(cause);
+      setError(toFailure(cause));
     } finally {
       setBusy(false);
     }
@@ -222,10 +225,9 @@ function SecondFactor() {
                 <p>{t('setupDetail')}</p>
                 {factor.attributes.uri && <QR uri={factor.attributes.uri} />}
                 <div className="field">
-                  <label>{t('manualSecret')}</label>
-                  <code className="secret-value" tabIndex={0}>
-                    {factor.attributes.secret}
-                  </code>
+                  {/* A caption, not a form label: the value is text with its own copy control. */}
+                  <span className="field-label">{t('manualSecret')}</span>
+                  <code className="secret-value">{factor.attributes.secret}</code>
                   <CopyButton value={factor.attributes.secret ?? ''} label="copySetupKey" />
                 </div>
                 <form onSubmit={confirm}>
@@ -254,7 +256,7 @@ function SecondFactor() {
                             setOTP('');
                             factors.reload();
                           } catch (cause) {
-                            setError(cause);
+                            setError(toFailure(cause));
                           } finally {
                             setBusy(false);
                           }

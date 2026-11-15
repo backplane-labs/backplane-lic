@@ -9,7 +9,13 @@ export class CustomerError extends Error {
   }
 }
 
-export function isInvalidReset(error: unknown): boolean {
+// A rejected promise may carry anything; the boundary narrows it to the error
+// domain without changing what an Error instance would display.
+export function toFailure<T>(value: T): Error {
+  return value instanceof Error ? value : new Error(String(value));
+}
+
+export function isInvalidReset(error: Error): boolean {
   return (
     error instanceof APIError &&
     (error.status === 404 ||
@@ -18,7 +24,7 @@ export function isInvalidReset(error: unknown): boolean {
   );
 }
 
-export function customerErrorMessage(error: unknown, t: (key: TranslationKey) => string, reset = false): string {
+export function customerErrorMessage(error: Error, t: (key: TranslationKey) => string, reset = false): string {
   if (error instanceof CustomerError) return t(error.key);
   if (!(error instanceof APIError)) return t('errorUnknown');
   if (error.status === 429) {

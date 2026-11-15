@@ -1,6 +1,6 @@
 import type { EditorCompletionResult, EditorDiagnostic } from '@backplane-labs/backplane-editors';
-import type { Native, NativeStruct } from '@gopherex/schemapb';
-import { type APIError, json, parseJSON } from './model.ts';
+import { isNativeStruct, type Native, type NativeStruct } from '@gopherex/schemapb';
+import { type APIError, json, parseJSON, type WireValue } from './model.ts';
 import type { Action, FieldSpec } from './resources.ts';
 import { formSchema, validateDraft } from './schemas.ts';
 
@@ -10,8 +10,7 @@ export function scaffoldDraft(fields: FieldSpec[], values: NativeStruct = {}): N
   for (const field of fields) {
     if (Object.hasOwn(result, field.name)) {
       const value = result[field.name];
-      if (field.fields && value && typeof value === 'object' && !Array.isArray(value))
-        result[field.name] = scaffoldDraft(field.fields, value as NativeStruct);
+      if (field.fields && isNativeStruct(value)) result[field.name] = scaffoldDraft(field.fields, value);
     } else if (field.required) result[field.name] = scaffoldField(field);
   }
   return result;
@@ -28,7 +27,7 @@ function scaffoldField(field: FieldSpec): Native {
 export function parseDraft(text: string): NativeStruct {
   const value = parseJSON(text);
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected a JSON object');
-  return value as NativeStruct;
+  return value;
 }
 function fieldsAt(fields: FieldSpec[], path: string[]): FieldSpec[] {
   let current = fields;
@@ -67,8 +66,7 @@ export function validateEditor(fields: FieldSpec[], text: string): EditorDiagnos
           severity: 'error',
           message: `/${[...path, key].join('/')}: unknown field`,
         });
-      else if (field.fields && value && typeof value === 'object' && !Array.isArray(value))
-        check(field.fields, value as NativeStruct, [...path, key]);
+      else if (field.fields && isNativeStruct(value)) check(field.fields, value, [...path, key]);
     }
   };
   check(fields, values, []);
@@ -119,12 +117,9 @@ function cursorContext(text: string, position: number) {
       }
       const raw = text.slice(start, ++i);
       if (frame?.phase === 'key') {
-        try {
-          frame.key = JSON.parse(raw);
-        } catch {
-          return undefined;
-        }
-        frame.seen.add(frame.key!);
+        const key: string = JSON.parse(raw);
+        frame.key = key;
+        frame.seen.add(key);
         frame.phase = 'colon';
       } else finish();
       continue;
@@ -168,8 +163,9 @@ export function completeEditor(fields: FieldSpec[], text: string, position: numb
       ? null
       : { from: 0, options: [{ label: '{}', type: 'keyword', apply: json(scaffoldDraft(fields)) }] };
   if (frame.array) return null;
-  const quoted = context.stringStart !== undefined;
-  const from = quoted ? context.stringStart! + 1 : position;
+  const start = context.stringStart;
+  const quoted = start !== undefined;
+  const from = quoted ? start + 1 : position;
   const prefix = quoted ? text.slice(from, position) : '';
   const closingQuote = quoted && text.slice(position).trimStart().startsWith('"');
   if (frame.phase === 'key') {
@@ -180,8 +176,8 @@ export function completeEditor(fields: FieldSpec[], text: string, position: numb
         type: 'property' as const,
         detail: field.required ? 'required' : 'optional',
         apply: quoted
-          ? field.name + (closingQuote ? '' : '": ' + json(scaffoldField(field)))
-          : JSON.stringify(field.name) + ': ' + json(scaffoldField(field)),
+          ? `${field.name}${closingQuote ? '' : `": ${json(scaffoldField(field))}`}`
+          : `${JSON.stringify(field.name)}: ${json(scaffoldField(field))}`,
       }));
     return { from, options };
   }
@@ -216,7 +212,7 @@ export function errorFieldPath(error: APIError, fields: FieldSpec[]): string[] |
     : pointer.split('.');
   if (path[0] === 'data') path.shift();
   if (path[0] === 'meta') path.shift();
-  if (path[0] === 'relationships' && path[1]) path = [path[1] + 'Id'];
+  if (path[0] === 'relationships' && path[1]) path = [`${path[1]}Id`];
   let current = fields;
   const matched: string[] = [];
   for (const segment of path) {
@@ -228,7 +224,7 @@ export function errorFieldPath(error: APIError, fields: FieldSpec[]): string[] |
   }
   return matched.length ? matched : undefined;
 }
-export function actionPayload(action: Action, values: NativeStruct): unknown {
+export function actionPayload(action: Action, values: NativeStruct): WireValue {
   const payload = { ...values };
   if (action.name === 'validateKey' && Object.hasOwn(payload, 'legacyEncrypted')) {
     payload.legacy_encrypted = payload.legacyEncrypted;

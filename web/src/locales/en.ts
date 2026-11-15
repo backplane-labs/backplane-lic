@@ -1,4 +1,4 @@
-export default {
+export const english = {
   search: 'Search',
   searchDescription: 'Find licenses, users, products, policies, groups and entitlements by their attributes.',
   query: 'Query',

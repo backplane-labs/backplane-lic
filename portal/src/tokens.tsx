@@ -21,6 +21,7 @@ import {
   Notice,
   useLoad,
 } from './components';
+import { toFailure } from './errors';
 import { useLocale } from './i18n';
 
 type Action = { kind: 'revoke' | 'regenerate'; token: Resource };
@@ -34,7 +35,7 @@ export function Tokens() {
   const [action, setAction] = useState<Action | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [message, setMessage] = useState('');
   useEffect(() => {
     if (!message) return;
@@ -58,7 +59,7 @@ export function Tokens() {
       setMessage(t('tokenCreated'));
       result.reload();
     } catch (cause) {
-      setError(cause);
+      setError(toFailure(cause));
     } finally {
       setBusy(false);
     }
@@ -88,7 +89,7 @@ export function Tokens() {
       setAction(null);
       result.reload();
     } catch (cause) {
-      setError(cause);
+      setError(toFailure(cause));
     } finally {
       setBusy(false);
     }
@@ -269,10 +270,9 @@ export function Tokens() {
             <DialogDescription>{t('secretDetail')}</DialogDescription>
           </DialogHeader>
           <div className="field">
-            <label>{t('tokenSecret')}</label>
-            <code className="secret-value" tabIndex={0}>
-              {secret}
-            </code>
+            {/* A caption, not a form label: the value is text with its own copy control. */}
+            <span className="field-label">{t('tokenSecret')}</span>
+            <code className="secret-value">{secret}</code>
           </div>
           <DialogFooter>
             <CopyButton value={secret ?? ''} label="copyToken" />

@@ -4,6 +4,7 @@ import { config } from './api';
 import { AuthProvider, useAuth } from './auth';
 import { ForgotPassword, Login, ResetPassword } from './auth-pages';
 import { Button, Empty, ErrorNotice, Loading } from './components';
+import { toFailure } from './errors';
 import { LocaleProvider, useLocale } from './i18n';
 import { LicenseDetail, Licenses } from './licenses';
 import { Profile } from './profile';
@@ -42,7 +43,14 @@ function Preferences() {
     <div className="preferences">
       <label>
         <span className="sr-only">{t('theme')}</span>
-        <select aria-label={t('theme')} value={theme} onChange={(e) => setTheme(e.target.value as Theme)}>
+        <select
+          aria-label={t('theme')}
+          value={theme}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === 'light' || value === 'dark' || value === 'system') setTheme(value);
+          }}
+        >
           <option value="system">{t('system')}</option>
           <option value="light">{t('light')}</option>
           <option value="dark">{t('dark')}</option>
@@ -50,7 +58,14 @@ function Preferences() {
       </label>
       <label>
         <span className="sr-only">{t('language')}</span>
-        <select aria-label={t('language')} value={locale} onChange={(e) => setLocale(e.target.value as 'en' | 'ru')}>
+        <select
+          aria-label={t('language')}
+          value={locale}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === 'en' || value === 'ru') setLocale(value);
+          }}
+        >
           <option value="en">English</option>
           <option value="ru">Русский</option>
         </select>
@@ -159,11 +174,12 @@ function CustomerLayout() {
   const { t } = useLocale();
   const { user, logout } = useAuth();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
-  const location = useLocation();
+  const [error, setError] = useState<Error | null>(null);
+  const { pathname } = useLocation();
   useEffect(() => {
-    document.querySelector<HTMLElement>('#main')?.focus();
-  }, [location.pathname]);
+    // Moving to another route returns focus to the main region.
+    if (pathname) document.querySelector<HTMLElement>('#main')?.focus();
+  }, [pathname]);
   return (
     <div className="customer-page">
       <a className="skip-link" href="#main">
@@ -186,7 +202,7 @@ function CustomerLayout() {
                 try {
                   await logout();
                 } catch (cause) {
-                  setError(cause);
+                  setError(toFailure(cause));
                 } finally {
                   setBusy(false);
                 }
@@ -254,7 +270,7 @@ export function Providers({ children }: { children: ReactNode }) {
     </LocaleProvider>
   );
 }
-export default function App() {
+export function App() {
   return (
     <Providers>
       <BrowserRouter basename={config.basePath}>

@@ -66,7 +66,7 @@ jobs:
       - run: make db && git diff --exit-code -- internal/infra/postgres/db internal/infra/postgres/migrations
       - run: make gen-api && git diff --exit-code -- openapi internal/oas
       - run: make gen && git diff --exit-code -- proto web/src/gen
-      - run: cd web && yarn typecheck && yarn test && yarn build
-      - run: cd portal && yarn typecheck && yarn test && yarn build
+      - run: cd web && yarn lint && yarn typecheck && yarn test && yarn build
+      - run: cd portal && yarn lint && yarn typecheck && yarn test && yarn build
       - run: go vet ./...
       - run: go test -race -p 1 -count=1 -timeout 15m ./...

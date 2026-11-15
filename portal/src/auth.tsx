@@ -1,13 +1,13 @@
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { API, APIError, type Resource, readSession, type Session, saveSession } from './api';
-import { CustomerError } from './errors';
+import { CustomerError, toFailure } from './errors';
 
 interface Auth {
   session: Session | null;
   user: Resource | null;
   api: API;
   checking: boolean;
-  error: unknown;
+  error: Error | null;
   login: (session: Session) => Promise<void>;
   logout: () => Promise<void>;
   replaceSession: (session: Session | null) => void;
@@ -18,14 +18,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const activeSession = useRef(session);
   const [user, setUser] = useState<Resource | null>(null);
   const [checking, setChecking] = useState(!!session);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   const api = useMemo(() => new API(session?.token), [session?.token]);
-  function replaceSession(value: Session | null) {
+  const replaceSession = useCallback((value: Session | null) => {
     activeSession.current = value;
     saveSession(value);
     setSession(value);
     if (!value) setUser(null);
-  }
+  }, []);
   useEffect(() => {
     function invalidate(event: Event) {
       // A late failure from a revoked or regenerated credential must not clear a newer session.
@@ -35,20 +35,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     window.addEventListener('lic-session-invalid', invalidate);
     return () => window.removeEventListener('lic-session-invalid', invalidate);
-  }, []);
+  }, [replaceSession]);
+  // The profile check below reads refs so its effect only re-runs when the API client changes.
+  const userRef = useRef<Resource | null>(user);
   useEffect(() => {
-    if (!session) {
+    userRef.current = user;
+  }, [user]);
+  useEffect(() => {
+    if (!activeSession.current) {
       setChecking(false);
       return;
     }
     const controller = new AbortController();
     // Revalidating a regenerated session must not unmount its show-once secret dialog.
-    if (!user) setChecking(true);
+    if (!userRef.current) setChecking(true);
     api
       .request('/profile', { signal: controller.signal })
       .then((response) => {
         if (controller.signal.aborted) return;
-        if (response.data.type !== 'users' || response.data.attributes.role !== 'user') {
+        if (response.data?.type !== 'users' || response.data.attributes.role !== 'user') {
           replaceSession(null);
           setError(new CustomerError('customerOnly'));
           return;
@@ -60,28 +65,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cause instanceof APIError && (cause.status === 401 || cause.has('USER_BANNED'))) {
           replaceSession(null);
           setError(new CustomerError('sessionExpired'));
-        } else setError(cause);
+        } else setError(toFailure(cause));
       })
       .finally(() => {
         if (!controller.signal.aborted) setChecking(false);
       });
     return () => controller.abort();
-  }, [api]);
+  }, [api, replaceSession]);
+  // A generated login token must not be persisted before its bearer is verified.
   async function login(value: Session) {
     const client = new API(value.token);
-    try {
-      const response = await client.request('/profile');
-      if (response.data.type !== 'users' || response.data.attributes.role !== 'user') {
-        await client.request(`/tokens/${encodeURIComponent(value.tokenId)}`, { method: 'DELETE' });
-        throw new CustomerError('customerOnly');
-      }
-      setError(null);
-      setUser(response.data);
-      replaceSession(value);
-    } catch (cause) {
-      // A generated login token must not be persisted before its bearer is verified.
-      throw cause;
+    const response = await client.request('/profile');
+    if (response.data?.type !== 'users' || response.data.attributes.role !== 'user') {
+      await client.request(`/tokens/${encodeURIComponent(value.tokenId)}`, { method: 'DELETE' });
+      throw new CustomerError('customerOnly');
     }
+    setError(null);
+    setUser(response.data);
+    replaceSession(value);
   }
   async function logout() {
     if (session) await api.request(`/tokens/${encodeURIComponent(session.tokenId)}`, { method: 'DELETE' });

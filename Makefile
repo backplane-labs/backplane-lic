@@ -112,6 +112,11 @@ spec: ## Bundle openapi/src fragments into openapi/openapi.yaml (3.1)
 configure-web: ## Install the console plugin dependencies
 	cd "$(CURDIR)/web" && $(YARN) install --immutable
 
+.PHONY: lint-web
+lint-web: ## Lint and format-check the console module and the portal (Biome)
+	cd "$(CURDIR)/web" && $(YARN) lint
+	cd "$(CURDIR)/portal" && $(YARN) lint
+
 .PHONY: gen
 gen: lint-proto ## Generate the console Go API and TypeScript client
 	$(EASYP) generate

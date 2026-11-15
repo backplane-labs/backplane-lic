@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { API, APIError, basic, config, resetParameters, secretSession } from './api';
 import { useAuth } from './auth';
 import { Button, ErrorNotice, Field, Notice } from './components';
-import { CustomerError } from './errors';
+import { CustomerError, toFailure } from './errors';
 import { useLocale } from './i18n';
 
 export function Login() {
@@ -16,7 +16,7 @@ export function Login() {
   const [otp, setOTP] = useState('');
   const [otpRequired, setOTPRequired] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   // The reason a previous session ended is shown until the next attempt.
   const [attempted, setAttempted] = useState(false);
   if (auth.user) return <Navigate to="/licenses" replace />;
@@ -37,14 +37,18 @@ export function Login() {
       await auth.login(secretSession(response.data));
       setPassword('');
       setOTP('');
-      const from = (location.state as { from?: string } | null)?.from;
-      navigate(from?.startsWith('/') && !from.startsWith('//') && from !== '/login' ? from : '/licenses', {
+      const state = location.state;
+      const from =
+        state && typeof state === 'object' && 'from' in state && typeof state.from === 'string'
+          ? state.from
+          : undefined;
+      await navigate(from?.startsWith('/') && !from.startsWith('//') && from !== '/login' ? from : '/licenses', {
         replace: true,
       });
     } catch (cause) {
       if (cause instanceof APIError && cause.has('OTP_REQUIRED')) {
         setOTPRequired(true);
-      } else setError(cause);
+      } else setError(toFailure(cause));
     } finally {
       setBusy(false);
     }
@@ -125,7 +129,7 @@ export function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   return (
     <div className="auth-form">
       <h1>{t('forgotHeading')}</h1>
@@ -143,7 +147,7 @@ export function ForgotPassword() {
               await new API().request('/passwords', { method: 'POST', body: { meta: { email: email.trim() } } });
               setDone(true);
             } catch (cause) {
-              setError(cause);
+              setError(toFailure(cause));
             } finally {
               setBusy(false);
             }
@@ -183,7 +187,7 @@ export function ResetPassword() {
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<Error | null>(null);
   if (!params.userId || !params.token || (params.account && params.account !== config.account))
     return (
       <div className="auth-form">
@@ -221,7 +225,7 @@ export function ResetPassword() {
               setConfirm('');
               setDone(true);
             } catch (cause) {
-              setError(cause);
+              setError(toFailure(cause));
             } finally {
               setBusy(false);
             }

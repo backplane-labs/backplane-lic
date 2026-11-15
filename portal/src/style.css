@@ -308,7 +308,8 @@ code {
   margin-bottom: 20px;
   min-width: 0;
 }
-.field label {
+.field label,
+.field .field-label {
   font-size: 14px;
   font-weight: 550;
 }
@@ -1032,11 +1033,11 @@ dl dd {
   flex-wrap: wrap;
   gap: 8px 20px;
 }
-.footer-inner a {
+.footer-inner nav a {
   color: var(--muted-foreground);
   text-decoration: none;
 }
-.footer-inner a:hover {
+.footer-inner nav a:hover {
   color: var(--foreground);
   text-decoration: underline;
 }

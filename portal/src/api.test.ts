@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { API, APIError, basic, readSession, resetParameters, saveSession, secretSession } from './api';
+import { API, APIError, basic, type JSONValue, readSession, resetParameters, saveSession, secretSession } from './api';
 
 const fetchMock = vi.fn();
 beforeEach(() => {
@@ -8,7 +8,7 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 afterEach(() => vi.unstubAllGlobals());
-function json(body: unknown, status = 200) {
+function json(body: JSONValue, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/vnd.api+json' } });
 }
 
@@ -46,7 +46,9 @@ describe('public API client', () => {
         401,
       ),
     );
-    const error = await new API().request('/tokens').catch((cause) => cause as APIError);
+    const error = await new API()
+      .request('/tokens')
+      .catch((cause) => (cause instanceof APIError ? cause : new Error(String(cause))));
     expect(error).toBeInstanceOf(APIError);
     if (!(error instanceof APIError)) throw new Error('Expected APIError');
     expect(error.has('OTP_REQUIRED')).toBe(true);
