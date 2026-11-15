@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/backplane-labs/backplane/pkg/backplane/tracehttp"
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
 
@@ -99,7 +100,8 @@ func newClient(allowed []*net.IPNet) *http.Client {
 		// Redirects are never followed: a redirect is the
 		// REDIRECT_ERROR outcome, not a delivery.
 		CheckRedirect: func(*http.Request, []*http.Request) error { return errRedirect },
-		Transport:     &http.Transport{DialContext: dialer.DialContext},
+		// A client span per delivery; the customer's endpoint gets no trace context.
+		Transport: tracehttp.NewTransport(&http.Transport{DialContext: dialer.DialContext}),
 	}
 }
 
