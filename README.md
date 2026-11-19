@@ -72,6 +72,7 @@ File (`BACKPLANE_CONFIG_FILE`) < env `LIC_*` (the SDK block reads
 |---|---|---|
 | `store.dsn` | `LIC_STORE_DSN` | PostgreSQL connection string |
 | `cache.addr` | `LIC_CACHE_ADDR` | Valkey address (cache-aside, optional) |
+| `cache.sentinel.master_set`, `cache.sentinel.addrs`, `cache.sentinel.password` | `LIC_CACHE_SENTINEL_MASTER_SET`, `LIC_CACHE_SENTINEL_ADDRS`, `LIC_CACHE_SENTINEL_PASSWORD` | Valkey under Sentinel instead of `cache.addr`: the client follows the primary across failovers |
 | `account.id` | `LIC_ACCOUNT_ID` | the single account's UUID, created at startup if missing |
 | `account.slug` | `LIC_ACCOUNT_SLUG` | the account's slug (also its API address) |
 | `account.name` | `LIC_ACCOUNT_NAME` | display name |
