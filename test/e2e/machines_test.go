@@ -58,7 +58,7 @@ func (e *env) fixture() {
 	policy := e.Policy(e.t, product, lictest.Attributes{
 		"name": "e2e policy", "authenticationStrategy": "LICENSE", "floating": true, "maxMachines": 3,
 	})
-	license := e.License(e.t, policy, nil)
+	license := e.License(e.t, policy, lictest.Attributes{"metadata": map[string]any{"seats": 25}})
 
 	e.licenseID, e.licenseKey, e.productTok = license.ID, license.Key, e.ProductToken(e.t, product)
 
@@ -195,23 +195,23 @@ func (e *env) updateMetadata(key installation.Key) {
 	}
 
 	err = vendor.UpdateMetadata(ctx, licensing.Metadata{
-		"paymentDeadline": json.RawMessage(`"2026-12-01T00:00:00Z"`),
-		"mode":            json.RawMessage(`"online"`),
-		"ack":             json.RawMessage(`{"epoch":7,"seq":2,"hash":"abcd"}`),
+		"vendorPaymentDeadline": json.RawMessage(`"2026-12-01T00:00:00Z"`),
+		"vendorMode":            json.RawMessage(`"online"`),
+		"note":                  json.RawMessage(`"kept"`),
 	})
 	if err != nil {
 		e.t.Fatal(err)
 	}
 
-	if err := vendor.UpdateMetadata(ctx, licensing.Metadata{"mode": json.RawMessage(`null`)}); err != nil {
+	if err := vendor.UpdateMetadata(ctx, licensing.Metadata{"vendorMode": json.RawMessage(`null`)}); err != nil {
 		e.t.Fatal(err)
 	}
 
-	if _, ok := vendor.Metadata["mode"]; ok {
-		e.t.Errorf("a null value kept its key: %s", vendor.Metadata["mode"])
+	if _, ok := vendor.Metadata["vendorMode"]; ok {
+		e.t.Errorf("a null value kept its key: %s", vendor.Metadata["vendorMode"])
 	}
 
-	file, err := vendor.Checkout(ctx, licensing.CheckoutEncrypt(false))
+	file, err := vendor.Checkout(ctx, licensing.CheckoutEncrypt(false), licensing.CheckoutInclude("license"))
 	if err != nil {
 		e.t.Fatal(err)
 	}
@@ -221,19 +221,14 @@ func (e *env) updateMetadata(key installation.Key) {
 		e.t.Fatal(err)
 	}
 
+	// The license's metadata is signed in too.
+	if seats := string(dataset.License.Metadata["seats"]); seats != "25" {
+		e.t.Errorf("signed license metadata = %s", dataset.License.Metadata)
+	}
+
 	signed := dataset.Machine.Metadata
-	if deadline, _ := signed.String("paymentDeadline"); deadline != "2026-12-01T00:00:00Z" {
+	if deadline, _ := signed.String("vendorPaymentDeadline"); deadline != "2026-12-01T00:00:00Z" {
 		e.t.Errorf("signed metadata = %s", signed)
-	}
-
-	var ack struct {
-		Epoch int    `json:"epoch"`
-		Seq   int    `json:"seq"`
-		Hash  string `json:"hash"`
-	}
-
-	if err := json.Unmarshal(signed["ack"], &ack); err != nil || ack.Epoch != 7 || ack.Seq != 2 || ack.Hash != "abcd" {
-		e.t.Errorf("signed ack = %s, %v", signed["ack"], err)
 	}
 
 	if fp, _ := signed.String("fingerprint"); fp != key.Fingerprint() {
@@ -414,6 +409,23 @@ func (e *env) reportUsage(machine *licensing.Machine, key installation.Key) chai
 
 	if again, err = machine.ReportUsage(ctx, &out.second); err != nil || *again != out.ack2 {
 		e.t.Fatalf("re-send of the second = %+v, %v", again, err)
+	}
+
+	// The accepted head rides in the next machine file: an offline
+	// installation learns it from the file the operator brings.
+	file, err := machine.Checkout(ctx, licensing.CheckoutEncrypt(false))
+	if err != nil {
+		e.t.Fatal(err)
+	}
+
+	dataset, err := file.Decode()
+	if err != nil {
+		e.t.Fatal(err)
+	}
+
+	var signedAck usage.Acked
+	if err := json.Unmarshal(dataset.Machine.Metadata["vendorUsageAck"], &signedAck); err != nil || signedAck != out.ack2 {
+		e.t.Fatalf("machine file ack = %s (%v), want %+v", dataset.Machine.Metadata["vendorUsageAck"], err, out.ack2)
 	}
 
 	// Once the chain moved on, the first report is a fork.
@@ -599,5 +611,55 @@ func TestUsageIsVendorSideOnly(t *testing.T) {
 
 	if _, err = keyless.ReportUsage(t.Context(), report); !errors.As(err, &apiErr) || apiErr.Code != "USAGE_KEY_MISSING" {
 		t.Errorf("keyless report = %v", err)
+	}
+}
+
+// A licensee activating a machine sets its own metadata but never the
+// vendor keys a signed machine file vouches for (vendorPaymentDeadline...);
+// an update's metadata is the vendor's alone (Keygen).
+func TestVendorMetadataReserved(t *testing.T) {
+	t.Parallel()
+
+	srv := boot(t).Server
+	product := srv.Product(t, "vendor keys")
+	policy := srv.Policy(t, product, lictest.Attributes{
+		"name": "unprotected", "authenticationStrategy": "LICENSE", "protected": false, "floating": true, "maxMachines": 5,
+	})
+	license := srv.License(t, policy, nil)
+	ctx := t.Context()
+
+	own, err := srv.Client(t, licensing.Config{LicenseKey: license.Key}).Me(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name, fingerprint string
+		metadata          map[string]string
+		code              string
+	}{
+		{
+			name: "vendor key", fingerprint: "fp-forged", metadata: map[string]string{"vendorPaymentDeadline": "2099-01-01"},
+			code: "METADATA_KEY_RESERVED",
+		},
+		{name: "own keys", fingerprint: "fp-own", metadata: map[string]string{"note": "mine"}},
+	}
+
+	for _, tc := range tests {
+		_, err := own.Activate(ctx, tc.fingerprint, licensing.WithMachineMetadata(tc.metadata))
+
+		var apiErr *licensing.APIError
+		if tc.code == "" && err != nil || tc.code != "" && (!errors.As(err, &apiErr) || apiErr.Code != tc.code) {
+			t.Errorf("%s: %v", tc.name, err)
+		}
+	}
+
+	vendor, err := srv.Client(t, licensing.Config{Token: srv.ProductToken(t, product)}).Machine(ctx, "fp-own")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := vendor.UpdateMetadata(ctx, licensing.Metadata{"vendorPaymentDeadline": json.RawMessage(`"2026-12-01"`)}); err != nil {
+		t.Fatalf("vendor writing its key: %v", err)
 	}
 }

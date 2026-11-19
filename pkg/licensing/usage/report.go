@@ -205,6 +205,10 @@ func (r *Report) Verify(pub ed25519.PublicKey, acked Acked) (Acked, error) {
 		return Acked{}, fmt.Errorf("%w: %d", ErrFormat, r.Format)
 	}
 
+	if r.SeqTo >= r.SeqFrom && r.SeqTo-r.SeqFrom >= MaxReportEvents {
+		return Acked{}, fmt.Errorf("%w: %d..%d", ErrTooLarge, r.SeqFrom, r.SeqTo)
+	}
+
 	// 1. Check signature.
 	payload := r.SigningPayload()
 

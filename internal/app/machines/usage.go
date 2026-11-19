@@ -184,6 +184,10 @@ func usageRefusal(err error) error {
 			Status: apperr.Conflict("").Status, Title: apperr.TitleConflict, Code: "USAGE_GAP",
 			Detail: "the report does not continue the accepted chain", Source: apperr.Source{Pointer: "/meta/report/seqFrom"},
 		}
+	case errors.Is(err, usage.ErrTooLarge):
+		return apperr.Unprocessable("USAGE_REPORT_TOO_LARGE",
+			fmt.Sprintf("must carry at most %d events; report the rest after the ack", usage.MaxReportEvents),
+			"/meta/report/seqTo")
 	case errors.Is(err, usage.ErrFormat):
 		return apperr.Unprocessable("USAGE_FORMAT_INVALID", err.Error(), "/meta/report")
 	default:

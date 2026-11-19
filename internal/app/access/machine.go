@@ -4,8 +4,13 @@
 package access
 
 import (
+	"maps"
+	"reflect"
+	"strings"
+
 	"github.com/google/uuid"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
@@ -312,4 +317,40 @@ func MachineResetHeartbeat(p Principal, m domain.Machine) error {
 	default:
 		return deny()
 	}
+}
+
+// VendorMetadataPrefix marks the machine metadata keys only the vendor
+// writes (a backplane extension): the values a signed machine file
+// carries for the product to trust, such as its deadlines. Keys are
+// stored underscored, so vendorPaymentDeadline on the wire is
+// vendor_payment_deadline here.
+const VendorMetadataPrefix = "vendor_"
+
+// MachineVendorMetadata guards the vendor keys of a machine's metadata
+// (create: before is nil): the staff writers and the machine's product
+// change them freely; anyone else must leave every one as it was. Only an
+// activation needs it: an update's metadata is the vendor's alone already.
+func MachineVendorMetadata(p Principal, m domain.Machine, before, after map[string]any) error {
+	if isStaffWriter(p) || p.Role == domain.RoleProduct && m.ProductID == p.BearerID {
+		return nil
+	}
+
+	if !maps.EqualFunc(vendorKeys(before), vendorKeys(after), reflect.DeepEqual) {
+		return apperr.Forbidden("METADATA_KEY_RESERVED",
+			"metadata keys starting with vendor are written by the vendor only")
+	}
+
+	return nil
+}
+
+func vendorKeys(metadata map[string]any) map[string]any {
+	out := map[string]any{}
+
+	for k, v := range metadata {
+		if strings.HasPrefix(k, VendorMetadataPrefix) {
+			out[k] = v
+		}
+	}
+
+	return out
 }

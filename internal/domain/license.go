@@ -19,7 +19,7 @@ const (
 
 // The policy's expiration strategies that revoke access on expiry.
 const (
-	ExpirationRestrictAccess = "RESTRICT_ACCESS"
+	ExpirationRevokeAccess = "REVOKE_ACCESS"
 )
 
 // The license statuses, in resolution order.
@@ -73,9 +73,11 @@ func (l LicenseAuth) Expired(now time.Time) bool {
 	return l.Expiry != nil && l.Expiry.Before(now)
 }
 
-// RestrictsAccess mirrors Policy#revoke_access? (RESTRICT_ACCESS).
-func (l LicenseAuth) RestrictsAccess() bool {
-	return l.PolicyExpirationStrategy == ExpirationRestrictAccess
+// RevokesAccess mirrors Policy#revoke_access? (REVOKE_ACCESS): an expired
+// license no longer authenticates. RESTRICT_ACCESS (the default) still
+// does, and check-out answers it a file with the license expired inside.
+func (l LicenseAuth) RevokesAccess() bool {
+	return l.PolicyExpirationStrategy == ExpirationRevokeAccess
 }
 
 // License is a license: its row plus the policy it delegates to (the

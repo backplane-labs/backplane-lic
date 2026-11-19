@@ -306,7 +306,7 @@ func checkLicense(lic domain.LicenseAuth, now time.Time) error {
 		return apperr.Forbidden("LICENSE_BANNED", "License is banned")
 	case lic.Suspended:
 		return apperr.Forbidden("LICENSE_SUSPENDED", "License is suspended")
-	case lic.RestrictsAccess() && lic.Expired(now):
+	case lic.RevokesAccess() && lic.Expired(now):
 		return apperr.Forbidden("LICENSE_EXPIRED", "License is expired")
 	case !lic.SupportsLicenseAuth():
 		return apperr.Forbidden("LICENSE_NOT_ALLOWED", "License key authentication is not allowed by policy")

@@ -111,6 +111,7 @@ func machineScenarios() []conformance.Scenario {
 		machineRolesScenario(k),
 		machineHeartbeatScenario(k),
 		machineCheckoutScenario(k),
+		machineCheckoutStatesScenario(k),
 		machineRelationshipsScenario(k),
 		machineActivationTokenScenario(k),
 		machineValidationScenario(k),
@@ -426,6 +427,53 @@ func machineCheckoutScenario(k machineKit) conformance.Scenario {
 		},
 		k.step("show last check out", http.MethodGet, "/machines/{{outMachine}}", "", admin),
 		k.step("generate offline proof", http.MethodPost, "/machines/{{outMachine}}/actions/generate-offline-proof", "", admin),
+	}}
+}
+
+// machineCheckoutStatesScenario: what check-out answers for a machine of a
+// suspended, an expired and a banned (its owner banned) license, to the
+// vendor and to the licensee; a product reads the license status inside
+// the file it is given, or the refusal.
+func machineCheckoutStatesScenario(k machineKit) conformance.Scenario {
+	admin := k.admin
+	licensee := func(license string) conformance.Auth {
+		return conformance.Auth{Kind: conformance.AuthLicenseVar, Var: license + "Key"}
+	}
+
+	return conformance.Scenario{Name: "machines_checkout_states", Steps: []conformance.Step{
+		k.product("stProduct"),
+		k.policy("stPolicy", "stProduct", `"floating":true,"maxMachines":5,"authenticationStrategy":"LICENSE"`),
+		k.user("stOwner"),
+		k.license("stSuspended", "stPolicy", ""),
+		k.license("stExpired", "stPolicy", ""),
+		k.license("stBanned", "stPolicy", "stOwner"),
+		k.policy("stRevoke", "stProduct",
+			`"floating":true,"maxMachines":5,"authenticationStrategy":"LICENSE","expirationStrategy":"REVOKE_ACCESS"`),
+		k.license("stRevoked", "stRevoke", ""),
+		k.machine("activate suspended", "stSuspendedMachine", "stSuspended", "st-sus-{{run}}", "", "", admin),
+		k.machine("activate expired", "stExpiredMachine", "stExpired", "st-exp-{{run}}", "", "", admin),
+		k.machine("activate banned", "stBannedMachine", "stBanned", "st-ban-{{run}}", "", "", admin),
+		k.machine("activate revoke access", "stRevokedMachine", "stRevoked", "st-rev-{{run}}", "", "", admin),
+		k.step("suspend", http.MethodPost, "/licenses/{{stSuspended}}/actions/suspend", "", admin),
+		k.step("expire", http.MethodPatch, "/licenses/{{stExpired}}",
+			`{"data":{"type":"licenses","attributes":{"expiry":"2001-01-01T00:00:00.000Z"}}}`, admin),
+		k.step("ban owner", http.MethodPost, "/users/{{stOwner}}/actions/ban", "", admin),
+		k.step("expire revoke access", http.MethodPatch, "/licenses/{{stRevoked}}",
+			`{"data":{"type":"licenses","attributes":{"expiry":"2001-01-01T00:00:00.000Z"}}}`, admin),
+		k.step("check out suspended as vendor", http.MethodPost,
+			"/machines/{{stSuspendedMachine}}/actions/check-out?encrypt=false&include=license", "", admin),
+		k.step("check out suspended as licensee", http.MethodPost,
+			"/machines/{{stSuspendedMachine}}/actions/check-out?encrypt=false&include=license", "", licensee("stSuspended")),
+		k.step("check out expired as vendor", http.MethodPost,
+			"/machines/{{stExpiredMachine}}/actions/check-out?encrypt=false&include=license", "", admin),
+		k.step("check out expired as licensee", http.MethodPost,
+			"/machines/{{stExpiredMachine}}/actions/check-out?encrypt=false&include=license", "", licensee("stExpired")),
+		k.step("check out banned as vendor", http.MethodPost,
+			"/machines/{{stBannedMachine}}/actions/check-out?encrypt=false&include=license", "", admin),
+		k.step("check out banned as licensee", http.MethodPost,
+			"/machines/{{stBannedMachine}}/actions/check-out?encrypt=false&include=license", "", licensee("stBanned")),
+		k.step("check out expired revoke access as licensee", http.MethodPost,
+			"/machines/{{stRevokedMachine}}/actions/check-out?encrypt=false&include=license", "", licensee("stRevoked")),
 	}}
 }
 

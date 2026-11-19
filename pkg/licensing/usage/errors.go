@@ -21,4 +21,7 @@ var (
 
 	// ErrFormat reports an unknown or unsupported report format version.
 	ErrFormat = errors.New("unsupported report format")
+
+	// ErrTooLarge reports a report of more than MaxReportEvents events.
+	ErrTooLarge = errors.New("report carries more than MaxReportEvents events")
 )

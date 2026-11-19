@@ -6281,6 +6281,22 @@ func (q *Queries) UsageAcks(ctx context.Context, arg UsageAcksParams) ([]UsageAc
 	return items, nil
 }
 
+const setMachineUsageAckSQL = `-- The accepted head rides in the machine's metadata (vendorUsageAck on the
+-- wire), so the next machine file carries it to an offline installation.
+UPDATE lic.machines SET metadata = jsonb_set(metadata, '{vendor_usage_ack}', $1::jsonb), updated_at = $2
+WHERE id = $3;`
+
+type SetMachineUsageAckParams struct {
+	Ack       json.RawMessage
+	UpdatedAt time.Time
+	MachineID uuid.UUID
+}
+
+func (q *Queries) SetMachineUsageAck(ctx context.Context, arg SetMachineUsageAckParams) error {
+	_, err := q.db.Exec(ctx, setMachineUsageAckSQL, arg.Ack, arg.UpdatedAt, arg.MachineID)
+	return err
+}
+
 const getUserByEmailSQL = `SELECT id, account_id, first_name, last_name, email, password_digest, role,
   permissions, group_id, metadata, password_reset_token, password_reset_sent_at,
   banned_at, created_at, updated_at

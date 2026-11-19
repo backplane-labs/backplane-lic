@@ -673,3 +673,55 @@ func makeEvents(n int) [][]byte {
 
 	return events
 }
+
+// A tail longer than MaxReportEvents goes in consecutive reports, each
+// continuing the previous ack; the server refuses a longer one.
+func TestReport_ChunkedTail(t *testing.T) {
+	t.Parallel()
+
+	pub, priv, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	j := NewJournal("test-usage/v1", "fp", 1, Acked{})
+	for range MaxReportEvents + 1 {
+		if _, _, err := j.Append([]byte("e")); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var (
+		acked   Acked
+		reports []uint64
+	)
+
+	for {
+		report, pending, err := j.AckPending("1.0.0")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !pending {
+			break
+		}
+
+		report.Sign(priv)
+
+		if acked, err = report.Verify(pub, acked); err != nil {
+			t.Fatalf("report %d..%d: %v", report.SeqFrom, report.SeqTo, err)
+		}
+
+		j.Ack(acked)
+		reports = append(reports, report.SeqTo-report.SeqFrom+1)
+	}
+
+	if len(reports) != 2 || reports[0] != MaxReportEvents || reports[1] != 1 || acked.Seq != MaxReportEvents+1 {
+		t.Fatalf("reports %v, acked %+v", reports, acked)
+	}
+
+	tooLarge := &Report{Format: FormatV1, SeqFrom: 1, SeqTo: MaxReportEvents + 1}
+	if _, err := tooLarge.Verify(pub, Acked{}); !errors.Is(err, ErrTooLarge) {
+		t.Fatalf("oversized report: %v", err)
+	}
+}

@@ -32,3 +32,9 @@ SELECT epoch, seq, hash FROM lic.machine_usage_acks
 WHERE machine_id = @machine_id AND epoch = @epoch AND seq > @after
 ORDER BY seq
 LIMIT @lim;
+
+-- name: SetMachineUsageAck :exec
+-- The accepted head rides in the machine's metadata (vendorUsageAck on the
+-- wire), so the next machine file carries it to an offline installation.
+UPDATE lic.machines SET metadata = jsonb_set(metadata, '{vendor_usage_ack}', @ack::jsonb), updated_at = @updated_at
+WHERE id = @machine_id;

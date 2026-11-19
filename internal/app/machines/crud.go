@@ -159,6 +159,10 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 		machine.Heartbeat, machine.LicenseMaxProcesses = license.Policy.HeartbeatOf(), license.MaxProcesses()
 	}
 
+	if err := access.MachineVendorMetadata(principal, machine, nil, machine.Metadata); err != nil {
+		return domain.Machine{}, err
+	}
+
 	err = s.write(ctx, func(ctx context.Context) error {
 		if licensed {
 			if err := s.licenses.LockLicense(ctx, account.ID, license.ID); err != nil {

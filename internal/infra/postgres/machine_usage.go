@@ -113,6 +113,17 @@ func (r MachinesRepo) AppendUsage(
 		return fmt.Errorf("postgres: usage head: %w", err)
 	}
 
+	rawAck, err := json.Marshal(ack)
+	if err != nil {
+		return fmt.Errorf("postgres: usage ack: %w", err)
+	}
+
+	if err := r.q.SetMachineUsageAck(ctx, db.SetMachineUsageAckParams{
+		MachineID: machineID, Ack: rawAck, UpdatedAt: now,
+	}); err != nil {
+		return fmt.Errorf("postgres: machine usage ack: %w", err)
+	}
+
 	return nil
 }
 

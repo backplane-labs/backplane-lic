@@ -1,6 +1,7 @@
 package access_test
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/google/uuid"
@@ -201,5 +202,52 @@ func BenchmarkMachineUpdate(b *testing.B) {
 		for _, a := range actors {
 			_ = access.MachineUpdate(a.principal, a.machine)
 		}
+	}
+}
+
+// The vendor keys of a machine's metadata are written by the staff
+// writers and the machine's product only; anyone else keeps them as they
+// were, and writes the other keys freely.
+func TestMachineVendorMetadata(t *testing.T) {
+	t.Parallel()
+
+	vendor := []string{"admin", "developer", "sales_agent", "support_agent", "product own"}
+
+	changes := []struct {
+		name          string
+		before, after map[string]any
+		anyoneMay     bool
+	}{
+		{name: "create with a vendor key", after: map[string]any{"vendor_deadline": "2027-01-01"}},
+		{name: "change a vendor key", before: map[string]any{"vendor_deadline": "a"}, after: map[string]any{"vendor_deadline": "b"}},
+		{name: "drop a vendor key", before: map[string]any{"vendor_deadline": "a"}, after: map[string]any{}},
+		{
+			name: "keep vendor keys, change others", before: map[string]any{"vendor_deadline": "a", "name": "x"},
+			after: map[string]any{"vendor_deadline": "a", "name": "y"}, anyoneMay: true,
+		},
+		{name: "no vendor keys", after: map[string]any{"vendorish": 1}, anyoneMay: true},
+	}
+
+	for _, c := range changes {
+		for _, a := range machineActors() {
+			t.Run(c.name+"/"+a.name, func(t *testing.T) {
+				t.Parallel()
+
+				err := access.MachineVendorMetadata(a.principal, a.machine, c.before, c.after)
+				if want := c.anyoneMay || slices.Contains(vendor, a.name); (err == nil) != want {
+					t.Fatalf("allowed %v, want %v (%v)", err == nil, want, err)
+				}
+			})
+		}
+	}
+}
+
+func BenchmarkMachineVendorMetadata(b *testing.B) {
+	p := access.Principal{Role: domain.RoleLicense, BearerType: access.BearerLicense, BearerID: uuid.New()}
+	before := map[string]any{"vendor_deadline": "a", "name": "x", "vendor_mode": "pilot"}
+	after := map[string]any{"vendor_deadline": "a", "name": "y", "vendor_mode": "pilot"}
+
+	for b.Loop() {
+		_ = access.MachineVendorMetadata(p, domain.Machine{}, before, after)
 	}
 }

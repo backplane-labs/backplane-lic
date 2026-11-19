@@ -6,6 +6,10 @@ import (
 	"math"
 )
 
+// MaxReportEvents is the most events one report carries: a longer tail
+// is reported in consecutive reports, each continuing the previous ack.
+const MaxReportEvents = 10000
+
 // maxEventSize is the largest single event the canonical wire encoding
 // can address with its 4-byte length prefix.
 const maxEventSize = math.MaxUint32
@@ -84,7 +88,8 @@ func (j *Journal) Epoch() uint64 {
 }
 
 // Report builds a report covering events from acked+1 through the
-// current head.
+// current head, at most MaxReportEvents of them: the rest goes in the
+// next report, after this one's ack.
 func (j *Journal) Report(build string) (*Report, error) {
 	seqFrom := j.acked.Seq + 1
 
@@ -99,7 +104,7 @@ func (j *Journal) Report(build string) (*Report, error) {
 	var rawEvents [][]byte
 
 	for _, rec := range j.recs {
-		if rec.seq >= seqFrom {
+		if rec.seq >= seqFrom && len(rawEvents) < MaxReportEvents {
 			rawEvents = append(rawEvents, rec.data)
 		}
 	}
@@ -117,8 +122,9 @@ func (j *Journal) Report(build string) (*Report, error) {
 		Build()
 }
 
-// AckPending returns a report covering unacknowledged events. pending
-// is false, and the report nil, when all events have been acked.
+// AckPending returns a report covering unacknowledged events (the next
+// MaxReportEvents of them). pending is false, and the report nil, when all
+// events have been acked.
 func (j *Journal) AckPending(build string) (*Report, bool, error) {
 	if j.nextSeq <= j.acked.Seq {
 		return nil, false, nil

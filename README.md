@@ -121,6 +121,13 @@ UUID or its fingerprint. A `PUT` on an update route is the same as `PATCH`.
 | Components | `GET`/`POST /components`, `GET`/`PATCH`/`DELETE /components/{id}`, `GET /components/{id}/machine`, `/license`, `/product`, `GET /machines/{id}/components`, `GET /machines/{id}/components/{componentId}` |
 | Processes | `GET`/`POST /processes` (spawn), `GET`/`PATCH`/`DELETE /processes/{id}` (kill), `POST /processes/{id}/actions/ping`, `GET /processes/{id}/machine`, `/license`, `/product`, `GET /machines/{id}/processes`, `GET /machines/{id}/processes/{processId}` |
 
+A machine's metadata keys starting with `vendor` (`vendorPaymentDeadline`,
+`vendorMode`, …; stored underscored as `vendor_…`) are the vendor's: the
+signed machine file carries them for the product to trust. Only the admin
+family and the machine's product write them; an activation by anyone else
+that sets one is a 403 `METADATA_KEY_RESERVED` (an update's metadata is the
+vendor's alone already, as in Keygen). A backplane extension.
+
 A component is a named hardware fingerprint of a machine; its fingerprint is
 unique within the policy's component uniqueness scope (default
 `UNIQUE_PER_MACHINE`). A machine's fingerprint is unique within the policy's
@@ -131,6 +138,13 @@ policy's process leasing (`PER_MACHINE` by default, `PER_LICENSE`,
 or else the license's.
 
 ### Check-out: machine files and offline proofs
+
+Check-out by the licensee (license key or license token) of a suspended
+license is a 403 `LICENSE_SUSPENDED`, of a banned one (its owner banned) a
+403 `LICENSE_BANNED`; an expired license still gets its file (the license
+inside is expired) unless its policy's `expirationStrategy` is
+`REVOKE_ACCESS`, then a 403 `LICENSE_EXPIRED`. The vendor side always gets
+the file. Recorded against Keygen CE (`machines_checkout_states`).
 
 `GET …/actions/check-out` answers the signed certificate itself
 (`-----BEGIN MACHINE FILE-----`, as an attachment named `{machine}.lic`);
@@ -499,10 +513,17 @@ side only: the admin family and the machine's product. `after` is a
 sequence number; `limit` defaults to 100 and is capped at 1000. The journal
 is deleted together with its machine.
 
+An accepted report also sets the machine's `vendorUsageAck` metadata to its
+ack, so the next machine file carries it to an installation that reports
+offline. One report carries at most 10,000 events (`usage.MaxReportEvents`);
+`Journal.Report` cuts a longer tail, the rest goes in the next report after
+the ack.
+
 Refusals:
 
 | Code | Status | Meaning |
 |---|---|---|
+| `USAGE_REPORT_TOO_LARGE` | 422 | more than 10,000 events in one report |
 | `USAGE_KEY_MISSING` | 422 | the machine has no `publicKey` metadata |
 | `USAGE_KEY_INVALID` | 422 | the `publicKey` is not an Ed25519 key |
 | `USAGE_FINGERPRINT_MISMATCH` | 422 | the report's fingerprint is not the machine's |
