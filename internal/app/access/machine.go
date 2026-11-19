@@ -12,6 +12,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
+	"github.com/backplane-labs/backplane-lic/internal/domain/jsonapi"
 )
 
 // The machine rules take a machine already found within the bearer's
@@ -347,7 +348,9 @@ func vendorKeys(metadata map[string]any) map[string]any {
 	out := map[string]any{}
 
 	for k, v := range metadata {
-		if strings.HasPrefix(k, VendorMetadataPrefix) {
+		// Judged as rendered: a key the renderer camelizes into a vendor
+		// key (_vendor_x renders vendorX) is one.
+		if strings.HasPrefix(jsonapi.UnderscoreKey(jsonapi.CamelizeKey(k)), VendorMetadataPrefix) {
 			out[k] = v
 		}
 	}

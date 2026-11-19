@@ -2,9 +2,22 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { type API, APIError, type Resource } from './api';
 import { useAuth } from './auth';
-import { Button, CopyButton, DateValue, Empty, ErrorNotice, LoadError, Loading, Status, useLoad } from './components';
+import {
+  Button,
+  CopyButton,
+  DateValue,
+  Empty,
+  ErrorNotice,
+  fileName,
+  LoadError,
+  Loading,
+  Status,
+  saveFile,
+  useLoad,
+} from './components';
 import { toFailure } from './errors';
 import { useLocale } from './i18n';
+import { Machines } from './machines';
 
 interface LicenseView {
   license: Resource;
@@ -203,6 +216,7 @@ export function LicenseDetail() {
         <h2>{t('entitlements')}</h2>
         <Entitlements values={entitlements} />
       </section>
+      <Machines license={license} />
       <section className="panel">
         <h2>{t('download')}</h2>
         <p className="section-description">
@@ -223,14 +237,7 @@ export function LicenseDetail() {
               const certificate = response.data?.attributes.certificate;
               if (typeof certificate !== 'string' || !certificate)
                 throw new Error('The API returned no license certificate.');
-              const url = URL.createObjectURL(new Blob([certificate], { type: 'application/octet-stream' }));
-              const anchor = document.createElement('a');
-              anchor.href = url;
-              anchor.download = `${license.id.replace(/[^a-zA-Z0-9-]/g, '_')}.lic`;
-              document.body.append(anchor);
-              anchor.click();
-              anchor.remove();
-              setTimeout(() => URL.revokeObjectURL(url), 1000);
+              saveFile(certificate, fileName(license.id, 'lic'));
             } catch (cause) {
               setError(toFailure(cause));
             } finally {

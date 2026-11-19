@@ -46,7 +46,12 @@ export type Attributes = {
   secret?: string;
   uri?: string;
   code?: string;
+  fingerprint?: string;
+  certificate?: string;
+  metadata?: { [key: string]: JSONValue };
 };
+// UsageAck is the accepted head of a machine's usage journal.
+export type UsageAck = { epoch: number; seq: number; hash: string };
 export type Resource = {
   id: string;
   type: string;
@@ -55,7 +60,7 @@ export type Resource = {
 };
 export type Document<T = Resource> = {
   data: T | null;
-  meta?: { tokenId?: string };
+  meta?: { tokenId?: string; ack?: UsageAck };
   links?: { next?: string | null };
 };
 export type APIErrorItem = {

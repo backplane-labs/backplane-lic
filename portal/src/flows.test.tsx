@@ -403,6 +403,7 @@ describe('licenses', () => {
     if (path.endsWith('/entitlements'))
       return json([{ id: 'entitlement-1', type: 'entitlements', attributes: { name: 'Export', code: 'EXPORT' } }]);
     if (path === '/users/user-1/licenses/license-1') return json(license);
+    if (path === '/licenses/license-1/machines') return json([]);
     if (path.endsWith('/actions/check-out'))
       return json({
         id: 'file-1',

@@ -213,6 +213,15 @@ answers a 400 in Keygen's error style instead.
 
 ## Customer portal
 
+A license's page lists its installations (machines): each shows its
+fingerprint, its status and the usage the vendor accepted (its
+`vendorUsageAck`). The customer downloads an installation's lease (its
+machine file, `check-out`) and uploads its usage report file
+(`report-usage`) there — the path of an installation without a connection
+of its own — and activates a new installation by its fingerprint and
+installation public key (the activation request). A protected license
+offers no activation.
+
 Enable the portal on the same HTTP listener as the public API:
 
 ```yaml

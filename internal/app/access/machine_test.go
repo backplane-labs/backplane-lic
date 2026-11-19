@@ -226,6 +226,8 @@ func TestMachineVendorMetadata(t *testing.T) {
 			after: map[string]any{"vendor_deadline": "a", "name": "y"}, anyoneMay: true,
 		},
 		{name: "no vendor keys", after: map[string]any{"vendorish": 1}, anyoneMay: true},
+		{name: "vendor key behind a leading underscore", after: map[string]any{"_vendor_deadline": "2099"}},
+		{name: "vendor key behind a dash", after: map[string]any{"-vendor_deadline": "2099"}},
 	}
 
 	for _, c := range changes {

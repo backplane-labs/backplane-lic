@@ -182,3 +182,19 @@ export function DateValue({ value, empty = 'noExpiry' }: { value?: string | null
     </time>
   );
 }
+
+// saveFile hands content to the browser as a download named name.
+export function saveFile(content: string, name: string) {
+  const url = URL.createObjectURL(new Blob([content], { type: 'application/octet-stream' }));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = name;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+// fileName keeps an id safe as a download name.
+export function fileName(id: string, extension: string) {
+  return `${id.replace(/[^a-zA-Z0-9-]/g, '_')}.${extension}`;
+}
