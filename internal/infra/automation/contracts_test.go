@@ -55,7 +55,7 @@ func TestAutomationManifest(t *testing.T) {
 	}
 
 	manifest := harness.Manifest()
-	if len(manifest.GetHooks()) != 1 || len(manifest.GetEvents()) != 10 || len(manifest.GetActivities()) != 6 {
+	if len(manifest.GetHooks()) != 1 || len(manifest.GetEvents()) != 11 || len(manifest.GetActivities()) != 6 {
 		t.Fatalf("manifest hooks/events/activities = %d/%d/%d", len(manifest.GetHooks()),
 			len(manifest.GetEvents()), len(manifest.GetActivities()))
 	}

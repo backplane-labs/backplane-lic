@@ -575,7 +575,8 @@ func TestLicenseEventContracts(t *testing.T) { //nolint:paralleltest // shared i
 	for webhook, eventName := range map[string]string{
 		"license.created": "LicenseCreated", "license.expiring-soon": "LicenseExpiringSoon",
 		"license.expired": "LicenseExpired", "license.renewed": "LicenseRenewed",
-		"license.suspended": "LicenseSuspended", "license.revoked": "LicenseRevoked",
+		"license.suspended": "LicenseSuspended", "license.reinstated": "LicenseReinstated",
+		"license.revoked":           "LicenseRevoked",
 		"license.validation.failed": "LicenseValidationFailed", "license.usage.incremented": "UsageIncremented",
 	} {
 		var resource any = snapshot
@@ -593,7 +594,7 @@ func TestLicenseEventContracts(t *testing.T) { //nolint:paralleltest // shared i
 	}
 
 	rows := queuedAutomation(t, store, account.ID)
-	if len(rows) != 8 {
+	if len(rows) != 9 {
 		t.Fatalf("license event records = %d", len(rows))
 	}
 

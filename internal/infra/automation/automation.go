@@ -37,7 +37,7 @@ func Declare(scope deps.Scope) Contracts {
 	}
 	for _, name := range []string{
 		"LicenseCreated", "LicenseExpiringSoon", "LicenseExpired", "LicenseRenewed",
-		"LicenseSuspended", "LicenseRevoked", "LicenseValidationFailed", "UsageIncremented",
+		"LicenseSuspended", "LicenseReinstated", "LicenseRevoked", "LicenseValidationFailed", "UsageIncremented",
 	} {
 		refs.LicenseEvents[name] = event.Declare[port.LicenseEvent](scope, name)
 	}

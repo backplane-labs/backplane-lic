@@ -368,7 +368,11 @@ only, never the reset token.
 Lic declares these stable Backplane event names: `lic.UserCreated`,
 `lic.PasswordResetRequested`, `lic.LicenseCreated`, `lic.LicenseExpiringSoon`,
 `lic.LicenseExpired`, `lic.LicenseRenewed`, `lic.LicenseSuspended`,
-`lic.LicenseRevoked`, `lic.LicenseValidationFailed` and `lic.UsageIncremented`.
+`lic.LicenseReinstated` (a suspended license active again), `lic.LicenseRevoked`,
+`lic.LicenseValidationFailed` and `lic.UsageIncremented`. License events are
+keyed by the license id and carry `account_id`, `license_id`, `product_id`,
+`policy_id`, `user_id`, `expiry`, `uses`, `suspended`, `validation_code` and
+`occurred_at`, never the key or the metadata.
 Event IDs survive relay retries; consumers must deduplicate by ID. Installations
 need NATS JetStream for events and Backplane's hook execution transport for
 mail. A missing transport leaves committed work pending; it never turns a

@@ -26,6 +26,8 @@ func (p Publisher) recordLicense(ctx context.Context, name string, license domai
 		eventName = "LicenseSuspended"
 	case "license.revoked":
 		eventName = "LicenseRevoked"
+	case "license.reinstated":
+		eventName = "LicenseReinstated"
 	case "license.validation.failed":
 		eventName = "LicenseValidationFailed"
 	case "license.usage.incremented":
