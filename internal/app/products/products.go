@@ -95,6 +95,9 @@ type UserStore interface {
 // shape-validated by the handler); the On flags distinguish an absent
 // attribute from an explicit null.
 type Input struct {
+	// ID fixes the new product's id; zero generates one. Only the declared
+	// catalog sets it, never a request.
+	ID             uuid.UUID
 	NameOn         bool
 	Name           *string
 	CodeOn         bool
@@ -279,8 +282,13 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 
 	now := s.clock()
 
+	id := in.ID
+	if id == uuid.Nil {
+		id = uuid.New()
+	}
+
 	product := domain.Product{
-		ID:                   uuid.New(),
+		ID:                   id,
 		AccountID:            account.ID,
 		Name:                 deref(in.Name),
 		Code:                 deref(in.Code),
@@ -339,6 +347,55 @@ func (s Scenario) Update(
 		return domain.Product{}, err // the authorization's own error
 	}
 
+	product = apply(product, in)
+	product.UpdatedAt = s.clock()
+
+	if err := s.validate(product); err != nil {
+		return domain.Product{}, err
+	}
+
+	if err := s.store.Do(ctx, func(ctx context.Context) error {
+		if err := s.store.UpdateProduct(ctx, product); err != nil {
+			return mapWrite(err)
+		}
+
+		s.publish(ctx, "product.updated", product)
+
+		return nil
+	}); err != nil {
+		return domain.Product{}, err // the transaction's own error
+	}
+
+	return product, nil
+}
+
+// Declare makes the product with the input's id match it: created when
+// missing, updated only when it differs (the declared catalog). It
+// reports whether it wrote anything.
+func (s Scenario) Declare(ctx context.Context, account domain.Account, in Input) (bool, error) {
+	existing, err := s.store.ProductByID(ctx, account.ID, in.ID)
+	if errors.Is(err, ErrNotFound) {
+		_, err := s.Create(ctx, account, in)
+
+		return true, err
+	}
+
+	if err != nil {
+		return false, fmt.Errorf("products: declare: %w", err)
+	}
+
+	next := apply(existing, in)
+	if domain.SameJSON(existing, next) {
+		return false, nil
+	}
+
+	_, err = s.Update(ctx, account, in.ID.String(), in)
+
+	return true, err
+}
+
+// apply merges the input's present attributes over the product.
+func apply(product domain.Product, in Input) domain.Product {
 	if in.NameOn {
 		product.Name = deref(in.Name)
 	}
@@ -367,25 +424,7 @@ func (s Scenario) Update(
 		product.DistributionStrategy = domain.DistributionLicensed
 	}
 
-	product.UpdatedAt = s.clock()
-
-	if err := s.validate(product); err != nil {
-		return domain.Product{}, err
-	}
-
-	if err := s.store.Do(ctx, func(ctx context.Context) error {
-		if err := s.store.UpdateProduct(ctx, product); err != nil {
-			return mapWrite(err)
-		}
-
-		s.publish(ctx, "product.updated", product)
-
-		return nil
-	}); err != nil {
-		return domain.Product{}, err // the transaction's own error
-	}
-
-	return product, nil
+	return product
 }
 
 // Destroy removes the product.

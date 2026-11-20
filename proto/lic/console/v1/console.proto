@@ -37,4 +37,19 @@ message InfoResponse {
   string version = 4;
   map<string, int64> counts = 5;
   string account_name = 6;
+  // declared are the objects the configuration's catalog owns: a change in
+  // the console is undone at the next start, so the console offers none.
+  repeated Declared declared = 7;
+  // undeclared counts the products, policies and product tokens the
+  // catalog does not declare, by kind; empty without a catalog.
+  map<string, int64> undeclared = 8;
+}
+
+// Declared is one object of the configuration's catalog.
+message Declared {
+  // kind: product, policy or token.
+  string kind = 1;
+  string id = 2;
+  // permissions of a token ("*": the product's whole set).
+  repeated string permissions = 3;
 }

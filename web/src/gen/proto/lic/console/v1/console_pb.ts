@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file proto/lic/console/v1/console.proto.
  */
 export const file_proto_lic_console_v1_console: GenFile = /*@__PURE__*/
-  fileDesc("CiJwcm90by9saWMvY29uc29sZS92MS9jb25zb2xlLnByb3RvEg5saWMuY29uc29sZS52MSKeAQoLQ2FsbFJlcXVlc3QSDgoGbWV0aG9kGAEgASgJEgwKBHBhdGgYAiABKAkSNQoFcXVlcnkYAyADKAsyJi5saWMuY29uc29sZS52MS5DYWxsUmVxdWVzdC5RdWVyeUVudHJ5EgwKBGJvZHkYBCABKAwaLAoKUXVlcnlFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIpgBCgxDYWxsUmVzcG9uc2USDgoGc3RhdHVzGAEgASgFEjoKB2hlYWRlcnMYAiADKAsyKS5saWMuY29uc29sZS52MS5DYWxsUmVzcG9uc2UuSGVhZGVyc0VudHJ5EgwKBGJvZHkYAyABKAwaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiDQoLSW5mb1JlcXVlc3QivgIKDEluZm9SZXNwb25zZRISCgphY2NvdW50X2lkGAEgASgJEhQKDGFjY291bnRfc2x1ZxgCIAEoCRJBCgtwdWJsaWNfa2V5cxgDIAMoCzIsLmxpYy5jb25zb2xlLnYxLkluZm9SZXNwb25zZS5QdWJsaWNLZXlzRW50cnkSDwoHdmVyc2lvbhgEIAEoCRI4CgZjb3VudHMYBSADKAsyKC5saWMuY29uc29sZS52MS5JbmZvUmVzcG9uc2UuQ291bnRzRW50cnkSFAoMYWNjb3VudF9uYW1lGAYgASgJGjEKD1B1YmxpY0tleXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGi0KC0NvdW50c0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoAzoCOAEylgEKDkNvbnNvbGVTZXJ2aWNlEkEKBENhbGwSGy5saWMuY29uc29sZS52MS5DYWxsUmVxdWVzdBocLmxpYy5jb25zb2xlLnYxLkNhbGxSZXNwb25zZRJBCgRJbmZvEhsubGljLmNvbnNvbGUudjEuSW5mb1JlcXVlc3QaHC5saWMuY29uc29sZS52MS5JbmZvUmVzcG9uc2VCS1pJZ2l0aHViLmNvbS9iYWNrcGxhbmUtbGFicy9iYWNrcGxhbmUtbGljL3Byb3RvL2xpYy9jb25zb2xlL3YxO2xpY2NvbnNvbGV2MWIGcHJvdG8z");
+  fileDesc("CiJwcm90by9saWMvY29uc29sZS92MS9jb25zb2xlLnByb3RvEg5saWMuY29uc29sZS52MSKeAQoLQ2FsbFJlcXVlc3QSDgoGbWV0aG9kGAEgASgJEgwKBHBhdGgYAiABKAkSNQoFcXVlcnkYAyADKAsyJi5saWMuY29uc29sZS52MS5DYWxsUmVxdWVzdC5RdWVyeUVudHJ5EgwKBGJvZHkYBCABKAwaLAoKUXVlcnlFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIpgBCgxDYWxsUmVzcG9uc2USDgoGc3RhdHVzGAEgASgFEjoKB2hlYWRlcnMYAiADKAsyKS5saWMuY29uc29sZS52MS5DYWxsUmVzcG9uc2UuSGVhZGVyc0VudHJ5EgwKBGJvZHkYAyABKAwaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiDQoLSW5mb1JlcXVlc3Qi3wMKDEluZm9SZXNwb25zZRISCgphY2NvdW50X2lkGAEgASgJEhQKDGFjY291bnRfc2x1ZxgCIAEoCRJBCgtwdWJsaWNfa2V5cxgDIAMoCzIsLmxpYy5jb25zb2xlLnYxLkluZm9SZXNwb25zZS5QdWJsaWNLZXlzRW50cnkSDwoHdmVyc2lvbhgEIAEoCRI4CgZjb3VudHMYBSADKAsyKC5saWMuY29uc29sZS52MS5JbmZvUmVzcG9uc2UuQ291bnRzRW50cnkSFAoMYWNjb3VudF9uYW1lGAYgASgJEioKCGRlY2xhcmVkGAcgAygLMhgubGljLmNvbnNvbGUudjEuRGVjbGFyZWQSQAoKdW5kZWNsYXJlZBgIIAMoCzIsLmxpYy5jb25zb2xlLnYxLkluZm9SZXNwb25zZS5VbmRlY2xhcmVkRW50cnkaMQoPUHVibGljS2V5c0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaLQoLQ291bnRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgDOgI4ARoxCg9VbmRlY2xhcmVkRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgDOgI4ASI5CghEZWNsYXJlZBIMCgRraW5kGAEgASgJEgoKAmlkGAIgASgJEhMKC3Blcm1pc3Npb25zGAMgAygJMpYBCg5Db25zb2xlU2VydmljZRJBCgRDYWxsEhsubGljLmNvbnNvbGUudjEuQ2FsbFJlcXVlc3QaHC5saWMuY29uc29sZS52MS5DYWxsUmVzcG9uc2USQQoESW5mbxIbLmxpYy5jb25zb2xlLnYxLkluZm9SZXF1ZXN0GhwubGljLmNvbnNvbGUudjEuSW5mb1Jlc3BvbnNlQktaSWdpdGh1Yi5jb20vYmFja3BsYW5lLWxhYnMvYmFja3BsYW5lLWxpYy9wcm90by9saWMvY29uc29sZS92MTtsaWNjb25zb2xldjFiBnByb3RvMw");
 
 /**
  * @generated from message lic.console.v1.CallRequest
@@ -121,6 +121,22 @@ export type InfoResponse = Message<"lic.console.v1.InfoResponse"> & {
    * @generated from field: string account_name = 6;
    */
   accountName: string;
+
+  /**
+   * declared are the objects the configuration's catalog owns: a change in
+   * the console is undone at the next start, so the console offers none.
+   *
+   * @generated from field: repeated lic.console.v1.Declared declared = 7;
+   */
+  declared: Declared[];
+
+  /**
+   * undeclared counts the products, policies and product tokens the
+   * catalog does not declare, by kind; empty without a catalog.
+   *
+   * @generated from field: map<string, int64> undeclared = 8;
+   */
+  undeclared: { [key: string]: bigint };
 };
 
 /**
@@ -129,6 +145,39 @@ export type InfoResponse = Message<"lic.console.v1.InfoResponse"> & {
  */
 export const InfoResponseSchema: GenMessage<InfoResponse> = /*@__PURE__*/
   messageDesc(file_proto_lic_console_v1_console, 3);
+
+/**
+ * Declared is one object of the configuration's catalog.
+ *
+ * @generated from message lic.console.v1.Declared
+ */
+export type Declared = Message<"lic.console.v1.Declared"> & {
+  /**
+   * kind: product, policy or token.
+   *
+   * @generated from field: string kind = 1;
+   */
+  kind: string;
+
+  /**
+   * @generated from field: string id = 2;
+   */
+  id: string;
+
+  /**
+   * permissions of a token ("*": the product's whole set).
+   *
+   * @generated from field: repeated string permissions = 3;
+   */
+  permissions: string[];
+};
+
+/**
+ * Describes the message lic.console.v1.Declared.
+ * Use `create(DeclaredSchema)` to create a new message.
+ */
+export const DeclaredSchema: GenMessage<Declared> = /*@__PURE__*/
+  messageDesc(file_proto_lic_console_v1_console, 4);
 
 /**
  * ConsoleService is the operator-only, internal console API. Backplane's

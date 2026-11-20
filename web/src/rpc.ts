@@ -3,7 +3,7 @@ import { CallRequestSchema, InfoRequestSchema } from './gen/proto/lic/console/v1
 import { ConsoleServiceClient } from './gen/proto/lic/console/v1/console_ws_pb';
 import { accountPath, decodeDocument, type WireValue, wireJSON } from './model';
 
-export type { CallResponse, InfoResponse as Info } from './gen/proto/lic/console/v1/console_pb';
+export type { CallResponse, Declared, InfoResponse as Info } from './gen/proto/lic/console/v1/console_pb';
 export { CallRequestSchema, ConsoleServiceClient, InfoRequestSchema };
 export const info = (client: ConsoleServiceClient, signal?: AbortSignal) =>
   client.info(create(InfoRequestSchema), { signal });

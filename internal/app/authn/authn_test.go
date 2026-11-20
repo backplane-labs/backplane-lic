@@ -328,3 +328,50 @@ func TestPasswordErrorOrder(t *testing.T) {
 		})
 	}
 }
+
+// A product token's own permissions narrow the product's set (Keygen
+// EE): the declared relay token reads machines and nothing else, while a
+// wildcard token keeps the whole product set.
+func TestProductTokenPermissions(t *testing.T) {
+	t.Parallel()
+
+	account := testAccount(t)
+
+	for _, tc := range []struct {
+		name        string
+		permissions []string
+		want        map[string]bool
+	}{
+		{"wildcard", []string{"*"}, map[string]bool{"machine.read": true, "license.create": true}},
+		{"narrowed", []string{"machine.read"}, map[string]bool{"machine.read": true, "license.create": false}},
+		{"outside the product set", []string{"account.update"}, map[string]bool{"account.update": false}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			raw, err := crypto.GenerateTokenSecret(rand.Reader, string(domain.RoleProduct))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			token := domain.Token{
+				ID: uuid.New(), AccountID: account.ID, Digest: crypto.DigestV3(account.Keys.SecretKey, raw),
+				BearerID: uuid.New(), BearerType: "Product", BearerRole: domain.RoleProduct, Permissions: tc.permissions,
+			}
+
+			scenario := authn.New(fakeStore{tokens: map[string]domain.Token{token.Digest: token}}, time.Now)
+
+			principal, _, err := scenario.Authenticate(t.Context(), account, authn.Parse("Bearer "+raw, ""),
+				authn.ModeToken, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for permission, want := range tc.want {
+				if got := principal.Allows(permission); got != want {
+					t.Errorf("%s allowed = %v, want %v", permission, got, want)
+				}
+			}
+		})
+	}
+}

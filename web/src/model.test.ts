@@ -96,3 +96,16 @@ test('untranslated attributes read as words and unnamed licenses are labelled by
     'license.created',
   );
 });
+
+test('a paginated list keeps its links when Keygen puts the page counts in links.meta', () => {
+  const body = new TextEncoder().encode(
+    JSON.stringify({
+      data: [{ type: 'tokens', id: 't1', attributes: { name: 'relay' } }],
+      links: { self: '/v1/x?page[number]=1', next: null, meta: { pages: 1, count: 1 } },
+    }),
+  );
+  const document = decodeDocument(200, body);
+  assert.equal(listData(document).length, 1);
+  assert.deepEqual(document.links, { self: '/v1/x?page[number]=1', next: null });
+  assert.throws(() => decodeDocument(200, new TextEncoder().encode(JSON.stringify({ data: [], links: { self: 1 } }))));
+});

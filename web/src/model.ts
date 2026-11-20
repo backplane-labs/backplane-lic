@@ -91,6 +91,8 @@ function parseDocument(text: string): Document {
     if (!isRecord(value.links)) throw new Error('Expected an object in links');
     const links: Record<string, string | null> = {};
     for (const [name, link] of Object.entries(value.links)) {
+      // Keygen's paginated lists carry their page counts in links.meta.
+      if (name === 'meta' && isRecord(link)) continue;
       if (link !== null && typeof link !== 'string') throw new Error('Expected string links');
       links[name] = link;
     }

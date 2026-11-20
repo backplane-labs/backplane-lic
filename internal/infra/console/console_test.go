@@ -24,6 +24,7 @@ import (
 	"github.com/gopherex/xlog"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
+	"github.com/backplane-labs/backplane-lic/internal/app/catalog"
 	"github.com/backplane-labs/backplane-lic/internal/infra/console"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
 	"github.com/backplane-labs/backplane-lic/internal/service"
@@ -33,7 +34,7 @@ import (
 func TestRequiresOperator(t *testing.T) {
 	t.Parallel()
 
-	srv := console.New(nil, nil, uuid.New(), "test", slog.New(slog.DiscardHandler))
+	srv := console.New(nil, nil, declaredCatalog{}, uuid.New(), "test", slog.New(slog.DiscardHandler))
 	if _, err := srv.Call(t.Context(), &licconsolev1.CallRequest{}); status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("Call without session: %v", err)
 	}
@@ -59,7 +60,7 @@ func TestCallRejectsInvalidRequests(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			srv := console.New(nil, nil, uuid.New(), "test", slog.New(slog.DiscardHandler))
+			srv := console.New(nil, nil, declaredCatalog{}, uuid.New(), "test", slog.New(slog.DiscardHandler))
 
 			ctx := backplanetest.Operator(t.Context(), uuid.New())
 			if _, err := srv.Call(ctx, in); status.Code(err) != codes.InvalidArgument {
@@ -83,7 +84,7 @@ func TestCallPreservesHTTPResponse(t *testing.T) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		_, _ = w.Write([]byte{0, 255, 42})
 	})
-	srv := console.New(handler, nil, uuid.New(), "test", slog.New(slog.NewJSONHandler(&logs, nil)))
+	srv := console.New(handler, nil, declaredCatalog{}, uuid.New(), "test", slog.New(slog.NewJSONHandler(&logs, nil)))
 	session := uuid.New()
 	ctx := backplanetest.Operator(t.Context(), session)
 
@@ -128,7 +129,13 @@ func TestConsoleAdminPassthroughAndInfo(t *testing.T) {
 
 	var logs bytes.Buffer
 
-	srv := console.New(handler, store, id, "v-test", slog.New(slog.NewJSONHandler(&logs, nil)))
+	productID := uuid.New()
+	declared := declaredCatalog{report: catalog.Report{
+		Declared:   []catalog.Object{{Kind: "product", ID: productID}, {Kind: "token", ID: id, Permissions: []string{"machine.read"}}},
+		Undeclared: map[string]int64{"policy": 3},
+	}}
+
+	srv := console.New(handler, store, declared, id, "v-test", slog.New(slog.NewJSONHandler(&logs, nil)))
 	ctx := backplanetest.Operator(t.Context(), uuid.New())
 	path := "/v1/accounts/" + id.String() + "/products"
 	body := []byte(`{"data":{"type":"products","attributes":{"name":"Console product"}}}`)
@@ -149,6 +156,13 @@ func TestConsoleAdminPassthroughAndInfo(t *testing.T) {
 	if err != nil || info.GetAccountId() != id.String() || info.GetAccountSlug() != "console-"+id.String() ||
 		info.GetVersion() != "v-test" || info.GetCounts()["products"] != 1 || len(info.GetPublicKeys()) != 3 {
 		t.Fatalf("Info: %v %v", info, err)
+	}
+
+	// The catalog's objects reach the console, a token with its permissions.
+	if got := info.GetDeclared(); len(got) != 2 || got[0].GetId() != productID.String() ||
+		got[1].GetKind() != "token" || len(got[1].GetPermissions()) != 1 ||
+		info.GetUndeclared()["policy"] != 3 {
+		t.Fatalf("Info catalog: %v %v", got, info.GetUndeclared())
 	}
 
 	account, err := store.Account(ctx, id)
@@ -254,3 +268,8 @@ func openStore(t *testing.T) (*postgres.Store, uuid.UUID) {
 
 	return store, id
 }
+
+// declaredCatalog is a fixed reconcile report.
+type declaredCatalog struct{ report catalog.Report }
+
+func (d declaredCatalog) Report() catalog.Report { return d.report }

@@ -173,6 +173,117 @@ func (q *Queries) ListAutomationMessages(ctx context.Context, accountID *string)
 	return items, nil
 }
 
+const lockCatalogSQL = `SELECT pg_advisory_xact_lock(hashtextextended($1::text || ':lic:catalog', 0));`
+
+func (q *Queries) LockCatalog(ctx context.Context, accountID string) error {
+	_, err := q.db.Exec(ctx, lockCatalogSQL, accountID)
+	return err
+}
+
+const listCatalogProductIdsSQL = `SELECT id FROM lic.products WHERE account_id = $1 ORDER BY id;`
+
+type ListCatalogProductIdsRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) ListCatalogProductIds(ctx context.Context, accountID uuid.UUID) ([]ListCatalogProductIdsRow, error) {
+	rows, err := q.db.Query(ctx, listCatalogProductIdsSQL, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListCatalogProductIdsRow
+	for rows.Next() {
+		var i ListCatalogProductIdsRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCatalogPolicyIdsSQL = `SELECT id FROM lic.policies WHERE account_id = $1 ORDER BY id;`
+
+type ListCatalogPolicyIdsRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) ListCatalogPolicyIds(ctx context.Context, accountID uuid.UUID) ([]ListCatalogPolicyIdsRow, error) {
+	rows, err := q.db.Query(ctx, listCatalogPolicyIdsSQL, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListCatalogPolicyIdsRow
+	for rows.Next() {
+		var i ListCatalogPolicyIdsRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCatalogProductTokensSQL = `SELECT id, bearer_id, name, digest, permissions, created_at
+FROM lic.tokens
+WHERE account_id = $1 AND bearer_type = 'Product'
+ORDER BY created_at, id;`
+
+type ListCatalogProductTokensRow struct {
+	ID          uuid.UUID
+	BearerID    *uuid.UUID
+	Name        *string
+	Digest      string
+	Permissions json.RawMessage
+	CreatedAt   time.Time
+}
+
+func (q *Queries) ListCatalogProductTokens(ctx context.Context, accountID uuid.UUID) ([]ListCatalogProductTokensRow, error) {
+	rows, err := q.db.Query(ctx, listCatalogProductTokensSQL, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListCatalogProductTokensRow
+	for rows.Next() {
+		var i ListCatalogProductTokensRow
+		if err := rows.Scan(&i.ID, &i.BearerID, &i.Name, &i.Digest, &i.Permissions, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setDeclaredTokenSQL = `UPDATE lic.tokens
+SET digest = $1,
+    permissions = $2,
+    updated_at = now()
+WHERE account_id = $3 AND id = $4;`
+
+type SetDeclaredTokenParams struct {
+	Digest      string
+	Permissions json.RawMessage
+	AccountID   uuid.UUID
+	ID          uuid.UUID
+}
+
+func (q *Queries) SetDeclaredToken(ctx context.Context, arg SetDeclaredTokenParams) error {
+	_, err := q.db.Exec(ctx, setDeclaredTokenSQL, arg.Digest, arg.Permissions, arg.AccountID, arg.ID)
+	return err
+}
+
 const listComponentsSQL = `SELECT c.id, c.account_id, c.machine_id, c.name, c.fingerprint, c.metadata, c.created_at, c.updated_at,
   l.product_id, m.license_id, count(*) OVER ()::bigint AS total
 FROM lic.machine_components c

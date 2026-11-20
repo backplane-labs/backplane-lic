@@ -130,6 +130,17 @@ export const english = {
   payload: 'Payload',
   download: 'Download',
   standalone: 'Standalone preview',
+  declared: 'From the configuration',
+  declaredHelp:
+    "The configuration's catalog (catalog.products) declares this object: lic restores it at every start, so it is changed there, not here.",
+  tokenPermissions: 'Permissions',
+  allPermissions: "all of the product's",
+  undeclared: 'Not in the configuration',
+  undeclaredHelp:
+    "The configuration's catalog does not declare these products, policies and product tokens: in the lists they are the rows without the From the configuration mark. lic keeps them; add them to catalog.products or delete them here.",
+  undeclared_product: 'Products',
+  undeclared_policy: 'Policies',
+  undeclared_token: 'Product tokens',
   standaloneHelp:
     'Explicit local preview. Reads use sample records; mutations are disabled. The embedded plugin uses the host session.',
   dark: 'Dark',

@@ -19,11 +19,12 @@ import (
 )
 
 func newConsole(
-	root deps.Scope, store deps.Dependency[*postgres.Store], id uuid.UUID, handler http.Handler,
+	root deps.Scope, store deps.Dependency[*postgres.Store], declared console.Catalog, id uuid.UUID,
+	handler http.Handler,
 ) *console.Server {
 	component := deps.NewComponent(root, "console")
 
-	return console.New(handler, consoleStore{store: store}, id, build.Get().Version,
+	return console.New(handler, consoleStore{store: store}, declared, id, build.Get().Version,
 		slog.New(xlog.NewSlogHandler(component.Log())))
 }
 

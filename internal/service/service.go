@@ -103,13 +103,13 @@ func New(root backplane.Root[Config]) (*Service, error) {
 	store := deps.NewDependency(root, postgres.New(cfg.Store), deps.Name("store"))
 	cache := newCache(root, cfg.Cache)
 
-	spec, err := accountSpec(cfg.Account)
+	spec, declared, err := specs(cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	id := spec.ID
-	late := &lateHandler{}
+	late, last := &lateHandler{}, &lastCatalog{}
 	contracts := bpautomation.Declare(root)
 	activities := bpautomation.NewActivityServer(root)
 
@@ -122,16 +122,11 @@ func New(root backplane.Root[Config]) (*Service, error) {
 
 	bootstrap := deps.NewComponent(root, "bootstrap")
 	bootstrap.OnStart(func(ctx context.Context) error {
-		if _, err := accounts.Bootstrap(ctx, store.Get().Accounts, spec); err != nil {
-			return fmt.Errorf("bootstrap: %w", err)
-		}
-
-		counters := telemetry.New(bootstrap.Meter())
+		log, counters := slog.New(xlog.NewSlogHandler(bootstrap.Log())), telemetry.New(bootstrap.Meter())
 		webhookWorker := whwebhook.NewWorker(store.Get(), spec.ID, domain.NetResolver{},
 			allowPrivate(cfg.HTTP.WebhookAllowPrivate), time.Now, counters)
 
-		relay, err := newOutbox(store.Get(), root.Identity().Instance,
-			slog.New(xlog.NewSlogHandler(bootstrap.Log())), bpautomation.NewWorker(contracts, webhookWorker))
+		relay, err := newOutbox(store.Get(), root.Identity().Instance, log, bpautomation.NewWorker(contracts, webhookWorker))
 		if err != nil {
 			return err
 		}
@@ -145,10 +140,15 @@ func New(root backplane.Root[Config]) (*Service, error) {
 				cfg.Automation.PortalBase, cfg.Automation.Locale, brand, time.Now)
 		}
 		publisher := decorate(webhooks.NewPublisher(store.Get(), relay, spec.ID, rand.Reader, time.Now))
+
+		if err := seed(ctx, store.Get(), spec, declared, publisher, cfg.HTTP, cached, last, log); err != nil {
+			return err
+		}
+
 		activities.Set(appautomation.NewActivities(store.Get(),
 			licenseScenario(store.Get(), cached, publisher, time.Now, counters), spec.ID, time.Now))
 		late.set(handler(store.Get(), throttler, cached, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate,
-			slog.New(xlog.NewSlogHandler(bootstrap.Log())), counters))
+			log, counters))
 
 		return nil
 	})
@@ -173,7 +173,7 @@ func New(root backplane.Root[Config]) (*Service, error) {
 		return runJobs(ctx, store.Get(), publisher, spec.ID)
 	})
 
-	return &Service{Console: newConsole(root, store, id, late), Store: store, Cache: cache, HTTP: public}, nil
+	return &Service{Console: newConsole(root, store, last, id, late), Store: store, Cache: cache, HTTP: public}, nil
 }
 
 // runJobs ticks the periodic jobs (the heartbeat cull and the rest) and the
@@ -302,6 +302,7 @@ type tokenCache interface {
 	Authn(inner authn.Store) authn.Store
 	Manage(inner tokens.Store) tokens.Store
 	Users(inner users.Store) users.Store
+	Invalidate(ctx context.Context, accountID uuid.UUID) error
 }
 
 func handler(

@@ -186,11 +186,20 @@ func (s usersStore) DeleteUserTokensExcept(ctx context.Context, accountID, userI
 	return s.tokens.bump(ctx, accountID)
 }
 
+// Invalidate starts a new token generation: a token written outside the
+// decorated ports (the declared catalog) is never answered from the cache.
+func (t Tokens) Invalidate(ctx context.Context, accountID uuid.UUID) error {
+	return t.bump(ctx, accountID)
+}
+
 // None is the absent cache: every store answers directly.
 type None struct{}
 
 // Authn answers the store itself.
 func (None) Authn(inner authn.Store) authn.Store { return inner }
+
+// Invalidate has nothing to drop.
+func (None) Invalidate(context.Context, uuid.UUID) error { return nil }
 
 // Manage answers the store itself.
 func (None) Manage(inner tokens.Store) tokens.Store { return inner }

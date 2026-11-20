@@ -43,6 +43,12 @@ type Principal struct {
 	License *domain.LicenseAuth
 }
 
+// System is the in-process principal of the declared catalog's
+// reconcile: an admin no credential, header or console call produces.
+func System() Principal {
+	return Principal{BearerType: BearerUser, Role: domain.RoleAdmin, Permissions: RolePermissions(domain.RoleAdmin)}
+}
+
 // IsUser/IsProduct/IsLicense are the bearer-kind checks.
 func (p Principal) IsUser() bool       { return p.BearerType == BearerUser }
 func (p Principal) IsProduct() bool    { return p.BearerType == BearerProduct }

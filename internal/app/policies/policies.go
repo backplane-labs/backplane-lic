@@ -58,6 +58,9 @@ type Store interface { //nolint:interfacebloat // one port per scenario is the a
 // attribute from an explicit null (the nullable numerics); the
 // pointers distinguish false from unset for the booleans.
 type Input struct {
+	// ID fixes the new policy's id; zero generates one. Only the declared
+	// catalog sets it, never a request.
+	ID   uuid.UUID
 	Name *string
 
 	Duration    *int32
@@ -361,7 +364,12 @@ func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) 
 	now := s.clock()
 
 	policy := domain.PolicyCreateDefaults()
-	policy.ID = uuid.New()
+
+	policy.ID = in.ID
+	if policy.ID == uuid.Nil {
+		policy.ID = uuid.New()
+	}
+
 	policy.AccountID = account.ID
 	policy.ProductID = product.ID
 	policy.Metadata = map[string]any{}
@@ -449,6 +457,42 @@ func (s Scenario) Update(ctx context.Context, account domain.Account, id uuid.UU
 	}
 
 	return policy, nil
+}
+
+// ErrImmutable: a declared policy differs from the stored one in what
+// cannot change after creation (its product, or a create-only attribute).
+var ErrImmutable = errors.New("policies: the declared policy changes attributes fixed at creation")
+
+// Declare makes the policy with the input's id match it: created when
+// missing, updated only when it differs (the declared catalog). It
+// reports whether it wrote anything.
+func (s Scenario) Declare(ctx context.Context, account domain.Account, in Input) (bool, error) {
+	existing, err := s.store.PolicyByID(ctx, account.ID, in.ID)
+	if errors.Is(err, ErrNotFound) {
+		_, err := s.Create(ctx, account, in)
+
+		return true, err
+	}
+
+	if err != nil {
+		return false, fmt.Errorf("policies: declare: %w", err)
+	}
+
+	mutable, whole := existing, existing
+	s.applyInput(&mutable, in, false)
+	s.applyInput(&whole, in, true)
+
+	if existing.ProductID != in.ProductID || !domain.SameJSON(mutable, whole) {
+		return false, fmt.Errorf("%w: %s", ErrImmutable, in.ID)
+	}
+
+	if domain.SameJSON(existing, mutable) {
+		return false, nil
+	}
+
+	_, err = s.Update(ctx, account, in.ID, in)
+
+	return true, err
 }
 
 // Destroy removes the policy.

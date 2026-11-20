@@ -135,8 +135,8 @@ github.com/gopherex/pg-outbox v1.6.0 h1:gct1g6F2d3usk88rVLuKD3rCXNnpiB/iq/iBMzls
 github.com/gopherex/pg-outbox v1.6.0/go.mod h1:ZF/GhTmvdgQRtCWM2H8S/WIZdvUZWbpm01A+umhKZVk=
 github.com/gopherex/pgtx v1.1.5 h1:iBQhzATech5F/eYSIB/Fb3cS4uSGdgGg5wVYzBetXic=
 github.com/gopherex/pgtx v1.1.5/go.mod h1:+i92NLuwKhT7DglyLxEJvh4slSv+Mgfq89alugrXBP4=
-github.com/gopherex/schemapb/go v1.12.1 h1:4imqPsycyfZSl3j4eT/GA1JHpDl0ONfHUFJfTJ3tZNo=
-github.com/gopherex/schemapb/go v1.12.1/go.mod h1:BwQdhiN79lmQ/jEPuoLW7HC7dltWVWb3wAR9/WAzMo8=
+github.com/gopherex/schemapb/go v1.13.1 h1:mSIKapNdtIciv8jGaET0bz3nq993Y0dCk1LgUasEFAg=
+github.com/gopherex/schemapb/go v1.13.1/go.mod h1:BwQdhiN79lmQ/jEPuoLW7HC7dltWVWb3wAR9/WAzMo8=
 github.com/gopherex/sqld v1.1.10 h1:+SgU5h3VUwRPFcMzEVJX/92cM/DdBEjrUP8TBZjfsG0=
 github.com/gopherex/sqld v1.1.10/go.mod h1:J/HwPz/WO9lJFALOQZipoG7KTXJV2N8E9qwu9aNIz2k=
 github.com/gopherex/ws-proto v1.11.1 h1:VV3CCjBvwyANZPgBRtJNEOg3eTVe8APgS5IdhNJOCSA=

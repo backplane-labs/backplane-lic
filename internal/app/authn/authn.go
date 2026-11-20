@@ -163,7 +163,8 @@ func (s Scenario) token(ctx context.Context, account domain.Account, value strin
 
 		principal.BearerType = access.BearerProduct
 		principal.Role = domain.RoleProduct
-		principal.Permissions = access.RolePermissions(domain.RoleProduct)
+		// The token's own permissions narrow the product's set (Keygen EE).
+		principal.Permissions = access.Effective(domain.RoleProduct, token.Permissions)
 
 	case "License":
 		license, err := s.activationLicense(ctx, account, token.BearerID)

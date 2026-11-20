@@ -23,6 +23,10 @@ type Config struct {
 	// created at startup from these fields when missing.
 	Account Account `json:"account"`
 
+	// Catalog declares products, their policies and named product tokens,
+	// reconciled at every start; empty declares nothing.
+	Catalog Catalog `json:"catalog,omitempty"`
+
 	// HTTP is the public API's runtime section.
 	HTTP HTTP `json:"http"`
 
@@ -69,4 +73,37 @@ type Account struct {
 	// Ed25519Seed imports the vendor's signing key when the account row is
 	// created; an existing row with another key fails startup.
 	Ed25519Seed config.Secret `json:"ed25519_seed,omitempty" schemapb:"description=Hex ed25519 signing seed to import"`
+}
+
+// Catalog is the declared catalog. It is read at startup only: token
+// values are secrets and never come from Consul.
+type Catalog struct {
+	Products []CatalogProduct `json:"products,omitempty" schemapb:"description=Declared products"`
+}
+
+// CatalogProduct is a declared product with its policies and tokens.
+type CatalogProduct struct {
+	ID                   string          `json:"id"                              schemapb:"description=UUID"`
+	Name                 string          `json:"name"                            schemapb:"description=Name"`
+	Code                 string          `json:"code,omitempty"                  schemapb:"description=Code"`
+	DistributionStrategy string          `json:"distribution_strategy,omitempty" schemapb:"description=Distribution"`
+	URL                  string          `json:"url,omitempty"                   schemapb:"description=URL"`
+	Platforms            []string        `json:"platforms,omitempty"             schemapb:"description=Platforms"`
+	Metadata             map[string]any  `json:"metadata,omitempty"              schemapb:"description=Metadata"`
+	Policies             []CatalogPolicy `json:"policies,omitempty"              schemapb:"description=Policies"`
+	Tokens               []CatalogToken  `json:"tokens,omitempty"                schemapb:"description=Tokens"`
+}
+
+// CatalogPolicy is a declared policy: its id and its Keygen attributes,
+// named as the API names them (maxMachines, expirationStrategy, ...).
+type CatalogPolicy struct {
+	ID         string         `json:"id"         schemapb:"description=The policy's UUID"`
+	Attributes map[string]any `json:"attributes" schemapb:"description=Keygen policy attributes"`
+}
+
+// CatalogToken is a named product token of fixed value.
+type CatalogToken struct {
+	Name        string        `json:"name"                  schemapb:"description=Token name, unique per product"`
+	Value       config.Secret `json:"value"                 schemapb:"description=Secret prod-<64 hex>v3"`
+	Permissions []string      `json:"permissions,omitempty" schemapb:"description=Product permissions (empty: all)"`
 }

@@ -191,10 +191,16 @@ type InfoResponse struct {
 	AccountId   string                 `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
 	AccountSlug string                 `protobuf:"bytes,2,opt,name=account_slug,json=accountSlug,proto3" json:"account_slug,omitempty"`
 	// Only public material: rsa/ecdsa PEM and ed25519 hex.
-	PublicKeys    map[string]string `protobuf:"bytes,3,rep,name=public_keys,json=publicKeys,proto3" json:"public_keys,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Version       string            `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
-	Counts        map[string]int64  `protobuf:"bytes,5,rep,name=counts,proto3" json:"counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
-	AccountName   string            `protobuf:"bytes,6,opt,name=account_name,json=accountName,proto3" json:"account_name,omitempty"`
+	PublicKeys  map[string]string `protobuf:"bytes,3,rep,name=public_keys,json=publicKeys,proto3" json:"public_keys,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Version     string            `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
+	Counts      map[string]int64  `protobuf:"bytes,5,rep,name=counts,proto3" json:"counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	AccountName string            `protobuf:"bytes,6,opt,name=account_name,json=accountName,proto3" json:"account_name,omitempty"`
+	// declared are the objects the configuration's catalog owns: a change in
+	// the console is undone at the next start, so the console offers none.
+	Declared []*Declared `protobuf:"bytes,7,rep,name=declared,proto3" json:"declared,omitempty"`
+	// undeclared counts the products, policies and product tokens the
+	// catalog does not declare, by kind; empty without a catalog.
+	Undeclared    map[string]int64 `protobuf:"bytes,8,rep,name=undeclared,proto3" json:"undeclared,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -271,6 +277,83 @@ func (x *InfoResponse) GetAccountName() string {
 	return ""
 }
 
+func (x *InfoResponse) GetDeclared() []*Declared {
+	if x != nil {
+		return x.Declared
+	}
+	return nil
+}
+
+func (x *InfoResponse) GetUndeclared() map[string]int64 {
+	if x != nil {
+		return x.Undeclared
+	}
+	return nil
+}
+
+// Declared is one object of the configuration's catalog.
+type Declared struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// kind: product, policy or token.
+	Kind string `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
+	Id   string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	// permissions of a token ("*": the product's whole set).
+	Permissions   []string `protobuf:"bytes,3,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Declared) Reset() {
+	*x = Declared{}
+	mi := &file_proto_lic_console_v1_console_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Declared) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Declared) ProtoMessage() {}
+
+func (x *Declared) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_lic_console_v1_console_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Declared.ProtoReflect.Descriptor instead.
+func (*Declared) Descriptor() ([]byte, []int) {
+	return file_proto_lic_console_v1_console_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Declared) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *Declared) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Declared) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
 var File_proto_lic_console_v1_console_proto protoreflect.FileDescriptor
 
 const file_proto_lic_console_v1_console_proto_rawDesc = "" +
@@ -292,7 +375,7 @@ const file_proto_lic_console_v1_console_proto_rawDesc = "" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\r\n" +
-	"\vInfoRequest\"\x98\x03\n" +
+	"\vInfoRequest\"\xdb\x04\n" +
 	"\fInfoResponse\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\tR\taccountId\x12!\n" +
@@ -301,13 +384,24 @@ const file_proto_lic_console_v1_console_proto_rawDesc = "" +
 	"publicKeys\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\tR\aversion\x12@\n" +
 	"\x06counts\x18\x05 \x03(\v2(.lic.console.v1.InfoResponse.CountsEntryR\x06counts\x12!\n" +
-	"\faccount_name\x18\x06 \x01(\tR\vaccountName\x1a=\n" +
+	"\faccount_name\x18\x06 \x01(\tR\vaccountName\x124\n" +
+	"\bdeclared\x18\a \x03(\v2\x18.lic.console.v1.DeclaredR\bdeclared\x12L\n" +
+	"\n" +
+	"undeclared\x18\b \x03(\v2,.lic.console.v1.InfoResponse.UndeclaredEntryR\n" +
+	"undeclared\x1a=\n" +
 	"\x0fPublicKeysEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a9\n" +
 	"\vCountsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x012\x96\x01\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1a=\n" +
+	"\x0fUndeclaredEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"P\n" +
+	"\bDeclared\x12\x12\n" +
+	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x12 \n" +
+	"\vpermissions\x18\x03 \x03(\tR\vpermissions2\x96\x01\n" +
 	"\x0eConsoleService\x12A\n" +
 	"\x04Call\x12\x1b.lic.console.v1.CallRequest\x1a\x1c.lic.console.v1.CallResponse\x12A\n" +
 	"\x04Info\x12\x1b.lic.console.v1.InfoRequest\x1a\x1c.lic.console.v1.InfoResponseBKZIgithub.com/backplane-labs/backplane-lic/proto/lic/console/v1;licconsolev1b\x06proto3"
@@ -324,31 +418,35 @@ func file_proto_lic_console_v1_console_proto_rawDescGZIP() []byte {
 	return file_proto_lic_console_v1_console_proto_rawDescData
 }
 
-var file_proto_lic_console_v1_console_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_proto_lic_console_v1_console_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_proto_lic_console_v1_console_proto_goTypes = []any{
 	(*CallRequest)(nil),  // 0: lic.console.v1.CallRequest
 	(*CallResponse)(nil), // 1: lic.console.v1.CallResponse
 	(*InfoRequest)(nil),  // 2: lic.console.v1.InfoRequest
 	(*InfoResponse)(nil), // 3: lic.console.v1.InfoResponse
-	nil,                  // 4: lic.console.v1.CallRequest.QueryEntry
-	nil,                  // 5: lic.console.v1.CallResponse.HeadersEntry
-	nil,                  // 6: lic.console.v1.InfoResponse.PublicKeysEntry
-	nil,                  // 7: lic.console.v1.InfoResponse.CountsEntry
+	(*Declared)(nil),     // 4: lic.console.v1.Declared
+	nil,                  // 5: lic.console.v1.CallRequest.QueryEntry
+	nil,                  // 6: lic.console.v1.CallResponse.HeadersEntry
+	nil,                  // 7: lic.console.v1.InfoResponse.PublicKeysEntry
+	nil,                  // 8: lic.console.v1.InfoResponse.CountsEntry
+	nil,                  // 9: lic.console.v1.InfoResponse.UndeclaredEntry
 }
 var file_proto_lic_console_v1_console_proto_depIdxs = []int32{
-	4, // 0: lic.console.v1.CallRequest.query:type_name -> lic.console.v1.CallRequest.QueryEntry
-	5, // 1: lic.console.v1.CallResponse.headers:type_name -> lic.console.v1.CallResponse.HeadersEntry
-	6, // 2: lic.console.v1.InfoResponse.public_keys:type_name -> lic.console.v1.InfoResponse.PublicKeysEntry
-	7, // 3: lic.console.v1.InfoResponse.counts:type_name -> lic.console.v1.InfoResponse.CountsEntry
-	0, // 4: lic.console.v1.ConsoleService.Call:input_type -> lic.console.v1.CallRequest
-	2, // 5: lic.console.v1.ConsoleService.Info:input_type -> lic.console.v1.InfoRequest
-	1, // 6: lic.console.v1.ConsoleService.Call:output_type -> lic.console.v1.CallResponse
-	3, // 7: lic.console.v1.ConsoleService.Info:output_type -> lic.console.v1.InfoResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	5, // 0: lic.console.v1.CallRequest.query:type_name -> lic.console.v1.CallRequest.QueryEntry
+	6, // 1: lic.console.v1.CallResponse.headers:type_name -> lic.console.v1.CallResponse.HeadersEntry
+	7, // 2: lic.console.v1.InfoResponse.public_keys:type_name -> lic.console.v1.InfoResponse.PublicKeysEntry
+	8, // 3: lic.console.v1.InfoResponse.counts:type_name -> lic.console.v1.InfoResponse.CountsEntry
+	4, // 4: lic.console.v1.InfoResponse.declared:type_name -> lic.console.v1.Declared
+	9, // 5: lic.console.v1.InfoResponse.undeclared:type_name -> lic.console.v1.InfoResponse.UndeclaredEntry
+	0, // 6: lic.console.v1.ConsoleService.Call:input_type -> lic.console.v1.CallRequest
+	2, // 7: lic.console.v1.ConsoleService.Info:input_type -> lic.console.v1.InfoRequest
+	1, // 8: lic.console.v1.ConsoleService.Call:output_type -> lic.console.v1.CallResponse
+	3, // 9: lic.console.v1.ConsoleService.Info:output_type -> lic.console.v1.InfoResponse
+	8, // [8:10] is the sub-list for method output_type
+	6, // [6:8] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_proto_lic_console_v1_console_proto_init() }
@@ -362,7 +460,7 @@ func file_proto_lic_console_v1_console_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_lic_console_v1_console_proto_rawDesc), len(file_proto_lic_console_v1_console_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

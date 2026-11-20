@@ -106,6 +106,63 @@ Bearers are always read live. Account rows hold the private signing keys
 and are never cached. Valkey also shares the password-attempt windows
 between replicas.
 
+## Declared catalog
+
+`catalog.products` declares products, their policies and named product
+tokens, so an installation comes up with them and no manual API calls. It is
+read at startup only (a restart applies a change): token values are secrets
+and never come from Consul. In env the section is one JSON value,
+`LIC_CATALOG_PRODUCTS='[...]'`; a file can carry it as YAML. Either way it
+holds the token values, so it comes from a secret (a file or a variable a
+secret store fills); values are not expanded from other variables. The
+console and logs show the values as `***`.
+
+```yaml
+catalog:
+  products:
+    - id: 7d4c0a52-1f3e-4b6a-9c2d-5e8f1a2b3c4d   # fixed: clients name the product by it
+      name: Komeet
+      code: komeet                                # optional, as the API
+      # distribution_strategy, url, platforms, metadata: optional, as the API
+      policies:
+        - id: 0f6b1c2d-3e4f-4a5b-8c6d-7e8f9a0b1c2d
+          # Keygen's policy attributes, named as the API names them.
+          attributes: {name: pilot, duration: 2592000, maxMachines: 1,
+                       machineUniquenessStrategy: UNIQUE_PER_POLICY,
+                       expirationStrategy: REVOKE_ACCESS}
+      tokens:
+        - name: relay                             # unique per product
+          value: prod-…v3                         # secret: prod-<64 lowercase hex>v3
+          permissions: [machine.read]             # empty or "*": the product's whole set
+```
+
+At every start, one replica at a time (a PostgreSQL advisory lock), lic:
+
+- creates a declared product or policy that is missing, with the declared
+  id, and updates one that differs; attributes a policy does not list keep
+  their value (Keygen's defaults on creation);
+- refuses to start when a declared policy changes what is fixed at creation
+  (its product, `scheme`, `encrypted`, `usePool`): `ErrImmutable`;
+- creates a named token with the declared value, or rotates the token of
+  that name (the oldest on the product) to a changed value or permission
+  set, keeping its id; the old value stops authenticating at once;
+- reports products, policies and product tokens the catalog does not
+  declare (one log line with counts; the console's account page), and never
+  deletes them.
+
+A malformed catalog (an id that is not a UUID, a repeated id or token name,
+a token value of another form, a permission outside the product role's set,
+a policy attribute the API would refuse) stops startup naming the field.
+
+A product token's `permissions` narrow the product role's set, as Keygen EE
+does: `relay` above reads machines and nothing else. Tokens created through
+the API keep `*`.
+
+In the console, declared objects carry the mark *From the configuration*:
+editing, deleting and regenerating them is off (the next start would undo
+it), their operations (a pool key, a check) stay. A declared token shows its
+permissions.
+
 ## Machines, components and processes
 
 Machines (devices), their components and their processes follow Keygen.

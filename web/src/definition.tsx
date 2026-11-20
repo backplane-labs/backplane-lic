@@ -56,7 +56,7 @@ import {
 } from './model';
 import navigation from './navigation';
 import { type Action, byName, type Relationship, type ResourceSpec } from './resources';
-import { ConsoleServiceClient, call, type Info, info, request } from './rpc';
+import { ConsoleServiceClient, call, type Declared, type Info, info, request } from './rpc';
 import { relationFields, relationshipBody } from './schemas';
 
 const Account = createContext<Info | undefined>(undefined);
@@ -102,6 +102,52 @@ function Shell() {
     </Stack>
   );
 }
+/** An object of the configuration's catalog: read-only here, with a token's permissions. */
+function DeclaredNotice({ declared }: { declared: Declared }) {
+  const t = useText();
+  return (
+    <Panel title={t('declared')}>
+      <Stack gap={8}>
+        <p style={{ margin: 0 }}>{t('declaredHelp')}</p>
+        {declared.kind === 'token' && (
+          <div style={row}>
+            <span>{t('tokenPermissions')}</span>
+            {declared.permissions.includes('*') ? (
+              <Badge variant="outline">{t('allPermissions')}</Badge>
+            ) : (
+              declared.permissions.map((permission) => (
+                <Badge key={permission} variant="outline">
+                  <code>{permission}</code>
+                </Badge>
+              ))
+            )}
+          </div>
+        )}
+      </Stack>
+    </Panel>
+  );
+}
+/** Products, policies and product tokens the configuration's catalog does not declare: kept, never deleted. */
+function UndeclaredNotice({ undeclared }: { undeclared: Record<string, bigint> }) {
+  const t = useText();
+  const kinds = Object.entries(undeclared).filter(([, count]) => count > 0n);
+  if (!kinds.length) return null;
+  return (
+    <Panel title={t('undeclared')}>
+      <Stack gap={8}>
+        <p style={{ margin: 0 }}>{t('undeclaredHelp')}</p>
+        <dl style={{ margin: 0 }}>
+          {kinds.map(([kind, count]) => (
+            <div key={kind} style={row}>
+              <dt>{t(`undeclared_${kind}`)}</dt>
+              <dd style={{ margin: 0 }}>{count.toString()}</dd>
+            </div>
+          ))}
+        </dl>
+      </Stack>
+    </Panel>
+  );
+}
 function AccountPage() {
   const t = useText(),
     { installation } = useAPI();
@@ -112,6 +158,7 @@ function AccountPage() {
         description={installation.accountSlug}
         meta={<Badge variant="outline">{installation.version}</Badge>}
       />
+      <UndeclaredNotice undeclared={installation.undeclared} />
       <Panel title={t('account')}>
         <AttributeList value={{ accountId: installation.accountId, accountSlug: installation.accountSlug }} />
       </Panel>
@@ -242,7 +289,7 @@ function SearchPage() {
   );
   const rows = listData(state.value),
     next = nextPage(state.value?.links);
-  const columns = resourceColumns(spec, rows, t, (resource) =>
+  const columns = resourceColumns(spec, rows, t, declaredIDs(api.installation), (resource) =>
     navigate(`${spec.name}/${encodeURIComponent(resource.id)}`),
   );
   const change = (list: Term[], index: number, patch: Partial<Term>) =>
@@ -459,7 +506,7 @@ function ResourceList({
   const rows = listData(state.value),
     next = nextPage(state.value?.links),
     standalone = context.environment === 'standalone';
-  const tableColumns = resourceColumns(spec, rows, t, (resource) => open(resource));
+  const tableColumns = resourceColumns(spec, rows, t, declaredIDs(api.installation), (resource) => open(resource));
   const open = (resource: Resource) =>
     onInspect ? onInspect(resource) : navigate(`${spec.name}/${encodeURIComponent(resource.id)}`);
   const create = async () => {
@@ -747,6 +794,9 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
     );
   if (!resource) return <Loading />;
   const blocked = environment === 'standalone';
+  // The configuration's catalog owns it: a console change is undone at the next start.
+  const declared = api.installation.declared.find((object) => object.id === resource.id);
+  const locked = blocked || declared !== undefined;
   const deletion = () =>
     setOperation({
       title: t('delete'),
@@ -825,11 +875,11 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
               {t('refresh')}
             </Button>
             {!spec.noEdit && (
-              <Button disabled={blocked} onClick={edit}>
+              <Button disabled={locked} onClick={edit}>
                 {t('edit')}
               </Button>
             )}
-            <Button variant="outline" disabled={blocked} onClick={deletion}>
+            <Button variant="outline" disabled={locked} onClick={deletion}>
               {t('delete')}
             </Button>
           </div>
@@ -899,6 +949,7 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
         )
       ) : (
         <>
+          {declared && <DeclaredNotice declared={declared} />}
           {spec.name === 'licenses' && <LicenseSummary resource={resource} />}
           {!!spec.actions?.length && (
             <Panel title={t('actions')}>
@@ -907,7 +958,9 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
                   <Button
                     variant="outline"
                     key={action.name}
-                    disabled={blocked || running}
+                    // Only regenerating a declared token undoes the configuration; the
+                    // operations on declared objects (a pool key, a check) stay.
+                    disabled={blocked || running || (declared !== undefined && action.name === 'regenerate')}
                     onClick={() => {
                       const op = actionOperation(action, spec, path, api, t);
                       // An action with nothing to fill and nothing to confirm runs at once.
@@ -966,6 +1019,9 @@ function Detail({ spec, path, onBack }: { spec: ResourceSpec; path: string; onBa
     </Stack>
   );
 }
+/** The ids the configuration's catalog owns. */
+const declaredIDs = (installation: Info): ReadonlySet<string> =>
+  new Set(installation.declared.map((object) => object.id));
 // resourceColumns is a resource type's table: its name, its own columns
 // and the short id. A row is named by its name; an identifier shown in its
 // own column (a license key, a user email) is not repeated as the name.
@@ -973,6 +1029,7 @@ function resourceColumns(
   spec: ResourceSpec,
   rows: Resource[],
   t: ReturnType<typeof useText>,
+  declared: ReadonlySet<string>,
   open: (resource: Resource) => void,
 ): DataColumn<Resource>[] {
   const columns = (spec.columns ?? ['status']).filter(
@@ -990,9 +1047,12 @@ function resourceColumns(
       label: t('name'),
       value: (resource) => nameOf(resource),
       render: (resource) => (
-        <Button variant="link" size="sm" style={{ padding: 0, height: 'auto' }} onClick={() => open(resource)}>
-          {nameOf(resource)}
-        </Button>
+        <span style={row}>
+          <Button variant="link" size="sm" style={{ padding: 0, height: 'auto' }} onClick={() => open(resource)}>
+            {nameOf(resource)}
+          </Button>
+          {declared.has(resource.id) && <Badge variant="outline">{t('declared')}</Badge>}
+        </span>
       ),
     },
     ...columns.map(

@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/catalog"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/httpapi"
 	licconsolev1 "github.com/backplane-labs/backplane-lic/proto/lic/console/v1"
@@ -35,14 +36,22 @@ type Server struct {
 	licconsolev1.UnimplementedConsoleServiceServer
 	handler http.Handler
 	store   Store
+	catalog Catalog
 	account uuid.UUID
 	version string
 	log     *slog.Logger
 }
 
+// Catalog is the last reconcile of the configuration's catalog.
+type Catalog interface {
+	Report() catalog.Report
+}
+
 // New builds a bridge over the same handler the service mounts publicly.
-func New(handler http.Handler, store Store, account uuid.UUID, version string, log *slog.Logger) *Server {
-	return &Server{handler: handler, store: store, account: account, version: version, log: log}
+func New(
+	handler http.Handler, store Store, declared Catalog, account uuid.UUID, version string, log *slog.Logger,
+) *Server {
+	return &Server{handler: handler, store: store, catalog: declared, account: account, version: version, log: log}
 }
 
 // Call executes a relative API request as the console's admin principal.
@@ -178,9 +187,16 @@ func (s *Server) Info(ctx context.Context, _ *licconsolev1.InfoRequest) (*liccon
 
 	s.audit(ctx, operator, "lic.console.info", "account/"+s.account.String(), "succeeded", http.StatusOK)
 
+	report := s.catalog.Report()
+
+	declared := make([]*licconsolev1.Declared, len(report.Declared))
+	for i, object := range report.Declared {
+		declared[i] = &licconsolev1.Declared{Kind: object.Kind, Id: object.ID.String(), Permissions: object.Permissions}
+	}
+
 	return &licconsolev1.InfoResponse{
 		AccountId: account.ID.String(), AccountSlug: account.Slug, AccountName: account.Name,
-		Version: s.version, Counts: counts,
+		Version: s.version, Counts: counts, Declared: declared, Undeclared: report.Undeclared,
 		PublicKeys: map[string]string{
 			"rsa": account.Keys.RSAPublic, "ed25519": account.Keys.Ed25519Public, "ecdsa": account.Keys.ECDSAPublic,
 		},

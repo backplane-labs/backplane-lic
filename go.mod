@@ -52,7 +52,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/gopherex/schemapb/go v1.12.1 // indirect
+	github.com/gopherex/schemapb/go v1.13.1 // indirect
 	github.com/gopherex/sqld v1.1.10 // indirect
 	github.com/gopherex/ws-proto v1.11.1 // indirect
 	github.com/gopherex/xconf v1.4.2 // indirect

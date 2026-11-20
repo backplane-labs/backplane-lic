@@ -33,7 +33,7 @@ func TestLicenseManagementThroughConsole(t *testing.T) {
 	}
 
 	fixture := consoleFixture{
-		srv:  console.New(handler, store, id, "test", slog.New(slog.DiscardHandler)),
+		srv:  console.New(handler, store, declaredCatalog{}, id, "test", slog.New(slog.DiscardHandler)),
 		base: "/v1/accounts/" + id.String(),
 	}
 	ctx := backplanetest.Operator(t.Context(), uuid.New())
