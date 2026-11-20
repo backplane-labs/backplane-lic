@@ -85,9 +85,19 @@ type Checkout struct {
 	FileID [16]byte
 }
 
-// Checkout validates the parameters, loads the includes and stamps the
+// Checkout answers the license's file, counted by outcome.
+func (s Scenario) Checkout(
+	ctx context.Context, account domain.Account, idOrKey string, params CheckoutParams,
+) (Checkout, error) {
+	out, err := s.checkout(ctx, account, idOrKey, params)
+	s.counters.Checkout(ctx, "license", err)
+
+	return out, err
+}
+
+// checkout validates the parameters, loads the includes and stamps the
 // check-out.
-func (s Scenario) Checkout( //nolint:cyclop,funlen // the parameter ladder, verbatim
+func (s Scenario) checkout( //nolint:cyclop,funlen // the parameter ladder, verbatim
 	ctx context.Context, account domain.Account, idOrKey string, params CheckoutParams,
 ) (Checkout, error) {
 	license, err := s.load(ctx, account, idOrKey)

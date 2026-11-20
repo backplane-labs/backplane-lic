@@ -17,6 +17,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
@@ -219,6 +220,8 @@ type Scenario struct {
 	// doTx runs fn inside one database transaction (pgtx); nil runs
 	// it bare (tests without a pool).
 	doTx func(ctx context.Context, fn func(context.Context) error) error
+	// counters are the business metrics; the zero value records nothing.
+	counters telemetry.Counters
 }
 
 // New builds the scenario over the repositories and seams it reuses.
@@ -226,12 +229,12 @@ func New(
 	store Store, entlist EntitlementListStore, policyStore PolicyStore, productStore ProductStore,
 	userStore users.Store, groupStore GroupStore, entitlementStore EntitlementStore, poolStore PoolStore,
 	tokenManager TokenManager, publisher events.Publisher, rng io.Reader, clock func() time.Time,
-	doTx func(ctx context.Context, fn func(context.Context) error) error,
+	doTx func(ctx context.Context, fn func(context.Context) error) error, counters telemetry.Counters,
 ) Scenario {
 	return Scenario{
 		store: store, entlist: entlist, policies: policyStore, products: productStore,
 		users: userStore, groups: groupStore, entitlements: entitlementStore, pool: poolStore,
-		tokens: tokenManager, events: publisher, rng: rng, clock: clock, doTx: doTx,
+		tokens: tokenManager, events: publisher, rng: rng, clock: clock, doTx: doTx, counters: counters,
 	}
 }
 

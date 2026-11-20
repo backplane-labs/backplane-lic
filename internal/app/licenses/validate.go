@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
@@ -95,13 +96,33 @@ func (s Scenario) Validate(
 	}
 
 	verdict, err := s.validateAndTouch(ctx, account, &license, scope)
+	s.counters.Validation(ctx, validationCode(verdict, err))
 
 	return license, verdict, err
 }
 
+// validationCode is the verdict's code, or the refusal's when there is
+// no verdict.
+func validationCode(verdict Verdict, err error) string {
+	if err != nil {
+		return telemetry.Outcome(err)
+	}
+
+	return verdict.Code
+}
+
 // ValidateKey runs the POST validate-key (anonymous allowed); the
-// answer's license is nil when the key matches none.
+// answer's license is nil when the key matches none. Counted by code.
 func (s Scenario) ValidateKey(
+	ctx context.Context, account domain.Account, key string, legacyEncrypted bool, scope Scope,
+) (*domain.License, Verdict, error) {
+	license, verdict, err := s.validateKey(ctx, account, key, legacyEncrypted, scope)
+	s.counters.Validation(ctx, validationCode(verdict, err))
+
+	return license, verdict, err
+}
+
+func (s Scenario) validateKey(
 	ctx context.Context, account domain.Account, key string, legacyEncrypted bool, scope Scope,
 ) (*domain.License, Verdict, error) {
 	license := s.lookupKey(ctx, account, key, legacyEncrypted)

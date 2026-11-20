@@ -24,6 +24,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
@@ -178,7 +179,7 @@ func deliverAndVerify(
 
 	worker := NewWorker(store, account.ID, stubResolver{}, []*net.IPNet{loopback}, func() time.Time {
 		return now
-	})
+	}, telemetry.Counters{})
 
 	// The transport dials the test host as the receiver (real DNS
 	// knows nothing of it) and trusts exactly its certificate.
@@ -413,7 +414,7 @@ func TestRebindingBlocked(t *testing.T) { //nolint:paralleltest // bootstrap and
 	}
 
 	// Validation sees a public address; NO private range is allowed.
-	worker := NewWorker(store, account.ID, publicResolver{}, nil, func() time.Time { return now })
+	worker := NewWorker(store, account.ID, publicResolver{}, nil, func() time.Time { return now }, telemetry.Counters{})
 
 	roots := x509.NewCertPool()
 	roots.AddCert(receiver.Certificate())
@@ -537,7 +538,7 @@ func TestOutcomeIsolation(t *testing.T) { //nolint:paralleltest // bootstrap and
 
 	worker := NewWorker(
 		failingOutcomeStore{Store: store, failDeliveredFor: firstEvent.ID},
-		account.ID, stubResolver{}, allowed, func() time.Time { return now },
+		account.ID, stubResolver{}, allowed, func() time.Time { return now }, telemetry.Counters{},
 	)
 	worker.client = testClient(allowed, roots, failReceiver.Listener.Addr().String())
 
@@ -634,7 +635,7 @@ func testQueue(t *testing.T, store *postgres.Store, accountID uuid.UUID) *outbox
 	t.Helper()
 
 	queue, err := outbox.New(store.Pool, store.DB.DB,
-		NewWorker(store, accountID, stubResolver{}, []*net.IPNet{}, time.Now),
+		NewWorker(store, accountID, stubResolver{}, []*net.IPNet{}, time.Now, telemetry.Counters{}),
 		outbox.WithSchema(postgres.Schema), outbox.WithBatchSize(1))
 	if err != nil {
 		t.Fatal(err)

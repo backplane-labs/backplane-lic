@@ -24,6 +24,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/accounts"
 	"github.com/backplane-labs/backplane-lic/internal/app/port"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
@@ -58,6 +59,7 @@ type delivery struct {
 
 // Worker is the pg-outbox Publisher. Construction starts no background work.
 type Worker struct {
+	counters  telemetry.Counters
 	store     Store
 	accountID uuid.UUID
 	client    *http.Client
@@ -70,9 +72,10 @@ type Worker struct {
 // sign the deliveries).
 func NewWorker(
 	store Store, accountID uuid.UUID, resolver domain.Resolver, allowed []*net.IPNet,
-	clock func() time.Time,
+	clock func() time.Time, counters telemetry.Counters,
 ) *Worker {
 	return &Worker{
+		counters:  counters,
 		store:     store,
 		accountID: accountID,
 		client:    newClient(newTransport(allowed)),
@@ -264,6 +267,8 @@ func (w *Worker) deliver(
 	}
 
 	if resp.StatusCode/100 == 2 { //nolint:mnd // the 2xx family
+		w.counters.Webhook(ctx, "delivered")
+
 		return w.store.SetWebhookEventDelivered( // the store's own error
 			ctx, w.accountID, delivery.Event.ID, resp.StatusCode, recorded)
 	}
@@ -407,6 +412,13 @@ func (w *Worker) fail(
 		status = domain.EventFailed
 	}
 
+	outcome := "failing"
+	if status == domain.EventFailed {
+		outcome = "failed"
+	}
+
+	w.counters.Webhook(ctx, outcome)
+
 	if err := w.store.SetWebhookEventFailure(ctx, w.accountID, delivery.Event.ID, status, code, body); err != nil {
 		return fmt.Errorf("webhook: record failure: %w", err)
 	}
@@ -419,6 +431,8 @@ func (w *Worker) fail(
 }
 
 func (w *Worker) failAndDisable(ctx context.Context, delivery delivery, code int, body string) error {
+	w.counters.Webhook(ctx, "failed")
+
 	if err := w.store.Do(ctx, func(ctx context.Context) error {
 		if err := w.store.SetWebhookEventFailure(ctx, w.accountID, delivery.Event.ID,
 			domain.EventFailed, &code, body); err != nil {

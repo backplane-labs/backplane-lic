@@ -138,9 +138,19 @@ type Checkout struct {
 	Expiry    *time.Time
 }
 
-// Checkout builds the machine file's content and stamps the check-out;
-// decode reads the parameters before the authorization.
+// Checkout answers the machine's file, counted by outcome.
 func (s Scenario) Checkout(
+	ctx context.Context, account domain.Account, idOrFingerprint string, decode func() (CheckoutParams, error),
+) (Checkout, error) {
+	out, err := s.checkout(ctx, account, idOrFingerprint, decode)
+	s.counters.Checkout(ctx, "machine", err)
+
+	return out, err
+}
+
+// checkout builds the machine file's content and stamps the check-out;
+// decode reads the parameters before the authorization.
+func (s Scenario) checkout(
 	ctx context.Context, account domain.Account, idOrFingerprint string, decode func() (CheckoutParams, error),
 ) (Checkout, error) {
 	machine, err := s.load(ctx, account, idOrFingerprint)

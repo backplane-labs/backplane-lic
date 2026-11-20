@@ -14,6 +14,7 @@ import (
 
 	outbox "github.com/gopherex/pg-outbox"
 
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
@@ -79,7 +80,7 @@ func TestOutboxRetryBackoffAndExhaustion(t *testing.T) { //nolint:paralleltest /
 	}
 
 	event := eventOf(ctx, t, store, account, "https://"+testHost+"/hook")
-	worker := NewWorker(store, account.ID, publicResolver{}, []*net.IPNet{}, time.Now)
+	worker := NewWorker(store, account.ID, publicResolver{}, []*net.IPNet{}, time.Now, telemetry.Counters{})
 	worker.client = &http.Client{Transport: responseTransport{code: http.StatusServiceUnavailable}}
 	observed := make(chan outbox.Message, MaxAttempts+1)
 	hooks := outcomeHooks{events: observed, accountID: account.ID.String()}
@@ -173,7 +174,7 @@ func TestOutboxPermanentAndDiscard(t *testing.T) { //nolint:paralleltest // one 
 				code, want = http.StatusOK, outbox.StatusPublished
 			}
 
-			worker := NewWorker(store, account.ID, publicResolver{}, []*net.IPNet{}, time.Now)
+			worker := NewWorker(store, account.ID, publicResolver{}, []*net.IPNet{}, time.Now, telemetry.Counters{})
 			worker.client = &http.Client{Transport: responseTransport{code: code}}
 			observed := make(chan outbox.Message, 1)
 			run := relayForTest(t, store, account.ID, worker,

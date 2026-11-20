@@ -28,6 +28,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/app/port"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/domain/crypto"
@@ -158,7 +159,7 @@ func TestPasswordAutomation(t *testing.T) { //nolint:paralleltest // shared inte
 			}
 			handler := handler(store, httpapi.NewMemoryThrottler(time.Now), liccache.None{},
 				accounts.Spec{ID: account.ID, Slug: account.Slug}, HTTP{}, "", "automation-test", queue, decorate,
-				slog.Default())
+				slog.Default(), telemetry.Counters{})
 			request := httptest.NewRequest(http.MethodPost, "/v1/accounts/"+account.ID.String()+"/passwords",
 				strings.NewReader(`{"meta":{"email":"alex@example.com"`+tc.deliver+`}}`))
 			request.Header.Set("Content-Type", "application/vnd.api+json")
@@ -407,7 +408,7 @@ func TestLicensingActivities(t *testing.T) { //nolint:paralleltest // shared int
 		queue, contracts, portalBase, "en", testBrand, time.Now)
 	product, policy := licenseFixture(t, store, account.ID)
 	_ = product
-	application := app.NewActivities(store, licenseScenario(store, liccache.None{}, publisher, time.Now), account.ID, time.Now)
+	application := app.NewActivities(store, licenseScenario(store, liccache.None{}, publisher, time.Now, telemetry.Counters{}), account.ID, time.Now)
 	server := bp.NewActivityServer(harness.Root())
 	server.Set(application)
 
@@ -514,7 +515,7 @@ func TestExpiringLicenseAutomation(t *testing.T) { //nolint:paralleltest // shar
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
 		queue, contracts, portalBase, "en", testBrand, time.Now)
-	application := app.NewActivities(store, licenseScenario(store, liccache.None{}, publisher, time.Now), account.ID, time.Now)
+	application := app.NewActivities(store, licenseScenario(store, liccache.None{}, publisher, time.Now, telemetry.Counters{}), account.ID, time.Now)
 
 	created, err := application.CreateLicense(t.Context(), port.CreateLicenseIn{PolicyID: policy.ID, OwnerID: &user.ID}, "expiring")
 	if err != nil {
@@ -637,7 +638,7 @@ func TestActivityReceiptFailureRollsBack(t *testing.T) { //nolint:paralleltest /
 	contracts := bp.Declare(harness.Root())
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
 		queue, contracts, portalBase, "en", testBrand, time.Now)
-	application := app.NewActivities(failingReceiptStore{Store: store}, licenseScenario(store, liccache.None{}, publisher, time.Now),
+	application := app.NewActivities(failingReceiptStore{Store: store}, licenseScenario(store, liccache.None{}, publisher, time.Now, telemetry.Counters{}),
 		account.ID, time.Now)
 
 	created, err := application.CreateLicense(t.Context(), port.CreateLicenseIn{PolicyID: policy.ID}, "failed-receipt")
@@ -662,7 +663,7 @@ func TestConcurrentActivityAttempts(t *testing.T) { //nolint:paralleltest // sha
 	queue := automationQueue(t, store)
 	publisher := app.NewPublisher(store, webhooks.NewPublisher(store, queue, account.ID, rand.Reader, time.Now),
 		queue, contracts, portalBase, "en", testBrand, time.Now)
-	application := app.NewActivities(store, licenseScenario(store, liccache.None{}, publisher, time.Now), account.ID, time.Now)
+	application := app.NewActivities(store, licenseScenario(store, liccache.None{}, publisher, time.Now, telemetry.Counters{}), account.ID, time.Now)
 
 	type attempt struct {
 		result port.LicenseOut

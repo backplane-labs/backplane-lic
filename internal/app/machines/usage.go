@@ -38,11 +38,21 @@ type UsageStore interface {
 	UsageAcks(ctx context.Context, machineID uuid.UUID, epoch, after uint64, limit int) ([]usage.Acked, error)
 }
 
-// ReportUsage accepts a signed usage report of the machine's
+// ReportUsage accepts a signed usage report, counted by outcome.
+func (s Scenario) ReportUsage(
+	ctx context.Context, account domain.Account, idOrFingerprint string, decode func() (usage.Report, error),
+) (domain.Machine, usage.Acked, error) {
+	machine, ack, err := s.reportUsage(ctx, account, idOrFingerprint, decode)
+	s.counters.UsageReport(ctx, err)
+
+	return machine, ack, err
+}
+
+// reportUsage accepts a signed usage report of the machine's
 // installation: the signature by the key in the machine's publicKey
 // metadata, the chain continuing the accepted head. A report already
 // accepted answers its ack again.
-func (s Scenario) ReportUsage(
+func (s Scenario) reportUsage(
 	ctx context.Context, account domain.Account, idOrFingerprint string, decode func() (usage.Report, error),
 ) (domain.Machine, usage.Acked, error) {
 	machine, err := s.load(ctx, account, idOrFingerprint)

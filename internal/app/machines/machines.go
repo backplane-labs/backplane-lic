@@ -14,6 +14,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/events"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 )
 
@@ -207,17 +208,19 @@ type Scenario struct {
 	events    events.Publisher
 	clock     func() time.Time
 	doTx      func(ctx context.Context, fn func(context.Context) error) error
+	// counters are the business metrics; the zero value records nothing.
+	counters telemetry.Counters
 }
 
 // New builds the scenario over the repositories.
 func New(
 	store Store, licenseStore LicenseStore, tokens TokenStore, usage UsageStore, directory Directory,
 	included LicenseIncludes, publisher events.Publisher, clock func() time.Time,
-	doTx func(ctx context.Context, fn func(context.Context) error) error,
+	doTx func(ctx context.Context, fn func(context.Context) error) error, counters telemetry.Counters,
 ) Scenario {
 	return Scenario{
 		store: store, licenses: licenseStore, tokens: tokens, usage: usage, directory: directory, included: included,
-		events: publisher, clock: clock, doTx: doTx,
+		events: publisher, clock: clock, doTx: doTx, counters: counters,
 	}
 }
 

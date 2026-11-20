@@ -13,6 +13,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/apperr"
 	"github.com/backplane-labs/backplane-lic/internal/app/licenses"
 	"github.com/backplane-labs/backplane-lic/internal/app/paging"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/pkg/licensing/usage"
 )
@@ -116,7 +117,7 @@ func newWorld() *world {
 
 func (w *world) scenario() Scenario {
 	return New(w, w, w, w, w, w, w, func() time.Time { return testNow },
-		func(ctx context.Context, fn func(context.Context) error) error { return fn(ctx) })
+		func(ctx context.Context, fn func(context.Context) error) error { return fn(ctx) }, telemetry.Counters{})
 }
 
 func pagingDefault() paging.Params {

@@ -41,6 +41,7 @@ import (
 	"github.com/backplane-labs/backplane-lic/internal/app/products"
 	"github.com/backplane-labs/backplane-lic/internal/app/search"
 	"github.com/backplane-labs/backplane-lic/internal/app/secondfactors"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/tokens"
 	"github.com/backplane-labs/backplane-lic/internal/app/users"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
@@ -125,8 +126,9 @@ func New(root backplane.Root[Config]) (*Service, error) {
 			return fmt.Errorf("bootstrap: %w", err)
 		}
 
+		counters := telemetry.New(bootstrap.Meter())
 		webhookWorker := whwebhook.NewWorker(store.Get(), spec.ID, domain.NetResolver{},
-			allowPrivate(cfg.HTTP.WebhookAllowPrivate), time.Now)
+			allowPrivate(cfg.HTTP.WebhookAllowPrivate), time.Now, counters)
 
 		relay, err := newOutbox(store.Get(), root.Identity().Instance,
 			slog.New(xlog.NewSlogHandler(bootstrap.Log())), bpautomation.NewWorker(contracts, webhookWorker))
@@ -143,10 +145,10 @@ func New(root backplane.Root[Config]) (*Service, error) {
 				cfg.Automation.PortalBase, cfg.Automation.Locale, brand, time.Now)
 		}
 		publisher := decorate(webhooks.NewPublisher(store.Get(), relay, spec.ID, rand.Reader, time.Now))
-		activities.Set(appautomation.NewActivities(store.Get(), licenseScenario(store.Get(), cached, publisher, time.Now),
-			spec.ID, time.Now))
+		activities.Set(appautomation.NewActivities(store.Get(),
+			licenseScenario(store.Get(), cached, publisher, time.Now, counters), spec.ID, time.Now))
 		late.set(handler(store.Get(), throttler, cached, spec, cfg.HTTP, cfg.DocsHost, build.Get().Commit, relay, decorate,
-			slog.New(xlog.NewSlogHandler(bootstrap.Log()))))
+			slog.New(xlog.NewSlogHandler(bootstrap.Log())), counters))
 
 		return nil
 	})
@@ -177,7 +179,8 @@ func New(root backplane.Root[Config]) (*Service, error) {
 // runJobs ticks the periodic jobs (the heartbeat cull and the rest) and the
 // notices until ctx ends.
 func runJobs(ctx context.Context, store *postgres.Store, publisher events.Publisher, account uuid.UUID) error {
-	culler := machineScenario(store, licenseScenario(store, liccache.None{}, publisher, time.Now), publisher, time.Now)
+	culler := machineScenario(store, licenseScenario(store, liccache.None{}, publisher, time.Now, telemetry.Counters{}),
+		publisher, time.Now, telemetry.Counters{})
 	jobsRunner := jobs.NewRunner(store, culler, time.Now)
 	notifier := licenses.NewNotifier(store.Licenses, publisher, account, time.Now, store.Do)
 
@@ -284,7 +287,7 @@ func Handler(
 	}
 
 	api := handler(store, httpapi.NewMemoryThrottler(time.Now), liccache.None{}, spec, cfg, docsHost, revision, queue,
-		func(publisher events.Publisher) events.Publisher { return publisher }, slog.Default())
+		func(publisher events.Publisher) events.Publisher { return publisher }, slog.Default(), telemetry.Counters{})
 
 	public, err := portal.New(cfg.Portal, domain.Brand{Name: domain.DefaultBrandName}, spec.ID.String(), api)
 	if err != nil {
@@ -304,7 +307,7 @@ type tokenCache interface {
 func handler(
 	store *postgres.Store, throttler httpapi.Throttler, cached tokenCache, spec accounts.Spec, cfg HTTP,
 	docsHost, revision string, queue port.WebhookQueue, decorate func(events.Publisher) events.Publisher,
-	log *slog.Logger,
+	log *slog.Logger, counters telemetry.Counters,
 ) http.Handler {
 	clock := time.Now
 	publisher := decorate(webhooks.NewPublisher(store, queue, spec.ID, rand.Reader, clock))
@@ -322,8 +325,9 @@ func handler(
 		Users:         users.New(cached.Users(store), publisher, clock),
 		Tokens:        tokens.New(cached.Manage(store), publisher, rand.Reader, clock),
 		Groups:        groups.New(store, publisher, clock),
-		Licenses:      licenseScenario(store, cached, publisher, clock),
-		Machines:      machineScenario(store, licenseScenario(store, cached, publisher, clock), publisher, clock),
+		Licenses:      licenseScenario(store, cached, publisher, clock, counters),
+		Machines: machineScenario(store, licenseScenario(store, cached, publisher, clock, counters), publisher, clock,
+			counters),
 		Products: products.New(store.Products, store.Tokens, store.Users,
 			publisher, resolver, allow, rand.Reader, clock),
 		Policies:       policies.New(store.Policies, store.Products, store.Entitlements, store.Keys, publisher, clock),
@@ -340,18 +344,20 @@ func handler(
 
 func licenseScenario(
 	store *postgres.Store, cached tokenCache, publisher events.Publisher, clock func() time.Time,
+	counters telemetry.Counters,
 ) licenses.Scenario {
 	return licenses.New(store.Licenses, store.Licenses, store.Policies, store.Products, store,
 		store, store.Entitlements, store.Keys,
 		tokens.Manager{Scenario: tokens.New(cached.Manage(store), publisher, rand.Reader, clock)},
-		publisher, rand.Reader, clock, store.Do)
+		publisher, rand.Reader, clock, store.Do, counters)
 }
 
 func machineScenario(
 	store *postgres.Store, included machines.LicenseIncludes, publisher events.Publisher, clock func() time.Time,
+	counters telemetry.Counters,
 ) machines.Scenario {
 	return machines.New(store.Machines, store.Machines, store.Machines, store.Machines, store, included, publisher,
-		clock, store.Do)
+		clock, store.Do, counters)
 }
 
 type lateHandler struct {
@@ -376,7 +382,7 @@ func webhookOutbox(store *postgres.Store, accountID uuid.UUID, cfg HTTP, instanc
 	log *slog.Logger,
 ) (*outbox.Outbox, error) {
 	delivery := whwebhook.NewWorker(store, accountID, domain.NetResolver{},
-		allowPrivate(cfg.WebhookAllowPrivate), time.Now)
+		allowPrivate(cfg.WebhookAllowPrivate), time.Now, telemetry.Counters{})
 
 	return newOutbox(store, instance, log, delivery)
 }

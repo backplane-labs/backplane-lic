@@ -14,6 +14,7 @@ import (
 
 	"github.com/backplane-labs/backplane-lic/internal/app/access"
 	"github.com/backplane-labs/backplane-lic/internal/app/jobs"
+	"github.com/backplane-labs/backplane-lic/internal/app/telemetry"
 	"github.com/backplane-labs/backplane-lic/internal/app/webhooks"
 	"github.com/backplane-labs/backplane-lic/internal/domain"
 	"github.com/backplane-labs/backplane-lic/internal/infra/postgres"
@@ -107,7 +108,7 @@ func TestFinalSigningFailureMarksEventFailed(t *testing.T) { //nolint:parallelte
 	}
 
 	event := eventOf(ctx, t, store, account, "https://"+testHost+"/hook")
-	worker := NewWorker(invalidSigningStore{Store: store}, account.ID, publicResolver{}, []*net.IPNet{}, time.Now)
+	worker := NewWorker(invalidSigningStore{Store: store}, account.ID, publicResolver{}, []*net.IPNet{}, time.Now, telemetry.Counters{})
 	err := worker.Publish(ctx, []outbox.Message{{Payload: []byte(event.ID.String()), Attempts: MaxAttempts}})
 
 	var permanent *outbox.PermanentError

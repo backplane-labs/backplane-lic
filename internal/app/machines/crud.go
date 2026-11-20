@@ -122,8 +122,16 @@ func (s Scenario) Show(ctx context.Context, account domain.Account, idOrFingerpr
 	return machine, nil
 }
 
-// Create activates a machine on a license.
+// Create activates a machine on a license, counted by outcome.
 func (s Scenario) Create(ctx context.Context, account domain.Account, in Input) (domain.Machine, error) {
+	machine, err := s.create(ctx, account, in)
+	s.counters.Activation(ctx, err)
+
+	return machine, err
+}
+
+// create activates a machine on a license.
+func (s Scenario) create(ctx context.Context, account domain.Account, in Input) (domain.Machine, error) {
 	principal, now := access.PrincipalOf(ctx), s.now()
 
 	license, licensed, err := s.licenseOf(ctx, account, in.LicenseID)

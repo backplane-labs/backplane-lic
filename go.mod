@@ -3,7 +3,7 @@ module github.com/backplane-labs/backplane-lic
 go 1.27.4
 
 require (
-	github.com/backplane-labs/backplane v0.6.110
+	github.com/backplane-labs/backplane v0.6.111
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/cel-go v0.30.0
@@ -18,6 +18,7 @@ require (
 	github.com/yaronf/httpsign v0.6.2
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/metric v1.45.0
+	go.opentelemetry.io/otel/sdk/metric v1.45.0
 	go.opentelemetry.io/otel/trace v1.45.0
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/crypto v0.58.0
@@ -120,7 +121,6 @@ require (
 	go.opentelemetry.io/otel/log v0.21.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.45.0 // indirect
 	go.opentelemetry.io/otel/sdk/log v0.21.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v1.45.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
 	go.temporal.io/api v1.63.5 // indirect
 	go.temporal.io/sdk v1.49.0 // indirect

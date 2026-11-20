@@ -555,3 +555,16 @@ documented in `pkg/licensing/usage/doc.go`.
   `url.PathEscape`.
 - `*licensing.Client.ValidateMachine(ctx, fingerprint)` — looks up the
   machine, fetches its licence, and validates it with the fingerprint scope.
+
+## Metrics
+
+| Name | Type | Labels |
+|---|---|---|
+| `lic.license.validations` | counter | `code`: Keygen's validation code (`VALID`, `EXPIRED`, `SUSPENDED`, …) or the refusal's code |
+| `lic.machine.activations` | counter | `outcome`: `ok`, the refusal code (`MACHINE_LIMIT_EXCEEDED`, `METADATA_KEY_RESERVED`, …), `error` |
+| `lic.checkouts` | counter | `kind` (`license`, `machine`), `outcome` (`ok`, `LICENSE_SUSPENDED`, `LICENSE_BANNED`, `LICENSE_EXPIRED`, …, `error`) |
+| `lic.usage.reports` | counter | `outcome`: `ok`, `USAGE_SIGNATURE_INVALID`, `USAGE_CHAIN_BROKEN`, `USAGE_REPORT_TOO_LARGE`, …, `error` |
+| `lic.webhook.deliveries` | counter | `outcome`: `delivered`, `failing` (retried), `failed` (final) |
+
+The SDK's metrics come on top (backplane `reference/metrics`), the HTTP API's
+request metrics among them.
