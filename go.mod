@@ -3,7 +3,7 @@ module github.com/backplane-labs/backplane-lic
 go 1.27.4
 
 require (
-	github.com/backplane-labs/backplane v0.6.111
+	github.com/backplane-labs/backplane v0.6.117
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/cel-go v0.30.0
@@ -52,7 +52,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/gopherex/schemapb/go v1.13.1 // indirect
+	github.com/gopherex/schemapb/go v1.13.2 // indirect
 	github.com/gopherex/sqld v1.1.10 // indirect
 	github.com/gopherex/ws-proto v1.11.1 // indirect
 	github.com/gopherex/xconf v1.4.2 // indirect
