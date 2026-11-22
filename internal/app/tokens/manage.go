@@ -151,7 +151,7 @@ func (m Manager) CreateForUser(
 		return domain.Token{}, "", err // the authorization's own error
 	}
 
-	return m.insert(ctx, account, user.ID, "User", user.Role, attrs)
+	return m.insert(ctx, account, principal, user.ID, "User", user.Role, attrs)
 }
 
 // CreateForLicense mints an activation token for the license (the
@@ -160,7 +160,7 @@ func (m Manager) CreateForUser(
 func (m Manager) CreateForLicense(
 	ctx context.Context,
 	account domain.Account,
-	_ access.Principal,
+	principal access.Principal,
 	licenseID uuid.UUID,
 	attrs CreateAttrs,
 ) (domain.Token, string, error) {
@@ -180,7 +180,7 @@ func (m Manager) CreateForLicense(
 		)
 	}
 
-	token, raw, err := m.insert(ctx, account, licenseID, "License", domain.RoleLicense, attrs)
+	token, raw, err := m.insert(ctx, account, principal, licenseID, "License", domain.RoleLicense, attrs)
 	if err != nil {
 		return domain.Token{}, "", err
 	}
@@ -212,6 +212,11 @@ func (m Manager) Regenerate(
 		m.licenseOfProduct(ctx, account.ID, token),
 	); err != nil {
 		return domain.Token{}, "", err // the authorization's own error
+	}
+
+	// A narrowed token cannot obtain the secret of a wider one.
+	if !access.Covers(principal, token.BearerRole, token.Permissions) {
+		return domain.Token{}, "", apperr.ForbiddenReason(access.ReasonTokenLacksPermission)
 	}
 
 	return m.regenerate(ctx, account, token)
@@ -306,6 +311,7 @@ func (m Manager) regenerate(
 func (m Manager) insert(
 	ctx context.Context,
 	account domain.Account,
+	principal access.Principal,
 	bearerID uuid.UUID,
 	bearerType string,
 	role domain.Role,
@@ -328,7 +334,7 @@ func (m Manager) insert(
 		Kind:             crypto.TokenKind(string(role)),
 		Name:             attrs.Name,
 		Expiry:           expiry(attrs.Expiry, attrs.ExpirySet, role, now),
-		Permissions:      []string{"*"},
+		Permissions:      access.GrantablePermissions(principal),
 		MaxActivations:   attrs.MaxActivations,
 		MaxDeactivations: attrs.MaxDeactivations,
 		CreatedAt:        now,

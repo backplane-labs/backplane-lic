@@ -491,7 +491,7 @@ func (s Scenario) GenerateProductToken(
 		Kind:        crypto.TokenKind(string(domain.RoleProduct)),
 		Name:        in.Name,
 		Expiry:      in.Expiry,
-		Permissions: []string{"*"},
+		Permissions: access.GrantablePermissions(access.PrincipalOf(ctx)),
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}

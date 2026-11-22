@@ -155,8 +155,10 @@ a token value of another form, a permission outside the product role's set,
 a policy attribute the API would refuse) stops startup naming the field.
 
 A product token's `permissions` narrow the product role's set, as Keygen EE
-does: `relay` above reads machines and nothing else. Tokens created through
-the API keep `*`.
+does: `relay` above reads machines and nothing else. A token created through
+the API gets `*`, or, when the caller is itself a narrowed token, exactly the
+caller's permissions; a narrowed token cannot regenerate a token wider than
+itself (403): no token hands out more than it holds.
 
 In the console, declared objects carry the mark *From the configuration*:
 editing, deleting and regenerating them is off (the next start would undo

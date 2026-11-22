@@ -103,7 +103,7 @@ func (s Scenario) Generate(
 		Kind:        crypto.TokenKind(string(bearerRole)),
 		Name:        in.Name,
 		Expiry:      expiry(in.Expiry, in.ExpirySet, bearerRole, now),
-		Permissions: []string{"*"},
+		Permissions: access.GrantablePermissions(principal),
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}

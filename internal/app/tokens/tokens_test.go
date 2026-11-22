@@ -21,6 +21,7 @@ import (
 // fakeStore records inserts and answers bearers from a map.
 type fakeStore struct {
 	users    map[uuid.UUID]domain.User
+	tokens   map[uuid.UUID]domain.Token
 	inserted []domain.Token
 }
 
@@ -30,7 +31,11 @@ func (f *fakeStore) InsertToken(_ context.Context, token domain.Token) error {
 	return nil
 }
 
-func (f *fakeStore) TokenByID(context.Context, uuid.UUID, uuid.UUID) (domain.Token, error) {
+func (f *fakeStore) TokenByID(_ context.Context, _, id uuid.UUID) (domain.Token, error) {
+	if t, ok := f.tokens[id]; ok {
+		return t, nil
+	}
+
 	return domain.Token{}, domain.ErrNotFound
 }
 
@@ -258,3 +263,41 @@ func TestGenerateExpiry(t *testing.T) {
 }
 
 func (f *fakeStore) Do(ctx context.Context, fn func(context.Context) error) error { return fn(ctx) }
+
+// A token whose own permissions narrow an admin mints tokens with that
+// narrowed set, never "*", and cannot regenerate (obtain the secret of) a
+// wider token.
+func TestNarrowedTokenGrantsNoMore(t *testing.T) {
+	t.Parallel()
+
+	plain := targetUser(domain.RoleUser)
+	wide := domain.Token{
+		ID: uuid.New(), BearerID: plain.ID, BearerType: "User", BearerRole: domain.RoleUser, Permissions: []string{"*"},
+	}
+	store := &fakeStore{
+		users:  map[uuid.UUID]domain.User{plain.ID: plain},
+		tokens: map[uuid.UUID]domain.Token{wide.ID: wide},
+	}
+	scenario := tokens.New(store, events.None{}, rand.Reader, time.Now)
+	account := testAccount(t)
+
+	narrowed := access.Principal{
+		BearerType: access.BearerUser, BearerID: uuid.New(), Role: domain.RoleAdmin, TokenID: uuid.New(),
+		Permissions: access.Effective(domain.RoleAdmin, []string{"token.generate", "token.regenerate", "token.read"}),
+	}
+	ctx := access.With(context.Background(), narrowed)
+
+	token, _, err := scenario.Generate(ctx, account, narrowed,
+		tokens.GenerateInput{BearerType: access.BearerUser, BearerID: plain.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := strings.Join(token.Permissions, ","); got != "token.generate,token.read,token.regenerate" {
+		t.Fatalf("minted permissions = %s", got)
+	}
+
+	if _, _, err := scenario.Manager().Regenerate(ctx, account, narrowed, wide.ID); apperr.From(err).Status != 403 {
+		t.Fatalf("regenerating a wider token: %v", err)
+	}
+}
