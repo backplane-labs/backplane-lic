@@ -3,7 +3,7 @@ module github.com/backplane-labs/backplane-lic
 go 1.27.4
 
 require (
-	github.com/backplane-labs/backplane v0.6.117
+	github.com/backplane-labs/backplane v0.6.118
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.2.0
 	github.com/google/cel-go v0.30.0
